@@ -1,13 +1,13 @@
 import { ReactNode } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Home, Calendar, Gift, MessageCircle, User } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
+import { Home, Calendar, Gift, MessageCircle, User, LogOut } from 'lucide-react';
 
-interface LayoutProps {
-  children: ReactNode;
-}
-
-const Layout = ({ children }: LayoutProps) => {
+const Layout = ({ children }: { children: ReactNode }) => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, loading, signOut } = useAuth();
 
   const navItems = [
     { path: '/', icon: Home, label: 'Home' },
@@ -17,15 +17,43 @@ const Layout = ({ children }: LayoutProps) => {
     { path: '/profile', icon: User, label: 'Profile' },
   ];
 
-  const isActive = (path: string) => location.pathname === path;
+  // Show loading spinner while checking auth
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  // Redirect to auth if not authenticated (except on auth page)
+  if (!user && location.pathname !== '/auth') {
+    navigate('/auth');
+    return null;
+  }
+
+  // Don't show layout for auth page
+  if (location.pathname === '/auth') {
+    return <div className="min-h-screen bg-background">{children}</div>;
+  }
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Header with Logo */}
-      <header className="flex justify-center py-6 px-4">
-        <h1 className="text-3xl font-bold text-primary neon-glow tracking-wider">
+      {/* Header with Logo and Logout */}
+      <header className="flex items-center justify-between py-6 px-4">
+        <h1 className="text-2xl font-bold text-foreground logo-glow" style={{ fontFamily: 'Times New Roman' }}>
           7T7Studios
         </h1>
+        {user && (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => signOut()}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            <LogOut className="h-4 w-4" />
+          </Button>
+        )}
       </header>
 
       {/* Main Content */}
@@ -33,25 +61,30 @@ const Layout = ({ children }: LayoutProps) => {
         {children}
       </main>
 
-      {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border">
-        <div className="flex items-center justify-around py-2">
-          {navItems.map(({ path, icon: Icon, label }) => (
-            <Link
-              key={path}
-              to={path}
-              className={`tap-target flex flex-col items-center space-y-1 p-2 rounded-lg transition-colors ${
-                isActive(path)
-                  ? 'text-primary neon-glow'
-                  : 'text-muted-foreground hover:text-primary'
-              }`}
-            >
-              <Icon size={20} />
-              <span className="text-xs font-medium">{label}</span>
-            </Link>
-          ))}
-        </div>
-      </nav>
+      {/* Navigation - Only show if user is authenticated */}
+      {user && (
+        <nav className="fixed bottom-0 left-0 right-0 bg-card/80 backdrop-blur-md border-t border-border">
+          <div className="flex justify-around py-3">
+            {navItems.map((item) => {
+              const isActive = location.pathname === item.path;
+              return (
+                <button
+                  key={item.path}
+                  onClick={() => navigate(item.path)}
+                  className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-all ${
+                    isActive 
+                      ? 'text-primary bg-primary/10' 
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <item.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{item.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </nav>
+      )}
     </div>
   );
 };
