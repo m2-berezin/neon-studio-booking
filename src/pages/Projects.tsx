@@ -16,8 +16,8 @@ const Projects = () => {
   if (!user) {
     return (
       <div className="text-center py-8">
-        <h2 className="text-2xl font-bold text-foreground mb-4">Login Required</h2>
-        <p className="text-muted-foreground">Please login to view your projects.</p>
+        <h2 className="text-2xl font-bold text-foreground mb-4">Sessão Requerida</h2>
+        <p className="text-muted-foreground">Por favor faça login para ver os seus projetos.</p>
       </div>
     );
   }
@@ -38,11 +38,11 @@ const Projects = () => {
   const getStatusLabel = (status: string) => {
     switch (status) {
       case 'in_progress':
-        return 'In Progress';
+        return 'Em Progresso';
       case 'review':
-        return 'Under Review';
+        return 'Em Revisão';
       case 'delivered':
-        return 'Delivered';
+        return 'Entregue';
       default:
         return status;
     }
@@ -56,24 +56,24 @@ const Projects = () => {
     <div className="space-y-6">
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-accent accent-glow mb-2">
-          My Projects
+          Os Meus Projetos
         </h1>
         <p className="text-muted-foreground">
-          {isAdmin() ? 'Manage all studio projects' : 'Track your studio projects'}
+          {isAdmin() ? 'Gerir todos os projetos do estúdio' : 'Acompanhar os seus projetos de estúdio'}
         </p>
       </div>
 
       {loading ? (
         <div className="text-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading projects...</p>
+          <p className="text-muted-foreground">A carregar projetos...</p>
         </div>
       ) : projects.length === 0 ? (
         <div className="text-center py-8">
           <Folder className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-foreground mb-2">No Projects Yet</h3>
+          <h3 className="text-lg font-semibold text-foreground mb-2">Ainda Sem Projetos</h3>
           <p className="text-muted-foreground">
-            {isAdmin() ? 'No projects have been created yet.' : 'Book a session to start your first project!'}
+            {isAdmin() ? 'Ainda não foram criados projetos.' : 'Faça uma reserva para começar o seu primeiro projeto!'}
           </p>
         </div>
       ) : (
@@ -98,7 +98,7 @@ const Projects = () => {
                   </div>
                   {isAdmin() && project.client_profile && (
                     <CardDescription className="text-sm">
-                      Client: {project.client_profile.full_name}
+                      Cliente: {project.client_profile.full_name}
                     </CardDescription>
                   )}
                 </CardHeader>
@@ -127,7 +127,7 @@ const Projects = () => {
                     {/* Last Update */}
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Clock className="w-4 h-4" />
-                      <span>Updated {format(new Date(project.created_at), 'MMM d, yyyy')}</span>
+                      <span>Atualizado {format(new Date(project.created_at), 'MMM d, yyyy')}</span>
                     </div>
 
                     {/* Progress Indicator */}
@@ -157,19 +157,19 @@ const Projects = () => {
                 <p className="text-2xl font-bold text-primary">
                   {projects.filter(p => p.status === 'in_progress').length}
                 </p>
-                <p className="text-sm text-muted-foreground">In Progress</p>
+                <p className="text-sm text-muted-foreground">Em Progresso</p>
               </div>
               <div>
                 <p className="text-2xl font-bold text-blue-500">
                   {projects.filter(p => p.status === 'review').length}
                 </p>
-                <p className="text-sm text-muted-foreground">Under Review</p>
+                <p className="text-sm text-muted-foreground">Em Revisão</p>
               </div>
               <div>
                 <p className="text-2xl font-bold text-green-500">
                   {projects.filter(p => p.status === 'delivered').length}
                 </p>
-                <p className="text-sm text-muted-foreground">Delivered</p>
+                <p className="text-sm text-muted-foreground">Entregues</p>
               </div>
             </div>
           </CardContent>

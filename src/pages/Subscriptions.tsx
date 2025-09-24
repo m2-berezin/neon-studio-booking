@@ -27,8 +27,8 @@ const Subscriptions = () => {
   if (!user) {
     return (
       <div className="text-center py-8">
-        <h2 className="text-2xl font-bold text-foreground mb-4">Login Required</h2>
-        <p className="text-muted-foreground">Please login to view subscription plans.</p>
+        <h2 className="text-2xl font-bold text-foreground mb-4">Sessão Requerida</h2>
+        <p className="text-muted-foreground">Por favor faça login para ver planos de subscrição.</p>
       </div>
     );
   }
@@ -36,39 +36,39 @@ const Subscriptions = () => {
   const plans = [
     {
       id: '8h-plan',
-      name: '8h/month (2h/week)',
-      description: 'Perfect for regular sessions',
+      name: '8h/mês (2h/semana)',
+      description: 'Perfeito para sessões regulares',
       hours: 8,
       listPrice: 80,
       discountedPrice: 65,
-      features: ['8 hours monthly', '2 hours per week', 'Flexible scheduling', 'Priority support']
+      features: ['8 horas mensais', '2 horas por semana', 'Agendamento flexível', 'Suporte prioritário']
     },
     {
       id: '16h-plan',
-      name: '16h/month (4h/week)',
-      description: 'Ideal for intensive projects',
+      name: '16h/mês (4h/semana)',
+      description: 'Ideal para projetos intensivos',
       hours: 16,
       listPrice: 160,
       discountedPrice: 130,
-      features: ['16 hours monthly', '4 hours per week', 'Flexible scheduling', 'Priority support', 'Bonus perks']
+      features: ['16 horas mensais', '4 horas por semana', 'Agendamento flexível', 'Suporte prioritário', 'Vantagens bónus']
     }
   ];
 
   const daysOfWeek = [
-    { value: '0', label: 'Sunday' },
-    { value: '1', label: 'Monday' },
-    { value: '2', label: 'Tuesday' },
-    { value: '3', label: 'Wednesday' },
-    { value: '4', label: 'Thursday' },
-    { value: '5', label: 'Friday' },
-    { value: '6', label: 'Saturday' }
+    { value: '0', label: 'Domingo' },
+    { value: '1', label: 'Segunda' },
+    { value: '2', label: 'Terça' },
+    { value: '3', label: 'Quarta' },
+    { value: '4', label: 'Quinta' },
+    { value: '5', label: 'Sexta' },
+    { value: '6', label: 'Sábado' }
   ];
 
   const timeWindows = [
-    { start: '09:00', end: '12:00', label: 'Morning (9AM-12PM)' },
-    { start: '12:00', end: '15:00', label: 'Afternoon (12PM-3PM)' },
-    { start: '15:00', end: '18:00', label: 'Late Afternoon (3PM-6PM)' },
-    { start: '18:00', end: '21:00', label: 'Evening (6PM-9PM)' }
+    { start: '09:00', end: '12:00', label: 'Manhã (9h-12h)' },
+    { start: '12:00', end: '15:00', label: 'Tarde (12h-15h)' },
+    { start: '15:00', end: '18:00', label: 'Final de Tarde (15h-18h)' },
+    { start: '18:00', end: '21:00', label: 'Noite (18h-21h)' }
   ];
 
   const handleCreateSubscription = async (plan: any) => {
@@ -121,10 +121,10 @@ const Subscriptions = () => {
     <div className="space-y-6">
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-accent accent-glow mb-2">
-          Studio Subscriptions
+          Subscrições do Estúdio
         </h1>
         <p className="text-muted-foreground">
-          Choose a monthly plan that fits your creative schedule
+          Escolha um plano mensal que se adapte ao seu horário criativo
         </p>
       </div>
 
@@ -134,10 +134,10 @@ const Subscriptions = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <CheckCircle className="w-5 h-5 text-primary" />
-              Current Subscription
+              Subscrição Atual
             </CardTitle>
             <CardDescription>
-              Your active subscription plan
+              O seu plano de subscrição ativo
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -146,7 +146,7 @@ const Subscriptions = () => {
                 <h3 className="text-xl font-bold text-foreground">{userSubscription.plan}</h3>
                 <p className="text-muted-foreground">{userSubscription.hours_per_month} hours per month</p>
                 <p className="text-sm text-muted-foreground">
-                  Started: {format(new Date(userSubscription.start_date), 'MMM d, yyyy')}
+                  Iniciado: {format(new Date(userSubscription.start_date), 'MMM d, yyyy')}
                 </p>
               </div>
               <div className="text-right">
@@ -161,7 +161,7 @@ const Subscriptions = () => {
       {/* Subscription Plans */}
       {!userSubscription && (
         <section>
-          <h2 className="text-2xl font-bold text-foreground mb-4">Choose Your Plan</h2>
+          <h2 className="text-2xl font-bold text-foreground mb-4">Escolha o Seu Plano</h2>
           <div className="grid md:grid-cols-2 gap-6">
             {plans.map((plan) => (
               <Card key={plan.id} className="studio-card">
@@ -179,9 +179,9 @@ const Subscriptions = () => {
                         <span className="text-3xl font-bold text-primary">€{plan.discountedPrice}</span>
                         <span className="text-lg text-muted-foreground line-through">€{plan.listPrice}</span>
                       </div>
-                      <p className="text-sm text-muted-foreground">per month</p>
+                      <p className="text-sm text-muted-foreground">por mês</p>
                       <Badge variant="secondary" className="mt-2">
-                        Save €{plan.listPrice - plan.discountedPrice}/month
+                        Poupe €{plan.listPrice - plan.discountedPrice}/mês
                       </Badge>
                     </div>
                     
@@ -199,7 +199,7 @@ const Subscriptions = () => {
                       onClick={() => handleCreateSubscription(plan)}
                       disabled={loading}
                     >
-                      {loading ? 'Creating...' : 'Subscribe Now'}
+                      {loading ? 'A criar...' : 'Subscrever Agora'}
                     </Button>
                   </div>
                 </CardContent>
@@ -213,28 +213,28 @@ const Subscriptions = () => {
       {userSubscription && (
         <section>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold text-foreground">Subscription Preferences</h2>
+            <h2 className="text-2xl font-bold text-foreground">Preferências de Subscrição</h2>
             {!editingPreferences && (
               <Button variant="outline" onClick={startEditing}>
                 <Settings className="w-4 h-4 mr-2" />
-                Edit Preferences
+                Editar Preferências
               </Button>
             )}
           </div>
 
           <Card className="studio-card">
             <CardHeader>
-              <CardTitle>Preferred Schedule</CardTitle>
-              <CardDescription>
-                Set your preferred days and time windows for sessions
-              </CardDescription>
+            <CardTitle>Horário Preferido</CardTitle>
+            <CardDescription>
+              Defina os seus dias e janelas de tempo preferidos para sessões
+            </CardDescription>
             </CardHeader>
             <CardContent>
               {editingPreferences ? (
                 <div className="space-y-6">
                   {/* Preferred Days */}
                   <div>
-                    <Label className="text-base font-semibold mb-3 block">Preferred Days</Label>
+                    <Label className="text-base font-semibold mb-3 block">Dias Preferidos</Label>
                     <div className="grid grid-cols-3 gap-3">
                       {daysOfWeek.map((day) => (
                         <div key={day.value} className="flex items-center space-x-2">

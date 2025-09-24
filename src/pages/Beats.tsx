@@ -21,8 +21,8 @@ const Beats = () => {
   if (!user) {
     return (
       <div className="text-center py-8">
-        <h2 className="text-2xl font-bold text-foreground mb-4">Login Required</h2>
-        <p className="text-muted-foreground">Please login to view exclusive beats.</p>
+        <h2 className="text-2xl font-bold text-foreground mb-4">Sessão Requerida</h2>
+        <p className="text-muted-foreground">Por favor faça login para ver os beats exclusivos.</p>
       </div>
     );
   }
@@ -30,47 +30,47 @@ const Beats = () => {
   const beatPackages = [
     {
       id: 'single-beat',
-      name: 'Single Exclusive Beat',
-      description: 'One custom beat tailored to your style',
+      name: 'Beat Exclusivo Individual',
+      description: 'Um beat personalizado ao teu estilo',
       price: 150,
       features: [
-        'Custom production',
-        'Full exclusive rights',
-        'WAV + MP3 stems',
-        '2 revisions included',
-        '48-hour delivery'
+        'Produção personalizada',
+        'Direitos exclusivos totais',
+        'Stems WAV + MP3',
+        '2 revisões incluídas',
+        'Entrega em 48 horas'
       ]
     },
     {
       id: 'beat-pack-3',
-      name: '3-Beat Pack',
-      description: 'Three exclusive beats with cohesive sound',
+      name: 'Pack de 3 Beats',
+      description: 'Três beats exclusivos com som coeso',
       price: 400,
       originalPrice: 450,
       features: [
-        'Three custom beats',
-        'Full exclusive rights',
-        'WAV + MP3 stems',
-        '3 revisions per beat',
-        '1 week delivery',
-        'Bonus: Instrumental variations'
+        'Três beats personalizados',
+        'Direitos exclusivos totais',
+        'Stems WAV + MP3',
+        '3 revisões por beat',
+        'Entrega em 1 semana',
+        'Bónus: Variações instrumentais'
       ],
       popular: true
     },
     {
       id: 'beat-pack-5',
-      name: '5-Beat Album Pack',
-      description: 'Complete album package with professional mixing',
+      name: 'Pack de Álbum 5 Beats',
+      description: 'Pacote completo de álbum com mistura profissional',
       price: 650,
       originalPrice: 750,
       features: [
-        'Five exclusive beats',
-        'Professional mixing',
-        'All stems + MIDI files',
-        'Unlimited revisions',
-        '2 week delivery',
-        'Bonus: Acapella versions',
-        'Priority support'
+        'Cinco beats exclusivos',
+        'Mistura profissional',
+        'Todos os stems + ficheiros MIDI',
+        'Revisões ilimitadas',
+        'Entrega em 2 semanas',
+        'Bónus: Versões acapella',
+        'Suporte prioritário'
       ]
     }
   ];
@@ -91,7 +91,7 @@ const Beats = () => {
 
   const handlePurchaseClick = (beatPackage: any) => {
     setSelectedBeat(beatPackage.name);
-    setMessage(`I'm interested in the ${beatPackage.name}. Please let me know the next steps for purchase.`);
+    setMessage(`Tenho interesse no ${beatPackage.name}. Por favor, indique-me os próximos passos para compra.`);
     setDialogOpen(true);
   };
 
@@ -110,10 +110,10 @@ const Beats = () => {
     <div className="space-y-6">
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-accent accent-glow mb-2">
-          Exclusive Beats
+          Beats Exclusivos
         </h1>
         <p className="text-muted-foreground">
-          Premium custom beats crafted exclusively for you
+          Beats personalizados premium criados exclusivamente para ti
         </p>
       </div>
 
@@ -126,7 +126,7 @@ const Beats = () => {
           >
             {beatPackage.popular && (
               <Badge className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-primary">
-                Most Popular
+                Mais Popular
               </Badge>
             )}
             
@@ -148,7 +148,7 @@ const Beats = () => {
                 </div>
                 {beatPackage.originalPrice && (
                   <Badge variant="secondary" className="mt-2">
-                    Save €{beatPackage.originalPrice - beatPackage.price}
+                    Poupa €{beatPackage.originalPrice - beatPackage.price}
                   </Badge>
                 )}
               </div>
@@ -164,14 +164,14 @@ const Beats = () => {
                 ))}
               </ul>
               
-              <Button 
-                className="w-full" 
-                onClick={() => handlePurchaseClick(beatPackage)}
-                variant={beatPackage.popular ? 'default' : 'outline'}
-              >
-                <MessageCircle className="w-4 h-4 mr-2" />
-                Chat to Purchase
-              </Button>
+                <Button 
+                  className="w-full" 
+                  onClick={() => handlePurchaseClick(beatPackage)}
+                  variant={beatPackage.popular ? 'default' : 'outline'}
+                >
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  Conversar para Comprar
+                </Button>
             </CardContent>
           </Card>
         ))}
@@ -181,27 +181,27 @@ const Beats = () => {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Contact for Purchase</DialogTitle>
+            <DialogTitle>Contactar para Compra</DialogTitle>
             <DialogDescription>
-              Send a message to our team or chat via WhatsApp
+              Envia uma mensagem à nossa equipa ou conversa pelo WhatsApp
             </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4">
             <div>
-              <Label className="text-sm font-medium">Selected Package</Label>
+              <Label className="text-sm font-medium">Pacote Selecionado</Label>
               <p className="text-sm text-muted-foreground">{selectedBeat}</p>
             </div>
             
             <div>
               <Label htmlFor="message" className="text-sm font-medium">
-                Your Message
+                A Tua Mensagem
               </Label>
               <Textarea
                 id="message"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                placeholder="Tell us about your project, style preferences, or any specific requirements..."
+                placeholder="Conta-nos sobre o teu projeto, preferências de estilo, ou requisitos específicos..."
                 className="mt-1"
                 rows={4}
               />
@@ -209,9 +209,9 @@ const Beats = () => {
             
             {/* File Upload */}
             <div>
-              <Label className="text-sm font-medium">Reference Files (Optional)</Label>
+              <Label className="text-sm font-medium">Ficheiros de Referência (Opcional)</Label>
               <p className="text-xs text-muted-foreground mb-2">
-                Upload audio references to help us understand your style
+                Carrega referências áudio para nos ajudar a entender o teu estilo
               </p>
               
               <div className="space-y-2">
@@ -232,7 +232,7 @@ const Beats = () => {
                   className="w-full"
                 >
                   <Upload className="w-4 h-4 mr-2" />
-                  {uploading ? 'Uploading...' : 'Add Reference Files'}
+                  {uploading ? 'A carregar...' : 'Adicionar Ficheiros de Referência'}
                 </Button>
                 
                 {referenceFiles.length > 0 && (
@@ -263,7 +263,7 @@ const Beats = () => {
               className="w-full"
             >
               <MessageCircle className="w-4 h-4 mr-2" />
-              {loading ? 'Sending...' : 'Send Message'}
+              {loading ? 'A enviar...' : 'Enviar Mensagem'}
             </Button>
             
             <Button
@@ -273,7 +273,7 @@ const Beats = () => {
             >
               <a href={whatsAppLink} target="_blank" rel="noopener noreferrer">
                 <ExternalLink className="w-4 h-4 mr-2" />
-                Chat on WhatsApp
+                Conversar no WhatsApp
               </a>
             </Button>
           </DialogFooter>
@@ -284,22 +284,22 @@ const Beats = () => {
       <Card className="studio-card bg-gradient-to-br from-primary/10 to-accent/10">
         <CardContent className="pt-6">
           <div className="text-center space-y-4">
-            <h3 className="text-xl font-semibold text-foreground">Why Choose Our Exclusive Beats?</h3>
+            <h3 className="text-xl font-semibold text-foreground">Porquê Escolher os Nossos Beats Exclusivos?</h3>
             <div className="grid md:grid-cols-3 gap-4 text-sm">
               <div className="space-y-2">
                 <Music className="w-6 h-6 text-primary mx-auto" />
                 <h4 className="font-medium text-foreground">100% Original</h4>
-                <p className="text-muted-foreground">Every beat is crafted from scratch exclusively for you</p>
+                <p className="text-muted-foreground">Cada beat é criado de raiz exclusivamente para ti</p>
               </div>
               <div className="space-y-2">
                 <MessageCircle className="w-6 h-6 text-primary mx-auto" />
-                <h4 className="font-medium text-foreground">Direct Collaboration</h4>
-                <p className="text-muted-foreground">Work directly with our producers throughout the process</p>
+                <h4 className="font-medium text-foreground">Colaboração Direta</h4>
+                <p className="text-muted-foreground">Trabalha diretamente com os nossos produtores durante todo o processo</p>
               </div>
               <div className="space-y-2">
                 <Upload className="w-6 h-6 text-primary mx-auto" />
-                <h4 className="font-medium text-foreground">Full Rights</h4>
-                <p className="text-muted-foreground">Complete exclusive ownership and commercial rights</p>
+                <h4 className="font-medium text-foreground">Direitos Completos</h4>
+                <p className="text-muted-foreground">Propriedade exclusiva completa e direitos comerciais</p>
               </div>
             </div>
           </div>
@@ -309,9 +309,9 @@ const Beats = () => {
       {/* Footer */}
       <div className="text-center py-4">
         <p className="text-xs text-muted-foreground">
-          All beats come with full exclusive rights and professional mixing.
+          Todos os beats incluem direitos exclusivos completos e mistura profissional.
           <span className="block mt-1">
-            Contact us for custom packages or bulk discounts.
+            Contacta-nos para pacotes personalizados ou descontos por volume.
           </span>
         </p>
       </div>

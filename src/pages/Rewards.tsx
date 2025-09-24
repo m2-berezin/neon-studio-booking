@@ -29,8 +29,8 @@ const Rewards = () => {
   if (!user) {
     return (
       <div className="text-center py-8">
-        <h2 className="text-2xl font-bold text-foreground mb-4">Login Required</h2>
-        <p className="text-muted-foreground">Please login to view rewards and offers.</p>
+        <h2 className="text-2xl font-bold text-foreground mb-4">Sessão Requerida</h2>
+        <p className="text-muted-foreground">Por favor faça login para ver recompensas e ofertas.</p>
       </div>
     );
   }
@@ -55,10 +55,10 @@ const Rewards = () => {
     <div className="space-y-6">
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-accent accent-glow mb-2">
-          Studio Rewards
+          Recompensas do Estúdio
         </h1>
         <p className="text-muted-foreground">
-          Special offers and loyalty rewards for our valued clients
+          Ofertas especiais e recompensas de fidelidade para os nossos clientes valiosos
         </p>
       </div>
 
@@ -74,9 +74,9 @@ const Rewards = () => {
           <AlertDescription className="text-primary font-medium">
             <div className="flex items-center justify-between">
               <div>
-                <span className="font-semibold">€15 voucher available!</span>
+                <span className="font-semibold">Vale de €15 disponível!</span>
                 <p className="text-sm text-primary/80 mt-1">
-                  Claim your quarterly voucher - valid for 60 days on any service.
+                  Reivindique o seu vale trimestral - válido por 60 dias em qualquer serviço.
                 </p>
               </div>
               <Button
@@ -85,7 +85,7 @@ const Rewards = () => {
                 size="sm"
                 className="ml-4"
               >
-                {loading ? 'Claiming...' : 'Claim €15 Voucher'}
+                {loading ? 'A reivindicar...' : 'Reivindicar Vale de €15'}
               </Button>
             </div>
           </AlertDescription>
@@ -96,7 +96,7 @@ const Rewards = () => {
       <section>
         <h2 className="text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
           <Clock className="w-6 h-6 text-primary" />
-          Weekly Offers
+          Ofertas Semanais
         </h2>
         
         <div className="grid gap-4">
@@ -105,10 +105,10 @@ const Rewards = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Star className="w-5 h-5 text-primary" />
-                Buy 2h Recording, Get +1h Free
+                Compre 2h de Gravação, Ganhe +1h Grátis
               </CardTitle>
               <CardDescription>
-                3 hours total recording time for just €20
+                3 horas totais de gravação por apenas €20
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -116,11 +116,11 @@ const Rewards = () => {
                 <div>
                   <p className="text-2xl font-bold text-accent">€20</p>
                   <p className="text-sm text-muted-foreground">
-                    Used: {getCurrentMonthUsage('W_REC_3FOR20')}/2 this month
+                    Usado: {getCurrentMonthUsage('W_REC_3FOR20')}/2 este mês
                   </p>
                   {!isWeeklyOfferAAvailable() && getCurrentMonthUsage('W_REC_3FOR20') >= 2 && (
                     <Badge variant="outline" className="text-xs mt-1">
-                      Monthly limit reached
+                      Limite mensal atingido
                     </Badge>
                   )}
                 </div>
@@ -129,7 +129,7 @@ const Rewards = () => {
                   disabled={!isWeeklyOfferAAvailable() || appliedRewards['W_REC_3FOR20'] || loading}
                   variant={appliedRewards['W_REC_3FOR20'] ? 'outline' : 'default'}
                 >
-                  {appliedRewards['W_REC_3FOR20'] ? 'Applied ✓' : 'Apply to Next Booking'}
+                  {appliedRewards['W_REC_3FOR20'] ? 'Aplicado ✓' : 'Aplicar à Próxima Reserva'}
                 </Button>
               </div>
             </CardContent>
@@ -140,10 +140,10 @@ const Rewards = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Zap className="w-5 h-5 text-primary" />
-                Mixing & Mastering Bundle
+                Bundle Mistura & Masterização
               </CardTitle>
               <CardDescription>
-                €35 each when sending 2 tracks together
+                €35 cada ao enviar 2 faixas juntas
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -151,7 +151,7 @@ const Rewards = () => {
                 <div>
                   <p className="text-2xl font-bold text-accent">€35 each</p>
                   <p className="text-sm text-muted-foreground">
-                    Unlimited uses • Save when bundling
+                    Usos ilimitados • Poupe ao agrupar
                   </p>
                 </div>
                 <Button
@@ -159,7 +159,7 @@ const Rewards = () => {
                   disabled={hasActivePenalty() || appliedRewards['W_MM_BUNDLE'] || loading}
                   variant={appliedRewards['W_MM_BUNDLE'] ? 'outline' : 'default'}
                 >
-                  {appliedRewards['W_MM_BUNDLE'] ? 'Applied ✓' : 'Apply Bundle Rate'}
+                  {appliedRewards['W_MM_BUNDLE'] ? 'Aplicado ✓' : 'Aplicar Taxa Bundle'}
                 </Button>
               </div>
             </CardContent>
@@ -171,17 +171,17 @@ const Rewards = () => {
       <section>
         <h2 className="text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
           <Package className="w-6 h-6 text-primary" />
-          Monthly Package
+          Pacote Mensal
         </h2>
         
         <Card className="studio-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Crown className="w-5 h-5 text-primary" />
-              Full Production Package
+              Pacote Produção Completa
             </CardTitle>
             <CardDescription>
-              Recording + Mixing + Mastering complete package
+              Pacote completo Gravação + Mistura + Masterização
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -190,12 +190,12 @@ const Rewards = () => {
                 <div className="flex items-center gap-4">
                   <div>
                     <p className="text-2xl font-bold text-accent">€70</p>
-                    <p className="text-sm text-muted-foreground">Standard rate</p>
+                    <p className="text-sm text-muted-foreground">Taxa padrão</p>
                   </div>
-                  <div className="text-muted-foreground">or</div>
+                  <div className="text-muted-foreground">ou</div>
                   <div>
                     <p className="text-2xl font-bold text-primary">€65</p>
-                    <p className="text-sm text-muted-foreground">Premium rate</p>
+                    <p className="text-sm text-muted-foreground">Taxa premium</p>
                   </div>
                 </div>
               </div>
@@ -205,17 +205,17 @@ const Rewards = () => {
                   disabled={hasActivePenalty() || appliedRewards['M_PACKAGE_70'] || loading}
                   variant={appliedRewards['M_PACKAGE_70'] ? 'outline' : 'secondary'}
                   size="sm"
-                >
-                  {appliedRewards['M_PACKAGE_70'] ? 'Applied ✓' : 'Apply €70'}
-                </Button>
-                <Button
-                  onClick={() => handleApplyReward('M_PACKAGE_65', 'Full package €65')}
-                  disabled={hasActivePenalty() || appliedRewards['M_PACKAGE_65'] || loading}
-                  variant={appliedRewards['M_PACKAGE_65'] ? 'outline' : 'default'}
-                  size="sm"
-                >
-                  {appliedRewards['M_PACKAGE_65'] ? 'Applied ✓' : 'Apply €65'}
-                </Button>
+                  >
+                    {appliedRewards['M_PACKAGE_70'] ? 'Aplicado ✓' : 'Aplicar €70'}
+                  </Button>
+                  <Button
+                    onClick={() => handleApplyReward('M_PACKAGE_65', 'Full package €65')}
+                    disabled={hasActivePenalty() || appliedRewards['M_PACKAGE_65'] || loading}
+                    variant={appliedRewards['M_PACKAGE_65'] ? 'outline' : 'default'}
+                    size="sm"
+                  >
+                    {appliedRewards['M_PACKAGE_65'] ? 'Aplicado ✓' : 'Aplicar €65'}
+                  </Button>
               </div>
             </div>
           </CardContent>
@@ -226,17 +226,17 @@ const Rewards = () => {
       <section>
         <h2 className="text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
           <Award className="w-6 h-6 text-primary" />
-          Loyalty Rewards
+          Recompensas de Fidelidade
         </h2>
         
         <Card className="studio-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Gift className="w-5 h-5 text-primary" />
-              Free Mixing & Mastering
+              Mistura & Masterização Grátis
             </CardTitle>
             <CardDescription>
-              Earn a free M&M session through loyalty
+              Ganhe uma sessão M&M grátis através da fidelidade
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -244,13 +244,13 @@ const Rewards = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div className="text-center p-4 bg-secondary/50 rounded-lg">
                   <p className="text-2xl font-bold text-primary">{projectStats.mixingMasteringCount}</p>
-                  <p className="text-sm text-muted-foreground">M&M Projects</p>
-                  <p className="text-xs text-muted-foreground">Need 7 total</p>
+                  <p className="text-sm text-muted-foreground">Projetos M&M</p>
+                  <p className="text-xs text-muted-foreground">Precisa de 7 no total</p>
                 </div>
                 <div className="text-center p-4 bg-secondary/50 rounded-lg">
                   <p className="text-2xl font-bold text-primary">{projectStats.fullSongCount}</p>
-                  <p className="text-sm text-muted-foreground">Full Songs</p>
-                  <p className="text-xs text-muted-foreground">Need 5 total</p>
+                  <p className="text-sm text-muted-foreground">Músicas Completas</p>
+                  <p className="text-xs text-muted-foreground">Precisa de 5 no total</p>
                 </div>
               </div>
               
@@ -258,12 +258,12 @@ const Rewards = () => {
                 <div>
                   <p className="font-medium text-foreground">
                     {isLoyaltyRewardAvailable() 
-                      ? 'Congratulations! You\'ve earned a free M&M session' 
-                      : 'Keep completing projects to earn your free session'
+                      ? 'Parabéns! Ganhou uma sessão M&M grátis' 
+                      : 'Continue a completar projetos para ganhar a sua sessão grátis'
                     }
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Complete 7 mixing/mastering projects OR 5 full songs (record+mix+master)
+                    Complete 7 projetos de mistura/masterização OU 5 músicas completas (gravar+misturar+masterizar)
                   </p>
                 </div>
                 <Button
@@ -271,7 +271,7 @@ const Rewards = () => {
                   disabled={!isLoyaltyRewardAvailable() || loading}
                   variant={isLoyaltyRewardAvailable() ? 'default' : 'outline'}
                 >
-                  {loading ? 'Redeeming...' : isLoyaltyRewardAvailable() ? 'Redeem Free M&M' : 'Not Available'}
+                  {loading ? 'A resgatar...' : isLoyaltyRewardAvailable() ? 'Resgatar M&M Grátis' : 'Não Disponível'}
                 </Button>
               </div>
             </div>
@@ -282,10 +282,10 @@ const Rewards = () => {
       {/* Info Footer */}
       <div className="text-center py-4">
         <p className="text-xs text-muted-foreground">
-          Applied rewards will be automatically included in your next booking pricing.
+          As recompensas aplicadas serão automaticamente incluídas no preço da sua próxima reserva.
           {hasActivePenalty() && (
             <span className="block text-destructive mt-1">
-              All reward applications are currently paused due to an active penalty.
+              Todas as aplicações de recompensas estão atualmente pausadas devido a uma penalização ativa.
             </span>
           )}
         </p>
