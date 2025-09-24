@@ -8,6 +8,7 @@ import { useBooking } from '@/hooks/useBooking';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { format, parse } from 'date-fns';
+import PriceSummary from '@/components/PriceSummary';
 import { 
   Calendar as CalendarIcon, 
   Clock, 
@@ -323,7 +324,7 @@ const Book = () => {
 
           <Card className="p-6">
             <h3 className="text-lg font-semibold mb-4">Booking Summary</h3>
-            <div className="space-y-3 text-sm">
+            <div className="space-y-3 text-sm mb-6">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Service:</span>
                 <span className="font-medium">{selectedServiceDetails?.name}</span>
@@ -340,12 +341,13 @@ const Book = () => {
                   {selectedSlot && format(parse(selectedSlot.start_time, 'HH:mm:ss', new Date()), 'h:mm a')} - {selectedSlot && format(parse(selectedSlot.end_time, 'HH:mm:ss', new Date()), 'h:mm a')}
                 </span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Price:</span>
-                <span className="font-medium text-primary">${selectedServiceDetails?.base_price}</span>
-              </div>
             </div>
           </Card>
+
+          <PriceSummary 
+            services={selectedServiceDetails ? [selectedServiceDetails] : []}
+            bookingDate={selectedDate || undefined}
+          />
 
           <div className="space-y-3">
             <Button 
