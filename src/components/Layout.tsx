@@ -12,15 +12,15 @@ const Layout = ({ children }: { children: ReactNode }) => {
   const { user, loading, signOut, isAdmin } = useAuth();
 
   const navItems = [
-    { path: '/', icon: Home, label: 'Home' },
-    { path: '/book', icon: Calendar, label: 'Book' },
-    { path: '/projects', icon: Folder, label: 'Projects' },
-    { path: '/subscriptions', icon: Star, label: 'Subscriptions' },
+    { path: '/', icon: Home, label: 'Início' },
+    { path: '/book', icon: Calendar, label: 'Reservar' },
+    { path: '/projects', icon: Folder, label: 'Projectos' },
+    { path: '/subscriptions', icon: Star, label: 'Subscrições' },
     { path: '/beats', icon: Music, label: 'Beats' },
-    { path: '/rewards', icon: Gift, label: 'Rewards' },
-    { path: '/messages', icon: MessageCircle, label: 'Messages' },
+    { path: '/rewards', icon: Gift, label: 'Recompensas' },
+    { path: '/messages', icon: MessageCircle, label: 'Mensagens' },
     { path: '/studio-info', icon: Info, label: 'Info' },
-    { path: '/profile', icon: User, label: 'Profile' },
+    { path: '/profile', icon: User, label: 'Perfil' },
   ];
 
   // Add admin navigation items if user is admin

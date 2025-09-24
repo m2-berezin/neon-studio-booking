@@ -28,8 +28,8 @@ const Messages = () => {
   if (!user) {
     return (
       <div className="text-center py-8">
-        <h2 className="text-2xl font-bold text-foreground mb-4">Login Required</h2>
-        <p className="text-muted-foreground">Please login to view your messages.</p>
+        <h2 className="text-2xl font-bold text-foreground mb-4">Login Necessário</h2>
+        <p className="text-muted-foreground">Por favor, inicie sessão para ver as suas mensagens.</p>
       </div>
     );
   }
@@ -82,18 +82,18 @@ const Messages = () => {
       {/* Thread List */}
       <div className="w-1/3 border-r border-border">
         <div className="p-4 border-b border-border">
-          <h2 className="text-xl font-bold text-foreground">Conversations</h2>
+          <h2 className="text-xl font-bold text-foreground">Conversas</h2>
         </div>
         
         <ScrollArea className="h-[calc(100%-4rem)]">
           <div className="p-2">
             {loading && threads.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
-                Loading conversations...
+                A carregar conversas...
               </div>
             ) : threads.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
-                No conversations yet
+                Ainda não há conversas
               </div>
             ) : (
               <div className="space-y-2">
@@ -116,7 +116,7 @@ const Messages = () => {
                       </div>
                       <p className="text-xs text-muted-foreground line-clamp-2">
                         {thread.latest_message.attachments?.length 
-                          ? `📎 ${thread.latest_message.attachments.length} attachment(s)`
+                          ? `📎 ${thread.latest_message.attachments.length} anexo(s)`
                           : thread.latest_message.body
                         }
                       </p>
@@ -141,7 +141,7 @@ const Messages = () => {
             {/* Chat Header */}
             <div className="p-4 border-b border-border">
               <h3 className="font-semibold text-foreground">
-                {threads.find(t => t.recipient_id === currentRecipient)?.recipient_name || 'Chat'}
+                {threads.find(t => t.recipient_id === currentRecipient)?.recipient_name || 'Conversa'}
               </h3>
             </div>
 
@@ -253,7 +253,7 @@ const Messages = () => {
                   <Textarea
                     value={messageText}
                     onChange={(e) => setMessageText(e.target.value)}
-                    placeholder="Type your message..."
+                    placeholder="Escreva a sua mensagem..."
                     className="min-h-[60px] resize-none"
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && !e.shiftKey) {
@@ -297,10 +297,10 @@ const Messages = () => {
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
               <h3 className="text-lg font-semibold text-foreground mb-2">
-                Select a conversation
+                Seleccione uma conversa
               </h3>
               <p className="text-muted-foreground">
-                Choose a conversation from the list to start messaging
+                Escolha uma conversa da lista para começar a enviar mensagens
               </p>
             </div>
           </div>

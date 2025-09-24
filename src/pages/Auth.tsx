@@ -9,10 +9,10 @@ import { useToast } from '@/hooks/use-toast';
 import { Mail, Lock, Zap, User, Phone, Shield } from 'lucide-react';
 import { z } from 'zod';
 
-const emailSchema = z.string().trim().email('Please enter a valid email address');
-const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
-const fullNameSchema = z.string().trim().min(2, 'Full name must be at least 2 characters').max(100, 'Full name must be less than 100 characters');
-const phoneSchema = z.string().trim().min(10, 'Phone must be at least 10 characters').max(20, 'Phone must be less than 20 characters').regex(/^[\d\s\-\+\(\)]+$/, 'Phone can only contain numbers, spaces, and basic punctuation');
+const emailSchema = z.string().trim().email('Por favor, introduza um endereço de email válido');
+const passwordSchema = z.string().min(6, 'A palavra-passe deve ter pelo menos 6 caracteres');
+const fullNameSchema = z.string().trim().min(2, 'O nome completo deve ter pelo menos 2 caracteres').max(100, 'O nome completo deve ter menos de 100 caracteres');
+const phoneSchema = z.string().trim().min(10, 'O telefone deve ter pelo menos 10 caracteres').max(20, 'O telefone deve ter menos de 20 caracteres').regex(/^[\d\s\-\+\(\)]+$/, 'O telefone só pode conter números, espaços e pontuação básica');
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -172,7 +172,7 @@ const Auth = () => {
             7T7Studios
           </h1>
           <p className="text-muted-foreground">
-            Welcome to the studio
+            Bem-vindo ao estúdio
           </p>
         </div>
 
@@ -182,7 +182,7 @@ const Auth = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Shield className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium">Admin Mode</span>
+                <span className="text-sm font-medium">Modo Admin</span>
               </div>
               <Button
                 variant={adminMode ? "default" : "outline"}
@@ -190,7 +190,7 @@ const Auth = () => {
                 onClick={handleAdminToggle}
                 disabled={loading}
               >
-                {adminMode ? 'Disable' : 'Enable'}
+                {adminMode ? 'Desactivar' : 'Activar'}
               </Button>
             </div>
           </div>
@@ -198,8 +198,8 @@ const Auth = () => {
 
         <Tabs defaultValue="signin" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="signin">Sign In</TabsTrigger>
-            <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            <TabsTrigger value="signin">Iniciar Sessão</TabsTrigger>
+            <TabsTrigger value="signup">Registar</TabsTrigger>
           </TabsList>
           
           <TabsContent value="signin" className="space-y-4">
@@ -224,7 +224,7 @@ const Auth = () => {
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     type="password"
-                    placeholder="Password"
+                    placeholder="Palavra-passe"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="pl-10"
@@ -235,7 +235,7 @@ const Auth = () => {
               </div>
               
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? 'Signing In...' : 'Sign In'}
+                {loading ? 'A iniciar sessão...' : 'Iniciar Sessão'}
               </Button>
             </form>
 
@@ -244,7 +244,7 @@ const Auth = () => {
                 <span className="w-full border-t" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">Or</span>
+                <span className="bg-background px-2 text-muted-foreground">Ou</span>
               </div>
             </div>
 
@@ -256,7 +256,7 @@ const Auth = () => {
                 disabled={loading}
               >
                 <Zap className="w-4 h-4 mr-2" />
-                {loading ? 'Sending...' : 'Send Magic Link'}
+                {loading ? 'A enviar...' : 'Enviar Link Mágico'}
               </Button>
             </form>
           </TabsContent>
@@ -268,7 +268,7 @@ const Auth = () => {
                   <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     type="text"
-                    placeholder="Full Name"
+                    placeholder="Nome Completo"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     className="pl-10"
@@ -299,7 +299,7 @@ const Auth = () => {
                   <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     type="tel"
-                    placeholder="Phone Number"
+                    placeholder="Número de Telefone"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     className="pl-10"
@@ -315,7 +315,7 @@ const Auth = () => {
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     type="password"
-                    placeholder="Password (min. 6 characters)"
+                    placeholder="Palavra-passe (min. 6 caracteres)"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="pl-10"
@@ -326,7 +326,7 @@ const Auth = () => {
               </div>
               
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? 'Creating Account...' : 'Sign Up'}
+                {loading ? 'A criar conta...' : 'Registar'}
               </Button>
             </form>
           </TabsContent>

@@ -10,16 +10,16 @@ const Profile = () => {
   const [loading, setLoading] = useState(false);
   
   const userStats = [
-    { label: 'Sessions Booked', value: '0', icon: Calendar },
-    { label: 'Projects Completed', value: '0', icon: Music },
-    { label: 'Rewards Earned', value: '0', icon: Award },
+    { label: 'Sessões Reservadas', value: '0', icon: Calendar },
+    { label: 'Projectos Concluídos', value: '0', icon: Music },
+    { label: 'Recompensas Ganhas', value: '0', icon: Award },
   ];
 
   const menuItems = [
-    { label: 'Account Settings', icon: Settings, path: '/settings' },
-    { label: 'My Projects', icon: Music, path: '/projects' },
-    { label: 'Billing & Subscriptions', icon: Calendar, path: '/billing' },
-    { label: 'Help & Support', icon: User, path: '/support' },
+    { label: 'Definições da Conta', icon: Settings, path: '/settings' },
+    { label: 'Os Meus Projectos', icon: Music, path: '/projects' },
+    { label: 'Facturação e Subscrições', icon: Calendar, path: '/billing' },
+    { label: 'Ajuda e Suporte', icon: User, path: '/support' },
   ];
 
   const handleSignOut = async () => {
@@ -75,10 +75,10 @@ const Profile = () => {
     <div className="space-y-6">
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-accent accent-glow mb-2">
-          Your Profile
+          O Seu Perfil
         </h1>
         <p className="text-muted-foreground">
-          Manage your studio account
+          Gerencie a sua conta do estúdio
         </p>
       </div>
 
@@ -93,13 +93,13 @@ const Profile = () => {
               {profile.full_name || 'No name provided'}
             </h2>
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-muted-foreground capitalize">{profile.role} Member</span>
+              <span className="text-muted-foreground capitalize">{profile.role} Membro</span>
               {profile.role === 'admin' && (
                 <Shield className="h-4 w-4 text-primary" />
               )}
             </div>
             <p className="text-sm text-muted-foreground">
-              Member since {new Date(profile.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+              Membro desde {new Date(profile.created_at).toLocaleDateString('pt-PT', { month: 'short', year: 'numeric' })}
             </p>
           </div>
         </div>
@@ -124,7 +124,7 @@ const Profile = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Shield className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium">Admin Mode</span>
+                <span className="text-sm font-medium">Modo Admin</span>
               </div>
               <Button
                 variant={profile.role === 'admin' ? "default" : "outline"}
@@ -132,7 +132,7 @@ const Profile = () => {
                 onClick={toggleAdminMode}
                 disabled={loading}
               >
-                {profile.role === 'admin' ? 'Disable' : 'Enable'}
+                {profile.role === 'admin' ? 'Desactivar' : 'Activar'}
               </Button>
             </div>
           </div>
@@ -177,7 +177,7 @@ const Profile = () => {
               <div className="p-2 bg-secondary rounded-lg">
                 <Settings className="text-accent" size={18} />
               </div>
-              <span className="font-medium text-foreground">App Settings</span>
+              <span className="font-medium text-foreground">Definições da App</span>
             </div>
             <div className="text-muted-foreground">
               →
@@ -195,7 +195,7 @@ const Profile = () => {
                 <LogOut className="text-destructive" size={18} />
               </div>
               <span className="font-medium text-foreground">
-                {loading ? 'Signing out...' : 'Sign Out'}
+                {loading ? 'A terminar sessão...' : 'Terminar Sessão'}
               </span>
             </div>
             <div className="text-muted-foreground">

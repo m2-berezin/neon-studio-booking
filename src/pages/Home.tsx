@@ -14,40 +14,40 @@ const Home = () => {
 
   const services = [
     {
-      title: 'Book a Session',
-      description: 'Schedule your recording session with our professional engineers',
+      title: 'Reservar Sessão',
+      description: 'Agende a sua sessão de gravação com os nossos engenheiros profissionais',
       icon: Calendar,
       path: '/book',
       gradient: true,
     },
     {
-      title: 'Exclusive Beats',
-      description: 'Browse our collection of premium beats and instrumentals',
+      title: 'Beats Exclusivos',
+      description: 'Explore a nossa colecção de beats premium e instrumentais',
       icon: Music,
       path: '/beats',
     },
     {
-      title: 'My Projects',
-      description: 'Access your recordings, mixes, and project files',
+      title: 'Os Meus Projectos',
+      description: 'Aceda às suas gravações, misturas e ficheiros de projectos',
       icon: FolderOpen,
       path: '/projects',
     },
     {
-      title: 'Rewards',
-      description: 'Earn points and unlock exclusive perks and discounts',
+      title: 'Recompensas',
+      description: 'Ganhe pontos e desbloqueie vantagens e descontos exclusivos',
       icon: Gift,
       path: '/rewards',
       gradient: true,
     },
     {
-      title: 'Subscriptions',
-      description: 'Manage your studio membership and billing',
+      title: 'Subscrições',
+      description: 'Gerencie a sua afiliação no estúdio e facturação',
       icon: CreditCard,
       path: '/subscriptions',
     },
     {
-      title: 'Studio Info',
-      description: 'Location, hours, equipment specs, and contact information',
+      title: 'Info do Estúdio',
+      description: 'Localização, horários, especificações de equipamento e contactos',
       icon: MapPin,
       path: '/studio-info',
     },
@@ -58,10 +58,10 @@ const Home = () => {
       {/* Welcome Section */}
       <div className="text-center mb-8">
         <h1 className="neon-heading">
-          Welcome to the Studio
+          Bem-vindo ao Estúdio
         </h1>
         <p className="text-muted-foreground text-lg mt-4">
-          Professional music production at your fingertips
+          Produção musical profissional ao seu alcance
         </p>
       </div>
 

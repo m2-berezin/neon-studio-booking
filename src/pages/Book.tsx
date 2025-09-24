@@ -127,21 +127,21 @@ const Book = () => {
         <div className="text-center">
           <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
           <h1 className="neon-heading">
-            Booking Confirmed!
+            Reserva Confirmada!
           </h1>
           <p className="text-muted-foreground">
-            Your session has been successfully booked
+            A sua sessão foi reservada com sucesso
           </p>
         </div>
 
         <Card className="p-6">
           <div className="space-y-4">
             <div className="text-center">
-              <h3 className="text-lg font-semibold mb-2">Session Details</h3>
+              <h3 className="text-lg font-semibold mb-2">Detalhes da Sessão</h3>
               <div className="space-y-2 text-sm text-muted-foreground">
-                <p><span className="font-medium">Service:</span> {selectedServiceDetails?.name}</p>
-                <p><span className="font-medium">Date:</span> {selectedDate && format(selectedDate, 'EEEE, MMMM do, yyyy')}</p>
-                <p><span className="font-medium">Time:</span> {selectedSlot && format(parse(selectedSlot.start_time, 'HH:mm:ss', new Date()), 'h:mm a')} - {selectedSlot && format(parse(selectedSlot.end_time, 'HH:mm:ss', new Date()), 'h:mm a')}</p>
+                <p><span className="font-medium">Serviço:</span> {selectedServiceDetails?.name}</p>
+                <p><span className="font-medium">Data:</span> {selectedDate && format(selectedDate, 'EEEE, MMMM do, yyyy')}</p>
+                <p><span className="font-medium">Horário:</span> {selectedSlot && format(parse(selectedSlot.start_time, 'HH:mm:ss', new Date()), 'h:mm a')} - {selectedSlot && format(parse(selectedSlot.end_time, 'HH:mm:ss', new Date()), 'h:mm a')}</p>
               </div>
             </div>
 
@@ -152,19 +152,19 @@ const Book = () => {
                 className="w-full bg-green-600 hover:bg-green-700"
               >
                 <MessageCircle className="w-5 h-5 mr-2" />
-                Open in WhatsApp
+                Abrir no WhatsApp
                 <ExternalLink className="w-5 h-5 ml-2" />
               </Button>
               
               <p className="text-xs text-muted-foreground text-center">
-                Session details have also been sent to your Messages
+                Os detalhes da sessão também foram enviados para as suas Mensagens
               </p>
             </div>
           </div>
         </Card>
 
         <Button onClick={resetBooking} variant="outline" size="xl" className="w-full">
-          Book Another Session
+          Reservar Outra Sessão
         </Button>
       </div>
     );
@@ -174,10 +174,10 @@ const Book = () => {
     <div className="space-y-6">
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-accent accent-glow mb-2">
-          Book a Session
+          Reservar uma Sessão
         </h1>
         <p className="text-muted-foreground">
-          Schedule your recording session in a few simple steps
+          Agende a sua sessão de gravação em alguns passos simples
         </p>
       </div>
 
@@ -206,7 +206,7 @@ const Book = () => {
       {/* Step 1: Choose Service */}
       {step === 1 && (
         <div className="space-y-4">
-          <h2 className="text-xl font-semibold text-center">Choose Your Service</h2>
+          <h2 className="text-xl font-semibold text-center">Escolha o Seu Serviço</h2>
           <div className="space-y-3">
             {services.map((service) => (
               <Card
@@ -244,12 +244,12 @@ const Book = () => {
             <Button variant="ghost" size="sm" onClick={() => setStep(1)}>
               <ArrowLeft className="w-4 h-4" />
             </Button>
-            <h2 className="text-xl font-semibold">Choose Date</h2>
+            <h2 className="text-xl font-semibold">Escolher Data</h2>
           </div>
           
           <div className="text-center mb-4">
             <p className="text-sm text-muted-foreground">
-              Selected: <span className="font-medium text-foreground">{selectedServiceDetails?.name}</span>
+              Seleccionado: <span className="font-medium text-foreground">{selectedServiceDetails?.name}</span>
             </p>
           </div>
 
@@ -264,7 +264,7 @@ const Book = () => {
           </div>
           
           <p className="text-xs text-muted-foreground text-center">
-            Only available dates are selectable
+            Apenas datas disponíveis são seleccionáveis
           </p>
         </div>
       )}
@@ -276,7 +276,7 @@ const Book = () => {
             <Button variant="ghost" size="sm" onClick={() => setStep(2)}>
               <ArrowLeft className="w-4 h-4" />
             </Button>
-            <h2 className="text-xl font-semibold">Choose Time</h2>
+            <h2 className="text-xl font-semibold">Escolher Horário</h2>
           </div>
           
           <div className="text-center mb-4">
@@ -307,7 +307,7 @@ const Book = () => {
 
           {timeSlots.filter(s => s.available).length === 0 && (
             <div className="text-center py-8">
-              <p className="text-muted-foreground">No available time slots for this date</p>
+              <p className="text-muted-foreground">Nenhum horário disponível para esta data</p>
             </div>
           )}
         </div>
@@ -320,24 +320,24 @@ const Book = () => {
             <Button variant="ghost" size="sm" onClick={() => setStep(3)}>
               <ArrowLeft className="w-4 h-4" />
             </Button>
-            <h2 className="text-xl font-semibold">Confirm Booking</h2>
+            <h2 className="text-xl font-semibold">Confirmar Reserva</h2>
           </div>
 
           <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Booking Summary</h3>
+            <h3 className="text-lg font-semibold mb-4">Resumo da Reserva</h3>
             <div className="space-y-3 text-sm mb-6">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Service:</span>
+                <span className="text-muted-foreground">Serviço:</span>
                 <span className="font-medium">{selectedServiceDetails?.name}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Date:</span>
+                <span className="text-muted-foreground">Data:</span>
                 <span className="font-medium">
                   {selectedDate && format(selectedDate, 'EEEE, MMMM do, yyyy')}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Time:</span>
+                <span className="text-muted-foreground">Horário:</span>
                 <span className="font-medium">
                   {selectedSlot && format(parse(selectedSlot.start_time, 'HH:mm:ss', new Date()), 'h:mm a')} - {selectedSlot && format(parse(selectedSlot.end_time, 'HH:mm:ss', new Date()), 'h:mm a')}
                 </span>
@@ -356,10 +356,10 @@ const Book = () => {
               className="w-full"
               disabled={loading}
             >
-              {loading ? 'Confirming...' : 'Confirm Booking'}
+              {loading ? 'A confirmar...' : 'Confirmar Reserva'}
             </Button>
             <p className="text-xs text-muted-foreground text-center">
-              No payment required now. Payment will be processed at the studio.
+              Não é necessário pagamento agora. O pagamento será processado no estúdio.
             </p>
           </div>
         </div>
