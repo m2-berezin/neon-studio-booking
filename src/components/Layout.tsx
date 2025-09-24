@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Home, Calendar, Gift, MessageCircle, User, LogOut, Settings, Star, Music, Folder } from 'lucide-react';
+import { Home, Calendar, Gift, MessageCircle, User, LogOut, Settings, Star, Music, Folder, Info } from 'lucide-react';
 import { NotificationBell } from '@/components/NotificationBell';
 
 const Layout = ({ children }: { children: ReactNode }) => {
@@ -18,6 +18,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
     { path: '/beats', icon: Music, label: 'Beats' },
     { path: '/rewards', icon: Gift, label: 'Rewards' },
     { path: '/messages', icon: MessageCircle, label: 'Messages' },
+    { path: '/studio-info', icon: Info, label: 'Info' },
     { path: '/profile', icon: User, label: 'Profile' },
   ];
 
