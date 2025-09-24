@@ -57,10 +57,10 @@ const Home = () => {
     <div className="space-y-6">
       {/* Welcome Section */}
       <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-foreground mb-2">
+        <h1 className="neon-heading">
           Welcome to the Studio
-        </h2>
-        <p className="text-muted-foreground">
+        </h1>
+        <p className="text-muted-foreground text-lg mt-4">
           Professional music production at your fingertips
         </p>
       </div>

@@ -61,29 +61,78 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground font-serif;
-    font-family: 'Times New Roman', serif;
+    @apply bg-background text-foreground font-sans;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  }
+
+  /* Typography System */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
+    font-family: 'Times New Roman', Times, serif;
+  }
+
+  h1 {
+    @apply text-4xl font-bold;
+    text-shadow: 0 0 8px hsl(var(--accent)), 0 0 16px hsl(var(--accent));
+  }
+
+  h2 {
+    @apply text-3xl font-bold;
+    text-shadow: 0 0 6px hsl(var(--accent)), 0 0 12px hsl(var(--accent));
+  }
+
+  h3 {
+    @apply text-2xl font-bold;
+    text-shadow: 0 0 4px hsl(var(--accent)), 0 0 8px hsl(var(--accent));
+  }
+
+  h4 {
+    @apply text-xl font-semibold;
+    text-shadow: 0 0 3px hsl(var(--accent)), 0 0 6px hsl(var(--accent));
+  }
+
+  h5 {
+    @apply text-lg font-semibold;
+    text-shadow: 0 0 2px hsl(var(--accent)), 0 0 4px hsl(var(--accent));
+  }
+
+  h6 {
+    @apply text-base font-semibold;
+    text-shadow: 0 0 2px hsl(var(--accent)), 0 0 4px hsl(var(--accent));
   }
 
   /* Studio Card Glow Effects */
   .studio-card {
     @apply bg-card border border-border rounded-xl p-6 transition-all duration-300;
-    box-shadow: 0 0 20px hsla(var(--studio-glow), 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.3);
   }
 
   .studio-card:hover {
     @apply bg-studio-card-hover;
-    box-shadow: 0 0 30px hsla(var(--studio-glow), 0.2);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 4px 12px rgba(0, 0, 0, 0.4);
     transform: translateY(-2px);
   }
 
-  /* Neon Text Glow */
+  /* Button Styles - Large and Prominent */
+  .btn-large {
+    @apply px-8 py-4 text-lg font-semibold rounded-lg transition-all duration-200;
+    min-height: 56px;
+    min-width: 120px;
+  }
+
+  /* Neon Text Effects */
   .neon-glow {
-    text-shadow: 0 0 10px hsla(var(--studio-glow), 0.5);
+    text-shadow: 0 0 10px hsl(var(--primary)), 0 0 20px hsl(var(--primary));
   }
 
   .accent-glow {
-    text-shadow: 0 0 10px hsla(var(--studio-accent-glow), 0.5);
+    text-shadow: 0 0 10px hsl(var(--accent)), 0 0 20px hsl(var(--accent));
+  }
+
+  .neon-heading {
+    @apply font-serif;
+    text-shadow: 0 0 8px hsl(var(--accent)), 0 0 16px hsl(var(--accent)), 0 0 24px hsl(var(--accent));
+    animation: pulse-neon 3s ease-in-out infinite;
   }
 
   /* Large Tap Targets for Mobile */

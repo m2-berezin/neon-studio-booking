@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Home, Calendar, Gift, MessageCircle, User, LogOut, Settings, Star, Music, Folder, Info } from 'lucide-react';
 import { NotificationBell } from '@/components/NotificationBell';
+import { Logo } from '@/components/Logo';
 
 const Layout = ({ children }: { children: ReactNode }) => {
   const location = useLocation();
@@ -53,9 +54,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header with Logo and Logout */}
       <header className="flex items-center justify-between py-6 px-4">
-        <h1 className="text-2xl font-bold text-foreground logo-glow" style={{ fontFamily: 'Times New Roman' }}>
-          7T7Studios
-        </h1>
+        <Logo size="md" />
         {user && (
           <div className="flex items-center gap-2">
             <NotificationBell />

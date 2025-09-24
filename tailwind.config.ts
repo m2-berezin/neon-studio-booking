@@ -14,7 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        serif: ['Times New Roman', 'serif'],
+        serif: ['Times New Roman', 'Times', 'serif'],
+        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -61,6 +62,12 @@ export default {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      boxShadow: {
+        'neon': '0 0 5px hsl(var(--accent)), 0 0 10px hsl(var(--accent)), 0 0 20px hsl(var(--accent))',
+        'neon-subtle': '0 0 3px hsl(var(--accent)), 0 0 6px hsl(var(--accent))',
+        'card-subtle': '0 4px 12px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.3)',
+        'card-hover': '0 8px 24px rgba(0, 0, 0, 0.5), 0 4px 12px rgba(0, 0, 0, 0.4)',
+      },
       keyframes: {
         "accordion-down": {
           from: {
@@ -78,10 +85,19 @@ export default {
             height: "0",
           },
         },
+        "pulse-neon": {
+          "0%, 100%": { 
+            textShadow: "0 0 5px hsl(var(--accent)), 0 0 10px hsl(var(--accent)), 0 0 20px hsl(var(--accent))" 
+          },
+          "50%": { 
+            textShadow: "0 0 2px hsl(var(--accent)), 0 0 5px hsl(var(--accent)), 0 0 10px hsl(var(--accent))" 
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "pulse-neon": "pulse-neon 2s ease-in-out infinite",
       },
     },
   },

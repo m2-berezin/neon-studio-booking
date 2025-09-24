@@ -126,7 +126,7 @@ const Book = () => {
       <div className="space-y-6">
         <div className="text-center">
           <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-          <h1 className="text-3xl font-bold text-foreground mb-2">
+          <h1 className="neon-heading">
             Booking Confirmed!
           </h1>
           <p className="text-muted-foreground">
@@ -148,11 +148,12 @@ const Book = () => {
             <div className="border-t pt-4 space-y-3">
               <Button
                 onClick={() => window.open(whatsAppLink, '_blank')}
+                size="xl"
                 className="w-full bg-green-600 hover:bg-green-700"
               >
-                <MessageCircle className="w-4 h-4 mr-2" />
+                <MessageCircle className="w-5 h-5 mr-2" />
                 Open in WhatsApp
-                <ExternalLink className="w-4 h-4 ml-2" />
+                <ExternalLink className="w-5 h-5 ml-2" />
               </Button>
               
               <p className="text-xs text-muted-foreground text-center">
@@ -162,7 +163,7 @@ const Book = () => {
           </div>
         </Card>
 
-        <Button onClick={resetBooking} variant="outline" className="w-full">
+        <Button onClick={resetBooking} variant="outline" size="xl" className="w-full">
           Book Another Session
         </Button>
       </div>
