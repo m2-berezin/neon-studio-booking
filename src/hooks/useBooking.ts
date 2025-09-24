@@ -217,13 +217,22 @@ export const useBooking = () => {
       if (error) throw error;
 
       // Create admin notification
-      await supabase
-        .from('notifications')
-        .insert({
-          user_id: (await supabase.from('profiles').select('id').eq('role', 'admin').single()).data?.id,
-          title: 'New Session Booked',
-          body: `A new ${services.find(s => s.id === serviceId)?.name} session has been booked for ${format(date, 'PPP')} at ${startTime}`,
-        });
+      const { data: adminProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('role', 'admin')
+        .limit(1)
+        .single();
+
+      if (adminProfile) {
+        await supabase
+          .from('notifications')
+          .insert({
+            user_id: adminProfile.id,
+            title: 'New Session Booked',
+            body: `A new ${services.find(s => s.id === serviceId)?.name} session has been booked for ${format(date, 'PPP')} at ${startTime}`,
+          });
+      }
 
       toast({
         title: 'Booking Confirmed',
@@ -252,14 +261,23 @@ export const useBooking = () => {
       const service = services.find(s => s.id === serviceId);
       const messageText = `Your ${service?.name} session is confirmed for ${format(date, 'EEEE, MMMM do, yyyy')} at ${format(parse(startTime, 'HH:mm:ss', new Date()), 'h:mm a')}.\n\n📍 Studio Location: 7T7Studios, [Address to be provided]\n\n📋 Session Rules:\n• Arrive 15 minutes early for setup\n• Bring your ID and any personal equipment\n• No outside food or drinks\n• Respect studio equipment and environment\n\nWe're excited to work with you! 🎵`;
 
-      await supabase
-        .from('messages')
-        .insert({
-          thread_type: 'direct',
-          sender_id: (await supabase.from('profiles').select('id').eq('role', 'admin').single()).data?.id,
-          recipient_id: user.id,
-          body: messageText,
-        });
+      const { data: adminProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('role', 'admin')
+        .limit(1)
+        .single();
+
+      if (adminProfile) {
+        await supabase
+          .from('messages')
+          .insert({
+            thread_type: 'direct',
+            sender_id: adminProfile.id,
+            recipient_id: user.id,
+            body: messageText,
+          });
+      }
     } catch (error) {
       console.error('Error sending booking message:', error);
     }
