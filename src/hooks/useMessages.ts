@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useNotifications } from '@/hooks/useNotifications';
 
 interface MessageAttachment {
   name: string;
@@ -39,6 +40,7 @@ interface MessageThread {
 export const useMessages = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { createNotification } = useNotifications();
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [threads, setThreads] = useState<MessageThread[]>([]);
@@ -202,6 +204,13 @@ export const useMessages = () => {
         });
 
       if (error) throw error;
+
+      // Create notification for recipient
+      await createNotification(
+        recipientId, 
+        'New Message', 
+        `You have a new message: ${body.length > 50 ? body.substring(0, 50) + '...' : body}`
+      );
 
       // Reload current thread if we're viewing it
       if (currentRecipient === recipientId) {

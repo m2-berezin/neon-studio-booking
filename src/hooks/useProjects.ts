@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useNotifications } from '@/hooks/useNotifications';
 
 interface ProjectFile {
   id: string;
@@ -29,6 +30,7 @@ interface Project {
 export const useProjects = () => {
   const { user, isAdmin } = useAuth();
   const { toast } = useToast();
+  const { createNotification } = useNotifications();
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -192,13 +194,11 @@ export const useProjects = () => {
       const project = projects.find(p => p.id === projectId) || currentProject;
       if (project) {
         // Send notification to client
-        await supabase
-          .from('notifications')
-          .insert({
-            user_id: project.client_id,
-            title: 'Project Delivered',
-            body: `Your project "${project.title}" has been completed and delivered!`,
-          });
+        await createNotification(
+          project.client_id,
+          'Project Delivered',
+          `Your project "${project.title}" has been completed and delivered!`
+        );
       }
 
       // Reload projects

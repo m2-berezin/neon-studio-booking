@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Home, Calendar, Gift, MessageCircle, User, LogOut, Settings, Star, Music, Folder } from 'lucide-react';
+import { NotificationBell } from '@/components/NotificationBell';
 
 const Layout = ({ children }: { children: ReactNode }) => {
   const location = useLocation();
@@ -55,14 +56,17 @@ const Layout = ({ children }: { children: ReactNode }) => {
           7T7Studios
         </h1>
         {user && (
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => signOut()}
-            className="text-muted-foreground hover:text-foreground"
-          >
-            <LogOut className="h-4 w-4" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <NotificationBell />
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => signOut()}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <LogOut className="h-4 w-4" />
+            </Button>
+          </div>
         )}
       </header>
 
