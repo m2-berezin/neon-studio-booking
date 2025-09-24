@@ -1,46 +1,65 @@
-import { Gift, Star, Crown, Zap } from 'lucide-react';
+import React from 'react';
+import { Gift, Star, Crown, Zap, Clock } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { useRewards } from '@/hooks/useRewards';
+import { useAuth } from '@/contexts/AuthContext';
+import PenaltyBanner from '@/components/PenaltyBanner';
+import { format } from 'date-fns';
 
 const Rewards = () => {
-  const currentPoints = 1250;
+  const { profile } = useAuth();
+  const { 
+    loading, 
+    userRewards, 
+    hasActivePenalty, 
+    getPenaltyEndDate, 
+    redeemReward 
+  } = useRewards();
+
   const nextTierPoints = 2000;
-  const progress = (currentPoints / nextTierPoints) * 100;
+  const progress = Math.min((userRewards.total_points / nextTierPoints) * 100, 100);
 
   const rewards = [
     { 
+      id: 'free-hour',
       title: 'Free Studio Hour', 
       points: 500, 
       icon: Star,
-      available: true,
       description: 'One hour of free studio time'
     },
     { 
+      id: 'beat-pack',
       title: 'Premium Beat Pack', 
       points: 750, 
       icon: Gift,
-      available: true,
       description: '10 exclusive beats from our producers'
     },
     { 
+      id: 'mixing-discount',
       title: 'Mixing Discount 25%', 
       points: 1000, 
       icon: Zap,
-      available: true,
       description: '25% off your next mixing session'
     },
     { 
+      id: 'vip-membership',
       title: 'VIP Membership', 
       points: 2500, 
       icon: Crown,
-      available: false,
       description: 'Priority booking and exclusive access'
     },
   ];
 
-  const recentActivity = [
-    { action: 'Booked session', points: '+100', date: 'Today' },
-    { action: 'Referred friend', points: '+250', date: 'Yesterday' },
-    { action: 'Completed project', points: '+150', date: '2 days ago' },
-  ];
+  const handleRewardClaim = async (rewardId: string, pointsCost: number) => {
+    await redeemReward(rewardId, pointsCost);
+  };
+
+  const isRewardAvailable = (pointsCost: number) => {
+    return !hasActivePenalty() && userRewards.total_points >= pointsCost;
+  };
+
+  const penaltyEndDate = getPenaltyEndDate();
 
   return (
     <div className="space-y-6">
@@ -53,11 +72,16 @@ const Rewards = () => {
         </p>
       </div>
 
+      {/* Penalty Banner */}
+      {hasActivePenalty() && penaltyEndDate && (
+        <PenaltyBanner penaltyEndDate={penaltyEndDate} className="mb-6" />
+      )}
+
       {/* Points Balance */}
       <div className="studio-card bg-gradient-to-br from-accent/10 to-primary/10">
         <div className="text-center">
           <h2 className="text-4xl font-bold text-primary neon-glow mb-2">
-            {currentPoints.toLocaleString()}
+            {userRewards.total_points.toLocaleString()}
           </h2>
           <p className="text-muted-foreground mb-4">Available Points</p>
           
@@ -69,8 +93,28 @@ const Rewards = () => {
             />
           </div>
           <p className="text-sm text-muted-foreground">
-            {nextTierPoints - currentPoints} points to VIP status
+            {userRewards.total_points >= nextTierPoints 
+              ? 'VIP status achieved!' 
+              : `${nextTierPoints - userRewards.total_points} points to VIP status`
+            }
           </p>
+        </div>
+      </div>
+
+      {/* Earning Info */}
+      <div className="studio-card">
+        <div className="space-y-3">
+          <h3 className="font-semibold text-foreground">How to Earn Points</h3>
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4 text-primary" />
+              <span className="text-muted-foreground">Complete session: <span className="font-medium text-foreground">10 pts</span></span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Star className="w-4 h-4 text-primary" />
+              <span className="text-muted-foreground">This month: <span className="font-medium text-foreground">{userRewards.current_month_bookings} sessions</span></span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -78,60 +122,72 @@ const Rewards = () => {
       <div className="space-y-4">
         <h2 className="text-xl font-bold text-foreground">Available Rewards</h2>
         <div className="space-y-3">
-          {rewards.map((reward) => (
-            <div 
-              key={reward.title} 
-              className={`studio-card ${!reward.available ? 'opacity-60' : ''}`}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <div className={`p-3 rounded-lg ${
-                    reward.available ? 'bg-primary/20' : 'bg-secondary'
-                  }`}>
-                    <reward.icon 
-                      size={20} 
-                      className={reward.available ? 'text-primary' : 'text-muted-foreground'} 
-                    />
+          {rewards.map((reward) => {
+            const canClaim = isRewardAvailable(reward.points);
+            const hasEnoughPoints = userRewards.total_points >= reward.points;
+            const isPenalized = hasActivePenalty();
+            
+            return (
+              <div 
+                key={reward.id} 
+                className={`studio-card ${!hasEnoughPoints || isPenalized ? 'opacity-60' : ''}`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <div className={`p-3 rounded-lg ${
+                      hasEnoughPoints && !isPenalized ? 'bg-primary/20' : 'bg-secondary'
+                    }`}>
+                      <reward.icon 
+                        size={20} 
+                        className={hasEnoughPoints && !isPenalized ? 'text-primary' : 'text-muted-foreground'} 
+                      />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-foreground">{reward.title}</h3>
+                      <p className="text-sm text-muted-foreground">{reward.description}</p>
+                      {isPenalized && (
+                        <Badge variant="destructive" className="text-xs mt-1">
+                          Blocked by penalty
+                        </Badge>
+                      )}
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-bold text-foreground">{reward.title}</h3>
-                    <p className="text-sm text-muted-foreground">{reward.description}</p>
+                  <div className="text-right space-y-2">
+                    <p className="text-lg font-bold text-accent">
+                      {reward.points} pts
+                    </p>
+                    {canClaim ? (
+                      <Button
+                        size="sm"
+                        onClick={() => handleRewardClaim(reward.id, reward.points)}
+                        disabled={loading}
+                        className="text-xs"
+                      >
+                        {loading ? 'Claiming...' : 'Claim'}
+                      </Button>
+                    ) : (
+                      <Badge variant="outline" className="text-xs">
+                        {!hasEnoughPoints ? 'Need more points' : 'Unavailable'}
+                      </Badge>
+                    )}
                   </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-lg font-bold text-accent">
-                    {reward.points} pts
-                  </p>
-                  {reward.available && currentPoints >= reward.points && (
-                    <button className="text-xs text-primary neon-glow font-medium">
-                      Claim
-                    </button>
-                  )}
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
-      {/* Recent Activity */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-bold text-foreground">Recent Activity</h2>
-        <div className="space-y-3">
-          {recentActivity.map((activity, index) => (
-            <div key={index} className="studio-card">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-foreground">{activity.action}</p>
-                  <p className="text-sm text-muted-foreground">{activity.date}</p>
-                </div>
-                <span className="text-primary font-bold neon-glow">
-                  {activity.points}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
+      {/* Point Balance Info */}
+      <div className="text-center py-4">
+        <p className="text-xs text-muted-foreground">
+          Points are earned automatically when you complete studio sessions.
+          {hasActivePenalty() && (
+            <span className="block text-destructive mt-1">
+              Reward redemptions are currently paused due to an active penalty.
+            </span>
+          )}
+        </p>
       </div>
     </div>
   );

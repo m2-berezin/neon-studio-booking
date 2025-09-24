@@ -2,12 +2,12 @@ import { ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Home, Calendar, Gift, MessageCircle, User, LogOut } from 'lucide-react';
+import { Home, Calendar, Gift, MessageCircle, User, LogOut, Settings } from 'lucide-react';
 
 const Layout = ({ children }: { children: ReactNode }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, loading, signOut } = useAuth();
+  const { user, loading, signOut, isAdmin } = useAuth();
 
   const navItems = [
     { path: '/', icon: Home, label: 'Home' },
@@ -16,6 +16,13 @@ const Layout = ({ children }: { children: ReactNode }) => {
     { path: '/messages', icon: MessageCircle, label: 'Messages' },
     { path: '/profile', icon: User, label: 'Profile' },
   ];
+
+  // Add admin navigation items if user is admin
+  const adminNavItems = [
+    { path: '/admin/bookings', icon: Settings, label: 'Admin' },
+  ];
+
+  const allNavItems = isAdmin() ? [...navItems, ...adminNavItems] : navItems;
 
   // Show loading spinner while checking auth
   if (loading) {
@@ -65,7 +72,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
       {user && (
         <nav className="fixed bottom-0 left-0 right-0 bg-card/80 backdrop-blur-md border-t border-border">
           <div className="flex justify-around py-3">
-            {navItems.map((item) => {
+            {allNavItems.map((item) => {
               const isActive = location.pathname === item.path;
               return (
                 <button
