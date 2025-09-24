@@ -22,7 +22,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
 
   // Add admin navigation items if user is admin
   const adminNavItems = [
-    { path: '/admin/bookings', icon: Settings, label: 'Admin' },
+    { path: '/admin', icon: Settings, label: 'Admin' },
   ];
 
   const allNavItems = isAdmin() ? [...navItems, ...adminNavItems] : navItems;

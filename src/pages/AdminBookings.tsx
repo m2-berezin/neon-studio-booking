@@ -25,14 +25,14 @@ interface Booking {
   };
   services: {
     name: string;
-    type: string;
+    base_price: number;
   };
 }
 
 const AdminBookings = () => {
   const { isAdmin } = useAuth();
-  const { loading, updateBookingStatus, getAllBookings } = useAdmin();
-  const [bookings, setBookings] = useState<Booking[]>([]);
+  const { loading, updateBookingStatus, loadBookings, bookings } = useAdmin();
+  const [localBookings, setLocalBookings] = useState<Booking[]>([]);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [newStatus, setNewStatus] = useState('');
   const [notes, setNotes] = useState('');
@@ -54,21 +54,16 @@ const AdminBookings = () => {
     { value: 'cancelled', label: 'Cancelled' },
   ];
 
-  const loadBookings = async () => {
-    try {
-      const data = await getAllBookings();
-      setBookings(data);
-    } catch (error) {
-      console.error('Failed to load bookings:', error);
-    }
+  const loadAllBookings = async () => {
+    await loadBookings();
   };
 
   const handleStatusUpdate = async () => {
     if (!selectedBooking || !newStatus) return;
 
     try {
-      await updateBookingStatus(selectedBooking.id, newStatus, notes);
-      await loadBookings(); // Refresh the list
+      await updateBookingStatus(selectedBooking.id, newStatus);
+      await loadAllBookings(); // Refresh the list
       setDialogOpen(false);
       setSelectedBooking(null);
       setNewStatus('');
@@ -87,7 +82,7 @@ const AdminBookings = () => {
 
   useEffect(() => {
     if (isAdmin) {
-      loadBookings();
+      loadAllBookings();
     }
   }, [isAdmin]);
 
@@ -146,7 +141,7 @@ const AdminBookings = () => {
                         <span className="font-medium">{booking.profiles.full_name}</span>
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        {booking.services.name} ({booking.services.type})
+                        {booking.services.name} - €{booking.services.base_price}
                       </div>
                     </div>
 
