@@ -9,6 +9,7 @@ import Home from "./pages/Home";
 import Book from "./pages/Book";
 import Rewards from "./pages/Rewards";
 import Subscriptions from "./pages/Subscriptions";
+import Beats from "./pages/Beats";
 import Messages from "./pages/Messages";
 import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
@@ -30,6 +31,7 @@ const App = () => (
               <Route path="/book" element={<Book />} />
               <Route path="/rewards" element={<Rewards />} />
               <Route path="/subscriptions" element={<Subscriptions />} />
+              <Route path="/beats" element={<Beats />} />
               <Route path="/messages" element={<Messages />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/auth" element={<Auth />} />

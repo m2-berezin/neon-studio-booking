@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Home, Calendar, Gift, MessageCircle, User, LogOut, Settings, Star } from 'lucide-react';
+import { Home, Calendar, Gift, MessageCircle, User, LogOut, Settings, Star, Music } from 'lucide-react';
 
 const Layout = ({ children }: { children: ReactNode }) => {
   const location = useLocation();
@@ -13,6 +13,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
     { path: '/', icon: Home, label: 'Home' },
     { path: '/book', icon: Calendar, label: 'Book' },
     { path: '/subscriptions', icon: Star, label: 'Subscriptions' },
+    { path: '/beats', icon: Music, label: 'Beats' },
     { path: '/rewards', icon: Gift, label: 'Rewards' },
     { path: '/messages', icon: MessageCircle, label: 'Messages' },
     { path: '/profile', icon: User, label: 'Profile' },
