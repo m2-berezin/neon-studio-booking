@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Gift, Star, Crown, Zap, Clock, Percent, Package, Award } from 'lucide-react';
+import { Gift, Star, Crown, Zap, Clock, Percent, Package, Award, Ticket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useRewards } from '@/hooks/useRewards';
 import { useAuth } from '@/contexts/AuthContext';
 import PenaltyBanner from '@/components/PenaltyBanner';
@@ -18,6 +19,8 @@ const Rewards = () => {
     redeemLoyaltyReward,
     isWeeklyOfferAAvailable,
     isLoyaltyRewardAvailable,
+    isVoucherAvailable,
+    claimVoucher,
     projectStats
   } = useRewards();
 
@@ -62,6 +65,31 @@ const Rewards = () => {
       {/* Penalty Banner */}
       {hasActivePenalty() && penaltyEndDate && (
         <PenaltyBanner penaltyEndDate={penaltyEndDate} className="mb-6" />
+      )}
+
+      {/* Voucher Banner */}
+      {isVoucherAvailable() && (
+        <Alert className="border-primary bg-primary/10 mb-6">
+          <Ticket className="h-4 w-4 text-primary" />
+          <AlertDescription className="text-primary font-medium">
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="font-semibold">€15 voucher available!</span>
+                <p className="text-sm text-primary/80 mt-1">
+                  Claim your quarterly voucher - valid for 60 days on any service.
+                </p>
+              </div>
+              <Button
+                onClick={claimVoucher}
+                disabled={loading}
+                size="sm"
+                className="ml-4"
+              >
+                {loading ? 'Claiming...' : 'Claim €15 Voucher'}
+              </Button>
+            </div>
+          </AlertDescription>
+        </Alert>
       )}
 
       {/* Weekly Offers */}

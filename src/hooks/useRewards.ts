@@ -253,6 +253,80 @@ export const useRewards = () => {
     return !hasActivePenalty() && isEligible;
   };
 
+  // Check if voucher is available (no penalty, last_voucher_at null or >= 6 months ago)
+  const isVoucherAvailable = (): boolean => {
+    if (hasActivePenalty()) return false;
+    
+    if (!profile?.last_voucher_at) return true;
+    
+    const lastVoucherDate = new Date(profile.last_voucher_at);
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+    
+    return lastVoucherDate <= sixMonthsAgo;
+  };
+
+  // Claim €15 voucher
+  const claimVoucher = async () => {
+    if (!user) return false;
+
+    if (!isVoucherAvailable()) {
+      toast({
+        title: 'Voucher Not Available',
+        description: 'You are not eligible for a voucher at this time.',
+        variant: 'destructive',
+      });
+      return false;
+    }
+
+    setLoading(true);
+    try {
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 60); // +60 days
+
+      // Insert voucher
+      const { data: voucher, error: voucherError } = await supabase
+        .from('vouchers')
+        .insert({
+          client_id: user.id,
+          code: `VOUCHER_${Date.now()}`,
+          amount: 15,
+          expires_at: expiresAt.toISOString().split('T')[0],
+          combinable: false,
+          redeemed: false
+        })
+        .select()
+        .single();
+
+      if (voucherError) throw voucherError;
+
+      // Update profile last_voucher_at
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ last_voucher_at: new Date().toISOString().split('T')[0] })
+        .eq('id', user.id);
+
+      if (profileError) throw profileError;
+
+      toast({
+        title: 'Voucher Claimed!',
+        description: `€15 voucher created! Code: ${voucher.code}. Expires in 60 days.`,
+      });
+
+      return true;
+    } catch (error: any) {
+      console.error('Error claiming voucher:', error);
+      toast({
+        title: 'Claim Failed',
+        description: error.message || 'Failed to claim voucher',
+        variant: 'destructive',
+      });
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (user && profile) {
       loadRewardUsage();
@@ -270,6 +344,8 @@ export const useRewards = () => {
     redeemLoyaltyReward,
     isWeeklyOfferAAvailable,
     isLoyaltyRewardAvailable,
+    isVoucherAvailable,
+    claimVoucher,
     projectStats,
     rewardUsage,
   };
