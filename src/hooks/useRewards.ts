@@ -4,28 +4,26 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { isBefore, parseISO } from 'date-fns';
 
-interface RewardProgram {
-  id: string;
-  name: string;
-  points_required: number;
-  description: string;
-  active: boolean;
+interface RewardUsage {
+  reward_code: string;
+  count: number;
+  month: number;
+  year: number;
 }
 
-interface UserRewards {
-  total_points: number;
-  current_month_bookings: number;
-  penalty_until: string | null;
+interface ProjectStats {
+  mixingMasteringCount: number;
+  fullSongCount: number;
 }
 
 export const useRewards = () => {
   const { user, profile } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [userRewards, setUserRewards] = useState<UserRewards>({
-    total_points: 0,
-    current_month_bookings: 0,
-    penalty_until: null,
+  const [rewardUsage, setRewardUsage] = useState<RewardUsage[]>([]);
+  const [projectStats, setProjectStats] = useState<ProjectStats>({
+    mixingMasteringCount: 0,
+    fullSongCount: 0,
   });
 
   // Check if user has an active penalty
@@ -40,56 +38,141 @@ export const useRewards = () => {
     return parseISO(profile.penalty_until);
   };
 
-  // Calculate user rewards and points
-  const calculateUserRewards = async () => {
+  // Get current month reward usage count
+  const getCurrentMonthUsage = (rewardCode: string): number => {
+    const currentMonth = new Date().getMonth() + 1;
+    const currentYear = new Date().getFullYear();
+    
+    const usage = rewardUsage.find(u => 
+      u.reward_code === rewardCode && 
+      u.month === currentMonth && 
+      u.year === currentYear
+    );
+    
+    return usage?.count || 0;
+  };
+
+  // Load reward usage data
+  const loadRewardUsage = async () => {
     if (!user) return;
 
-    setLoading(true);
     try {
-      // Get completed bookings count for points calculation
-      const { data: bookings, error: bookingsError } = await supabase
-        .from('bookings')
-        .select('id, date, status')
-        .eq('client_id', user.id)
-        .eq('status', 'completed');
+      const { data, error } = await supabase
+        .from('rewards_usage')
+        .select('*')
+        .eq('client_id', user.id);
 
-      if (bookingsError) throw bookingsError;
-
-      // Calculate total points (10 points per completed session)
-      const totalPoints = (bookings?.length || 0) * 10;
-
-      // Get current month bookings
-      const currentMonth = new Date().getMonth() + 1;
-      const currentYear = new Date().getFullYear();
-      const currentMonthBookings = bookings?.filter(booking => {
-        const bookingDate = new Date(booking.date);
-        return bookingDate.getMonth() + 1 === currentMonth && 
-               bookingDate.getFullYear() === currentYear;
-      }).length || 0;
-
-      setUserRewards({
-        total_points: totalPoints,
-        current_month_bookings: currentMonthBookings,
-        penalty_until: profile?.penalty_until || null,
-      });
-
+      if (error) throw error;
+      setRewardUsage(data || []);
     } catch (error) {
-      console.error('Error calculating rewards:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load rewards data',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
+      console.error('Error loading reward usage:', error);
     }
   };
 
-  // Redeem reward
-  const redeemReward = async (rewardId: string, pointsCost: number) => {
+  // Load project statistics for loyalty rewards
+  const loadProjectStats = async () => {
+    if (!user) return;
+
+    try {
+      const { data: projects, error } = await supabase
+        .from('projects')
+        .select('title, status')
+        .eq('client_id', user.id)
+        .eq('status', 'delivered');
+
+      if (error) throw error;
+
+      let mixingMasteringCount = 0;
+      let fullSongCount = 0;
+
+      projects?.forEach(project => {
+        const title = project.title.toLowerCase();
+        if (title.includes('mixing') || title.includes('mastering')) {
+          mixingMasteringCount++;
+        }
+        if (title.includes('recording') && (title.includes('mixing') || title.includes('mastering'))) {
+          fullSongCount++;
+        }
+      });
+
+      setProjectStats({ mixingMasteringCount, fullSongCount });
+    } catch (error) {
+      console.error('Error loading project stats:', error);
+    }
+  };
+
+  // Apply reward to session
+  const applyReward = (rewardCode: string, description: string) => {
+    if (hasActivePenalty()) {
+      toast({
+        title: 'Rewards Paused',
+        description: 'You cannot apply rewards while a penalty is active.',
+        variant: 'destructive',
+      });
+      return false;
+    }
+
+    // Store in session storage
+    sessionStorage.setItem('appliedReward', JSON.stringify({
+      code: rewardCode,
+      description,
+      appliedAt: new Date().toISOString()
+    }));
+
+    toast({
+      title: 'Reward Applied',
+      description: `${description} will be applied to your next booking.`,
+    });
+
+    return true;
+  };
+
+  // Increment reward usage
+  const incrementRewardUsage = async (rewardCode: string) => {
+    if (!user) return;
+
+    const currentMonth = new Date().getMonth() + 1;
+    const currentYear = new Date().getFullYear();
+
+    try {
+      // Try to increment existing record or create a new one
+      const { data: existing } = await supabase
+        .from('rewards_usage')
+        .select('*')
+        .eq('client_id', user.id)
+        .eq('reward_code', rewardCode)
+        .eq('month', currentMonth)
+        .eq('year', currentYear)
+        .maybeSingle();
+
+      if (existing) {
+        await supabase
+          .from('rewards_usage')
+          .update({ count: existing.count + 1 })
+          .eq('id', existing.id);
+      } else {
+        await supabase
+          .from('rewards_usage')
+          .insert({
+            client_id: user.id,
+            reward_code: rewardCode,
+            month: currentMonth,
+            year: currentYear,
+            count: 1
+          });
+      }
+
+      // Reload usage data
+      await loadRewardUsage();
+    } catch (error) {
+      console.error('Error incrementing reward usage:', error);
+    }
+  };
+
+  // Redeem loyalty reward
+  const redeemLoyaltyReward = async () => {
     if (!user) return false;
 
-    // Check for active penalty
     if (hasActivePenalty()) {
       toast({
         title: 'Rewards Paused',
@@ -99,10 +182,12 @@ export const useRewards = () => {
       return false;
     }
 
-    if (userRewards.total_points < pointsCost) {
+    const isEligible = projectStats.mixingMasteringCount >= 7 || projectStats.fullSongCount >= 5;
+    
+    if (!isEligible) {
       toast({
-        title: 'Insufficient Points',
-        description: `You need ${pointsCost} points but only have ${userRewards.total_points}.`,
+        title: 'Not Eligible',
+        description: 'You need 7 mixing/mastering projects or 5 full songs to redeem this reward.',
         variant: 'destructive',
       });
       return false;
@@ -110,30 +195,44 @@ export const useRewards = () => {
 
     setLoading(true);
     try {
-      // In a real implementation, you'd track reward redemptions
-      // For now, we'll just create a notification
-      await supabase
-        .from('notifications')
+      // Create zero-price project
+      const { data: project, error: projectError } = await supabase
+        .from('projects')
         .insert({
-          user_id: user.id,
-          title: 'Reward Redeemed',
-          body: `You have successfully redeemed a reward using ${pointsCost} points!`,
+          client_id: user.id,
+          title: 'Free Mixing & Mastering (Loyalty Reward)',
+          status: 'in_progress'
+        })
+        .select()
+        .single();
+
+      if (projectError) throw projectError;
+
+      // Create voucher record for audit
+      await supabase
+        .from('vouchers')
+        .insert({
+          client_id: user.id,
+          code: `LOYALTY_${Date.now()}`,
+          amount: 0,
+          expires_at: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 90 days
+          redeemed: true
         });
 
-      // Recalculate rewards after redemption
-      await calculateUserRewards();
+      // Reset project stats (they've used their loyalty reward)
+      setProjectStats({ mixingMasteringCount: 0, fullSongCount: 0 });
 
       toast({
-        title: 'Reward Redeemed',
-        description: `Successfully redeemed reward for ${pointsCost} points!`,
+        title: 'Loyalty Reward Redeemed',
+        description: 'Free mixing & mastering project created! Check your projects.',
       });
 
       return true;
     } catch (error: any) {
-      console.error('Error redeeming reward:', error);
+      console.error('Error redeeming loyalty reward:', error);
       toast({
         title: 'Redemption Failed',
-        description: error.message || 'Failed to redeem reward',
+        description: error.message || 'Failed to redeem loyalty reward',
         variant: 'destructive',
       });
       return false;
@@ -142,18 +241,36 @@ export const useRewards = () => {
     }
   };
 
+  // Check if weekly offer A is available
+  const isWeeklyOfferAAvailable = (): boolean => {
+    const usage = getCurrentMonthUsage('W_REC_3FOR20');
+    return !hasActivePenalty() && usage < 2;
+  };
+
+  // Check if loyalty reward is available
+  const isLoyaltyRewardAvailable = (): boolean => {
+    const isEligible = projectStats.mixingMasteringCount >= 7 || projectStats.fullSongCount >= 5;
+    return !hasActivePenalty() && isEligible;
+  };
+
   useEffect(() => {
     if (user && profile) {
-      calculateUserRewards();
+      loadRewardUsage();
+      loadProjectStats();
     }
   }, [user, profile]);
 
   return {
     loading,
-    userRewards,
     hasActivePenalty,
     getPenaltyEndDate,
-    redeemReward,
-    calculateUserRewards,
+    getCurrentMonthUsage,
+    applyReward,
+    incrementRewardUsage,
+    redeemLoyaltyReward,
+    isWeeklyOfferAAvailable,
+    isLoyaltyRewardAvailable,
+    projectStats,
+    rewardUsage,
   };
 };

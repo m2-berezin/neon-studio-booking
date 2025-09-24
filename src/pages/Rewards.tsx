@@ -1,65 +1,52 @@
-import React from 'react';
-import { Gift, Star, Crown, Zap, Clock } from 'lucide-react';
+import React, { useState } from 'react';
+import { Gift, Star, Crown, Zap, Clock, Percent, Package, Award } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useRewards } from '@/hooks/useRewards';
 import { useAuth } from '@/contexts/AuthContext';
 import PenaltyBanner from '@/components/PenaltyBanner';
-import { format } from 'date-fns';
 
 const Rewards = () => {
-  const { profile } = useAuth();
+  const { user } = useAuth();
   const { 
     loading, 
-    userRewards, 
     hasActivePenalty, 
     getPenaltyEndDate, 
-    redeemReward 
+    getCurrentMonthUsage,
+    applyReward,
+    redeemLoyaltyReward,
+    isWeeklyOfferAAvailable,
+    isLoyaltyRewardAvailable,
+    projectStats
   } = useRewards();
 
-  const nextTierPoints = 2000;
-  const progress = Math.min((userRewards.total_points / nextTierPoints) * 100, 100);
+  const [appliedRewards, setAppliedRewards] = useState<Record<string, boolean>>({});
 
-  const rewards = [
-    { 
-      id: 'free-hour',
-      title: 'Free Studio Hour', 
-      points: 500, 
-      icon: Star,
-      description: 'One hour of free studio time'
-    },
-    { 
-      id: 'beat-pack',
-      title: 'Premium Beat Pack', 
-      points: 750, 
-      icon: Gift,
-      description: '10 exclusive beats from our producers'
-    },
-    { 
-      id: 'mixing-discount',
-      title: 'Mixing Discount 25%', 
-      points: 1000, 
-      icon: Zap,
-      description: '25% off your next mixing session'
-    },
-    { 
-      id: 'vip-membership',
-      title: 'VIP Membership', 
-      points: 2500, 
-      icon: Crown,
-      description: 'Priority booking and exclusive access'
-    },
-  ];
-
-  const handleRewardClaim = async (rewardId: string, pointsCost: number) => {
-    await redeemReward(rewardId, pointsCost);
-  };
-
-  const isRewardAvailable = (pointsCost: number) => {
-    return !hasActivePenalty() && userRewards.total_points >= pointsCost;
-  };
+  if (!user) {
+    return (
+      <div className="text-center py-8">
+        <h2 className="text-2xl font-bold text-foreground mb-4">Login Required</h2>
+        <p className="text-muted-foreground">Please login to view rewards and offers.</p>
+      </div>
+    );
+  }
 
   const penaltyEndDate = getPenaltyEndDate();
+
+  const handleApplyReward = (rewardCode: string, description: string) => {
+    const success = applyReward(rewardCode, description);
+    if (success) {
+      setAppliedRewards(prev => ({ ...prev, [rewardCode]: true }));
+    }
+  };
+
+  const handleLoyaltyRedeem = async () => {
+    const success = await redeemLoyaltyReward();
+    if (success) {
+      // Loyalty reward redeemed successfully - component will update automatically
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -68,7 +55,7 @@ const Rewards = () => {
           Studio Rewards
         </h1>
         <p className="text-muted-foreground">
-          Earn points and unlock exclusive perks
+          Special offers and loyalty rewards for our valued clients
         </p>
       </div>
 
@@ -77,114 +64,200 @@ const Rewards = () => {
         <PenaltyBanner penaltyEndDate={penaltyEndDate} className="mb-6" />
       )}
 
-      {/* Points Balance */}
-      <div className="studio-card bg-gradient-to-br from-accent/10 to-primary/10">
-        <div className="text-center">
-          <h2 className="text-4xl font-bold text-primary neon-glow mb-2">
-            {userRewards.total_points.toLocaleString()}
-          </h2>
-          <p className="text-muted-foreground mb-4">Available Points</p>
-          
-          {/* Progress Bar */}
-          <div className="w-full bg-secondary rounded-full h-2 mb-2">
-            <div 
-              className="bg-gradient-to-r from-primary to-accent h-2 rounded-full transition-all duration-500"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-          <p className="text-sm text-muted-foreground">
-            {userRewards.total_points >= nextTierPoints 
-              ? 'VIP status achieved!' 
-              : `${nextTierPoints - userRewards.total_points} points to VIP status`
-            }
-          </p>
-        </div>
-      </div>
+      {/* Weekly Offers */}
+      <section>
+        <h2 className="text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
+          <Clock className="w-6 h-6 text-primary" />
+          Weekly Offers
+        </h2>
+        
+        <div className="grid gap-4">
+          {/* Offer A: 3h for €20 */}
+          <Card className="studio-card">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Star className="w-5 h-5 text-primary" />
+                Buy 2h Recording, Get +1h Free
+              </CardTitle>
+              <CardDescription>
+                3 hours total recording time for just €20
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-2xl font-bold text-accent">€20</p>
+                  <p className="text-sm text-muted-foreground">
+                    Used: {getCurrentMonthUsage('W_REC_3FOR20')}/2 this month
+                  </p>
+                  {!isWeeklyOfferAAvailable() && getCurrentMonthUsage('W_REC_3FOR20') >= 2 && (
+                    <Badge variant="outline" className="text-xs mt-1">
+                      Monthly limit reached
+                    </Badge>
+                  )}
+                </div>
+                <Button
+                  onClick={() => handleApplyReward('W_REC_3FOR20', '3h recording for €20')}
+                  disabled={!isWeeklyOfferAAvailable() || appliedRewards['W_REC_3FOR20'] || loading}
+                  variant={appliedRewards['W_REC_3FOR20'] ? 'outline' : 'default'}
+                >
+                  {appliedRewards['W_REC_3FOR20'] ? 'Applied ✓' : 'Apply to Next Booking'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
 
-      {/* Earning Info */}
-      <div className="studio-card">
-        <div className="space-y-3">
-          <h3 className="font-semibold text-foreground">How to Earn Points</h3>
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-primary" />
-              <span className="text-muted-foreground">Complete session: <span className="font-medium text-foreground">10 pts</span></span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Star className="w-4 h-4 text-primary" />
-              <span className="text-muted-foreground">This month: <span className="font-medium text-foreground">{userRewards.current_month_bookings} sessions</span></span>
-            </div>
-          </div>
+          {/* Offer B: M&M €35 each for 2 tracks */}
+          <Card className="studio-card">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Zap className="w-5 h-5 text-primary" />
+                Mixing & Mastering Bundle
+              </CardTitle>
+              <CardDescription>
+                €35 each when sending 2 tracks together
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-2xl font-bold text-accent">€35 each</p>
+                  <p className="text-sm text-muted-foreground">
+                    Unlimited uses • Save when bundling
+                  </p>
+                </div>
+                <Button
+                  onClick={() => handleApplyReward('W_MM_BUNDLE', 'M&M bundle €35 each')}
+                  disabled={hasActivePenalty() || appliedRewards['W_MM_BUNDLE'] || loading}
+                  variant={appliedRewards['W_MM_BUNDLE'] ? 'outline' : 'default'}
+                >
+                  {appliedRewards['W_MM_BUNDLE'] ? 'Applied ✓' : 'Apply Bundle Rate'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
-      </div>
+      </section>
 
-      {/* Available Rewards */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-bold text-foreground">Available Rewards</h2>
-        <div className="space-y-3">
-          {rewards.map((reward) => {
-            const canClaim = isRewardAvailable(reward.points);
-            const hasEnoughPoints = userRewards.total_points >= reward.points;
-            const isPenalized = hasActivePenalty();
-            
-            return (
-              <div 
-                key={reward.id} 
-                className={`studio-card ${!hasEnoughPoints || isPenalized ? 'opacity-60' : ''}`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className={`p-3 rounded-lg ${
-                      hasEnoughPoints && !isPenalized ? 'bg-primary/20' : 'bg-secondary'
-                    }`}>
-                      <reward.icon 
-                        size={20} 
-                        className={hasEnoughPoints && !isPenalized ? 'text-primary' : 'text-muted-foreground'} 
-                      />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-foreground">{reward.title}</h3>
-                      <p className="text-sm text-muted-foreground">{reward.description}</p>
-                      {isPenalized && (
-                        <Badge variant="destructive" className="text-xs mt-1">
-                          Blocked by penalty
-                        </Badge>
-                      )}
-                    </div>
+      {/* Monthly Offers */}
+      <section>
+        <h2 className="text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
+          <Package className="w-6 h-6 text-primary" />
+          Monthly Package
+        </h2>
+        
+        <Card className="studio-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Crown className="w-5 h-5 text-primary" />
+              Full Production Package
+            </CardTitle>
+            <CardDescription>
+              Recording + Mixing + Mastering complete package
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-4">
+                  <div>
+                    <p className="text-2xl font-bold text-accent">€70</p>
+                    <p className="text-sm text-muted-foreground">Standard rate</p>
                   </div>
-                  <div className="text-right space-y-2">
-                    <p className="text-lg font-bold text-accent">
-                      {reward.points} pts
-                    </p>
-                    {canClaim ? (
-                      <Button
-                        size="sm"
-                        onClick={() => handleRewardClaim(reward.id, reward.points)}
-                        disabled={loading}
-                        className="text-xs"
-                      >
-                        {loading ? 'Claiming...' : 'Claim'}
-                      </Button>
-                    ) : (
-                      <Badge variant="outline" className="text-xs">
-                        {!hasEnoughPoints ? 'Need more points' : 'Unavailable'}
-                      </Badge>
-                    )}
+                  <div className="text-muted-foreground">or</div>
+                  <div>
+                    <p className="text-2xl font-bold text-primary">€65</p>
+                    <p className="text-sm text-muted-foreground">Premium rate</p>
                   </div>
                 </div>
               </div>
-            );
-          })}
-        </div>
-      </div>
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => handleApplyReward('M_PACKAGE_70', 'Full package €70')}
+                  disabled={hasActivePenalty() || appliedRewards['M_PACKAGE_70'] || loading}
+                  variant={appliedRewards['M_PACKAGE_70'] ? 'outline' : 'secondary'}
+                  size="sm"
+                >
+                  {appliedRewards['M_PACKAGE_70'] ? 'Applied ✓' : 'Apply €70'}
+                </Button>
+                <Button
+                  onClick={() => handleApplyReward('M_PACKAGE_65', 'Full package €65')}
+                  disabled={hasActivePenalty() || appliedRewards['M_PACKAGE_65'] || loading}
+                  variant={appliedRewards['M_PACKAGE_65'] ? 'outline' : 'default'}
+                  size="sm"
+                >
+                  {appliedRewards['M_PACKAGE_65'] ? 'Applied ✓' : 'Apply €65'}
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
 
-      {/* Point Balance Info */}
+      {/* Loyalty Rewards */}
+      <section>
+        <h2 className="text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
+          <Award className="w-6 h-6 text-primary" />
+          Loyalty Rewards
+        </h2>
+        
+        <Card className="studio-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Gift className="w-5 h-5 text-primary" />
+              Free Mixing & Mastering
+            </CardTitle>
+            <CardDescription>
+              Earn a free M&M session through loyalty
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="text-center p-4 bg-secondary/50 rounded-lg">
+                  <p className="text-2xl font-bold text-primary">{projectStats.mixingMasteringCount}</p>
+                  <p className="text-sm text-muted-foreground">M&M Projects</p>
+                  <p className="text-xs text-muted-foreground">Need 7 total</p>
+                </div>
+                <div className="text-center p-4 bg-secondary/50 rounded-lg">
+                  <p className="text-2xl font-bold text-primary">{projectStats.fullSongCount}</p>
+                  <p className="text-sm text-muted-foreground">Full Songs</p>
+                  <p className="text-xs text-muted-foreground">Need 5 total</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-foreground">
+                    {isLoyaltyRewardAvailable() 
+                      ? 'Congratulations! You\'ve earned a free M&M session' 
+                      : 'Keep completing projects to earn your free session'
+                    }
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Complete 7 mixing/mastering projects OR 5 full songs (record+mix+master)
+                  </p>
+                </div>
+                <Button
+                  onClick={handleLoyaltyRedeem}
+                  disabled={!isLoyaltyRewardAvailable() || loading}
+                  variant={isLoyaltyRewardAvailable() ? 'default' : 'outline'}
+                >
+                  {loading ? 'Redeeming...' : isLoyaltyRewardAvailable() ? 'Redeem Free M&M' : 'Not Available'}
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* Info Footer */}
       <div className="text-center py-4">
         <p className="text-xs text-muted-foreground">
-          Points are earned automatically when you complete studio sessions.
+          Applied rewards will be automatically included in your next booking pricing.
           {hasActivePenalty() && (
             <span className="block text-destructive mt-1">
-              Reward redemptions are currently paused due to an active penalty.
+              All reward applications are currently paused due to an active penalty.
             </span>
           )}
         </p>
