@@ -6,67 +6,63 @@ import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Mail, Lock, Zap } from 'lucide-react';
+import { Mail, Lock, Zap, User, Phone, Shield } from 'lucide-react';
 import { z } from 'zod';
 
-const emailSchema = z.string().email('Please enter a valid email address');
+const emailSchema = z.string().trim().email('Please enter a valid email address');
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
+const fullNameSchema = z.string().trim().min(2, 'Full name must be at least 2 characters').max(100, 'Full name must be less than 100 characters');
+const phoneSchema = z.string().trim().min(10, 'Phone must be at least 10 characters').max(20, 'Phone must be less than 20 characters').regex(/^[\d\s\-\+\(\)]+$/, 'Phone can only contain numbers, spaces, and basic punctuation');
 
 const Auth = () => {
   const navigate = useNavigate();
-  const { signUp, signIn, signInWithMagicLink, user } = useAuth();
+  const { signUp, signIn, signInWithMagicLink, updateProfile, user, profile, isAdmin } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [adminMode, setAdminMode] = useState(false);
 
   // Redirect if already authenticated
-  if (user) {
+  if (user && profile) {
     navigate('/');
     return null;
   }
 
-  const validateEmail = (email: string) => {
+  const validateField = (schema: z.ZodSchema, value: string, fieldName: string) => {
     try {
-      emailSchema.parse(email);
+      schema.parse(value);
       return null;
     } catch (error) {
       if (error instanceof z.ZodError) {
         return error.issues[0].message;
       }
-      return 'Invalid email';
-    }
-  };
-
-  const validatePassword = (password: string) => {
-    try {
-      passwordSchema.parse(password);
-      return null;
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return error.issues[0].message;
-      }
-      return 'Invalid password';
+      return `Invalid ${fieldName}`;
     }
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const emailError = validateEmail(email);
-    const passwordError = validatePassword(password);
+    const emailError = validateField(emailSchema, email, 'email');
+    const passwordError = validateField(passwordSchema, password, 'password');
+    const fullNameError = validateField(fullNameSchema, fullName, 'full name');
+    const phoneError = validateField(phoneSchema, phone, 'phone');
     
-    if (emailError || passwordError) {
+    const firstError = emailError || passwordError || fullNameError || phoneError;
+    if (firstError) {
       toast({
         title: 'Validation Error',
-        description: emailError || passwordError,
+        description: firstError,
         variant: 'destructive',
       });
       return;
     }
 
     setLoading(true);
-    const { error } = await signUp(email, password);
+    const { error } = await signUp(email, password, fullName, phone);
     
     if (error) {
       toast({
@@ -86,8 +82,8 @@ const Auth = () => {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const emailError = validateEmail(email);
-    const passwordError = validatePassword(password);
+    const emailError = validateField(emailSchema, email, 'email');
+    const passwordError = validateField(passwordSchema, password, 'password');
     
     if (emailError || passwordError) {
       toast({
@@ -116,7 +112,7 @@ const Auth = () => {
   const handleMagicLink = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const emailError = validateEmail(email);
+    const emailError = validateField(emailSchema, email, 'email');
     
     if (emailError) {
       toast({
@@ -145,6 +141,29 @@ const Auth = () => {
     setLoading(false);
   };
 
+  const handleAdminToggle = async () => {
+    if (!isAdmin()) return;
+    
+    setLoading(true);
+    const newRole = adminMode ? 'client' : 'admin';
+    const { error } = await updateProfile({ role: newRole });
+    
+    if (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to update admin status',
+        variant: 'destructive',
+      });
+    } else {
+      setAdminMode(!adminMode);
+      toast({
+        title: 'Success',
+        description: `Admin mode ${!adminMode ? 'enabled' : 'disabled'}`,
+      });
+    }
+    setLoading(false);
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="w-full max-w-md p-6">
@@ -156,6 +175,26 @@ const Auth = () => {
             Welcome to the studio
           </p>
         </div>
+
+        {/* Admin Toggle - Only visible for admin users */}
+        {user && profile && isAdmin() && (
+          <div className="mb-6 p-4 border border-border rounded-lg bg-card">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Shield className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium">Admin Mode</span>
+              </div>
+              <Button
+                variant={adminMode ? "default" : "outline"}
+                size="sm"
+                onClick={handleAdminToggle}
+                disabled={loading}
+              >
+                {adminMode ? 'Disable' : 'Enable'}
+              </Button>
+            </div>
+          </div>
+        )}
 
         <Tabs defaultValue="signin" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
@@ -175,6 +214,7 @@ const Auth = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     className="pl-10"
                     required
+                    maxLength={255}
                   />
                 </div>
               </div>
@@ -189,6 +229,7 @@ const Auth = () => {
                     onChange={(e) => setPassword(e.target.value)}
                     className="pl-10"
                     required
+                    minLength={6}
                   />
                 </div>
               </div>
@@ -224,6 +265,22 @@ const Auth = () => {
             <form onSubmit={handleSignUp} className="space-y-4">
               <div className="space-y-2">
                 <div className="relative">
+                  <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="text"
+                    placeholder="Full Name"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    className="pl-10"
+                    required
+                    minLength={2}
+                    maxLength={100}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="relative">
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     type="email"
@@ -232,6 +289,23 @@ const Auth = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     className="pl-10"
                     required
+                    maxLength={255}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="relative">
+                  <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="tel"
+                    placeholder="Phone Number"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="pl-10"
+                    required
+                    minLength={10}
+                    maxLength={20}
                   />
                 </div>
               </div>
@@ -246,6 +320,7 @@ const Auth = () => {
                     onChange={(e) => setPassword(e.target.value)}
                     className="pl-10"
                     required
+                    minLength={6}
                   />
                 </div>
               </div>
