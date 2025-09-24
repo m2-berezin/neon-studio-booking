@@ -54,8 +54,8 @@ const ProjectDetail = () => {
   if (!user) {
     return (
       <div className="text-center py-8">
-        <h2 className="text-2xl font-bold text-foreground mb-4">Login Required</h2>
-        <p className="text-muted-foreground">Please login to view project details.</p>
+        <h2 className="text-2xl font-bold text-foreground mb-4">Login Necessário</h2>
+        <p className="text-muted-foreground">Por favor, inicie sessão para ver os detalhes do projeto.</p>
       </div>
     );
   }
@@ -64,7 +64,7 @@ const ProjectDetail = () => {
     return (
       <div className="text-center py-8">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-        <p className="text-muted-foreground">Loading project...</p>
+        <p className="text-muted-foreground">A carregar projeto...</p>
       </div>
     );
   }
@@ -72,10 +72,10 @@ const ProjectDetail = () => {
   if (!currentProject) {
     return (
       <div className="text-center py-8">
-        <h2 className="text-2xl font-bold text-foreground mb-4">Project Not Found</h2>
-        <p className="text-muted-foreground">The requested project could not be found.</p>
+        <h2 className="text-2xl font-bold text-foreground mb-4">Projeto Não Encontrado</h2>
+        <p className="text-muted-foreground">O projeto solicitado não foi encontrado.</p>
         <Button onClick={() => navigate('/projects')} className="mt-4">
-          Back to Projects
+          Voltar aos Projetos
         </Button>
       </div>
     );
@@ -185,12 +185,12 @@ const ProjectDetail = () => {
           onClick={() => navigate('/projects')}
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Projects
+          Voltar aos Projetos
         </Button>
         <div className="flex-1">
           <h1 className="text-2xl font-bold text-foreground">{currentProject.title}</h1>
           <p className="text-muted-foreground">
-            Created {format(new Date(currentProject.created_at), 'MMMM d, yyyy')}
+            Criado em {format(new Date(currentProject.created_at), 'd MMMM yyyy', { locale: require('date-fns/locale/pt') })}
           </p>
         </div>
         <Badge className={`${getStatusColor(currentProject.status)}`}>

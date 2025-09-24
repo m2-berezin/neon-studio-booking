@@ -16,11 +16,11 @@ const PenaltyBanner = ({ penaltyEndDate, className = '' }: PenaltyBannerProps) =
         <div className="flex items-center gap-2">
           <Shield className="h-4 w-4" />
           <span>
-            Penalty active until {format(penaltyEndDate, 'MMMM do, yyyy')}. Rewards paused.
+            Penalização ativa até {format(penaltyEndDate, 'd MMMM yyyy', { locale: require('date-fns/locale/pt') })}. Recompensas pausadas.
           </span>
         </div>
         <p className="text-sm text-destructive/80 mt-1">
-          This penalty was applied due to a no-show. Please contact the studio if you have questions.
+          Esta penalização foi aplicada devido a não comparência. Por favor contacte o estúdio se tiver dúvidas.
         </p>
       </AlertDescription>
     </Alert>

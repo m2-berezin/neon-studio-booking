@@ -47,11 +47,11 @@ const AdminBookings = () => {
   };
 
   const statusOptions = [
-    { value: 'pending', label: 'Pending' },
-    { value: 'confirmed', label: 'Confirmed' },
-    { value: 'completed', label: 'Completed' },
-    { value: 'no_show', label: 'No Show' },
-    { value: 'cancelled', label: 'Cancelled' },
+    { value: 'pending', label: 'Pendente' },
+    { value: 'confirmed', label: 'Confirmada' },
+    { value: 'completed', label: 'Concluída' },
+    { value: 'no_show', label: 'Não Compareceu' },
+    { value: 'cancelled', label: 'Cancelada' },
   ];
 
   const loadAllBookings = async () => {
@@ -90,8 +90,8 @@ const AdminBookings = () => {
     return (
       <div className="text-center py-8">
         <Shield className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-        <h2 className="text-xl font-semibold text-foreground mb-2">Admin Access Required</h2>
-        <p className="text-muted-foreground">You need admin privileges to view this page.</p>
+        <h2 className="text-xl font-semibold text-foreground mb-2">Acesso de Admin Necessário</h2>
+        <p className="text-muted-foreground">Precisa de privilégios de administrador para ver esta página.</p>
       </div>
     );
   }
@@ -100,10 +100,10 @@ const AdminBookings = () => {
     <div className="space-y-6">
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-accent accent-glow mb-2">
-          Manage Bookings
+          Gerir Reservas
         </h1>
         <p className="text-muted-foreground">
-          View and manage all studio bookings
+          Veja e gira todas as reservas do estúdio
         </p>
       </div>
 

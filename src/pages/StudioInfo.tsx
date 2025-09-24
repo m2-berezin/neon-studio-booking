@@ -93,10 +93,10 @@ const StudioInfo = () => {
       {/* Header */}
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold text-foreground mb-2">
-          Studio Information
+          Informações do Estúdio
         </h1>
         <p className="text-muted-foreground text-lg">
-          Everything you need to know for your session
+          Tudo o que precisa de saber para a sua sessão
         </p>
       </div>
 
@@ -107,8 +107,8 @@ const StudioInfo = () => {
             <div className="flex items-center gap-3">
               <MessageCircle className="h-6 w-6 text-primary" />
               <div>
-                <h3 className="font-semibold text-foreground">Need Help?</h3>
-                <p className="text-sm text-muted-foreground">Get instant support via WhatsApp</p>
+                <h3 className="font-semibold text-foreground">Precisa de Ajuda?</h3>
+                <p className="text-sm text-muted-foreground">Obtenha suporte instantâneo via WhatsApp</p>
               </div>
             </div>
             <Button
@@ -116,7 +116,7 @@ const StudioInfo = () => {
               className="bg-green-600 hover:bg-green-700"
             >
               <MessageCircle className="h-4 w-4 mr-2" />
-              Contact Studio
+              Contactar Estúdio
             </Button>
           </div>
         </CardContent>

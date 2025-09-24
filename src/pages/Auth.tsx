@@ -62,18 +62,18 @@ const Auth = () => {
     }
 
     setLoading(true);
-    const { error } = await signUp(email, password, fullName, phone);
+      const { error } = await signUp(email, password, fullName, phone);
     
     if (error) {
       toast({
-        title: 'Sign Up Error',
+        title: 'Erro de Registo',
         description: error.message,
         variant: 'destructive',
       });
     } else {
       toast({
-        title: 'Check your email',
-        description: 'We sent you a confirmation link to complete your registration.',
+        title: 'Verifique o seu email',
+        description: 'Enviámos um link de confirmação para completar o registo.',
       });
     }
     setLoading(false);
@@ -87,7 +87,7 @@ const Auth = () => {
     
     if (emailError || passwordError) {
       toast({
-        title: 'Validation Error',
+        title: 'Erro de Validação',
         description: emailError || passwordError,
         variant: 'destructive',
       });
@@ -99,7 +99,7 @@ const Auth = () => {
     
     if (error) {
       toast({
-        title: 'Sign In Error',
+        title: 'Erro de Início de Sessão',
         description: error.message,
         variant: 'destructive',
       });
@@ -116,7 +116,7 @@ const Auth = () => {
     
     if (emailError) {
       toast({
-        title: 'Validation Error',
+        title: 'Erro de Validação',
         description: emailError,
         variant: 'destructive',
       });
@@ -128,14 +128,14 @@ const Auth = () => {
     
     if (error) {
       toast({
-        title: 'Magic Link Error',
+        title: 'Erro de Link Mágico',
         description: error.message,
         variant: 'destructive',
       });
     } else {
       toast({
-        title: 'Check your email',
-        description: 'We sent you a magic link to sign in.',
+        title: 'Verifique o seu email',
+        description: 'Enviámos um link mágico para iniciar sessão.',
       });
     }
     setLoading(false);
@@ -150,15 +150,15 @@ const Auth = () => {
     
     if (error) {
       toast({
-        title: 'Error',
-        description: 'Failed to update admin status',
+        title: 'Erro',
+        description: 'Falha ao atualizar o estado de administrador',
         variant: 'destructive',
       });
     } else {
       setAdminMode(!adminMode);
       toast({
-        title: 'Success',
-        description: `Admin mode ${!adminMode ? 'enabled' : 'disabled'}`,
+        title: 'Sucesso',
+        description: `Modo de administrador ${!adminMode ? 'activado' : 'desactivado'}`,
       });
     }
     setLoading(false);

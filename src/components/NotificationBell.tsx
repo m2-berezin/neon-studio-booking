@@ -46,7 +46,7 @@ export const NotificationBell = () => {
         <Card className="border-0 shadow-none">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-lg">Notifications</CardTitle>
+              <CardTitle className="text-lg">Notificações</CardTitle>
               {unreadCount > 0 && (
                 <Button
                   variant="ghost"
@@ -56,13 +56,13 @@ export const NotificationBell = () => {
                   className="text-xs"
                 >
                   <CheckCheck className="h-4 w-4 mr-1" />
-                  Mark all read
+                  Marcar todas como lidas
                 </Button>
               )}
             </div>
             {unreadCount > 0 && (
               <p className="text-sm text-muted-foreground">
-                {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
+                {unreadCount} notificação{unreadCount !== 1 ? 'ões' : ''} não lida{unreadCount !== 1 ? 's' : ''}
               </p>
             )}
           </CardHeader>
@@ -73,7 +73,7 @@ export const NotificationBell = () => {
                 <div className="flex flex-col items-center justify-center py-8">
                   <Bell className="h-8 w-8 text-muted-foreground mb-2" />
                   <p className="text-sm text-muted-foreground text-center">
-                    No notifications yet
+                    Ainda não há notificações
                   </p>
                 </div>
               ) : (

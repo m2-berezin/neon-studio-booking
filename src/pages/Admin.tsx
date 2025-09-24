@@ -89,16 +89,16 @@ const Admin = () => {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Card className="p-6">
-          <CardTitle className="text-center text-destructive">Access Denied</CardTitle>
+          <CardTitle className="text-center text-destructive">Acesso Negado</CardTitle>
           <p className="text-center text-muted-foreground mt-2">
-            You don't have permission to access the admin area.
+            Não tem permissões para aceder à área de administração.
           </p>
         </Card>
       </div>
     );
   }
 
-  const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const dayNames = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
   const bookingStatuses = ['confirmed', 'pending', 'cancelled', 'completed', 'no_show'];
 
   const handleCreateAvailabilityRule = async () => {
@@ -170,36 +170,36 @@ const Admin = () => {
       <div className="mb-6">
         <h1 className="text-3xl font-bold flex items-center gap-2">
           <Settings className="h-8 w-8" />
-          Admin Dashboard
+          Painel de Administração
         </h1>
-        <p className="text-muted-foreground">Manage your studio operations</p>
+        <p className="text-muted-foreground">Gerencie as operações do estúdio</p>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="availability" className="flex items-center gap-2">
             <Calendar className="h-4 w-4" />
-            Availability
+            Disponibilidade
           </TabsTrigger>
           <TabsTrigger value="bookings" className="flex items-center gap-2">
             <BookOpen className="h-4 w-4" />
-            Bookings
+            Reservas
           </TabsTrigger>
           <TabsTrigger value="clients" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
-            Clients
+            Clientes
           </TabsTrigger>
           <TabsTrigger value="services" className="flex items-center gap-2">
             <DollarSign className="h-4 w-4" />
-            Services
+            Serviços
           </TabsTrigger>
           <TabsTrigger value="rewards" className="flex items-center gap-2">
             <Gift className="h-4 w-4" />
-            Rewards
+            Recompensas
           </TabsTrigger>
           <TabsTrigger value="broadcast" className="flex items-center gap-2">
             <Send className="h-4 w-4" />
-            Broadcast
+            Transmissão
           </TabsTrigger>
         </TabsList>
 

@@ -265,12 +265,12 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange }
   return (
     <Card className={className}>
       <CardHeader>
-        <CardTitle>Price Summary</CardTitle>
+        <CardTitle>Resumo de Preços</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Line Items */}
         <div className="space-y-2">
-          <Label className="text-sm font-medium">Services</Label>
+          <Label className="text-sm font-medium">Serviços</Label>
           {lineItems.map(item => (
             <div key={item.id} className="flex justify-between text-sm">
               <span>{item.name} x {item.quantity}</span>
@@ -288,7 +288,7 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange }
         {subscriptionDiscount > 0 && (
           <div className="space-y-2">
             <div className="flex justify-between text-sm text-green-600">
-              <span>Subscription Discount ({userSubscription?.plan})</span>
+              <span>Desconto de Subscrição ({userSubscription?.plan})</span>
               <span>-€{subscriptionDiscount.toFixed(2)}</span>
             </div>
           </div>
@@ -297,23 +297,23 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange }
         {/* Reward Code Input */}
         {!appliedVoucher && (
           <div className="space-y-2">
-            <Label htmlFor="reward-code">Reward Code</Label>
+            <Label htmlFor="reward-code">Código de Recompensa</Label>
             {appliedReward ? (
               <div className="flex items-center justify-between">
                 <Badge variant="secondary">{appliedReward} Applied</Badge>
                 <Button variant="outline" size="sm" onClick={removeReward}>
-                  Remove
+                  Remover
                 </Button>
               </div>
             ) : (
               <div className="flex gap-2">
                 <Input
                   id="reward-code"
-                  placeholder="Enter reward code"
+                  placeholder="Introduza código de recompensa"
                   value={rewardCode}
                   onChange={(e) => setRewardCode(e.target.value)}
                 />
-                <Button onClick={applyReward}>Apply</Button>
+                <Button onClick={applyReward}>Aplicar</Button>
               </div>
             )}
           </div>
@@ -322,14 +322,14 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange }
         {/* Voucher Code Input */}
         {!appliedReward && (
           <div className="space-y-2">
-            <Label htmlFor="voucher-code">Voucher Code</Label>
+            <Label htmlFor="voucher-code">Código de Vale</Label>
             {appliedVoucher ? (
               <div className="flex items-center justify-between">
                 <Badge variant="secondary">
                   {appliedVoucher.code} (€{appliedVoucher.amount})
                 </Badge>
                 <Button variant="outline" size="sm" onClick={removeVoucher}>
-                  Remove
+                  Remover
                 </Button>
               </div>
             ) : (
@@ -337,19 +337,19 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange }
                 <div className="flex gap-2">
                   <Input
                     id="voucher-code"
-                    placeholder="Enter voucher code"
+                    placeholder="Introduza código de vale"
                     value={voucherCode}
                     onChange={(e) => setVoucherCode(e.target.value)}
                   />
                   <Button onClick={applyVoucher} disabled={loading}>
-                    Apply
+                    Aplicar
                   </Button>
                 </div>
                 
                 {/* Available Vouchers */}
                 {availableVouchers.length > 0 && (
                   <div className="space-y-2">
-                    <Label className="text-xs text-muted-foreground">Available Vouchers:</Label>
+                    <Label className="text-xs text-muted-foreground">Vales Disponíveis:</Label>
                     <div className="flex flex-wrap gap-2">
                       {availableVouchers.map(voucher => (
                         <Button
@@ -376,13 +376,13 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange }
             <Separator />
             {rewardDiscount > 0 && (
               <div className="flex justify-between text-sm text-green-600">
-                <span>Reward Discount</span>
+                <span>Desconto de Recompensa</span>
                 <span>-€{rewardDiscount.toFixed(2)}</span>
               </div>
             )}
             {voucherDiscount > 0 && (
               <div className="flex justify-between text-sm text-green-600">
-                <span>Voucher Discount</span>
+                <span>Desconto de Vale</span>
                 <span>-€{voucherDiscount.toFixed(2)}</span>
               </div>
             )}
@@ -398,7 +398,7 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange }
 
         {finalPrice === 0 && (
           <Badge variant="secondary" className="w-full justify-center">
-            Free Session
+            Sessão Gratuita
           </Badge>
         )}
       </CardContent>

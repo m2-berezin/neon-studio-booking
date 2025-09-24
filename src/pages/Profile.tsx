@@ -27,13 +27,13 @@ const Profile = () => {
     try {
       await signOut();
       toast({
-        title: 'Signed out successfully',
-        description: 'You have been signed out of your account.',
+        title: 'Sessão terminada com sucesso',
+        description: 'A sessão foi terminada.',
       });
     } catch (error) {
       toast({
-        title: 'Error',
-        description: 'Failed to sign out. Please try again.',
+        title: 'Erro',
+        description: 'Falha ao terminar a sessão. Tente novamente.',
         variant: 'destructive',
       });
     }
@@ -50,14 +50,14 @@ const Profile = () => {
     
     if (error) {
       toast({
-        title: 'Error',
-        description: 'Failed to update admin status',
+        title: 'Erro',
+        description: 'Falha ao atualizar o estado de administrador',
         variant: 'destructive',
       });
     } else {
       toast({
-        title: 'Success',
-        description: `Role updated to ${newRole}`,
+        title: 'Sucesso',
+        description: `Função atualizada para ${newRole}`,
       });
     }
     setLoading(false);
