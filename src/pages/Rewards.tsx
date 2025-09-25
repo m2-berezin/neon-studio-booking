@@ -54,11 +54,11 @@ const Rewards = () => {
   return (
     <div className="space-y-6">
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-accent accent-glow mb-2">
+        <h1 className="text-4xl font-bold text-foreground mb-2">
           Recompensas do Estúdio
         </h1>
-        <p className="text-muted-foreground">
-          Ofertas especiais e recompensas de fidelidade para os nossos clientes valiosos
+        <p className="text-muted-foreground text-lg">
+          Ofertas especiais e recompensas para clientes regulares
         </p>
       </div>
 
@@ -76,8 +76,11 @@ const Rewards = () => {
               <div>
                 <span className="font-semibold">Vale de €15 disponível!</span>
                 <p className="text-sm text-primary/80 mt-1">
-                  Reivindique o seu vale trimestral - válido por 60 dias em qualquer serviço.
+                  Reivindique o seu vale válido por 30 dias - disponível a cada 30 dias.
                 </p>
+                <div className="text-xs text-orange-600 font-medium mt-2">
+                  ⏰ Dias restantes para reivindicar: {Math.max(0, Math.ceil((new Date().getTime() + 30 * 24 * 60 * 60 * 1000 - new Date().getTime()) / (24 * 60 * 60 * 1000)))}
+                </div>
               </div>
               <Button
                 onClick={claimVoucher}
@@ -233,10 +236,10 @@ const Rewards = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Gift className="w-5 h-5 text-primary" />
-              Mistura & Masterização Grátis
+              Ganha uma Mix&Master
             </CardTitle>
             <CardDescription>
-              Ganhe uma sessão M&M grátis através da fidelidade
+              Através da acumulação de pontos
             </CardDescription>
           </CardHeader>
           <CardContent>

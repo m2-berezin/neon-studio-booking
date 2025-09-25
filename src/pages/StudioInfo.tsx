@@ -37,8 +37,8 @@ const StudioInfo = () => {
     },
     {
       icon: <Settings className="h-5 w-5" />,
-      title: "No Food or Drinks",
-      description: "Only water in sealed containers is allowed in the studio."
+      title: "NO FOOD",
+      description: "Comida não é permitida no estúdio. É permitido fumar."
     },
     {
       icon: <Phone className="h-5 w-5" />,
@@ -147,19 +147,11 @@ const StudioInfo = () => {
             <Separator />
             
             <div>
-              <h4 className="font-medium mb-2">Studio Hours</h4>
+              <h4 className="font-medium mb-2">Horários do Estúdio</h4>
               <div className="space-y-1 text-sm">
                 <div className="flex justify-between">
-                  <span>Monday - Friday:</span>
-                  <span>9:00 AM - 10:00 PM</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Saturday:</span>
-                  <span>10:00 AM - 8:00 PM</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Sunday:</span>
-                  <span>12:00 PM - 6:00 PM</span>
+                  <span>Todos os dias:</span>
+                  <span>10:00 - 22:00</span>
                 </div>
               </div>
             </div>
@@ -186,25 +178,25 @@ const StudioInfo = () => {
               <div className="flex items-start gap-2">
                 <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="font-medium text-sm">24+ Hours Notice</p>
-                  <p className="text-xs text-muted-foreground">Full refund or free rescheduling</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start gap-2">
-                <AlertTriangle className="h-5 w-5 text-yellow-500 mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="font-medium text-sm">12-24 Hours Notice</p>
-                  <p className="text-xs text-muted-foreground">50% refund or reschedule with fee</p>
+                  <p className="font-medium text-sm">3+ Dias de Antecedência</p>
+                  <p className="text-xs text-muted-foreground">Reagendamento sem custos extras</p>
                 </div>
               </div>
               
               <div className="flex items-start gap-2">
                 <AlertTriangle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="font-medium text-sm">Less than 12 Hours</p>
-                  <p className="text-xs text-muted-foreground">No refund, reschedule with full fee</p>
+                  <p className="font-medium text-sm">Menos de 3 Dias</p>
+                  <p className="text-xs text-muted-foreground">Não há devolução, cobrança de €15 como taxa</p>
                 </div>
+              </div>
+
+              <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <h5 className="font-medium text-blue-800 text-sm mb-1">Política de Reservas</h5>
+                <p className="text-xs text-blue-700">
+                  Não subscritores: Sinal de €15 obrigatório para reserva de sessão.<br/>
+                  Subscritores: Sem necessidade de sinal.
+                </p>
               </div>
             </div>
             
@@ -252,35 +244,6 @@ const StudioInfo = () => {
         </CardContent>
       </Card>
 
-      {/* Session Prep Checklist */}
-      <Card className="mt-8">
-        <CardHeader>
-          <CardTitle>Session Preparation Checklist</CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Follow this checklist to make the most of your studio time.
-          </p>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-6">
-            {prepChecklist.map((section, index) => (
-              <div key={index}>
-                <h4 className="font-medium text-foreground mb-3 flex items-center gap-2">
-                  <Badge variant="outline">{section.category}</Badge>
-                </h4>
-                <div className="space-y-2 ml-4">
-                  {section.items.map((item, itemIndex) => (
-                    <div key={itemIndex} className="flex items-start gap-2">
-                      <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                      <p className="text-sm text-muted-foreground">{item}</p>
-                    </div>
-                  ))}
-                </div>
-                {index < prepChecklist.length - 1 && <Separator className="mt-4" />}
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Contact Footer */}
       <Card className="mt-8 border-primary/20 bg-primary/5">

@@ -27,19 +27,25 @@ interface TimeSlot {
   available: boolean;
 }
 
-const Book = () => {
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const {
-    services,
-    loading,
-    isDateAvailable,
-    generateTimeSlots,
-    fetchBookingsForDate,
-    createBooking,
-    sendBookingMessage,
-    generateWhatsAppLink,
-  } = useBooking();
+  const services = [
+    {
+      id: 'recording',
+      name: 'Captação 2h (mínimo)',
+      base_price: 20,
+      type: 'recording',
+      description: 'Sessão de gravação profissional de 2 horas mínimo',
+      duration: 120
+    },
+    {
+      id: 'recording_mix',
+      name: 'Captação Mix e Master',
+      base_price: 70,
+      subscriptionPrice: 59.5,
+      type: 'full_service',
+      description: 'Pacote completo: captação + mistura e masterização',
+      duration: 120
+    }
+  ];
 
   const [step, setStep] = useState(1);
   const [selectedService, setSelectedService] = useState<string>('');
@@ -225,10 +231,17 @@ const Book = () => {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold text-primary">${service.base_price}</p>
-                    <Badge variant="secondary" className="text-xs">
-                      {service.type}
-                    </Badge>
+                    <div className="space-y-1">
+                      <div className="flex flex-col">
+                        <p className="text-lg font-bold">€{service.base_price}</p>
+                        {service.subscriptionPrice && (
+                          <p className="text-lg font-bold text-primary">€{service.subscriptionPrice} <span className="text-xs text-muted-foreground">(com subscrição)</span></p>
+                        )}
+                      </div>
+                      {service.subscriptionPrice && (
+                        <p className="text-xs text-green-600">Poupe 15% com subscrição</p>
+                      )}
+                    </div>
                   </div>
                 </div>
               </Card>

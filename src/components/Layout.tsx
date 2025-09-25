@@ -12,15 +12,11 @@ const Layout = ({ children }: { children: ReactNode }) => {
   const { user, loading, signOut, isAdmin } = useAuth();
 
   const navItems = [
-    { path: '/', icon: Home, label: 'Início' },
-    { path: '/book', icon: Calendar, label: 'Reservar' },
     { path: '/projects', icon: Folder, label: 'Projectos' },
-    { path: '/subscriptions', icon: Star, label: 'Subscrições' },
     { path: '/beats', icon: Music, label: 'Beats' },
     { path: '/rewards', icon: Gift, label: 'Recompensas' },
     { path: '/messages', icon: MessageCircle, label: 'Mensagens' },
     { path: '/studio-info', icon: Info, label: 'Info' },
-    { path: '/profile', icon: User, label: 'Perfil' },
   ];
 
   // Add admin navigation items if user is admin
@@ -52,9 +48,29 @@ const Layout = ({ children }: { children: ReactNode }) => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Header with Logo and Logout */}
+      {/* Header with Profile, Logo, and Logout */}
       <header className="flex items-center justify-between py-6 px-4">
-        <Logo size="md" />
+        {/* Profile Icon - Left */}
+        {user && (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => navigate('/profile')}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            <User className="h-5 w-5" />
+          </Button>
+        )}
+        
+        {/* Logo - Center */}
+        <div className="absolute left-1/2 transform -translate-x-1/2">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-primary">7T7</h1>
+            <p className="text-xs text-muted-foreground -mt-1">Studios</p>
+          </div>
+        </div>
+        
+        {/* Logout and Notifications - Right */}
         {user && (
           <div className="flex items-center gap-2">
             <NotificationBell />
@@ -79,6 +95,19 @@ const Layout = ({ children }: { children: ReactNode }) => {
       {user && (
         <nav className="fixed bottom-0 left-0 right-0 bg-card/80 backdrop-blur-md border-t border-border">
           <div className="flex justify-around py-3">
+            {/* Home button centered */}
+            <button
+              onClick={() => navigate('/')}
+              className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-all ${
+                location.pathname === '/' 
+                  ? 'text-primary bg-primary/10' 
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <Home className="w-5 h-5" />
+              <span className="text-xs font-medium">Início</span>
+            </button>
+            
             {allNavItems.map((item) => {
               const isActive = location.pathname === item.path;
               return (

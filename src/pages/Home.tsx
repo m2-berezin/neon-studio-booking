@@ -21,35 +21,17 @@ const Home = () => {
       gradient: true,
     },
     {
-      title: 'Beats Exclusivos',
-      description: 'Explore a nossa colecção de beats premium e instrumentais',
+      title: 'Mix & Master',
+      description: 'Serviço profissional de mistura e masterização para os seus projectos',
       icon: Music,
-      path: '/beats',
-    },
-    {
-      title: 'Os Meus Projectos',
-      description: 'Aceda às suas gravações, misturas e ficheiros de projectos',
-      icon: FolderOpen,
-      path: '/projects',
-    },
-    {
-      title: 'Recompensas',
-      description: 'Ganhe pontos e desbloqueie vantagens e descontos exclusivos',
-      icon: Gift,
-      path: '/rewards',
+      path: '/mix-master',
       gradient: true,
     },
     {
       title: 'Subscrições',
-      description: 'Gerencie a sua afiliação no estúdio e facturação',
+      description: 'Poupe com os nossos planos de subscrição S e X',
       icon: CreditCard,
       path: '/subscriptions',
-    },
-    {
-      title: 'Info do Estúdio',
-      description: 'Localização, horários, especificações de equipamento e contactos',
-      icon: MapPin,
-      path: '/studio-info',
     },
   ];
 

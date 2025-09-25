@@ -155,14 +155,20 @@ const Beats = () => {
             </CardHeader>
             
             <CardContent>
-              <ul className="space-y-2 mb-6">
-                {beatPackage.features.map((feature, index) => (
-                  <li key={index} className="flex items-center gap-2 text-sm">
-                    <Music className="w-4 h-4 text-primary" />
-                    <span className="text-muted-foreground">{feature}</span>
-                  </li>
-                ))}
-              </ul>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">Premium</span>
+                          <span className="font-semibold text-primary">€{beat.price}</span>
+                        </div>
+                        
+                        <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                          <p className="text-xs text-yellow-800 mb-2">
+                            <strong>Condições de Pagamento:</strong>
+                          </p>
+                          <p className="text-xs text-yellow-700">
+                            • 30% como sinal para começar o trabalho<br/>
+                            • 70% antes do envio do produto final
+                          </p>
+                        </div>
               
                 <Button 
                   className="w-full" 

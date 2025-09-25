@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar, Clock, Star, CheckCircle, MessageSquare, Settings } from 'lucide-react';
+import { Calendar, Clock, Star, CheckCircle, MessageSquare, Settings, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -33,24 +33,31 @@ const Subscriptions = () => {
     );
   }
 
-  const plans = [
+  const subscriptionPlans = [
     {
-      id: '8h-plan',
-      name: '8h/mês (2h/semana)',
-      description: 'Perfeito para sessões regulares',
-      hours: 8,
-      listPrice: 80,
-      discountedPrice: 65,
-      features: ['8 horas mensais', '2 horas por semana', 'Agendamento flexível', 'Suporte prioritário']
+      id: 'plan-s',
+      name: 'Plano S',
+      price: 4.99,
+      duration: 'monthly',
+      features: [
+        '10% desconto em todos os serviços no primeiro mês',
+        '15% desconto nos meses seguintes',
+        'Ao fim de 6 meses: oferta de 1 Mix&Master (poupa €10)'
+      ],
+      popular: false
     },
     {
-      id: '16h-plan',
-      name: '16h/mês (4h/semana)',
-      description: 'Ideal para projetos intensivos',
-      hours: 16,
-      listPrice: 160,
-      discountedPrice: 130,
-      features: ['16 horas mensais', '4 horas por semana', 'Agendamento flexível', 'Suporte prioritário', 'Vantagens bónus']
+      id: 'plan-x',
+      name: 'Plano X',
+      price: 9.99,
+      duration: 'monthly',
+      features: [
+        '10% desconto no primeiro mês em todos os serviços',
+        '15% desconto nos meses seguintes',
+        'Oferta de 2h de captação por mês',
+        'Ao fim de 6 meses: 1 captação mix e master (poupa €10)'
+      ],
+      popular: true
     }
   ];
 
@@ -161,28 +168,28 @@ const Subscriptions = () => {
       {/* Subscription Plans */}
       {!userSubscription && (
         <section>
-          <h2 className="text-2xl font-bold text-foreground mb-4">Escolha o Seu Plano</h2>
+          <h2 className="text-2xl font-bold text-foreground mb-4">Planos</h2>
           <div className="grid md:grid-cols-2 gap-6">
-            {plans.map((plan) => (
-              <Card key={plan.id} className="studio-card">
+            {subscriptionPlans.map((plan) => (
+              <Card key={plan.id} className={`studio-card ${plan.popular ? 'border-primary' : ''}`}>
+                {plan.popular && (
+                  <Badge className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-primary">
+                    Mais Popular
+                  </Badge>
+                )}
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Star className="w-5 h-5 text-primary" />
                     {plan.name}
                   </CardTitle>
-                  <CardDescription>{plan.description}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <div className="text-center">
                       <div className="flex items-center justify-center gap-2">
-                        <span className="text-3xl font-bold text-primary">€{plan.discountedPrice}</span>
-                        <span className="text-lg text-muted-foreground line-through">€{plan.listPrice}</span>
+                        <span className="text-3xl font-bold text-primary">€{plan.price}</span>
                       </div>
                       <p className="text-sm text-muted-foreground">por mês</p>
-                      <Badge variant="secondary" className="mt-2">
-                        Poupe €{plan.listPrice - plan.discountedPrice}/mês
-                      </Badge>
                     </div>
                     
                     <ul className="space-y-2">
@@ -198,6 +205,7 @@ const Subscriptions = () => {
                       className="w-full"
                       onClick={() => handleCreateSubscription(plan)}
                       disabled={loading}
+                      variant={plan.popular ? 'default' : 'outline'}
                     >
                       {loading ? 'A criar...' : 'Subscrever Agora'}
                     </Button>
