@@ -20,7 +20,7 @@ import {
 
 const StudioInfo = () => {
   const whatsappNumber = "+1234567890"; // Replace with actual studio WhatsApp number
-  const studioAddress = "123 Studio Street, Music City, MC 12345";
+  const studioAddress = "Rua Abade Correia da Serra 20A, 2865-207 Fernão Ferro";
   const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(studioAddress)}`;
   const whatsappLink = `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}?text=Hi! I'd like to inquire about studio sessions.`;
 
