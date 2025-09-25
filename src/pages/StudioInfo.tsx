@@ -21,8 +21,14 @@ import {
 const StudioInfo = () => {
   const whatsappNumber = "+1234567890"; // Replace with actual studio WhatsApp number
   const studioAddress = "Rua Abade Correia da Serra 20A, 2865-207 Fernão Ferro";
-  const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(studioAddress)}`;
+  const googleMapsLink = `https://www.google.com/maps/place/${encodeURIComponent(studioAddress)}`;
   const whatsappLink = `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}?text=Hi! I'd like to inquire about studio sessions.`;
+
+  const handleGoogleMapsClick = () => {
+    console.log('Google Maps URL:', googleMapsLink);
+    // Use window.location.href instead of window.open to avoid popup blockers
+    window.location.href = googleMapsLink;
+  };
 
   const houseRules = [
     {
@@ -110,7 +116,7 @@ const StudioInfo = () => {
               <p className="text-foreground font-medium mb-2">{studioAddress}</p>
               <Button
                 variant="outline"
-                onClick={() => window.open(googleMapsLink, '_blank')}
+                onClick={handleGoogleMapsClick}
                 className="w-full"
               >
                 <ExternalLink className="h-4 w-4 mr-2" />
