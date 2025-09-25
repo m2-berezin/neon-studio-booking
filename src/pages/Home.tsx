@@ -36,7 +36,7 @@ const Home = () => {
     },
     {
       title: 'Subscrições',
-      description: 'Poupe com os nossos planos de subscrição S e X',
+      description: 'Poupe com os nossos planos de subscrição',
       icon: CreditCard,
       path: '/subscriptions',
     },
