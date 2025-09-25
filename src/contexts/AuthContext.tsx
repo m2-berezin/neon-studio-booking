@@ -40,9 +40,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Start as false for instant loading
 
-  // Fetch user profile
+  // Fetch user profile (non-blocking)
   const fetchProfile = async (userId: string) => {
     try {
       const { data, error } = await supabase
@@ -70,45 +70,32 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          await fetchProfile(session.user.id);
+          fetchProfile(session.user.id); // Non-blocking
         } else {
           setProfile(null);
         }
-        
-        setLoading(false);
       }
     );
 
-    // Check for existing session with timeout
+    // Check for existing session (non-blocking)
     const checkSession = async () => {
       try {
-        // Set a timeout to prevent infinite loading
-        const timeoutPromise = new Promise<never>((_, reject) => 
-          setTimeout(() => reject(new Error('Session check timeout')), 10000)
-        );
-        
-        const sessionPromise = supabase.auth.getSession();
-        
-        const result = await Promise.race([sessionPromise, timeoutPromise]);
-        const { data: { session } } = result;
-        
+        const { data: { session } } = await supabase.auth.getSession();
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          await fetchProfile(session.user.id);
+          fetchProfile(session.user.id); // Non-blocking
         }
       } catch (error) {
         console.error('Error checking session:', error);
-        // Set loading to false even on error to prevent infinite loading
         setSession(null);
         setUser(null);
         setProfile(null);
-      } finally {
-        setLoading(false);
       }
     };
 
+    // Run in background without blocking UI
     checkSession();
 
     return () => subscription.unsubscribe();

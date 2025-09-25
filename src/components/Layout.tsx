@@ -11,12 +11,12 @@ const Layout = ({ children }: { children: ReactNode }) => {
   const navigate = useNavigate();
   const { user, loading, signOut, isAdmin } = useAuth();
 
-  // Handle authentication redirect properly
+  // Handle authentication redirect properly (non-blocking)
   useEffect(() => {
-    if (!loading && !user && location.pathname !== '/auth') {
+    if (!user && location.pathname !== '/auth') {
       navigate('/auth');
     }
-  }, [user, loading, navigate, location.pathname]);
+  }, [user, navigate, location.pathname]);
 
   const navItems = [
     { path: '/projects', icon: Folder, label: 'Projectos' },
@@ -33,29 +33,12 @@ const Layout = ({ children }: { children: ReactNode }) => {
 
   const allNavItems = isAdmin() ? [...navItems, ...adminNavItems] : navItems;
 
-  // Show loading spinner while checking auth
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  // Don't show layout for auth page
+  // Don't show layout for auth page - show immediately
   if (location.pathname === '/auth') {
     return <div className="min-h-screen bg-background">{children}</div>;
   }
 
-  // Return loading state if redirecting
-  if (!user && location.pathname !== '/auth') {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
+  // Show content immediately, handle auth state reactively
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header with Profile, Logo, and Logout */}

@@ -20,7 +20,14 @@ import StudioInfo from "@/pages/StudioInfo";
 import MixMaster from "./pages/MixMaster";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      retry: 1, // Reduce retries for faster loading
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
