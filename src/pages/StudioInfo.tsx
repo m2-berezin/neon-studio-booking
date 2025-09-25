@@ -226,7 +226,7 @@ const StudioInfo = () => {
           <p className="text-sm text-muted-foreground mb-4">
             Não encontrou o que procurava? Entre em contacto connosco directamente.
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <div className="flex justify-center">
             <Button
               variant="outline"
               onClick={() => window.open(whatsappLink, '_blank')}
@@ -234,13 +234,6 @@ const StudioInfo = () => {
             >
               <MessageCircle className="h-4 w-4 mr-2" />
               WhatsApp
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => window.open(`tel:${whatsappNumber}`, '_self')}
-            >
-              <Phone className="h-4 w-4 mr-2" />
-              Ligar para o Estúdio
             </Button>
           </div>
         </CardContent>
