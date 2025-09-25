@@ -89,53 +89,47 @@ All colors MUST be HSL.
 
   h4 {
     @apply text-xl font-semibold;
-    text-shadow: 0 0 3px hsl(var(--accent)), 0 0 6px hsl(var(--accent));
   }
 
   h5 {
     @apply text-lg font-semibold;
-    text-shadow: 0 0 2px hsl(var(--accent)), 0 0 4px hsl(var(--accent));
   }
 
   h6 {
     @apply text-base font-semibold;
-    text-shadow: 0 0 2px hsl(var(--accent)), 0 0 4px hsl(var(--accent));
   }
 
-  /* Studio Card Glow Effects - Now with black outlines */
+  /* Studio Card Effects - Clean look without glow */
   .studio-card {
-    @apply bg-card border-2 border-border rounded-xl p-6 transition-all duration-300;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6), 0 2px 6px rgba(0, 0, 0, 0.4), 
-                0 0 0 1px rgba(0, 0, 0, 0.8);
+    @apply bg-card border border-border rounded-xl p-6 transition-all duration-300;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6), 0 2px 6px rgba(0, 0, 0, 0.4);
   }
 
   .studio-card:hover {
     @apply bg-studio-card-hover;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7), 0 4px 12px rgba(0, 0, 0, 0.5),
-                0 0 0 2px rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7), 0 4px 12px rgba(0, 0, 0, 0.5);
     transform: translateY(-2px);
   }
 
-  /* Button Styles - Large and Prominent with outlines */
+  /* Button Styles - Clean without neon */
   .btn-large {
     @apply px-8 py-4 text-lg font-semibold rounded-lg transition-all duration-200 border border-border;
     min-height: 56px;
     min-width: 120px;
   }
 
-  /* Neon Text Effects - Subtle white glow */
+  /* Text Classes - No glow effects */
   .neon-glow {
-    text-shadow: 0 0 6px hsl(var(--accent) / 0.8), 0 0 12px hsl(var(--accent) / 0.6);
+    /* No glow effect */
   }
 
   .accent-glow {
-    text-shadow: 0 0 6px hsl(var(--accent) / 0.8), 0 0 12px hsl(var(--accent) / 0.6);
+    /* No glow effect */
   }
 
   .neon-heading {
     @apply font-serif;
-    text-shadow: 0 0 4px hsl(var(--accent) / 0.8), 0 0 8px hsl(var(--accent) / 0.6), 0 0 16px hsl(var(--accent) / 0.4);
-    animation: pulse-neon 3s ease-in-out infinite;
+    /* No glow effect */
   }
 
   /* Special class for 7T7 Studios logo */
