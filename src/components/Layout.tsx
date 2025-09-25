@@ -21,6 +21,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
   const navItems = [
     { path: '/projects', icon: Folder, label: 'Projectos' },
     { path: '/rewards', icon: Gift, label: 'Recompensas' },
+    { path: '/', icon: Home, label: 'Início' },
     { path: '/messages', icon: MessageCircle, label: 'Mensagens' },
     { path: '/studio-info', icon: Info, label: 'Info' },
   ];
@@ -87,19 +88,6 @@ const Layout = ({ children }: { children: ReactNode }) => {
       {user && (
         <nav className="fixed bottom-0 left-0 right-0 bg-card/80 backdrop-blur-md border-t border-border">
           <div className="flex justify-around py-3">
-            {/* Home button centered */}
-            <button
-              onClick={() => navigate('/')}
-              className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-all ${
-                location.pathname === '/' 
-                  ? 'text-primary bg-primary/10' 
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              <Home className="w-5 h-5" />
-              <span className="text-xs font-medium">Início</span>
-            </button>
-            
             {allNavItems.map((item) => {
               const isActive = location.pathname === item.path;
               return (
