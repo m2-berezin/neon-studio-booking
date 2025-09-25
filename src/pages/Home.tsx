@@ -15,14 +15,14 @@ const Home = () => {
   const services = [
     {
       title: 'Reservar Sessão',
-      description: 'Agenda a tua sessão de gravação com os nossos engenheiros profissionais',
+      description: 'Agenda a tua sessão de estúdio',
       icon: Calendar,
       path: '/book',
       gradient: true,
     },
     {
       title: 'Mix & Master',
-      description: 'Serviço profissional de mistura e masterização para os teus projectos',
+      description: 'Envia os teus projetos',
       icon: Music,
       path: '/mix-master',
       gradient: true,
@@ -49,9 +49,6 @@ const Home = () => {
         <h1 className="neon-heading">
           Bem-vindo ao Estúdio
         </h1>
-        <p className="text-muted-foreground text-lg mt-4">
-          Produção musical profissional ao seu alcance
-        </p>
       </div>
 
       {/* Service Cards Grid */}
