@@ -66,6 +66,8 @@ export default {
       boxShadow: {
         'neon': '0 0 5px hsl(var(--accent)), 0 0 10px hsl(var(--accent)), 0 0 20px hsl(var(--accent))',
         'neon-subtle': '0 0 3px hsl(var(--accent)), 0 0 6px hsl(var(--accent))',
+        'neon-primary': '0 0 5px hsl(var(--primary)), 0 0 10px hsl(var(--primary)), 0 0 20px hsl(var(--primary))',
+        'neon-logo': '0 0 5px hsl(var(--studio-logo-glow)), 0 0 10px hsl(var(--studio-logo-glow)), 0 0 20px hsl(var(--studio-logo-glow))',
         'card-subtle': '0 4px 12px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.3)',
         'card-hover': '0 8px 24px rgba(0, 0, 0, 0.5), 0 4px 12px rgba(0, 0, 0, 0.4)',
       },

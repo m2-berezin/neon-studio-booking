@@ -21,8 +21,8 @@ All colors MUST be HSL.
     --popover: 0 0% 5%;
     --popover-foreground: 0 0% 93%;
 
-    /* Brand Colors */
-    --primary: 180 100% 50%; /* Cyan neon - keep for 7T7 Studios logo */
+    /* Brand Colors - Now White Neon */
+    --primary: 0 0% 100%; /* White neon for primary elements */
     --primary-foreground: 0 0% 0%;
 
     /* Secondary Elements */
