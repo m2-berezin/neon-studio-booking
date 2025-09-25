@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,13 @@ const Layout = ({ children }: { children: ReactNode }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, loading, signOut, isAdmin } = useAuth();
+
+  // Handle authentication redirect properly
+  useEffect(() => {
+    if (!loading && !user && location.pathname !== '/auth') {
+      navigate('/auth');
+    }
+  }, [user, loading, navigate, location.pathname]);
 
   const navItems = [
     { path: '/projects', icon: Folder, label: 'Projectos' },
@@ -35,15 +42,18 @@ const Layout = ({ children }: { children: ReactNode }) => {
     );
   }
 
-  // Redirect to auth if not authenticated (except on auth page)
-  if (!user && location.pathname !== '/auth') {
-    navigate('/auth');
-    return null;
-  }
-
   // Don't show layout for auth page
   if (location.pathname === '/auth') {
     return <div className="min-h-screen bg-background">{children}</div>;
+  }
+
+  // Return loading state if redirecting
+  if (!user && location.pathname !== '/auth') {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
   }
 
   return (
