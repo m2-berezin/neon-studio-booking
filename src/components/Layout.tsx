@@ -20,7 +20,6 @@ const Layout = ({ children }: { children: ReactNode }) => {
 
   const navItems = [
     { path: '/projects', icon: Folder, label: 'Projectos' },
-    { path: '/beats', icon: Music, label: 'Beats' },
     { path: '/rewards', icon: Gift, label: 'Recompensas' },
     { path: '/messages', icon: MessageCircle, label: 'Mensagens' },
     { path: '/studio-info', icon: Info, label: 'Info' },
