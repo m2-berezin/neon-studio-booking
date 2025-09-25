@@ -9,6 +9,7 @@ import Home from "./pages/Home";
 import Book from "./pages/Book";
 import Rewards from "./pages/Rewards";
 import Subscriptions from "./pages/Subscriptions";
+import Beats from "./pages/Beats";
 import Projects from "./pages/Projects";
 import ProjectDetail from "./pages/ProjectDetail";
 import Messages from "./pages/Messages";
@@ -47,6 +48,7 @@ const App = () => (
               <Route path="/mix-master" element={<MixMaster />} />
               <Route path="/rewards" element={<Rewards />} />
               <Route path="/subscriptions" element={<Subscriptions />} />
+              <Route path="/beats" element={<Beats />} />
               <Route path="/projects" element={<Projects />} />
               <Route path="/projects/:projectId" element={<ProjectDetail />} />
               <Route path="/messages" element={<Messages />} />
