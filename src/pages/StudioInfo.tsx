@@ -130,12 +130,6 @@ const StudioInfo = () => {
               </div>
             </div>
 
-            <div>
-              <h4 className="font-medium mb-2">Estacionamento</h4>
-              <p className="text-sm text-muted-foreground">
-                Estacionamento gratuito disponível no parque do estúdio. Estacionamento na rua também disponível sem limite de tempo.
-              </p>
-            </div>
           </CardContent>
         </Card>
 
