@@ -75,10 +75,10 @@ const Profile = () => {
     <div className="space-y-6">
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-accent accent-glow mb-2">
-          O Seu Perfil
+          O Teu Perfil
         </h1>
         <p className="text-muted-foreground">
-          Gerencie a sua conta do estúdio
+          Gere a tua conta do estúdio
         </p>
       </div>
 

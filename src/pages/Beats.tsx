@@ -22,7 +22,7 @@ const Beats = () => {
     return (
       <div className="text-center py-8">
         <h2 className="text-2xl font-bold text-foreground mb-4">Sessão Requerida</h2>
-        <p className="text-muted-foreground">Por favor faça login para ver os beats exclusivos.</p>
+        <p className="text-muted-foreground">Por favor faz login para ver os beats exclusivos.</p>
       </div>
     );
   }

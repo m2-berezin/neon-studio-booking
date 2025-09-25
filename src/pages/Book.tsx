@@ -149,7 +149,7 @@ const Book = () => {
             Reserva Confirmada!
           </h1>
           <p className="text-muted-foreground">
-            A sua sessão foi reservada com sucesso
+            A tua sessão foi reservada com sucesso
           </p>
         </div>
 
@@ -176,7 +176,7 @@ const Book = () => {
               </Button>
               
               <p className="text-xs text-muted-foreground text-center">
-                Os detalhes da sessão também foram enviados para as suas Mensagens
+                Os detalhes da sessão também foram enviados para as tuas Mensagens
               </p>
             </div>
           </div>
@@ -196,7 +196,7 @@ const Book = () => {
           Reservar uma Sessão
         </h1>
         <p className="text-muted-foreground">
-          Agende a sua sessão de gravação em alguns passos simples
+          Agenda a tua sessão de gravação em alguns passos simples
         </p>
       </div>
 
@@ -225,7 +225,7 @@ const Book = () => {
       {/* Step 1: Choose Service */}
       {step === 1 && (
         <div className="space-y-4">
-          <h2 className="text-xl font-semibold text-center">Escolha o Seu Serviço</h2>
+          <h2 className="text-xl font-semibold text-center">Escolhe o Teu Serviço</h2>
           <div className="space-y-3">
             {services.map((service) => (
               <Card

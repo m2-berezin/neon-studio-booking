@@ -28,7 +28,7 @@ const Subscriptions = () => {
     return (
       <div className="text-center py-8">
         <h2 className="text-2xl font-bold text-foreground mb-4">Sessão Requerida</h2>
-        <p className="text-muted-foreground">Por favor faça login para ver planos de subscrição.</p>
+        <p className="text-muted-foreground">Por favor faz login para ver planos de subscrição.</p>
       </div>
     );
   }
@@ -131,7 +131,7 @@ const Subscriptions = () => {
           Subscrições do Estúdio
         </h1>
         <p className="text-muted-foreground">
-          Escolha um plano mensal que se adapte ao seu horário criativo
+          Escolhe um plano mensal que se adapte ao teu horário criativo
         </p>
       </div>
 
@@ -144,7 +144,7 @@ const Subscriptions = () => {
               Subscrição Atual
             </CardTitle>
             <CardDescription>
-              O seu plano de subscrição ativo
+              O teu plano de subscrição ativo
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -234,7 +234,7 @@ const Subscriptions = () => {
             <CardHeader>
             <CardTitle>Horário Preferido</CardTitle>
             <CardDescription>
-              Defina os seus dias e janelas de tempo preferidos para sessões
+              Define os teus dias e janelas de tempo preferidos para sessões
             </CardDescription>
             </CardHeader>
             <CardContent>

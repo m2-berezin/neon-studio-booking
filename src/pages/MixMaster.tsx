@@ -58,7 +58,7 @@ const MixMaster = () => {
     {
       id: 'upload',
       title: 'Enviar Ficheiros',
-      description: 'Faça upload directo dos seus ficheiros',
+      description: 'Faz upload directo dos teus ficheiros',
       icon: <Upload className="h-5 w-5" />
     },
     {
@@ -156,7 +156,7 @@ const MixMaster = () => {
       {/* Pricing Options */}
       <Card className="mb-8">
         <CardHeader>
-          <CardTitle>Escolha a Sua Opção</CardTitle>
+          <CardTitle>Escolhe a Tua Opção</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -279,7 +279,7 @@ const MixMaster = () => {
                 <Label htmlFor="transfer-link">Link de Transferência</Label>
                 <Input
                   id="transfer-link"
-                  placeholder="Cole aqui o seu link do SwissTransfer/WeTransfer"
+                  placeholder="Cola aqui o teu link do SwissTransfer/WeTransfer"
                   value={transferLink}
                   onChange={(e) => setTransferLink(e.target.value)}
                   className="mt-2"
@@ -319,7 +319,7 @@ const MixMaster = () => {
                 <Label htmlFor="project-notes">Notas do Projecto (Opcional)</Label>
                 <Textarea
                   id="project-notes"
-                  placeholder="Descreva o que pretende para o seu projecto, referências, estilo, etc."
+                  placeholder="Descreve o que pretendes para o teu projecto, referências, estilo, etc."
                   value={projectNotes}
                   onChange={(e) => setProjectNotes(e.target.value)}
                   className="mt-2"

@@ -15,14 +15,14 @@ const Home = () => {
   const services = [
     {
       title: 'Reservar Sessão',
-      description: 'Agende a sua sessão de gravação com os nossos engenheiros profissionais',
+      description: 'Agenda a tua sessão de gravação com os nossos engenheiros profissionais',
       icon: Calendar,
       path: '/book',
       gradient: true,
     },
     {
       title: 'Mix & Master',
-      description: 'Serviço profissional de mistura e masterização para os seus projectos',
+      description: 'Serviço profissional de mistura e masterização para os teus projectos',
       icon: Music,
       path: '/mix-master',
       gradient: true,

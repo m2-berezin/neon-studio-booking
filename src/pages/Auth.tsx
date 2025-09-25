@@ -72,7 +72,7 @@ const Auth = () => {
       });
     } else {
       toast({
-        title: 'Verifique o seu email',
+        title: 'Verifica o teu email',
         description: 'Enviámos um link de confirmação para completar o registo.',
       });
     }
@@ -134,7 +134,7 @@ const Auth = () => {
       });
     } else {
       toast({
-        title: 'Verifique o seu email',
+        title: 'Verifica o teu email',
         description: 'Enviámos um link mágico para iniciar sessão.',
       });
     }

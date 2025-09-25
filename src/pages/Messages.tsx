@@ -29,7 +29,7 @@ const Messages = () => {
     return (
       <div className="text-center py-8">
         <h2 className="text-2xl font-bold text-foreground mb-4">Login Necessário</h2>
-        <p className="text-muted-foreground">Por favor, inicie sessão para ver as suas mensagens.</p>
+        <p className="text-muted-foreground">Por favor faz login para ver as tuas mensagens.</p>
       </div>
     );
   }
@@ -253,7 +253,7 @@ const Messages = () => {
                   <Textarea
                     value={messageText}
                     onChange={(e) => setMessageText(e.target.value)}
-                    placeholder="Escreva a sua mensagem..."
+                    placeholder="Escreve a tua mensagem..."
                     className="min-h-[60px] resize-none"
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && !e.shiftKey) {

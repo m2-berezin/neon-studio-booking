@@ -30,7 +30,7 @@ const Rewards = () => {
     return (
       <div className="text-center py-8">
         <h2 className="text-2xl font-bold text-foreground mb-4">Sessão Requerida</h2>
-        <p className="text-muted-foreground">Por favor faça login para ver recompensas e ofertas.</p>
+        <p className="text-muted-foreground">Por favor faz login para ver recompensas e ofertas.</p>
       </div>
     );
   }
@@ -76,7 +76,7 @@ const Rewards = () => {
               <div>
                 <span className="font-semibold">Vale de €15 disponível!</span>
                 <p className="text-sm text-primary/80 mt-1">
-                  Reivindique o seu vale válido por 30 dias - disponível a cada 30 dias.
+                  Reivindica o teu vale válido por 30 dias - disponível a cada 30 dias.
                 </p>
                 <div className="text-xs text-orange-600 font-medium mt-2">
                   ⏰ Dias restantes para reivindicar: {Math.max(0, Math.ceil((new Date().getTime() + 30 * 24 * 60 * 60 * 1000 - new Date().getTime()) / (24 * 60 * 60 * 1000)))}
@@ -248,12 +248,12 @@ const Rewards = () => {
                 <div className="text-center p-4 bg-secondary/50 rounded-lg">
                   <p className="text-2xl font-bold text-primary">{projectStats.mixingMasteringCount}</p>
                   <p className="text-sm text-muted-foreground">Projetos M&M</p>
-                  <p className="text-xs text-muted-foreground">Precisa de 7 no total</p>
+                  <p className="text-xs text-muted-foreground">Precisas de 7 no total</p>
                 </div>
                 <div className="text-center p-4 bg-secondary/50 rounded-lg">
                   <p className="text-2xl font-bold text-primary">{projectStats.fullSongCount}</p>
                   <p className="text-sm text-muted-foreground">Músicas Completas</p>
-                  <p className="text-xs text-muted-foreground">Precisa de 5 no total</p>
+                  <p className="text-xs text-muted-foreground">Precisas de 5 no total</p>
                 </div>
               </div>
               
@@ -262,7 +262,7 @@ const Rewards = () => {
                   <p className="font-medium text-foreground">
                     {isLoyaltyRewardAvailable() 
                       ? 'Parabéns! Ganhou uma sessão M&M grátis' 
-                      : 'Continue a completar projetos para ganhar a sua sessão grátis'
+                      : 'Continua a completar projetos para ganhar a tua sessão grátis'
                     }
                   </p>
                   <p className="text-sm text-muted-foreground">
@@ -285,7 +285,7 @@ const Rewards = () => {
       {/* Info Footer */}
       <div className="text-center py-4">
         <p className="text-xs text-muted-foreground">
-          As recompensas aplicadas serão automaticamente incluídas no preço da sua próxima reserva.
+          As recompensas aplicadas serão automaticamente incluídas no preço da tua próxima reserva.
           {hasActivePenalty() && (
             <span className="block text-destructive mt-1">
               Todas as aplicações de recompensas estão atualmente pausadas devido a uma penalização ativa.

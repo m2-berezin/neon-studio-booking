@@ -97,7 +97,7 @@ const StudioInfo = () => {
           Informações do Estúdio
         </h1>
         <p className="text-muted-foreground text-lg">
-          Tudo o que precisa de saber para a sua sessão
+          Tudo o que precisas de saber para a tua sessão
         </p>
       </div>
 

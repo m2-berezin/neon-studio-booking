@@ -17,7 +17,7 @@ const Projects = () => {
     return (
       <div className="text-center py-8">
         <h2 className="text-2xl font-bold text-foreground mb-4">Sessão Requerida</h2>
-        <p className="text-muted-foreground">Por favor faça login para ver os seus projetos.</p>
+        <p className="text-muted-foreground">Por favor faz login para ver os teus projetos.</p>
       </div>
     );
   }
@@ -59,7 +59,7 @@ const Projects = () => {
           Os Meus Projetos
         </h1>
         <p className="text-muted-foreground">
-          {isAdmin() ? 'Gerir todos os projetos do estúdio' : 'Acompanhar os seus projetos de estúdio'}
+          {isAdmin() ? 'Gerir todos os projetos do estúdio' : 'Acompanha os teus projetos de estúdio'}
         </p>
       </div>
 
@@ -73,7 +73,7 @@ const Projects = () => {
           <Folder className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-foreground mb-2">Ainda Sem Projetos</h3>
           <p className="text-muted-foreground">
-            {isAdmin() ? 'Ainda não foram criados projetos.' : 'Faça uma reserva para começar o seu primeiro projeto!'}
+            {isAdmin() ? 'Ainda não foram criados projetos.' : 'Faz uma reserva para começar o teu primeiro projeto!'}
           </p>
         </div>
       ) : (
