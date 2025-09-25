@@ -76,10 +76,10 @@ const Rewards = () => {
               <div>
                 <span className="font-semibold">Vale de €15 disponível!</span>
                 <p className="text-sm text-primary/80 mt-1">
-                  Reivindica o teu vale válido por 30 dias - disponível a cada 30 dias.
+                  Disponível a cada 90 dias.
                 </p>
                 <div className="text-xs text-orange-600 font-medium mt-2">
-                  ⏰ Dias restantes para reivindicar: {Math.max(0, Math.ceil((new Date().getTime() + 30 * 24 * 60 * 60 * 1000 - new Date().getTime()) / (24 * 60 * 60 * 1000)))}
+                  ⏰ Dias restantes para reivindicar: {Math.max(0, Math.ceil((new Date().getTime() + 90 * 24 * 60 * 60 * 1000 - new Date().getTime()) / (24 * 60 * 60 * 1000)))}
                 </div>
               </div>
               <Button
@@ -128,7 +128,10 @@ const Rewards = () => {
                   )}
                 </div>
                 <Button
-                  onClick={() => handleApplyReward('W_REC_3FOR20', '3h recording for €20')}
+                  onClick={() => {
+                    handleApplyReward('W_REC_3FOR20', '3h recording for €20');
+                    window.open('/book?discount=W_REC_3FOR20', '_blank');
+                  }}
                   disabled={!isWeeklyOfferAAvailable() || appliedRewards['W_REC_3FOR20'] || loading}
                   variant={appliedRewards['W_REC_3FOR20'] ? 'outline' : 'default'}
                 >
@@ -152,17 +155,20 @@ const Rewards = () => {
             <CardContent>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-2xl font-bold text-accent">€35 each</p>
+                  <p className="text-2xl font-bold text-accent">€35 cada</p>
                   <p className="text-sm text-muted-foreground">
                     Usos ilimitados • Poupe ao agrupar
                   </p>
                 </div>
                 <Button
-                  onClick={() => handleApplyReward('W_MM_BUNDLE', 'M&M bundle €35 each')}
+                  onClick={() => {
+                    handleApplyReward('W_MM_BUNDLE', 'M&M bundle €35 each');
+                    window.open('/mix-master?discount=W_MM_BUNDLE', '_blank');
+                  }}
                   disabled={hasActivePenalty() || appliedRewards['W_MM_BUNDLE'] || loading}
                   variant={appliedRewards['W_MM_BUNDLE'] ? 'outline' : 'default'}
                 >
-                  {appliedRewards['W_MM_BUNDLE'] ? 'Aplicado ✓' : 'Aplicar Taxa Bundle'}
+                  {appliedRewards['W_MM_BUNDLE'] ? 'Aplicado ✓' : 'Aplicar Oferta'}
                 </Button>
               </div>
             </CardContent>
@@ -179,35 +185,34 @@ const Rewards = () => {
         
         <Card className="studio-card">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-base md:text-lg">
               <Crown className="w-5 h-5 text-primary" />
               Pacote Produção Completa
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-sm">
               Pacote completo Gravação + Mistura + Masterização
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="flex items-center gap-4">
-                  <div>
-                    <p className="text-2xl font-bold text-accent">€70</p>
-                    <p className="text-sm text-muted-foreground">Taxa padrão</p>
-                  </div>
-                  <div className="text-muted-foreground">ou</div>
-                  <div>
-                    <p className="text-2xl font-bold text-primary">€65</p>
-                    <p className="text-sm text-muted-foreground">Taxa premium</p>
-                  </div>
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4 text-center sm:text-left">
+                <div>
+                  <p className="text-2xl font-bold text-accent">€70</p>
+                  <p className="text-sm text-muted-foreground">Taxa padrão</p>
+                </div>
+                <div className="text-muted-foreground hidden sm:block">ou</div>
+                <div>
+                  <p className="text-2xl font-bold text-primary">€65</p>
+                  <p className="text-sm text-muted-foreground">Taxa premium</p>
                 </div>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <Button
                   onClick={() => handleApplyReward('M_PACKAGE_70', 'Full package €70')}
                   disabled={hasActivePenalty() || appliedRewards['M_PACKAGE_70'] || loading}
                   variant={appliedRewards['M_PACKAGE_70'] ? 'outline' : 'secondary'}
                   size="sm"
+                  className="w-full sm:w-auto"
                   >
                     {appliedRewards['M_PACKAGE_70'] ? 'Aplicado ✓' : 'Aplicar €70'}
                   </Button>
@@ -216,6 +221,7 @@ const Rewards = () => {
                     disabled={hasActivePenalty() || appliedRewards['M_PACKAGE_65'] || loading}
                     variant={appliedRewards['M_PACKAGE_65'] ? 'outline' : 'default'}
                     size="sm"
+                    className="w-full sm:w-auto"
                   >
                     {appliedRewards['M_PACKAGE_65'] ? 'Aplicado ✓' : 'Aplicar €65'}
                   </Button>
@@ -244,7 +250,7 @@ const Rewards = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="text-center p-4 bg-secondary/50 rounded-lg">
                   <p className="text-2xl font-bold text-primary">{projectStats.mixingMasteringCount}</p>
                   <p className="text-sm text-muted-foreground">Projetos M&M</p>
@@ -257,8 +263,8 @@ const Rewards = () => {
                 </div>
               </div>
               
-              <div className="flex items-center justify-between">
-                <div>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="text-center sm:text-left">
                   <p className="font-medium text-foreground">
                     {isLoyaltyRewardAvailable() 
                       ? 'Parabéns! Ganhou uma sessão M&M grátis' 
@@ -273,6 +279,7 @@ const Rewards = () => {
                   onClick={handleLoyaltyRedeem}
                   disabled={!isLoyaltyRewardAvailable() || loading}
                   variant={isLoyaltyRewardAvailable() ? 'default' : 'outline'}
+                  className="w-full sm:w-auto"
                 >
                   {loading ? 'A resgatar...' : isLoyaltyRewardAvailable() ? 'Resgatar M&M Grátis' : 'Não Disponível'}
                 </Button>

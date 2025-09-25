@@ -42,7 +42,7 @@ const Subscriptions = () => {
       features: [
         '10% desconto em todos os serviços no primeiro mês',
         '15% desconto nos meses seguintes',
-        'Ao fim de 6 meses: oferta de 1 Mix&Master (poupa €10)'
+        'Ao fim de 6 meses: oferta de 1 Mix&Master'
       ],
       popular: false
     },
@@ -55,7 +55,7 @@ const Subscriptions = () => {
         '10% desconto no primeiro mês em todos os serviços',
         '15% desconto nos meses seguintes',
         'Oferta de 2h de captação por mês',
-        'Ao fim de 6 meses: 1 captação mix e master (poupa €10)'
+        'Ao fim de 6 meses: 1 captação mix e master'
       ],
       popular: true
     }
@@ -203,11 +203,13 @@ const Subscriptions = () => {
                     
                     <Button
                       className="w-full"
-                      onClick={() => handleCreateSubscription(plan)}
+                      onClick={() => {
+                        window.open(`/payment?service=subscription&plan=${plan.id}&price=${plan.price}`, '_blank');
+                      }}
                       disabled={loading}
                       variant={plan.popular ? 'default' : 'outline'}
                     >
-                      {loading ? 'A criar...' : 'Subscrever Agora'}
+                      Subscrever Agora
                     </Button>
                   </div>
                 </CardContent>
@@ -390,10 +392,10 @@ const Subscriptions = () => {
       {/* Info Footer */}
       <div className="text-center py-4">
         <p className="text-xs text-muted-foreground">
-          Subscriptions are billed monthly. You can update your preferences anytime.
+          As subscrições são faturadas mensalmente. Podes atualizar as tuas preferências a qualquer momento.
           {userSubscription && (
             <span className="block mt-1">
-              Your monthly sessions will be scheduled based on availability and your preferences.
+              As tuas sessões mensais serão agendadas com base na disponibilidade e nas tuas preferências.
             </span>
           )}
         </p>

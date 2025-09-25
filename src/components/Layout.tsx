@@ -1,6 +1,7 @@
 import { ReactNode, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useWelcomeMessages } from '@/hooks/useWelcomeMessages';
 import { Button } from '@/components/ui/button';
 import { Home, Calendar, Gift, MessageCircle, User, LogOut, Settings, Star, Music, Folder, Info } from 'lucide-react';
 import { NotificationBell } from '@/components/NotificationBell';
@@ -10,6 +11,9 @@ const Layout = ({ children }: { children: ReactNode }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, loading, signOut, isAdmin } = useAuth();
+  
+  // Initialize welcome messages for new users
+  useWelcomeMessages();
 
   // Handle authentication redirect properly (non-blocking)
   useEffect(() => {

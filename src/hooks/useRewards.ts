@@ -260,10 +260,10 @@ export const useRewards = () => {
     if (!profile?.last_voucher_at) return true;
     
     const lastVoucherDate = new Date(profile.last_voucher_at);
-    const sixMonthsAgo = new Date();
-    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+    const threeMonthsAgo = new Date();
+    threeMonthsAgo.setDate(threeMonthsAgo.getDate() - 90); // 90 days = ~3 months
     
-    return lastVoucherDate <= sixMonthsAgo;
+    return lastVoucherDate <= threeMonthsAgo;
   };
 
   // Claim €15 voucher
@@ -272,8 +272,8 @@ export const useRewards = () => {
 
     if (!isVoucherAvailable()) {
       toast({
-        title: 'Voucher Not Available',
-        description: 'You are not eligible for a voucher at this time.',
+        title: 'Vale Não Disponível',
+        description: 'Não és elegível para um vale neste momento.',
         variant: 'destructive',
       });
       return false;
@@ -282,7 +282,7 @@ export const useRewards = () => {
     setLoading(true);
     try {
       const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + 60); // +60 days
+      expiresAt.setDate(expiresAt.getDate() + 30); // +30 days
 
       // Insert voucher
       const { data: voucher, error: voucherError } = await supabase
@@ -309,16 +309,16 @@ export const useRewards = () => {
       if (profileError) throw profileError;
 
       toast({
-        title: 'Voucher Claimed!',
-        description: `€15 voucher created! Code: ${voucher.code}. Expires in 60 days.`,
+        title: 'Vale Reivindicado!',
+        description: `Vale de €15 criado! Código: ${voucher.code}. Expira em 30 dias.`,
       });
 
       return true;
     } catch (error: any) {
       console.error('Error claiming voucher:', error);
       toast({
-        title: 'Claim Failed',
-        description: error.message || 'Failed to claim voucher',
+        title: 'Falha na Reivindicação',
+        description: error.message || 'Falha ao reivindicar vale',
         variant: 'destructive',
       });
       return false;
