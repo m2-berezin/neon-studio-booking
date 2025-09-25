@@ -27,33 +27,33 @@ const StudioInfo = () => {
   const houseRules = [
     {
       icon: <Clock className="h-5 w-5" />,
-      title: "Punctuality",
-      description: "Please arrive on time. Late arrivals may result in shortened sessions."
+      title: "Pontualidade",
+      description: "Por favor chegue a horas. Atrasos podem resultar em sessões encurtadas."
     },
     {
       icon: <Music className="h-5 w-5" />,
-      title: "Respect the Equipment",
-      description: "Handle all equipment with care. Report any issues immediately."
+      title: "Respeite o Equipamento",
+      description: "Manuseie todo o equipamento com cuidado. Reporte qualquer problema imediatamente."
     },
     {
       icon: <Settings className="h-5 w-5" />,
-      title: "NO FOOD",
+      title: "PROIBIDO COMER",
       description: "Comida não é permitida no estúdio. É permitido fumar."
     },
     {
       icon: <Phone className="h-5 w-5" />,
-      title: "Phone Etiquette",
-      description: "Keep phones on silent mode during recording sessions."
+      title: "Etiqueta do Telemóvel",
+      description: "Mantenha os telemóveis em modo silencioso durante as sessões de gravação."
     },
     {
       icon: <Headphones className="h-5 w-5" />,
-      title: "Personal Items",
-      description: "You're responsible for your personal belongings. We're not liable for lost items."
+      title: "Objectos Pessoais",
+      description: "É responsável pelos seus pertences pessoais. Não somos responsáveis por objectos perdidos."
     },
     {
       icon: <Mic className="h-5 w-5" />,
-      title: "Professional Conduct",
-      description: "Maintain a professional atmosphere. Disruptive behavior will not be tolerated."
+      title: "Conduta Profissional",
+      description: "Mantenha uma atmosfera profissional. Comportamento disruptivo não será tolerado."
     }
   ];
 
@@ -128,7 +128,7 @@ const StudioInfo = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <MapPin className="h-5 w-5 text-primary" />
-              Location
+              Localização
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -140,7 +140,7 @@ const StudioInfo = () => {
                 className="w-full"
               >
                 <ExternalLink className="h-4 w-4 mr-2" />
-                Open in Google Maps
+                Abrir no Google Maps
               </Button>
             </div>
             
@@ -157,9 +157,9 @@ const StudioInfo = () => {
             </div>
 
             <div>
-              <h4 className="font-medium mb-2">Parking</h4>
+              <h4 className="font-medium mb-2">Estacionamento</h4>
               <p className="text-sm text-muted-foreground">
-                Free parking available in the studio lot. Street parking is also available with no time limits.
+                Estacionamento gratuito disponível no parque do estúdio. Estacionamento na rua também disponível sem limite de tempo.
               </p>
             </div>
           </CardContent>
@@ -170,7 +170,7 @@ const StudioInfo = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Calendar className="h-5 w-5 text-primary" />
-              Cancellation Policy
+              Política de Cancelamento
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -203,16 +203,16 @@ const StudioInfo = () => {
             <Separator />
             
             <div>
-              <h4 className="font-medium mb-2">No-Show Policy</h4>
+              <h4 className="font-medium mb-2">Política de Não Comparência</h4>
               <p className="text-sm text-muted-foreground">
-                Missing your session without notice results in full payment forfeiture and a 3-month penalty period where rewards cannot be used.
+                Faltar à sessão sem aviso resulta na perda total do pagamento e num período de penalização de 3 meses onde as recompensas não podem ser utilizadas.
               </p>
             </div>
 
             <div>
-              <h4 className="font-medium mb-2">Emergency Situations</h4>
+              <h4 className="font-medium mb-2">Situações de Emergência</h4>
               <p className="text-sm text-muted-foreground">
-                We understand emergencies happen. Contact us immediately for case-by-case consideration.
+                Compreendemos que emergências acontecem. Contacte-nos imediatamente para consideração caso a caso.
               </p>
             </div>
           </CardContent>
@@ -222,9 +222,9 @@ const StudioInfo = () => {
       {/* House Rules */}
       <Card className="mt-8">
         <CardHeader>
-          <CardTitle>Studio House Rules</CardTitle>
+          <CardTitle>Regras da Casa do Estúdio</CardTitle>
           <p className="text-sm text-muted-foreground">
-            Please follow these guidelines to ensure a professional and productive environment for everyone.
+            Por favor siga estas diretrizes para garantir um ambiente profissional e produtivo para todos.
           </p>
         </CardHeader>
         <CardContent>
@@ -248,9 +248,9 @@ const StudioInfo = () => {
       {/* Contact Footer */}
       <Card className="mt-8 border-primary/20 bg-primary/5">
         <CardContent className="p-6 text-center">
-          <h3 className="font-semibold text-foreground mb-2">Questions?</h3>
+          <h3 className="font-semibold text-foreground mb-2">Dúvidas?</h3>
           <p className="text-sm text-muted-foreground mb-4">
-            Don't see what you're looking for? Get in touch with us directly.
+            Não encontrou o que procurava? Entre em contacto connosco directamente.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button
@@ -266,7 +266,7 @@ const StudioInfo = () => {
               onClick={() => window.open(`tel:${whatsappNumber}`, '_self')}
             >
               <Phone className="h-4 w-4 mr-2" />
-              Call Studio
+              Ligar para o Estúdio
             </Button>
           </div>
         </CardContent>
