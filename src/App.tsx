@@ -16,6 +16,7 @@ import Projects from "./pages/Projects";
 import ProjectDetail from "./pages/ProjectDetail";
 import Messages from "./pages/Messages";
 import Profile from "./pages/Profile";
+import ProfileSettings from "./pages/ProfileSettings";
 import Auth from "./pages/Auth";
 import Admin from "@/pages/Admin";
 import StudioInfo from "@/pages/StudioInfo";
@@ -64,6 +65,7 @@ const App = () => {
                 <Route path="/projects/:projectId" element={<ProjectDetail />} />
                 <Route path="/messages" element={<Messages />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/profile/settings" element={<ProfileSettings />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/admin" element={<Admin />} />
                 <Route path="/studio-info" element={<StudioInfo />} />

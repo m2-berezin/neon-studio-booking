@@ -1,10 +1,12 @@
-import { User, Settings, Music, Calendar, Award, LogOut, Shield, Phone, Mail } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Calendar, Music, Award, User, Settings, LogOut, Shield, Mail, Phone } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 
 const Profile = () => {
+  const navigate = useNavigate();
   const { user, profile, signOut, updateProfile, isAdmin } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -16,10 +18,8 @@ const Profile = () => {
   ];
 
   const menuItems = [
-    { label: 'Definições da Conta', icon: Settings, path: '/settings' },
-    { label: 'Os Meus Projectos', icon: Music, path: '/projects' },
-    { label: 'Facturação e Subscrições', icon: Calendar, path: '/billing' },
-    { label: 'Ajuda e Suporte', icon: User, path: '/support' },
+    { label: 'Definições', icon: Settings, path: '/profile/settings' },
+    { label: 'Facturação e Subscrições', icon: Calendar, path: '/subscriptions' },
   ];
 
   const handleSignOut = async () => {
@@ -153,7 +153,11 @@ const Profile = () => {
       {/* Menu Items */}
       <div className="space-y-3">
         {menuItems.map((item) => (
-          <div key={item.label} className="studio-card cursor-pointer tap-target">
+          <div 
+            key={item.label} 
+            className="studio-card cursor-pointer tap-target"
+            onClick={() => navigate(item.path)}
+          >
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
                 <div className="p-2 bg-secondary rounded-lg">
@@ -169,38 +173,22 @@ const Profile = () => {
         ))}
       </div>
 
-      {/* Account Actions */}
-      <div className="space-y-3">
-        <div className="studio-card cursor-pointer tap-target">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="p-2 bg-secondary rounded-lg">
-                <Settings className="text-accent" size={18} />
-              </div>
-              <span className="font-medium text-foreground">Definições da App</span>
+      {/* Sign Out */}
+      <div 
+        className="studio-card cursor-pointer tap-target"
+        onClick={handleSignOut}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <div className="p-2 bg-destructive/20 rounded-lg">
+              <LogOut className="text-destructive" size={18} />
             </div>
-            <div className="text-muted-foreground">
-              →
-            </div>
+            <span className="font-medium text-foreground">
+              {loading ? 'A terminar sessão...' : 'Terminar Sessão'}
+            </span>
           </div>
-        </div>
-
-        <div 
-          className="studio-card cursor-pointer tap-target"
-          onClick={handleSignOut}
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="p-2 bg-destructive/20 rounded-lg">
-                <LogOut className="text-destructive" size={18} />
-              </div>
-              <span className="font-medium text-foreground">
-                {loading ? 'A terminar sessão...' : 'Terminar Sessão'}
-              </span>
-            </div>
-            <div className="text-muted-foreground">
-              →
-            </div>
+          <div className="text-muted-foreground">
+            →
           </div>
         </div>
       </div>

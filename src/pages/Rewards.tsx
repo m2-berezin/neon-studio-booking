@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useRewards } from '@/hooks/useRewards';
 import { useAuth } from '@/contexts/AuthContext';
 import PenaltyBanner from '@/components/PenaltyBanner';
+import ReferralSystem from '@/components/ReferralSystem';
 
 const Rewards = () => {
   const { user } = useAuth();
@@ -66,6 +67,9 @@ const Rewards = () => {
       {hasActivePenalty() && penaltyEndDate && (
         <PenaltyBanner penaltyEndDate={penaltyEndDate} className="mb-6" />
       )}
+
+      {/* Referral System */}
+      <ReferralSystem className="mb-6" />
 
       {/* Voucher Banner */}
       {isVoucherAvailable() && (
