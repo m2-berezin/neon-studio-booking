@@ -9,6 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useNotificationSettings } from '@/hooks/useNotificationSettings';
 
 const ProfileSettings = () => {
   const navigate = useNavigate();
@@ -22,12 +23,11 @@ const ProfileSettings = () => {
     phone: profile?.phone || '',
   });
   
-  const [settings, setSettings] = useState({
-    notifications: true,
+  const { settings: notificationSettings, toggleSetting } = useNotificationSettings();
+  
+  const [appSettings, setAppSettings] = useState({
     darkMode: false,
     language: 'pt',
-    emailNotifications: true,
-    smsNotifications: false,
   });
 
   const handleProfileUpdate = async () => {
@@ -60,8 +60,8 @@ const ProfileSettings = () => {
     }
   };
 
-  const handleSettingChange = (key: string, value: boolean | string) => {
-    setSettings(prev => ({ ...prev, [key]: value }));
+  const handleAppSettingChange = (key: string, value: boolean | string) => {
+    setAppSettings(prev => ({ ...prev, [key]: value }));
     
     toast({
       title: 'Definição Atualizada',
@@ -194,41 +194,47 @@ const ProfileSettings = () => {
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <Label>Notificações Push</Label>
+              <Label>Mensagens Novas</Label>
               <p className="text-sm text-muted-foreground">
-                Recebe notificações sobre ofertas e atualizações
+                Notificações quando recebes mensagens novas
               </p>
             </div>
             <Switch
-              checked={settings.notifications}
-              onCheckedChange={(checked) => handleSettingChange('notifications', checked)}
+              checked={notificationSettings.newMessages}
+              onCheckedChange={() => toggleSetting('newMessages')}
             />
           </div>
 
           <div className="flex items-center justify-between">
             <div>
-              <Label>Notificações por Email</Label>
+              <Label>Voucher de €15 Disponível</Label>
               <p className="text-sm text-muted-foreground">
-                Recebe emails sobre novos serviços e ofertas
+                Notificação quando o voucher de €15 fica disponível
               </p>
             </div>
             <Switch
-              checked={settings.emailNotifications}
-              onCheckedChange={(checked) => handleSettingChange('emailNotifications', checked)}
+              checked={notificationSettings.voucherAvailable}
+              onCheckedChange={() => toggleSetting('voucherAvailable')}
             />
           </div>
 
           <div className="flex items-center justify-between">
             <div>
-              <Label>Notificações SMS</Label>
+              <Label>Lembretes de Reservas</Label>
               <p className="text-sm text-muted-foreground">
-                Recebe SMS sobre reservas confirmadas
+                Notificação uma semana antes da tua reserva
               </p>
             </div>
             <Switch
-              checked={settings.smsNotifications}
-              onCheckedChange={(checked) => handleSettingChange('smsNotifications', checked)}
+              checked={notificationSettings.bookingReminders}
+              onCheckedChange={() => toggleSetting('bookingReminders')}
             />
+          </div>
+
+          <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+            <p className="text-sm text-red-800">
+              ⚠️ As notificações por email foram removidas conforme solicitado.
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -250,16 +256,16 @@ const ProfileSettings = () => {
               </p>
             </div>
             <Switch
-              checked={settings.darkMode}
-              onCheckedChange={(checked) => handleSettingChange('darkMode', checked)}
+              checked={appSettings.darkMode}
+              onCheckedChange={(checked) => handleAppSettingChange('darkMode', checked)}
             />
           </div>
 
           <div className="space-y-2">
             <Label>Idioma</Label>
             <Select
-              value={settings.language}
-              onValueChange={(value) => handleSettingChange('language', value)}
+              value={appSettings.language}
+              onValueChange={(value) => handleAppSettingChange('language', value)}
             >
               <SelectTrigger>
                 <SelectValue />

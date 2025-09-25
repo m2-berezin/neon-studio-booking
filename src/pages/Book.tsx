@@ -43,11 +43,11 @@ const Book = () => {
   const services = [
     {
       id: 'recording',
-      name: 'Captação 2h (mínimo)',
+      name: 'Captação 3h (mínimo)',
       base_price: 20,
       type: 'recording',
-      description: 'Sessão de gravação profissional de 2 horas mínimo',
-      duration: 120
+      description: 'Sessão de gravação profissional de 3 horas mínimo',
+      duration: 180
     },
     {
       id: 'recording_mix',
@@ -378,14 +378,24 @@ const Book = () => {
 
           <div className="space-y-3">
             <Button 
-              onClick={handleBookingConfirm} 
+              onClick={() => {
+                // Redirect to payment page instead of confirming booking
+                const queryParams = new URLSearchParams({
+                  service: 'booking',
+                  option: selectedService,
+                  delivery: 'in-person',
+                  price: selectedServiceDetails?.base_price.toString() || '0',
+                  notes: `Booking for ${selectedDate ? selectedDate.toDateString() : ''} at ${selectedSlot ? selectedSlot.start_time : ''}`,
+                });
+                window.location.href = `/payment-stripe?${queryParams.toString()}`;
+              }}
               className="w-full"
               disabled={loading}
             >
-              {loading ? 'A confirmar...' : 'Confirmar Reserva'}
+              {loading ? 'A processar...' : 'Ir para Pagamento'}
             </Button>
             <p className="text-xs text-muted-foreground text-center">
-              Não é necessário pagamento agora. O pagamento será processado no estúdio.
+              Será redirecionado para a página de pagamento.
             </p>
           </div>
         </div>

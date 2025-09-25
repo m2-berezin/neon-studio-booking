@@ -19,7 +19,7 @@ interface AuthContextType {
   profile: Profile | null;
   loading: boolean;
   signUp: (email: string, password: string, fullName: string, phone: string) => Promise<{ error: any }>;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
+  signIn: (emailOrPhone: string, password: string) => Promise<{ error: any }>;
   signInWithMagicLink: (email: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<Profile>) => Promise<{ error: any }>;
@@ -118,12 +118,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return { error };
   };
 
-  const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    return { error };
+  const signIn = async (emailOrPhone: string, password: string) => {
+    // Check if it's a phone number (starts with 9 and has 9 digits)
+    const isPhoneNumber = /^9\d{8}$/.test(emailOrPhone);
+    
+    if (isPhoneNumber) {
+      // For phone login, we'll need to implement a different approach
+      // For now, return an error suggesting email login
+      return { error: new Error('Login por telefone será implementado numa atualização futura. Por favor use o email.') };
+    } else {
+      // Regular email sign in
+      const { error } = await supabase.auth.signInWithPassword({
+        email: emailOrPhone,
+        password,
+      });
+      return { error };
+    }
   };
 
   const signInWithMagicLink = async (email: string) => {

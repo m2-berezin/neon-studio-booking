@@ -82,13 +82,25 @@ const Auth = () => {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const emailError = validateField(emailSchema, email, 'email');
-    const passwordError = validateField(passwordSchema, password, 'password');
+    // Skip email validation if it's a phone number
+    const isPhoneNumber = /^9\d{8}$/.test(email);
+    if (!isPhoneNumber) {
+      const emailError = validateField(emailSchema, email, 'email');
+      if (emailError) {
+        toast({
+          title: 'Erro de Validação',
+          description: emailError,
+          variant: 'destructive',
+        });
+        return;
+      }
+    }
     
-    if (emailError || passwordError) {
+    const passwordError = validateField(passwordSchema, password, 'password');
+    if (passwordError) {
       toast({
         title: 'Erro de Validação',
-        description: emailError || passwordError,
+        description: passwordError,
         variant: 'destructive',
       });
       return;
@@ -208,8 +220,8 @@ const Auth = () => {
                 <div className="relative">
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
-                    type="email"
-                    placeholder="Email"
+                    type="text"
+                    placeholder="Email ou Número (9XXXXXXXX)"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="pl-10"

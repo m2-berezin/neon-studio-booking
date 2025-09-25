@@ -134,7 +134,7 @@ const Rewards = () => {
                 <Button
                   onClick={() => {
                     handleApplyReward('W_REC_3FOR20', '3h recording for €20');
-                    window.open('/book?discount=W_REC_3FOR20', '_blank');
+                    window.location.href = '/book?discount=W_REC_3FOR20';
                   }}
                   disabled={!isWeeklyOfferAAvailable() || appliedRewards['W_REC_3FOR20'] || loading}
                   variant={appliedRewards['W_REC_3FOR20'] ? 'outline' : 'default'}
@@ -167,12 +167,12 @@ const Rewards = () => {
                 <Button
                   onClick={() => {
                     handleApplyReward('W_MM_BUNDLE', 'M&M bundle €35 each');
-                    window.open('/mix-master?discount=W_MM_BUNDLE', '_blank');
+                    window.location.href = '/mix-master?discount=W_MM_BUNDLE';
                   }}
                   disabled={hasActivePenalty() || appliedRewards['W_MM_BUNDLE'] || loading}
                   variant={appliedRewards['W_MM_BUNDLE'] ? 'outline' : 'default'}
                 >
-                  {appliedRewards['W_MM_BUNDLE'] ? 'Aplicado ✓' : 'Aplicar Oferta'}
+                  {appliedRewards['W_MM_BUNDLE'] ? 'Oferta Aplicada' : 'Aplicar Oferta'}
                 </Button>
               </div>
             </CardContent>

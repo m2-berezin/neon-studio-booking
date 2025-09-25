@@ -148,4 +148,49 @@ All colors MUST be HSL.
   .tap-target {
     @apply min-h-[44px] min-w-[44px] flex items-center justify-center;
   }
+
+  /* Mobile Responsive Improvements */
+  @media (max-width: 768px) {
+    .container {
+      @apply px-3;
+    }
+    
+    /* Symmetric padding for mobile */
+    .mobile-symmetric {
+      @apply px-4 py-6;
+    }
+    
+    /* Better mobile card spacing */
+    .studio-card {
+      @apply p-4;
+    }
+    
+    /* Mobile-friendly buttons */
+    .btn-mobile {
+      @apply w-full min-h-[48px] text-base px-4 py-3;
+    }
+    
+    /* Mobile text scaling */
+    .mobile-title {
+      @apply text-2xl;
+    }
+    
+    .mobile-subtitle {
+      @apply text-lg;
+    }
+    
+    /* Mobile grid improvements */
+    .mobile-grid {
+      @apply grid-cols-1 gap-4;
+    }
+    
+    /* Proportional spacing */
+    .mobile-space-y {
+      @apply space-y-4;
+    }
+    
+    .mobile-space-x {
+      @apply space-x-3;
+    }
+  }
 }

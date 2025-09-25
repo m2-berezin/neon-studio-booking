@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubscriptions } from '@/hooks/useSubscriptions';
+import { validateFriendCode, useFriendCode } from '@/utils/friendCodes';
 
 interface Service {
   id: string;
@@ -113,12 +114,12 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange }
     ? Math.max(0, subtotal - userSubscription.discounted_price) 
     : 0;
 
-  // Apply reward code
+  // Apply friend/reward code
   const applyReward = async () => {
     if (!rewardCode.trim()) {
       toast({
-        title: 'Invalid Code',
-        description: 'Please enter a reward code',
+        title: 'Código Inválido',
+        description: 'Por favor introduza um código de amigo',
         variant: 'destructive',
       });
       return;
@@ -130,7 +131,19 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange }
       setVoucherCode('');
     }
 
-    // Simple reward codes for demo
+    // First check if it's a friend code
+    const friendCodeValidation = validateFriendCode(rewardCode.toUpperCase(), user?.id || '');
+    if (friendCodeValidation.valid) {
+      setAppliedReward(rewardCode.toUpperCase());
+      useFriendCode(rewardCode.toUpperCase(), user?.id || '');
+      toast({
+        title: 'Código de Amigo Aplicado',
+        description: `25% de desconto aplicado - €${(subtotal * 0.25).toFixed(2)} de desconto`,
+      });
+      return;
+    }
+
+    // Fallback to other reward codes
     const rewardDiscounts: Record<string, { discount: number; description: string }> = {
       'BUY2GET1': { discount: subtotal * 0.33, description: 'Buy 2h Get 1h Free' },
       'MIXING50': { discount: subtotal * 0.5, description: '50% Off Mixing & Mastering' },
@@ -141,13 +154,13 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange }
     if (reward) {
       setAppliedReward(rewardCode.toUpperCase());
       toast({
-        title: 'Reward Applied',
-        description: `${reward.description} - €${reward.discount.toFixed(2)} discount`,
+        title: 'Recompensa Aplicada',
+        description: `${reward.description} - €${reward.discount.toFixed(2)} desconto`,
       });
     } else {
       toast({
-        title: 'Invalid Code',
-        description: 'Reward code not found or expired',
+        title: 'Código Inválido',
+        description: friendCodeValidation.error || 'Código não encontrado ou expirado',
         variant: 'destructive',
       });
     }
@@ -210,6 +223,11 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange }
   // Calculate reward discount
   const getRewardDiscount = () => {
     if (!appliedReward) return 0;
+    
+    // Check if it's a friend code (8 character alphanumeric)
+    if (/^[A-Z0-9]{8}$/.test(appliedReward)) {
+      return subtotal * 0.25; // 25% discount for friend codes
+    }
     
     const rewardDiscounts: Record<string, number> = {
       'BUY2GET1': subtotal * 0.33,
@@ -294,10 +312,10 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange }
           </div>
         )}
 
-        {/* Reward Code Input */}
+        {/* Friend Code Input */}
         {!appliedVoucher && (
           <div className="space-y-2">
-            <Label htmlFor="reward-code">Código de Recompensa</Label>
+            <Label htmlFor="friend-code">Código de Amigo</Label>
             {appliedReward ? (
               <div className="flex items-center justify-between">
                 <Badge variant="secondary">{appliedReward} Applied</Badge>
@@ -308,8 +326,8 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange }
             ) : (
               <div className="flex gap-2">
                 <Input
-                  id="reward-code"
-                  placeholder="Introduza código de recompensa"
+                  id="friend-code"
+                  placeholder="Introduza código de amigo"
                   value={rewardCode}
                   onChange={(e) => setRewardCode(e.target.value)}
                 />
@@ -319,11 +337,30 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange }
           </div>
         )}
 
-        {/* Voucher Code Input */}
+        {/* Available Vouchers - No Code Input */}
         {!appliedReward && (
           <div className="space-y-2">
-            <Label htmlFor="voucher-code">Código de Vale</Label>
-            {appliedVoucher ? (
+            {availableVouchers.length > 0 && (
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Vales Disponíveis:</Label>
+                <div className="flex flex-wrap gap-2">
+                  {availableVouchers.map(voucher => (
+                    <Button
+                      key={voucher.id}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => selectVoucher(voucher)}
+                      className="text-xs"
+                    >
+                      {voucher.code} (€{voucher.amount})
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Show applied voucher */}
+            {appliedVoucher && (
               <div className="flex items-center justify-between">
                 <Badge variant="secondary">
                   {appliedVoucher.code} (€{appliedVoucher.amount})
@@ -332,40 +369,6 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange }
                   Remover
                 </Button>
               </div>
-            ) : (
-              <>
-                <div className="flex gap-2">
-                  <Input
-                    id="voucher-code"
-                    placeholder="Introduza código de vale"
-                    value={voucherCode}
-                    onChange={(e) => setVoucherCode(e.target.value)}
-                  />
-                  <Button onClick={applyVoucher} disabled={loading}>
-                    Aplicar
-                  </Button>
-                </div>
-                
-                {/* Available Vouchers */}
-                {availableVouchers.length > 0 && (
-                  <div className="space-y-2">
-                    <Label className="text-xs text-muted-foreground">Vales Disponíveis:</Label>
-                    <div className="flex flex-wrap gap-2">
-                      {availableVouchers.map(voucher => (
-                        <Button
-                          key={voucher.id}
-                          variant="outline"
-                          size="sm"
-                          onClick={() => selectVoucher(voucher)}
-                          className="text-xs"
-                        >
-                          {voucher.code} (€{voucher.amount})
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </>
             )}
           </div>
         )}

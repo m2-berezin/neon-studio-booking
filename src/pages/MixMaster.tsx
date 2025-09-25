@@ -34,13 +34,24 @@ const MixMaster = () => {
 
   const hasSubscription = userSubscription?.active;
 
+  // Check if it's first month of subscription (simplified check)
+  const isFirstMonth = false; // TODO: Implement proper first month detection
+  
+  const getProjectPrice = () => {
+    if (!hasSubscription) return 40; // No subscription
+    if (isFirstMonth) return 36; // First month: 10% discount (40 * 0.9)
+    return 34; // Regular subscription: 15% discount
+  };
+
   const pricingOptions = [
     {
       id: '1project',
       title: '1 Projecto',
       description: 'Mix & Master de 1 música',
-      price: hasSubscription ? 34 : 40,
-      savings: hasSubscription ? 6 : 0
+      price: getProjectPrice(),
+      originalPrice: 40,
+      hasSubscription,
+      isFirstMonth
     },
     {
       id: '2projects',
@@ -128,7 +139,7 @@ const MixMaster = () => {
       transferLink: transferLink
     });
     
-    window.open(`/payment?${queryParams.toString()}`, '_blank');
+    window.location.href = `/payment?${queryParams.toString()}`;
   };
 
   const getSelectedPrice = () => {
@@ -185,14 +196,36 @@ const MixMaster = () => {
                 <p className="text-sm text-muted-foreground mb-3">{option.description}</p>
                 
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-lg font-semibold">€{option.price}</span>
-                    {option.savings > 0 && (
-                      <Badge variant="secondary" className="text-xs">
-                        Poupe €{option.savings}
-                      </Badge>
-                    )}
-                  </div>
+                  {option.id === '1project' ? (
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-1">
+                          <div className="text-lg font-semibold">€{option.price}</div>
+                          {option.hasSubscription && (
+                            <div className="text-xs text-muted-foreground">
+                              {option.isFirstMonth ? (
+                                <>€40 <span className="line-through">→</span> €36 (10% desconto primeiro mês)</>
+                              ) : (
+                                <>€40 <span className="line-through">→</span> €34 (com subscrição)</>
+                              )}
+                            </div>
+                          )}
+                          {!option.hasSubscription && (
+                            <div className="text-xs text-muted-foreground">€40 sem subscrição</div>
+                          )}
+                        </div>
+                        {option.hasSubscription && (
+                          <Badge variant="secondary" className="text-xs">
+                            {option.isFirstMonth ? 'Primeiro Mês' : 'Com Subscrição'}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between">
+                      <span className="text-lg font-semibold">€{option.price}</span>
+                    </div>
+                  )}
                   {option.note && (
                     <p className="text-xs text-muted-foreground">{option.note}</p>
                   )}
@@ -200,6 +233,15 @@ const MixMaster = () => {
               </div>
             ))}
           </div>
+          
+          {/* First Month Disclaimer */}
+          {hasSubscription && isFirstMonth && (
+            <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-xs text-blue-800 font-medium">
+                ℹ️ O primeiro mês apenas tem 10% de desconto nos serviços
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
 

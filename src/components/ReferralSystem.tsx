@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Copy, Users, Gift, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { generateFriendCode, saveFriendCode } from '@/utils/friendCodes';
 
 interface ReferralSystemProps {
   className?: string;
@@ -18,13 +19,32 @@ const ReferralSystem = ({ className }: ReferralSystemProps) => {
 
   if (!user || !profile) return null;
 
-  // Generate referral code: FirstName + 777
-  const generateReferralCode = () => {
-    const firstName = profile.full_name?.split(' ')[0] || user.email?.split('@')[0] || 'User';
-    return `${firstName}777`;
-  };
+  // Generate random referral code and save it
+  const [referralCode, setReferralCode] = useState('');
 
-  const referralCode = generateReferralCode();
+  useEffect(() => {
+    if (user && profile) {
+      // Check if user already has a friend code
+      const existingCodes = JSON.parse(localStorage.getItem('friend_codes') || '[]');
+      const userCode = existingCodes.find((c: any) => c.createdBy === user.id);
+      
+      if (userCode) {
+        setReferralCode(userCode.code);
+      } else {
+        // Generate new code
+        const newCode = generateFriendCode();
+        setReferralCode(newCode);
+        
+        // Save the friend code
+        saveFriendCode({
+          code: newCode,
+          discount: 25,
+          createdBy: user.id,
+          expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year
+        });
+      }
+    }
+  }, [user, profile]);
 
   const handleCopyCode = async () => {
     try {
@@ -47,16 +67,7 @@ const ReferralSystem = ({ className }: ReferralSystemProps) => {
   };
 
   const shareLinks = [
-    {
-      name: 'WhatsApp',
-      url: `https://wa.me/?text=Experimenta o 7T7Studios! Usa o meu código ${referralCode} e ganha 25%25 de desconto na tua primeira reserva. https://7t7studios.app`,
-      color: 'bg-green-600 hover:bg-green-700',
-    },
-    {
-      name: 'Telegram',
-      url: `https://t.me/share/url?url=https://7t7studios.app&text=Experimenta o 7T7Studios! Usa o meu código ${referralCode} e ganha 25%25 de desconto na tua primeira reserva.`,
-      color: 'bg-blue-600 hover:bg-blue-700',
-    },
+    // Removed WhatsApp and Telegram as requested
   ];
 
   return (
@@ -102,22 +113,11 @@ const ReferralSystem = ({ className }: ReferralSystemProps) => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
-            {shareLinks.map((link) => (
-              <Button
-                key={link.name}
-                onClick={() => window.open(link.url, '_blank')}
-                className={`${link.color} text-white`}
-                size="sm"
-              >
-                Partilhar via {link.name}
-              </Button>
-            ))}
-          </div>
+          {/* Removed share buttons as requested */}
 
           <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 mt-4">
             <p className="text-xs text-orange-800 font-medium">
-              ℹ️ O código só fica disponível após o amigo fazer a sua primeira reserva
+              ℹ️ O desconto só fica disponível após o amigo fazer a sua primeira reserva
             </p>
             <p className="text-xs text-orange-700 mt-1">
               Desconto não acumulável com outros.
