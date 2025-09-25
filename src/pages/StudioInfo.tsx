@@ -95,27 +95,6 @@ const StudioInfo = () => {
         </p>
       </div>
 
-      {/* Quick Contact */}
-      <Card className="mb-8 border-primary/20 bg-primary/5">
-        <CardContent className="p-6">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <MessageCircle className="h-6 w-6 text-primary" />
-              <div>
-                <h3 className="font-semibold text-foreground">Precisa de Ajuda?</h3>
-                <p className="text-sm text-muted-foreground">Obtenha suporte instantâneo via WhatsApp</p>
-              </div>
-            </div>
-            <Button
-              onClick={() => window.open(whatsappLink, '_blank')}
-              className="bg-green-600 hover:bg-green-700"
-            >
-              <MessageCircle className="h-4 w-4 mr-2" />
-              Contactar Estúdio
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Location */}
