@@ -18,16 +18,23 @@ const Layout = ({ children }: { children: ReactNode }) => {
     }
   }, [user, navigate, location.pathname]);
 
-  const navItems = [
+  type NavItem = {
+    path: string;
+    icon: any;
+    label: string;
+    isLogo?: boolean;
+  };
+
+  const navItems: NavItem[] = [
     { path: '/projects', icon: Folder, label: 'Projectos' },
     { path: '/rewards', icon: Gift, label: 'Recompensas' },
-    { path: '/', icon: Home, label: 'Início' },
+    { path: '/', icon: Home, label: '7', isLogo: true },
     { path: '/messages', icon: MessageCircle, label: 'Mensagens' },
     { path: '/studio-info', icon: Info, label: 'Info' },
   ];
 
   // Add admin navigation items if user is admin
-  const adminNavItems = [
+  const adminNavItems: NavItem[] = [
     { path: '/admin', icon: Settings, label: 'Admin' },
   ];
 
@@ -100,8 +107,16 @@ const Layout = ({ children }: { children: ReactNode }) => {
                       : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
-                  <item.icon className="w-5 h-5" />
-                  <span className="text-xs font-medium">{item.label}</span>
+                  {item.isLogo ? (
+                    <span className={`text-lg font-bold ${isActive ? 'neon-logo' : 'text-studio-logo-glow neon-logo'}`}>
+                      7
+                    </span>
+                  ) : (
+                    <item.icon className="w-5 h-5" />
+                  )}
+                  <span className={`text-xs font-medium ${item.isLogo && (isActive || true) ? 'neon-logo' : ''}`}>
+                    {item.label}
+                  </span>
                 </button>
               );
             })}
