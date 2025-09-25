@@ -103,12 +103,12 @@ const Layout = ({ children }: { children: ReactNode }) => {
                   onClick={() => navigate(item.path)}
                   className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-all ${
                     isActive 
-                      ? 'text-primary bg-primary/10' 
+                      ? 'text-primary' 
                       : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
                   {item.isLogo ? (
-                    <span className={`text-2xl font-bold neon-logo`}>
+                    <span className={`text-2xl font-bold ${isActive ? 'neon-title' : 'neon-title'}`}>
                       7
                     </span>
                   ) : (
