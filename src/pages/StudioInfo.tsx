@@ -46,11 +46,6 @@ const StudioInfo = () => {
       description: "Mantenha os telemóveis em modo silencioso durante as sessões de gravação."
     },
     {
-      icon: <Headphones className="h-5 w-5" />,
-      title: "Objectos Pessoais",
-      description: "É responsável pelos seus pertences pessoais. Não somos responsáveis por objectos perdidos."
-    },
-    {
       icon: <Mic className="h-5 w-5" />,
       title: "Conduta Profissional",
       description: "Mantenha uma atmosfera profissional. Comportamento disruptivo não será tolerado."
