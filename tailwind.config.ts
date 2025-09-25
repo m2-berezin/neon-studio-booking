@@ -55,6 +55,7 @@ export default {
           glow: "hsl(var(--studio-glow))",
           "accent-glow": "hsl(var(--studio-accent-glow))",
           "card-hover": "hsl(var(--studio-card-hover))",
+          "logo-glow": "hsl(var(--studio-logo-glow))",
         },
       },
       borderRadius: {
@@ -87,10 +88,18 @@ export default {
         },
         "pulse-neon": {
           "0%, 100%": { 
-            textShadow: "0 0 5px hsl(var(--accent)), 0 0 10px hsl(var(--accent)), 0 0 20px hsl(var(--accent))" 
+            textShadow: "0 0 8px hsl(var(--accent)), 0 0 16px hsl(var(--accent)), 0 0 24px hsl(var(--accent))" 
           },
           "50%": { 
-            textShadow: "0 0 2px hsl(var(--accent)), 0 0 5px hsl(var(--accent)), 0 0 10px hsl(var(--accent))" 
+            textShadow: "0 0 4px hsl(var(--accent)), 0 0 8px hsl(var(--accent)), 0 0 12px hsl(var(--accent))" 
+          },
+        },
+        "pulse-neon-logo": {
+          "0%, 100%": { 
+            textShadow: "0 0 8px hsl(var(--studio-logo-glow)), 0 0 16px hsl(var(--studio-logo-glow)), 0 0 24px hsl(var(--studio-logo-glow))" 
+          },
+          "50%": { 
+            textShadow: "0 0 4px hsl(var(--studio-logo-glow)), 0 0 8px hsl(var(--studio-logo-glow)), 0 0 12px hsl(var(--studio-logo-glow))" 
           },
         },
       },
@@ -98,6 +107,7 @@ export default {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "pulse-neon": "pulse-neon 2s ease-in-out infinite",
+        "pulse-neon-logo": "pulse-neon-logo 2s ease-in-out infinite",
       },
     },
   },

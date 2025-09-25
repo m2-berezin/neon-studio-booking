@@ -58,7 +58,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
         {/* Logo - Center */}
         <div className="absolute left-1/2 transform -translate-x-1/2">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-primary">7T7</h1>
+            <h1 className="text-2xl font-bold neon-logo">7T7</h1>
             <p className="text-xs text-muted-foreground -mt-1">Studios</p>
           </div>
         </div>
