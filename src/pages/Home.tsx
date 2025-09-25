@@ -43,26 +43,30 @@ const Home = () => {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen flex flex-col">
       {/* Welcome Section */}
-      <div className="text-center mb-8">
-        <h1 className="neon-heading">
-          Bem-vindo ao Estúdio
-        </h1>
-      </div>
+      <div className="flex-1 flex items-center justify-center px-4">
+        <div className="text-center max-w-4xl mx-auto w-full">
+          <div className="mb-12">
+            <h1 className="neon-heading mb-8">
+              Bem-vindo ao Estúdio
+            </h1>
+          </div>
 
-      {/* Service Cards Grid */}
-      <div className="grid grid-cols-1 gap-4">
-        {services.map((service) => (
-          <ServiceCard
-            key={service.title}
-            title={service.title}
-            description={service.description}
-            icon={service.icon}
-            gradient={service.gradient}
-            onClick={() => navigate(service.path)}
-          />
-        ))}
+          {/* Service Cards Grid - Symmetrical Layout */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+            {services.map((service) => (
+              <ServiceCard
+                key={service.title}
+                title={service.title}
+                description={service.description}
+                icon={service.icon}
+                gradient={service.gradient}
+                onClick={() => navigate(service.path)}
+              />
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
