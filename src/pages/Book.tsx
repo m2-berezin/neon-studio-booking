@@ -27,6 +27,19 @@ interface TimeSlot {
   available: boolean;
 }
 
+const Book = () => {
+  const { 
+    loading, 
+    createBooking, 
+    fetchBookingsForDate, 
+    generateTimeSlots, 
+    isDateAvailable, 
+    sendBookingMessage, 
+    generateWhatsAppLink 
+  } = useBooking();
+  const { user } = useAuth();
+  const { toast } = useToast();
+
   const services = [
     {
       id: 'recording',

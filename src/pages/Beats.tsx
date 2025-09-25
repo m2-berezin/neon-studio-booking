@@ -157,7 +157,7 @@ const Beats = () => {
             <CardContent>
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-muted-foreground">Premium</span>
-                          <span className="font-semibold text-primary">€{beat.price}</span>
+                          <span className="font-semibold text-primary">€{beatPackage.price}</span>
                         </div>
                         
                         <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
