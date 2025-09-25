@@ -39,17 +39,14 @@ const MixMaster = () => {
       id: '1project',
       title: '1 Projecto',
       description: 'Mix & Master de 1 música',
-      originalPrice: 40,
-      subscriptionPrice: 34,
-      savings: 6
+      price: hasSubscription ? 34 : 40,
+      savings: hasSubscription ? 6 : 0
     },
     {
       id: '2projects',
-      title: '2 Projectos',
+      title: '2 Projectos', 
       description: 'Mix & Master de 2 músicas',
-      originalPrice: 70,
-      subscriptionPrice: 70,
-      pricePerTrack: 35,
+      price: 70,
       note: 'Mesmo preço com e sem subscrição'
     }
   ];
@@ -72,12 +69,6 @@ const MixMaster = () => {
       title: 'WhatsApp',
       description: 'Enviar ficheiros via WhatsApp',
       icon: <MessageCircle className="h-5 w-5" />
-    },
-    {
-      id: 'later',
-      title: 'Enviar Depois',
-      description: 'Fazer pagamento agora, enviar ficheiros depois',
-      icon: <Clock className="h-5 w-5" />
     }
   ];
 
@@ -127,17 +118,23 @@ const MixMaster = () => {
       return;
     }
 
-    // Here you would integrate with your payment system
-    toast({
-      title: "Redireccionando para Pagamento",
-      description: "Será redirecionado para a página de pagamento em breve...",
+    // Redirect to payment page
+    const queryParams = new URLSearchParams({
+      service: 'mixmaster',
+      option: selectedOption,
+      delivery: deliveryMethod,
+      price: getSelectedPrice().toString(),
+      notes: projectNotes,
+      transferLink: transferLink
     });
+    
+    window.open(`/payment?${queryParams.toString()}`, '_blank');
   };
 
   const getSelectedPrice = () => {
     if (!selectedOption) return 0;
     const option = pricingOptions.find(p => p.id === selectedOption);
-    return hasSubscription ? (option?.subscriptionPrice || 0) : (option?.originalPrice || 0);
+    return option?.price || 0;
   };
 
   return (
@@ -163,7 +160,16 @@ const MixMaster = () => {
             {pricingOptions.map((option) => (
               <div
                 key={option.id}
-                onClick={() => setSelectedOption(option.id as '1project' | '2projects')}
+                onClick={() => {
+                  setSelectedOption(option.id as '1project' | '2projects');
+                  // Automatically scroll to delivery method
+                  setTimeout(() => {
+                    const deliveryElement = document.getElementById('delivery-section');
+                    if (deliveryElement) {
+                      deliveryElement.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }, 100);
+                }}
                 className={`p-4 border rounded-lg cursor-pointer transition-all ${
                   selectedOption === option.id
                     ? 'border-primary bg-primary/5'
@@ -180,18 +186,13 @@ const MixMaster = () => {
                 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm">Sem subscrição:</span>
-                    <span className="font-medium">€{option.originalPrice}</span>
+                    <span className="text-lg font-semibold">€{option.price}</span>
+                    {option.savings > 0 && (
+                      <Badge variant="secondary" className="text-xs">
+                        Poupe €{option.savings}
+                      </Badge>
+                    )}
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">Com subscrição:</span>
-                    <span className="font-medium text-primary">€{option.subscriptionPrice}</span>
-                  </div>
-                  {option.savings && (
-                    <Badge variant="secondary" className="text-xs">
-                      Poupe €{option.savings}
-                    </Badge>
-                  )}
                   {option.note && (
                     <p className="text-xs text-muted-foreground">{option.note}</p>
                   )}
@@ -224,7 +225,7 @@ const MixMaster = () => {
 
       {/* Delivery Method */}
       {selectedOption && (
-        <Card className="mb-8">
+        <Card className="mb-8" id="delivery-section">
           <CardHeader>
             <CardTitle>Método de Entrega</CardTitle>
           </CardHeader>
@@ -255,27 +256,18 @@ const MixMaster = () => {
             {/* Delivery Method Content */}
             {deliveryMethod === 'upload' && (
               <div className="mt-6 space-y-4">
-                <div>
-                  <Label htmlFor="file-upload">Seleccionar Ficheiros</Label>
-                  <Input
-                    id="file-upload"
-                    type="file"
-                    multiple
-                    accept="audio/*"
-                    onChange={handleFileUpload}
-                    className="mt-2"
-                  />
-                  {files && (
-                    <p className="text-sm text-muted-foreground mt-2">
-                      {files.length} ficheiro(s) seleccionado(s)
-                    </p>
-                  )}
-                </div>
+                <Button 
+                  onClick={() => window.open('/file-upload', '_blank')}
+                  className="w-full"
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Enviar Ficheiros
+                </Button>
               </div>
             )}
 
             {deliveryMethod === 'link' && (
-              <div className="mt-6">
+              <div className="mt-6 space-y-4">
                 <Label htmlFor="transfer-link">Link de Transferência</Label>
                 <Input
                   id="transfer-link"
@@ -284,33 +276,28 @@ const MixMaster = () => {
                   onChange={(e) => setTransferLink(e.target.value)}
                   className="mt-2"
                 />
+                <Button 
+                  onClick={() => window.open('/file-transfer', '_blank')}
+                  className="w-full"
+                >
+                  <LinkIcon className="h-4 w-4 mr-2" />
+                  Continuar com Link
+                </Button>
               </div>
             )}
 
             {deliveryMethod === 'whatsapp' && (
               <div className="mt-6">
                 <Button 
-                  onClick={handleWhatsAppSend}
+                  onClick={() => {
+                    handleWhatsAppSend();
+                    window.open('/whatsapp-upload', '_blank');
+                  }}
                   className="w-full bg-green-600 hover:bg-green-700"
                 >
                   <MessageCircle className="h-4 w-4 mr-2" />
-                  Abrir WhatsApp
+                  Continuar via WhatsApp
                 </Button>
-              </div>
-            )}
-
-            {deliveryMethod === 'later' && (
-              <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <div className="flex items-start gap-2">
-                  <AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5" />
-                  <div>
-                    <h4 className="font-medium text-yellow-800">Envio Pendente</h4>
-                    <p className="text-sm text-yellow-700 mt-1">
-                      Pode fazer o pagamento agora e enviar os ficheiros depois. 
-                      Receberá instruções por email após o pagamento.
-                    </p>
-                  </div>
-                </div>
               </div>
             )}
 
@@ -369,22 +356,13 @@ const MixMaster = () => {
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-3">
-                <Button 
-                  onClick={handleProceedToPayment}
-                  className="flex-1"
-                >
-                  <CreditCard className="h-4 w-4 mr-2" />
-                  Pagar Agora
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="flex-1"
-                  onClick={handleProceedToPayment}
-                >
-                  Pagar Depois
-                </Button>
-              </div>
+              <Button 
+                onClick={handleProceedToPayment}
+                className="w-full"
+              >
+                <CreditCard className="h-4 w-4 mr-2" />
+                Pagar Agora
+              </Button>
             </div>
           </CardContent>
         </Card>

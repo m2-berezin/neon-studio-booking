@@ -18,6 +18,7 @@ import Auth from "./pages/Auth";
 import Admin from "@/pages/Admin";
 import StudioInfo from "@/pages/StudioInfo";
 import MixMaster from "./pages/MixMaster";
+import Payment from "./pages/Payment";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -46,6 +47,7 @@ const App = () => (
               <Route path="/" element={<Home />} />
               <Route path="/book" element={<Book />} />
               <Route path="/mix-master" element={<MixMaster />} />
+              <Route path="/payment" element={<Payment />} />
               <Route path="/rewards" element={<Rewards />} />
               <Route path="/subscriptions" element={<Subscriptions />} />
               <Route path="/beats" element={<Beats />} />
