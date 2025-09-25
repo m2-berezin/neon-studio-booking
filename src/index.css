@@ -74,17 +74,14 @@ All colors MUST be HSL.
 
   h1 {
     @apply text-4xl font-bold;
-    text-shadow: 0 0 8px hsl(var(--accent)), 0 0 16px hsl(var(--accent));
   }
 
   h2 {
     @apply text-3xl font-bold;
-    text-shadow: 0 0 6px hsl(var(--accent)), 0 0 12px hsl(var(--accent));
   }
 
   h3 {
     @apply text-2xl font-bold;
-    text-shadow: 0 0 4px hsl(var(--accent)), 0 0 8px hsl(var(--accent));
   }
 
   h4 {
@@ -118,6 +115,12 @@ All colors MUST be HSL.
     min-width: 120px;
   }
 
+  /* Special neon class for specific main titles */
+  .neon-title {
+    @apply font-serif;
+    text-shadow: 0 0 8px hsl(var(--accent)), 0 0 16px hsl(var(--accent));
+  }
+
   /* Text Classes - No glow effects */
   .neon-glow {
     /* No glow effect */
@@ -129,7 +132,8 @@ All colors MUST be HSL.
 
   .neon-heading {
     @apply font-serif;
-    /* No glow effect */
+    text-shadow: 0 0 8px hsl(var(--accent)), 0 0 16px hsl(var(--accent));
+    animation: pulse-neon 3s ease-in-out infinite;
   }
 
   /* Special class for 7T7 Studios logo */

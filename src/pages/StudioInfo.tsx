@@ -87,7 +87,7 @@ const StudioInfo = () => {
     <div className="container mx-auto p-6 max-w-4xl">
       {/* Header */}
       <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold text-foreground mb-2">
+        <h1 className="text-4xl font-bold neon-title mb-2">
           Informações do Estúdio
         </h1>
         <p className="text-muted-foreground text-lg">

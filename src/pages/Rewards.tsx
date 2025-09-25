@@ -54,7 +54,7 @@ const Rewards = () => {
   return (
     <div className="space-y-6">
       <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold text-foreground mb-2">
+        <h1 className="text-4xl font-bold neon-title mb-2">
           Recompensas do Estúdio
         </h1>
         <p className="text-muted-foreground text-lg">
