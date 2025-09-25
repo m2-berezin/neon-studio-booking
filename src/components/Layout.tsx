@@ -108,15 +108,15 @@ const Layout = ({ children }: { children: ReactNode }) => {
                   }`}
                 >
                   {item.isLogo ? (
-                    <span className={`text-lg font-bold ${isActive ? 'neon-logo' : 'text-studio-logo-glow neon-logo'}`}>
+                    <span className={`text-2xl font-bold neon-logo`}>
                       7
                     </span>
                   ) : (
-                    <item.icon className="w-5 h-5" />
+                    <>
+                      <item.icon className="w-5 h-5" />
+                      <span className="text-xs font-medium">{item.label}</span>
+                    </>
                   )}
-                  <span className={`text-xs font-medium ${item.isLogo && (isActive || true) ? 'neon-logo' : ''}`}>
-                    {item.label}
-                  </span>
                 </button>
               );
             })}
