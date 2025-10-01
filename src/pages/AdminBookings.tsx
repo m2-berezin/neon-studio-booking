@@ -9,6 +9,7 @@ import { useAdmin } from '@/hooks/useAdmin';
 import { useAuth } from '@/contexts/AuthContext';
 import { format, parse } from 'date-fns';
 import { Calendar, Clock, User, AlertTriangle, Edit, Shield } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface Booking {
   id: string;
@@ -31,6 +32,7 @@ interface Booking {
 
 const AdminBookings = () => {
   const { isAdmin } = useAuth();
+  const { toast } = useToast();
   const { loading, updateBookingStatus, loadBookings, bookings } = useAdmin();
   const [localBookings, setLocalBookings] = useState<Booking[]>([]);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
@@ -96,15 +98,51 @@ const AdminBookings = () => {
     );
   }
 
+  const exportToCSV = () => {
+    const csvData = bookings.map(booking => ({
+      Cliente: booking.profiles.full_name,
+      Serviço: booking.services.name,
+      Data: format(new Date(booking.date), 'dd/MM/yyyy'),
+      Hora_Início: booking.start_time,
+      Hora_Fim: booking.end_time,
+      Status: booking.status,
+      Preço: `€${booking.services.base_price}`,
+      Notas: booking.notes || '',
+      Data_Reserva: format(new Date(booking.created_at), 'dd/MM/yyyy HH:mm'),
+    }));
+
+    const headers = Object.keys(csvData[0]).join(',');
+    const rows = csvData.map(row => Object.values(row).join(',')).join('\n');
+    const csv = `${headers}\n${rows}`;
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `reservas-${format(new Date(), 'dd-MM-yyyy')}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+
+    toast({
+      title: 'Exportado com Sucesso',
+      description: 'As reservas foram exportadas para CSV',
+    });
+  };
+
   return (
     <div className="space-y-6">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-accent accent-glow mb-2">
-          Gerir Reservas
-        </h1>
-        <p className="text-muted-foreground">
-          Veja e gira todas as reservas do estúdio
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Gerir Reservas</h1>
+          <p className="text-muted-foreground">
+            Veja e gira todas as reservas do estúdio
+          </p>
+        </div>
+        <Button onClick={exportToCSV} variant="outline">
+          Exportar CSV
+        </Button>
       </div>
 
       {/* Bookings List */}

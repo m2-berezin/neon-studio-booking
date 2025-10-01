@@ -20,6 +20,10 @@ import ProfileSettings from "./pages/ProfileSettings";
 import Auth from "./pages/Auth";
 import Admin from "@/pages/Admin";
 import AdminPayments from "@/pages/AdminPayments";
+import AdminBookings from "@/pages/AdminBookings";
+import AdminDashboard from "@/pages/AdminDashboard";
+import AdminMessages from "@/pages/AdminMessages";
+import { AdminLayout } from "@/components/admin/AdminLayout";
 import StudioInfo from "@/pages/StudioInfo";
 import MixMaster from "./pages/MixMaster";
 import Payment from "./pages/Payment";
@@ -69,8 +73,14 @@ const App = () => {
                 <Route path="/profile/settings" element={<ProfileSettings />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/admin" element={<Admin />} />
-                <Route path="/admin/payments" element={<AdminPayments />} />
                 <Route path="/studio-info" element={<StudioInfo />} />
+                
+                {/* Admin Routes with AdminLayout */}
+                <Route path="/admin/dashboard" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
+                <Route path="/admin/bookings" element={<AdminLayout><AdminBookings /></AdminLayout>} />
+                <Route path="/admin/payments" element={<AdminLayout><AdminPayments /></AdminLayout>} />
+                <Route path="/admin/messages" element={<AdminLayout><AdminMessages /></AdminLayout>} />
+                
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
