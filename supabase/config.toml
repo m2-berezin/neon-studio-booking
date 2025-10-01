@@ -1,1 +1,4 @@
 project_id = "esuascsrlfdbcpikzvlq"
+
+[functions.notify-admin-payment]
+verify_jwt = false

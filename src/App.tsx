@@ -19,6 +19,7 @@ import Profile from "./pages/Profile";
 import ProfileSettings from "./pages/ProfileSettings";
 import Auth from "./pages/Auth";
 import Admin from "@/pages/Admin";
+import AdminPayments from "@/pages/AdminPayments";
 import StudioInfo from "@/pages/StudioInfo";
 import MixMaster from "./pages/MixMaster";
 import Payment from "./pages/Payment";
@@ -68,6 +69,7 @@ const App = () => {
                 <Route path="/profile/settings" element={<ProfileSettings />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/admin" element={<Admin />} />
+                <Route path="/admin/payments" element={<AdminPayments />} />
                 <Route path="/studio-info" element={<StudioInfo />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />

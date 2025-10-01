@@ -31,17 +31,29 @@ const AdminPayments = () => {
     try {
       const { data, error } = await supabase
         .from('payment_requests')
-        .select(`
-          *,
-          profiles (
-            full_name,
-            phone
-          )
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setPaymentRequests(data || []);
+      
+      // Fetch profiles separately
+      if (data && data.length > 0) {
+        const userIds = data.map(req => req.user_id);
+        const { data: profilesData } = await supabase
+          .from('profiles')
+          .select('id, full_name, phone')
+          .in('id', userIds);
+        
+        const profilesMap = new Map(profilesData?.map(p => [p.id, p]));
+        const enrichedData = data.map(req => ({
+          ...req,
+          profiles: profilesMap.get(req.user_id) || { full_name: 'Desconhecido', phone: '' }
+        }));
+        
+        setPaymentRequests(enrichedData);
+      } else {
+        setPaymentRequests([]);
+      }
     } catch (error) {
       console.error('Error loading payment requests:', error);
       toast({

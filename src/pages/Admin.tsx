@@ -168,11 +168,24 @@ const Admin = () => {
   return (
     <div className="container mx-auto p-6">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold flex items-center gap-2">
-          <Settings className="h-8 w-8" />
-          Painel de Administração
-        </h1>
-        <p className="text-muted-foreground">Gerencie as operações do estúdio</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold flex items-center gap-2">
+              <Settings className="h-8 w-8" />
+              Painel de Administração
+            </h1>
+            <p className="text-muted-foreground">Gerencie as operações do estúdio</p>
+          </div>
+          <Button 
+            onClick={() => window.location.href = '/admin/payments'}
+            variant="default"
+            size="lg"
+            className="flex items-center gap-2"
+          >
+            <DollarSign className="h-5 w-5" />
+            Pagamentos
+          </Button>
+        </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
