@@ -2,13 +2,12 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import { CreditCard, Smartphone, CheckCircle, ArrowLeft } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { ArrowLeft, CheckCircle, Copy } from 'lucide-react';
 
 const Payment = () => {
   const [searchParams] = useSearchParams();
@@ -16,7 +15,6 @@ const Payment = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   
-  const [phoneNumber, setPhoneNumber] = useState('');
   const [loading, setLoading] = useState(false);
   
   // Get payment details from URL params
@@ -29,6 +27,10 @@ const Payment = () => {
   const serviceTitle = service === 'mixmaster' ? 'Mix & Master' : service;
   const optionTitle = option === '1project' ? '1 Projecto' : '2 Projectos';
 
+  // Payment details
+  const MBWAY_PHONE = '+351 912 345 678';
+  const IBAN = 'PT50 0000 0000 0000 0000 0000 0';
+
   useEffect(() => {
     if (!service || !option || !price) {
       toast({
@@ -40,20 +42,19 @@ const Payment = () => {
     }
   }, [service, option, price, navigate, toast]);
 
-  const handleMBWayPayment = async () => {
-    if (!phoneNumber) {
-      toast({
-        title: 'Erro',
-        description: 'Por favor introduce o teu número de telefone',
-        variant: 'destructive',
-      });
-      return;
-    }
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: 'Copiado!',
+      description: `${label} copiado para a área de transferência`,
+    });
+  };
 
-    if (!/^9[1236]\d{7}$/.test(phoneNumber)) {
+  const handlePaymentConfirmation = async () => {
+    if (!user) {
       toast({
         title: 'Erro',
-        description: 'Número de telefone inválido. Use o formato 9XXXXXXXX',
+        description: 'Precisa de iniciar sessão para confirmar o pagamento',
         variant: 'destructive',
       });
       return;
@@ -62,27 +63,38 @@ const Payment = () => {
     setLoading(true);
     
     try {
-      // Simulate MBWay payment process
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      const { error } = await supabase
+        .from('payment_requests')
+        .insert({
+          user_id: user.id,
+          amount: parseFloat(price || '0'),
+          method: 'manual',
+          status: 'pending'
+        });
+
+      if (error) throw error;
+
+      // Call edge function to notify admin via SMS
+      await supabase.functions.invoke('notify-payment-sms', {
+        body: {
+          user_id: user.id,
+          amount: parseFloat(price || '0'),
+          method: 'manual'
+        }
+      });
+
       toast({
-        title: 'Pagamento Enviado',
-        description: 'Verifica o teu telemóvel para confirmar o pagamento MBWay',
+        title: 'Pagamento Registado',
+        description: 'O teu pagamento está a ser verificado. Receberás uma confirmação em breve.',
       });
       
-      // Simulate payment confirmation
-      setTimeout(() => {
-        toast({
-          title: 'Pagamento Confirmado',
-          description: 'O teu pagamento foi processado com sucesso!',
-        });
-        navigate('/projects');
-      }, 3000);
+      navigate('/projects');
       
     } catch (error) {
+      console.error('Error registering payment:', error);
       toast({
         title: 'Erro no Pagamento',
-        description: 'Ocorreu um erro ao processar o pagamento',
+        description: 'Ocorreu um erro ao registar o pagamento',
         variant: 'destructive',
       });
     } finally {
@@ -111,7 +123,7 @@ const Payment = () => {
           Finalizar Pagamento
         </h1>
         <p className="text-muted-foreground">
-          Confirma os detalhes e escolhe o método de pagamento
+          Confirma os detalhes e realiza o pagamento
         </p>
       </div>
 
@@ -148,72 +160,78 @@ const Payment = () => {
             
             <div className="flex items-center justify-between text-xl font-bold">
               <span>Total:</span>
-              <span>€{price}</span>
+              <span className="text-primary">€{price}</span>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Payment Method */}
+      {/* Payment Instructions */}
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Smartphone className="h-5 w-5" />
-            Pagar com MBWay
-          </CardTitle>
+          <CardTitle>Informações de Pagamento</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="phone">Número de Telemóvel</Label>
-              <Input
-                id="phone"
-                type="tel"
-                placeholder="9XXXXXXXX"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
-                maxLength={9}
-                className="mt-2"
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                Introduce o número associado ao teu MBWay
-              </p>
+        <CardContent className="space-y-6">
+          {/* MBWay */}
+          <div className="space-y-2">
+            <h3 className="font-semibold text-lg">MB Way</h3>
+            <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+              <span className="font-mono">{MBWAY_PHONE}</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => copyToClipboard(MBWAY_PHONE, 'Número MB Way')}
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
             </div>
-            
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <div className="flex items-start gap-2">
-                <CheckCircle className="h-5 w-5 text-blue-600 mt-0.5" />
-                <div>
-                  <h4 className="font-medium text-blue-800">Como funciona</h4>
-                  <ol className="text-sm text-blue-700 mt-1 space-y-1">
-                    <li>1. Clica em "Pagar com MBWay"</li>
-                    <li>2. Receberás uma notificação no teu telemóvel</li>
-                    <li>3. Confirma o pagamento na app MBWay</li>
-                    <li>4. Aguarda a confirmação</li>
-                  </ol>
-                </div>
-              </div>
-            </div>
-            
-            <Button 
-              onClick={handleMBWayPayment}
-              disabled={loading || !phoneNumber}
-              className="w-full bg-orange-600 hover:bg-orange-700"
-              size="lg"
-            >
-              {loading ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                  A processar...
-                </>
-              ) : (
-                <>
-                  <Smartphone className="h-4 w-4 mr-2" />
-                  Pagar €{price} com MBWay
-                </>
-              )}
-            </Button>
           </div>
+
+          <Separator />
+
+          {/* IBAN */}
+          <div className="space-y-2">
+            <h3 className="font-semibold text-lg">Transferência Bancária</h3>
+            <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+              <span className="font-mono text-sm">{IBAN}</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => copyToClipboard(IBAN, 'IBAN')}
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Instructions */}
+          <div className="space-y-2">
+            <h3 className="font-semibold">Instruções:</h3>
+            <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
+              <li>Faça o pagamento de €{price} usando MB Way ou Transferência Bancária</li>
+              <li>Use a referência do pedido nas notas de pagamento (se aplicável)</li>
+              <li>Clique em "Já Paguei" após realizar o pagamento</li>
+              <li>Aguarde a confirmação do pagamento (normalmente 24-48h)</li>
+            </ol>
+          </div>
+
+          <Button 
+            onClick={handlePaymentConfirmation}
+            disabled={loading}
+            className="w-full"
+            size="lg"
+          >
+            {loading ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                A processar...
+              </>
+            ) : (
+              'Já Paguei'
+            )}
+          </Button>
         </CardContent>
       </Card>
 
@@ -224,7 +242,7 @@ const Payment = () => {
           <div>
             <h4 className="font-medium text-green-800">Pagamento Seguro</h4>
             <p className="text-sm text-green-700 mt-1">
-              Os teus dados estão protegidos. O pagamento é processado de forma segura através do MBWay.
+              Os teus dados estão protegidos. Todos os pagamentos são processados de forma segura.
             </p>
           </div>
         </div>
