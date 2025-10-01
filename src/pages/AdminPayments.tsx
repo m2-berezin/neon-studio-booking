@@ -184,14 +184,22 @@ const AdminPayments = () => {
           // Notify client
           await supabase.from('notifications').insert({
             user_id: request.user_id,
-            title: 'Pagamento Aprovado!',
-            body: `O teu pagamento de €${request.amount} foi aprovado. O teu projeto já está disponível.`,
+            title: 'Pagamento aprovado',
+            body: 'A tua sessão está reservada',
             read: false
           });
 
         } catch (projectError) {
           console.error('Error creating booking/project:', projectError);
         }
+      } else if (newStatus === 'rejected') {
+        // Notify client of rejection
+        await supabase.from('notifications').insert({
+          user_id: request.user_id,
+          title: 'Pagamento recusado',
+          body: 'Reserva indisponível, experimenta marcar para outro dia/hora',
+          read: false
+        });
       }
 
       toast({
