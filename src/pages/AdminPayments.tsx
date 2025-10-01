@@ -15,6 +15,7 @@ interface PaymentRequest {
   method: string;
   status: string;
   created_at: string;
+  notes?: string;
   profiles: {
     full_name: string;
     phone: string;
@@ -84,7 +85,7 @@ const AdminPayments = () => {
     }
   }, [isAdmin]);
 
-  const handleUpdateStatus = async (id: string, newStatus: 'approved' | 'rejected') => {
+  const handleUpdateStatus = async (id: string, newStatus: 'approved' | 'rejected', request: PaymentRequest) => {
     try {
       const { error } = await supabase
         .from('payment_requests')
@@ -92,6 +93,106 @@ const AdminPayments = () => {
         .eq('id', id);
 
       if (error) throw error;
+
+      // If approved, create booking and project
+      if (newStatus === 'approved') {
+        try {
+          // Parse booking info from notes
+          let bookingInfo = null;
+          if (request.notes) {
+            try {
+              bookingInfo = JSON.parse(request.notes);
+            } catch (e) {
+              console.error('Error parsing booking info:', e);
+            }
+          }
+
+          // Extract date and time from booking details if available
+          let bookingDate = null;
+          let startTime = null;
+          let endTime = null;
+
+          if (bookingInfo?.booking_details) {
+            const details = bookingInfo.booking_details;
+            // Extract date (format: "Reserva para 01/01/2025 às 14:00")
+            const dateMatch = details.match(/(\d{2}\/\d{2}\/\d{4})/);
+            const timeMatch = details.match(/às (\d{2}:\d{2})/);
+            
+            if (dateMatch) {
+              const [day, month, year] = dateMatch[1].split('/');
+              bookingDate = `${year}-${month}-${day}`;
+            }
+            if (timeMatch) {
+              startTime = timeMatch[1];
+              // Add 1 hour for end time
+              const [hours, minutes] = startTime.split(':');
+              endTime = `${String(parseInt(hours) + 1).padStart(2, '0')}:${minutes}`;
+            }
+          }
+
+          // Create booking if we have date and time
+          let bookingId = null;
+          if (bookingDate && startTime && endTime) {
+            // Get the service ID (simplified - you may need to adjust)
+            const { data: services } = await supabase
+              .from('services')
+              .select('id')
+              .eq('name', 'Recording Session')
+              .single();
+
+            if (services) {
+              const { data: booking, error: bookingError } = await supabase
+                .from('bookings')
+                .insert({
+                  client_id: request.user_id,
+                  service_id: services.id,
+                  date: bookingDate,
+                  start_time: startTime,
+                  end_time: endTime,
+                  status: 'confirmed',
+                  notes: bookingInfo?.booking_details || 'Reserva via pagamento'
+                })
+                .select()
+                .single();
+
+              if (!bookingError && booking) {
+                bookingId = booking.id;
+              }
+            }
+          }
+
+          // Create project
+          const projectTitle = bookingInfo?.service 
+            ? `${bookingInfo.service} - ${bookingInfo.option || ''}`
+            : 'Novo Projeto';
+
+          const { data: project, error: projectError } = await supabase
+            .from('projects')
+            .insert({
+              client_id: request.user_id,
+              title: projectTitle,
+              status: 'in_progress',
+              booking_id: bookingId
+            })
+            .select()
+            .single();
+
+          if (projectError) {
+            console.error('Error creating project:', projectError);
+          }
+
+          // Notify client
+          await supabase.from('notifications').insert({
+            user_id: request.user_id,
+            title: 'Pagamento Aprovado!',
+            body: `O teu pagamento de €${request.amount} foi aprovado. O teu projeto já está disponível.`,
+            read: false
+          });
+
+        } catch (projectError) {
+          console.error('Error creating booking/project:', projectError);
+        }
+      }
 
       toast({
         title: newStatus === 'approved' ? 'Pagamento Aprovado' : 'Pagamento Rejeitado',
@@ -197,8 +298,20 @@ const AdminPayments = () => {
                       <p><span className="font-medium">Cliente:</span> {request.profiles.full_name}</p>
                       <p><span className="font-medium">Telemóvel:</span> {request.profiles.phone || 'N/A'}</p>
                       <p><span className="font-medium">Método:</span> {request.method}</p>
+                      {request.notes && (() => {
+                        try {
+                          const bookingInfo = JSON.parse(request.notes);
+                          return (
+                            <p className="text-xs bg-muted p-2 rounded mt-2">
+                              <span className="font-medium">Detalhes:</span> {bookingInfo.booking_details || bookingInfo.service}
+                            </p>
+                          );
+                        } catch {
+                          return null;
+                        }
+                      })()}
                       <p className="text-muted-foreground">
-                        {format(new Date(request.created_at), "dd/MM/yyyy 'às' HH:mm")}
+                        Solicitado em {format(new Date(request.created_at), "dd/MM/yyyy 'às' HH:mm")}
                       </p>
                     </div>
                   </div>
@@ -207,7 +320,7 @@ const AdminPayments = () => {
                     <Button
                       size="sm"
                       className="bg-green-600 hover:bg-green-700"
-                      onClick={() => handleUpdateStatus(request.id, 'approved')}
+                      onClick={() => handleUpdateStatus(request.id, 'approved', request)}
                     >
                       <CheckCircle className="w-4 h-4 mr-1" />
                       Aprovar
@@ -215,7 +328,7 @@ const AdminPayments = () => {
                     <Button
                       size="sm"
                       variant="destructive"
-                      onClick={() => handleUpdateStatus(request.id, 'rejected')}
+                      onClick={() => handleUpdateStatus(request.id, 'rejected', request)}
                     >
                       <XCircle className="w-4 h-4 mr-1" />
                       Rejeitar

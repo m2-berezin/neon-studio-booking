@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMessages } from '@/hooks/useMessages';
+import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import AudioPlayer from '@/components/AudioPlayer';
 import { format } from 'date-fns';
 
@@ -21,6 +22,7 @@ const Messages = () => {
     loadThread,
     sendMessage,
   } = useMessages();
+  const { markConversationAsRead } = useUnreadMessages();
 
   const [messageText, setMessageText] = useState('');
   const [attachments, setAttachments] = useState<File[]>([]);
@@ -103,7 +105,10 @@ const Messages = () => {
                     className={`cursor-pointer transition-colors hover:bg-accent/50 ${
                       currentRecipient === thread.recipient_id ? 'bg-accent/20 border-primary' : ''
                     }`}
-                    onClick={() => loadThread(thread.recipient_id)}
+                    onClick={() => {
+                      loadThread(thread.recipient_id);
+                      markConversationAsRead(thread.recipient_id);
+                    }}
                   >
                     <CardContent className="p-3">
                       <div className="flex items-center justify-between mb-1">

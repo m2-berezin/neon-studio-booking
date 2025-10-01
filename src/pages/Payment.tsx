@@ -64,13 +64,21 @@ const Payment = () => {
     setLoading(true);
     
     try {
+      // Store booking details in payment request
+      const bookingInfo = notes ? {
+        service: serviceTitle,
+        option: optionTitle,
+        booking_details: notes
+      } : null;
+
       const { error } = await supabase
         .from('payment_requests')
         .insert({
           user_id: user.id,
           amount: parseFloat(price || '0'),
           method: 'manual',
-          status: 'pending'
+          status: 'pending',
+          notes: JSON.stringify(bookingInfo)
         });
 
       if (error) throw error;
@@ -91,10 +99,14 @@ const Payment = () => {
         .eq('role', 'admin');
 
       if (admins && admins.length > 0) {
+        const notificationBody = notes 
+          ? `${userName} confirmou pagamento de €${price} para ${serviceTitle} - ${notes}`
+          : `${userName} confirmou pagamento de €${price} para ${serviceTitle} - ${optionTitle}`;
+
         const notifications = admins.map(admin => ({
           user_id: admin.id,
           title: 'Novo Pagamento Pendente',
-          body: `${userName} confirmou pagamento de €${price} para ${serviceTitle} - ${optionTitle}`,
+          body: notificationBody,
           read: false
         }));
 

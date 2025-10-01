@@ -8,6 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { useBooking } from '@/hooks/useBooking';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import { format, parse } from 'date-fns';
 import PriceSummary from '@/components/PriceSummary';
 import { 
@@ -106,6 +107,38 @@ const Book = () => {
         selectedSlot.start_time,
         selectedSlot.end_time
       );
+
+      // Notify admin about new booking
+      if (user) {
+        try {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('full_name')
+            .eq('id', user.id)
+            .single();
+
+          const userName = profile?.full_name || user.email || 'Cliente';
+          const serviceName = services.find(s => s.id === selectedService)?.name || 'Serviço';
+          
+          const { data: admins } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('role', 'admin');
+
+          if (admins && admins.length > 0) {
+            const notifications = admins.map(admin => ({
+              user_id: admin.id,
+              title: 'Nova Reserva',
+              body: `${userName} fez uma nova reserva de ${serviceName} para ${format(selectedDate, 'dd/MM/yyyy')} às ${selectedSlot.start_time}`,
+              read: false
+            }));
+
+            await supabase.from('notifications').insert(notifications);
+          }
+        } catch (error) {
+          console.error('Error notifying admin:', error);
+        }
+      }
 
       // Send in-app message
       await sendBookingMessage(
