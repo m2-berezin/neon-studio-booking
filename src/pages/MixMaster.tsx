@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -22,6 +23,7 @@ import {
 } from 'lucide-react';
 
 const MixMaster = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { userSubscription } = useSubscriptions();
   const { toast } = useToast();
@@ -129,7 +131,6 @@ const MixMaster = () => {
       return;
     }
 
-    // Redirect to payment page
     const queryParams = new URLSearchParams({
       service: 'mixmaster',
       option: selectedOption,
@@ -139,7 +140,7 @@ const MixMaster = () => {
       transferLink: transferLink
     });
     
-    window.location.href = `/payment?${queryParams.toString()}`;
+    navigate(`/payment?${queryParams.toString()}`);
   };
 
   const getSelectedPrice = () => {

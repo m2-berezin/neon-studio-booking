@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Calendar } from '@/components/ui/calendar';
@@ -28,6 +29,7 @@ interface TimeSlot {
 }
 
 const Book = () => {
+  const navigate = useNavigate();
   const { 
     loading, 
     createBooking, 
@@ -379,15 +381,14 @@ const Book = () => {
           <div className="space-y-3">
             <Button 
               onClick={() => {
-                // Redirect to payment page instead of confirming booking
                 const queryParams = new URLSearchParams({
                   service: 'booking',
                   option: selectedService,
                   delivery: 'in-person',
                   price: selectedServiceDetails?.base_price.toString() || '0',
-                  notes: `Booking for ${selectedDate ? selectedDate.toDateString() : ''} at ${selectedSlot ? selectedSlot.start_time : ''}`,
+                  notes: `Reserva para ${selectedDate ? format(selectedDate, 'dd/MM/yyyy') : ''} às ${selectedSlot ? selectedSlot.start_time : ''}`,
                 });
-                window.location.href = `/payment-stripe?${queryParams.toString()}`;
+                navigate(`/payment?${queryParams.toString()}`);
               }}
               className="w-full"
               disabled={loading}
