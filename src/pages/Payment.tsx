@@ -7,7 +7,8 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { ArrowLeft, CheckCircle, Copy } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Copy, Smartphone, Building2 } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 
 const Payment = () => {
   const [searchParams] = useSearchParams();
@@ -28,8 +29,8 @@ const Payment = () => {
   const optionTitle = option === '1project' ? '1 Projecto' : '2 Projectos';
 
   // Payment details
-  const MBWAY_PHONE = '+351 912 345 678';
-  const IBAN = 'PT50 0000 0000 0000 0000 0000 0';
+  const MBWAY_PHONE = '934941263';
+  const IBAN = 'PT50 0193 0000 1050 4647 3479 5';
 
   useEffect(() => {
     if (!service || !option || !price) {
@@ -74,14 +75,31 @@ const Payment = () => {
 
       if (error) throw error;
 
-      // Call edge function to notify admin via SMS
-      await supabase.functions.invoke('notify-payment-sms', {
-        body: {
-          user_id: user.id,
-          amount: parseFloat(price || '0'),
-          method: 'manual'
-        }
-      });
+      // Create notification for admin
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', user.id)
+        .single();
+
+      const userName = profile?.full_name || user.email || 'Usuário';
+
+      // Get admin users
+      const { data: admins } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('role', 'admin');
+
+      if (admins && admins.length > 0) {
+        const notifications = admins.map(admin => ({
+          user_id: admin.id,
+          title: 'Novo Pagamento Pendente',
+          body: `${userName} confirmou pagamento de €${price} para ${serviceTitle} - ${optionTitle}`,
+          read: false
+        }));
+
+        await supabase.from('notifications').insert(notifications);
+      }
 
       toast({
         title: 'Pagamento Registado',
@@ -173,34 +191,68 @@ const Payment = () => {
         </CardHeader>
         <CardContent className="space-y-6">
           {/* MBWay */}
-          <div className="space-y-2">
-            <h3 className="font-semibold text-lg">MB Way</h3>
-            <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-              <span className="font-mono">{MBWAY_PHONE}</span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => copyToClipboard(MBWAY_PHONE, 'Número MB Way')}
-              >
-                <Copy className="h-4 w-4" />
-              </Button>
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Smartphone className="h-5 w-5 text-primary" />
+              <h3 className="font-semibold text-lg">MB Way</h3>
+            </div>
+            
+            <div className="bg-gradient-to-br from-primary/5 to-primary/10 p-6 rounded-xl border-2 border-primary/20">
+              <div className="flex flex-col md:flex-row items-center gap-6">
+                <div className="bg-white p-4 rounded-lg shadow-lg">
+                  <QRCodeSVG 
+                    value={`MBWAY:${MBWAY_PHONE}:${price}`}
+                    size={160}
+                    level="H"
+                    includeMargin={true}
+                  />
+                </div>
+                
+                <div className="flex-1 text-center md:text-left">
+                  <p className="text-sm text-muted-foreground mb-2">Número de Telemóvel:</p>
+                  <div className="flex items-center justify-center md:justify-start gap-2 mb-4">
+                    <span className="text-2xl font-bold font-mono">{MBWAY_PHONE}</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => copyToClipboard(MBWAY_PHONE, 'Número MB Way')}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Digitalize o QR code com a app MB Way ou use o número manualmente
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
 
           <Separator />
 
           {/* IBAN */}
-          <div className="space-y-2">
-            <h3 className="font-semibold text-lg">Transferência Bancária</h3>
-            <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-              <span className="font-mono text-sm">{IBAN}</span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => copyToClipboard(IBAN, 'IBAN')}
-              >
-                <Copy className="h-4 w-4" />
-              </Button>
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Building2 className="h-5 w-5 text-primary" />
+              <h3 className="font-semibold text-lg">Transferência Bancária</h3>
+            </div>
+            
+            <div className="bg-gradient-to-br from-secondary/5 to-secondary/10 p-4 rounded-xl border-2 border-secondary/20">
+              <p className="text-sm text-muted-foreground mb-2">IBAN:</p>
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <span className="font-mono text-sm md:text-base font-semibold break-all">{IBAN}</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => copyToClipboard(IBAN, 'IBAN')}
+                  className="flex-shrink-0"
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Utilize este IBAN para transferência bancária nacional ou internacional
+              </p>
             </div>
           </div>
 
@@ -220,7 +272,7 @@ const Payment = () => {
           <Button 
             onClick={handlePaymentConfirmation}
             disabled={loading}
-            className="w-full"
+            className="w-full bg-green-600 hover:bg-green-700 text-white"
             size="lg"
           >
             {loading ? (
@@ -229,7 +281,10 @@ const Payment = () => {
                 A processar...
               </>
             ) : (
-              'Já Paguei'
+              <>
+                <CheckCircle className="h-5 w-5 mr-2" />
+                Já Paguei
+              </>
             )}
           </Button>
         </CardContent>
