@@ -124,11 +124,21 @@ const Projects = () => {
                       ))}
                     </div>
 
-                    {/* Last Update */}
+                     {/* Last Update */}
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Clock className="w-4 h-4" />
                       <span>Atualizado {format(new Date(project.created_at), 'MMM d, yyyy')}</span>
                     </div>
+
+                    {/* Booking Info if available */}
+                    {project.booking && (
+                      <div className="text-sm bg-primary/5 p-2 rounded">
+                        <p className="font-medium text-foreground">Sessão Reservada</p>
+                        <p className="text-muted-foreground">
+                          {format(new Date(project.booking.date), 'dd/MM/yyyy')} às {project.booking.start_time}
+                        </p>
+                      </div>
+                    )}
 
                     {/* Progress Indicator */}
                     <div className="w-full bg-secondary rounded-full h-2">

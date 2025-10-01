@@ -208,6 +208,37 @@ const ProjectDetail = () => {
         )}
       </div>
 
+      {/* Booking Details Card */}
+      {currentProject.booking && (
+        <Card className="studio-card bg-gradient-to-br from-primary/10 to-accent/10">
+          <CardHeader>
+            <CardTitle className="text-lg">Detalhes da Reserva</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div>
+              <p className="text-sm text-muted-foreground">Serviço</p>
+              <p className="font-medium">{currentProject.booking.service?.name || 'Recording Session'}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Data e Hora</p>
+              <p className="font-medium">
+                {format(new Date(currentProject.booking.date), 'dd/MM/yyyy')} às {currentProject.booking.start_time} - {currentProject.booking.end_time}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Morada</p>
+              <p className="font-medium">Rua do Estúdio, 123 - Lisboa</p>
+            </div>
+            {currentProject.booking.notes && (
+              <div>
+                <p className="text-sm text-muted-foreground">Notas</p>
+                <p className="font-medium">{currentProject.booking.notes}</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       <Tabs defaultValue="files" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="files">Files & Uploads</TabsTrigger>

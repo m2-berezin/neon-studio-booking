@@ -25,6 +25,18 @@ interface Project {
     full_name: string;
     role: string;
   };
+  booking?: {
+    id: string;
+    date: string;
+    start_time: string;
+    end_time: string;
+    status: string;
+    notes?: string;
+    service?: {
+      name: string;
+      description?: string;
+    };
+  };
 }
 
 export const useProjects = () => {
@@ -47,7 +59,16 @@ export const useProjects = () => {
         .select(`
           *,
           files(*),
-          client_profile:profiles!client_id(full_name, role)
+          client_profile:profiles!client_id(full_name, role),
+          booking:bookings!projects_booking_id_fkey(
+            id,
+            date,
+            start_time,
+            end_time,
+            status,
+            notes,
+            service:services(name, description)
+          )
         `)
         .order('created_at', { ascending: false });
 
@@ -83,7 +104,16 @@ export const useProjects = () => {
         .select(`
           *,
           files(*),
-          client_profile:profiles!client_id(full_name, role)
+          client_profile:profiles!client_id(full_name, role),
+          booking:bookings!projects_booking_id_fkey(
+            id,
+            date,
+            start_time,
+            end_time,
+            status,
+            notes,
+            service:services(name, description)
+          )
         `)
         .eq('id', projectId)
         .single();
