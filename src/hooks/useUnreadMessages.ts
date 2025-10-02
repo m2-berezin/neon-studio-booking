@@ -18,28 +18,49 @@ export const useUnreadMessages = () => {
       // Get all messages where user is recipient
       const { data: allMessages, error } = await supabase
         .from('messages')
-        .select('id, sender_id, recipient_id, created_at')
+        .select('id, sender_id')
         .eq('recipient_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
-      // Group by sender to find latest message from each conversation
-      const conversationMap = new Map<string, string>();
+      if (!allMessages || allMessages.length === 0) {
+        setUnreadCount(0);
+        setLoading(false);
+        return;
+      }
+
+      // Get read status for all messages
+      const { data: readMessages, error: readError } = await supabase
+        .from('message_reads')
+        .select('message_id')
+        .eq('user_id', user.id);
+
+      if (readError) throw readError;
+
+      const readMessageIds = new Set(readMessages?.map(r => r.message_id) || []);
+
+      // Group by sender and count unread messages per conversation
+      const conversationUnreadMap = new Map<string, boolean>();
       
-      allMessages?.forEach(message => {
+      allMessages.forEach(message => {
         const senderId = message.sender_id;
-        if (!conversationMap.has(senderId)) {
-          conversationMap.set(senderId, message.id);
+        if (!conversationUnreadMap.has(senderId)) {
+          // Check if this conversation has any unread messages
+          const hasUnread = !readMessageIds.has(message.id);
+          conversationUnreadMap.set(senderId, hasUnread);
+        } else if (!conversationUnreadMap.get(senderId)) {
+          // If we already marked it as read, check if this message is unread
+          const hasUnread = !readMessageIds.has(message.id);
+          if (hasUnread) {
+            conversationUnreadMap.set(senderId, true);
+          }
         }
       });
 
-      // For each conversation, check if there are unread messages
-      // (messages after the user last viewed that conversation)
-      // For simplicity, we'll count unique senders with recent messages
-      // This is a simplified approach - you might want to track "last_read_at" per conversation
-      
-      setUnreadCount(conversationMap.size);
+      // Count conversations with unread messages
+      const unreadConversations = Array.from(conversationUnreadMap.values()).filter(hasUnread => hasUnread).length;
+      setUnreadCount(unreadConversations);
     } catch (error) {
       console.error('Error loading unread message count:', error);
       setUnreadCount(0);
@@ -51,8 +72,10 @@ export const useUnreadMessages = () => {
   useEffect(() => {
     loadUnreadCount();
 
+    if (!user) return;
+
     // Set up realtime subscription for new messages
-    const channel = supabase
+    const messagesChannel = supabase
       .channel('messages-unread')
       .on(
         'postgres_changes',
@@ -60,7 +83,24 @@ export const useUnreadMessages = () => {
           event: 'INSERT',
           schema: 'public',
           table: 'messages',
-          filter: `recipient_id=eq.${user?.id}`
+          filter: `recipient_id=eq.${user.id}`
+        },
+        () => {
+          loadUnreadCount();
+        }
+      )
+      .subscribe();
+
+    // Set up realtime subscription for message reads
+    const readsChannel = supabase
+      .channel('message-reads-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'message_reads',
+          filter: `user_id=eq.${user.id}`
         },
         () => {
           loadUnreadCount();
@@ -69,18 +109,62 @@ export const useUnreadMessages = () => {
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(messagesChannel);
+      supabase.removeChannel(readsChannel);
     };
   }, [user]);
 
   const markConversationAsRead = async (senderId: string) => {
     if (!user) return;
     
-    // Remove this sender from the unread count immediately
-    setUnreadCount(prev => Math.max(0, prev - 1));
-    
-    // Reload count to ensure accuracy
-    await loadUnreadCount();
+    try {
+      // Get all messages from this sender that haven't been read
+      const { data: unreadMessages, error: fetchError } = await supabase
+        .from('messages')
+        .select('id')
+        .eq('recipient_id', user.id)
+        .eq('sender_id', senderId);
+
+      if (fetchError) throw fetchError;
+
+      if (unreadMessages && unreadMessages.length > 0) {
+        // Get already read messages
+        const { data: alreadyRead, error: readFetchError } = await supabase
+          .from('message_reads')
+          .select('message_id')
+          .eq('user_id', user.id)
+          .in('message_id', unreadMessages.map(m => m.id));
+
+        if (readFetchError) throw readFetchError;
+
+        const alreadyReadIds = new Set(alreadyRead?.map(r => r.message_id) || []);
+        
+        // Mark unread messages as read
+        const messagesToMark = unreadMessages
+          .filter(m => !alreadyReadIds.has(m.id))
+          .map(m => ({
+            user_id: user.id,
+            message_id: m.id
+          }));
+
+        if (messagesToMark.length > 0) {
+          const { error: insertError } = await supabase
+            .from('message_reads')
+            .insert(messagesToMark);
+
+          if (insertError && !insertError.message.includes('duplicate')) {
+            throw insertError;
+          }
+        }
+      }
+      
+      // Reload count
+      await loadUnreadCount();
+    } catch (error) {
+      console.error('Error marking conversation as read:', error);
+      // Still reload count to ensure accuracy
+      await loadUnreadCount();
+    }
   };
 
   return {
