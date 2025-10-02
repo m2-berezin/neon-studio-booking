@@ -24,7 +24,6 @@ import AdminBookings from "@/pages/AdminBookings";
 import AdminDashboard from "@/pages/AdminDashboard";
 import AdminMessages from "@/pages/AdminMessages";
 import { AdminLayout } from "@/components/admin/AdminLayout";
-import DayOff from "@/components/admin/DayOff";
 import StudioInfo from "@/pages/StudioInfo";
 import MixMaster from "./pages/MixMaster";
 import Payment from "./pages/Payment";
@@ -81,7 +80,6 @@ const App = () => {
                 <Route path="/admin/bookings" element={<AdminLayout><AdminBookings /></AdminLayout>} />
                 <Route path="/admin/payments" element={<AdminLayout><AdminPayments /></AdminLayout>} />
                 <Route path="/admin/messages" element={<AdminLayout><AdminMessages /></AdminLayout>} />
-                <Route path="/admin/dayoff" element={<AdminLayout><DayOff /></AdminLayout>} />
                 
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />

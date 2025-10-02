@@ -272,27 +272,26 @@ export const useProjects = () => {
     });
   };
 
-  // Helper function to notify ALL admins
+  // Helper function to notify admin
   const notifyAdmin = async (projectId: string, message: string) => {
     try {
-      const { data: adminUsers } = await supabase
+      const { data: adminUser } = await supabase
         .from('profiles')
         .select('id')
-        .eq('role', 'admin');
+        .eq('role', 'admin')
+        .maybeSingle();
 
-      if (adminUsers && adminUsers.length > 0) {
-        const notifications = adminUsers.map(admin => ({
-          user_id: admin.id,
-          title: 'Atualização de Projeto',
-          body: message,
-        }));
-        
+      if (adminUser) {
         await supabase
           .from('notifications')
-          .insert(notifications);
+          .insert({
+            user_id: adminUser.id,
+            title: 'Project Update',
+            body: message,
+          });
       }
     } catch (error) {
-      console.error('Error notifying admins:', error);
+      console.error('Error notifying admin:', error);
     }
   };
 

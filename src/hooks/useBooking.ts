@@ -218,22 +218,22 @@ export const useBooking = () => {
 
       if (error) throw error;
 
-      // Create notifications for ALL admins
-      const { data: adminProfiles } = await supabase
+      // Create admin notification
+      const { data: adminProfile } = await supabase
         .from('profiles')
         .select('id')
-        .eq('role', 'admin');
+        .eq('role', 'admin')
+        .limit(1)
+        .single();
 
-      if (adminProfiles && adminProfiles.length > 0) {
-        const notifications = adminProfiles.map(admin => ({
-          user_id: admin.id,
-          title: 'Nova Sessão Reservada',
-          body: `Uma nova sessão de ${services.find(s => s.id === serviceId)?.name} foi reservada para ${format(date, 'PPP')} às ${startTime}`,
-        }));
-        
+      if (adminProfile) {
         await supabase
           .from('notifications')
-          .insert(notifications);
+          .insert({
+            user_id: adminProfile.id,
+            title: 'New Session Booked',
+            body: `A new ${services.find(s => s.id === serviceId)?.name} session has been booked for ${format(date, 'PPP')} at ${startTime}`,
+          });
       }
 
       toast({
@@ -261,25 +261,24 @@ export const useBooking = () => {
 
     try {
       const service = services.find(s => s.id === serviceId);
-      const messageText = `A tua sessão de ${service?.name} está confirmada para ${format(date, 'EEEE, MMMM do, yyyy')} às ${format(parse(startTime, 'HH:mm:ss', new Date()), 'h:mm a')}.\n\n📍 Localização do Estúdio: 7T7Studios, [Morada a fornecer]\n\n📋 Regras da Sessão:\n• Chegar 15 minutos mais cedo para preparação\n• Trazer o teu ID e qualquer equipamento pessoal\n• Sem comida ou bebidas de fora\n• Respeitar o equipamento e ambiente do estúdio\n\nEstamos ansiosos para trabalhar contigo! 🎵`;
+      const messageText = `Your ${service?.name} session is confirmed for ${format(date, 'EEEE, MMMM do, yyyy')} at ${format(parse(startTime, 'HH:mm:ss', new Date()), 'h:mm a')}.\n\n📍 Studio Location: 7T7Studios, [Address to be provided]\n\n📋 Session Rules:\n• Arrive 15 minutes early for setup\n• Bring your ID and any personal equipment\n• No outside food or drinks\n• Respect studio equipment and environment\n\nWe're excited to work with you! 🎵`;
 
-      const { data: adminProfiles } = await supabase
+      const { data: adminProfile } = await supabase
         .from('profiles')
         .select('id')
-        .eq('role', 'admin');
+        .eq('role', 'admin')
+        .limit(1)
+        .single();
 
-      if (adminProfiles && adminProfiles.length > 0) {
-        // Send message from each admin to user
-        for (const admin of adminProfiles) {
-          await supabase
-            .from('messages')
-            .insert({
-              thread_type: 'direct',
-              sender_id: admin.id,
-              recipient_id: user.id,
-              body: messageText,
-            });
-        }
+      if (adminProfile) {
+        await supabase
+          .from('messages')
+          .insert({
+            thread_type: 'direct',
+            sender_id: adminProfile.id,
+            recipient_id: user.id,
+            body: messageText,
+          });
       }
     } catch (error) {
       console.error('Error sending booking message:', error);

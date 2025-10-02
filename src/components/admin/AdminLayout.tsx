@@ -11,9 +11,7 @@ import {
   LogOut,
   Menu,
   X,
-  Shield,
-  CalendarOff,
-  Send
+  Shield
 } from 'lucide-react';
 import { useState } from 'react';
 import { NotificationBell } from '@/components/NotificationBell';
@@ -45,8 +43,6 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
     { path: '/admin/payments', icon: DollarSign, label: 'Pagamentos' },
     { path: '/admin/bookings', icon: Calendar, label: 'Reservas' },
     { path: '/admin/messages', icon: MessageSquare, label: 'Mensagens' },
-    { path: '/admin/dayoff', icon: CalendarOff, label: 'Day Off' },
-    { path: '/admin/send-welcome', icon: Send, label: 'Enviar Boas-Vindas' },
   ];
 
   return (
