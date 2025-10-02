@@ -738,7 +738,70 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      v_messages: {
+        Row: {
+          created_at: string | null
+          id: string | null
+          is_read: boolean | null
+          message: string | null
+          receiver_display_name: string | null
+          receiver_id: string | null
+          sender_display_name: string | null
+          sender_id: string | null
+          service_id: string | null
+          thread_id: string | null
+          timestamp: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string | null
+          is_read?: boolean | null
+          message?: string | null
+          receiver_display_name?: never
+          receiver_id?: string | null
+          sender_display_name?: never
+          sender_id?: string | null
+          service_id?: string | null
+          thread_id?: string | null
+          timestamp?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string | null
+          is_read?: boolean | null
+          message?: string | null
+          receiver_display_name?: never
+          receiver_id?: string | null
+          sender_display_name?: never
+          sender_id?: string | null
+          service_id?: string | null
+          thread_id?: string | null
+          timestamp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_receiver_id_fkey"
+            columns: ["receiver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       backfill_welcome_messages: {

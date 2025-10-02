@@ -11,14 +11,8 @@ export interface Message {
   message: string;
   timestamp: string;
   is_read: boolean;
-  sender_profile?: {
-    full_name: string;
-    email: string;
-  };
-  receiver_profile?: {
-    full_name: string;
-    email: string;
-  };
+  sender_display_name: string;
+  receiver_display_name: string;
 }
 
 export interface Thread {
@@ -56,51 +50,21 @@ export const useMessaging = () => {
 
     setLoading(true);
     try {
-      const isUserAdmin = await isAdmin();
-
-      // Get all messages involving current user
+      // Get all messages from view (includes display names)
       const { data: allMessages, error } = await supabase
-        .from('messages')
+        .from('v_messages')
         .select('*')
         .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
         .order('timestamp', { ascending: false });
 
       if (error) throw error;
 
-      // Group messages by thread and get user names
+      // Group messages by thread
       const threadMap = new Map<string, Thread>();
 
       for (const msg of allMessages || []) {
         const otherUserId = msg.sender_id === user.id ? msg.receiver_id : msg.sender_id;
-        
-        // Get other user's profile
-        const { data: otherProfile } = await supabase
-          .from('profiles')
-          .select('full_name')
-          .eq('id', otherUserId)
-          .single();
-
-        let displayName = otherProfile?.full_name || 'Usuário';
-
-        // For users (not admins), check if the other person is an admin and show admin name
-        if (!isUserAdmin && msg.sender_id !== user.id) {
-          const { data: senderRoles } = await supabase
-            .from('user_roles')
-            .select('*')
-            .eq('user_id', msg.sender_id)
-            .eq('role', 'admin')
-            .maybeSingle();
-          
-          if (senderRoles) {
-            // Get sender email to determine which admin
-            const { data: { user: authUser } } = await supabase.auth.admin.getUserById(msg.sender_id);
-            if (authUser?.email === 'ghostwayne777@hotmail.com') {
-              displayName = 'Ghost Wayne';
-            } else if (authUser?.email === 'maximberezin.pro@outlook.com') {
-              displayName = 'MAX.I.M';
-            }
-          }
-        }
+        const displayName = msg.sender_id === user.id ? msg.receiver_display_name : msg.sender_display_name;
 
         if (!threadMap.has(msg.thread_id)) {
           const unreadCount = (allMessages || []).filter(
@@ -136,8 +100,9 @@ export const useMessaging = () => {
 
     setLoading(true);
     try {
+      // Load from view to get display names
       const { data, error } = await supabase
-        .from('messages')
+        .from('v_messages')
         .select('*')
         .eq('thread_id', threadId)
         .order('timestamp', { ascending: true });
@@ -147,7 +112,7 @@ export const useMessaging = () => {
       setMessages(data || []);
       setSelectedThreadId(threadId);
 
-      // Mark messages as read
+      // Mark messages as read (update on actual table)
       await supabase
         .from('messages')
         .update({ is_read: true })
