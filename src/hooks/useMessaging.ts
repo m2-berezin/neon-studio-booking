@@ -32,18 +32,6 @@ export const useMessaging = () => {
   const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Check if current user is admin
-  const isAdmin = async () => {
-    if (!user) return false;
-    const { data } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', user.id)
-      .eq('role', 'admin')
-      .maybeSingle();
-    return !!data;
-  };
-
   // Load all threads for current user
   const loadThreads = async () => {
     if (!user) return;
@@ -184,17 +172,16 @@ export const useMessaging = () => {
     if (!user) return;
 
     const channel = supabase
-      .channel('messages-changes')
+      .channel(`messages-changes-${user.id}`)
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
           table: 'messages',
+          filter: `sender_id=eq.${user.id},receiver_id=eq.${user.id}`,
         },
-        (payload) => {
-          console.log('Message update:', payload);
-          
+        () => {
           // Reload threads and messages
           loadThreads();
           if (selectedThreadId) {
