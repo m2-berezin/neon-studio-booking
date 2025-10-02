@@ -18,7 +18,7 @@ export const useWelcomeMessages = () => {
         .from('messages')
         .select('id')
         .eq('recipient_id', user.id)
-        .eq('thread_type', 'welcome')
+        .eq('thread_type', 'direct')
         .limit(1);
 
       if (error) {
@@ -31,63 +31,66 @@ export const useWelcomeMessages = () => {
         return;
       }
 
-      // Find Ghost Wayne (admin user)
-      const { data: adminUser, error: adminError } = await supabase
+      // Find ALL admin users
+      const { data: adminUsers, error: adminError } = await supabase
         .from('profiles')
-        .select('id')
-        .eq('role', 'admin')
-        .limit(1)
-        .single();
+        .select('id, full_name')
+        .eq('role', 'admin');
 
-      if (adminError || !adminUser) {
-        console.error('Error finding admin user:', adminError);
+      if (adminError || !adminUsers || adminUsers.length === 0) {
+        console.error('Error finding admin users:', adminError);
         return;
       }
 
-      // Send first welcome message
-      const firstMessage = `Bem vindo à 7T7Studios App, esta é a minha visão para a interação entre a música e a tecnologia.
-Aqui podes fazer reservas, enviar projetos, comprar beats e ganhar ofertas. 🎁 
-Qualquer dúvida manda-me mensagem aqui no chat! 💭`;
+      console.log(`🎉 Enviando mensagens de boas-vindas de ${adminUsers.length} admin(s)`);
 
-      await supabase
-        .from('messages')
-        .insert({
-          sender_id: adminUser.id,
-          recipient_id: user.id,
-          thread_type: 'welcome',
-          body: firstMessage,
-        });
+      // Send first welcome message from each admin
+      const firstMessage = `🎧 Bem-vindo à 7T7Studios App, esta é a minha visão para a interação entre a música e a tecnologia.
+Aqui podes fazer reservas, enviar projetos, comprar beats e ganhar ofertas.
+💬 Qualquer dúvida manda-me mensagem aqui no chat!`;
 
-      // Send second welcome message after a short delay
-      setTimeout(async () => {
-        const secondMessage = `Já agora, pra não dizeres que não ganhas nada com isto... vai à Tab "Recompensas" e vê as ofertas que tens disponíveis. Até já ! 🦇`;
-
+      for (const admin of adminUsers) {
         await supabase
           .from('messages')
           .insert({
-            sender_id: adminUser.id,
+            sender_id: admin.id,
             recipient_id: user.id,
-            thread_type: 'welcome',
-            body: secondMessage,
+            thread_type: 'direct',
+            body: firstMessage,
           });
+      }
+
+      // Send second welcome message after a short delay
+      setTimeout(async () => {
+        const secondMessage = `🎁 Já agora, pra não dizeres que não ganhas nada com isto...
+Vai até à Tab "Recompensas" e vê as ofertas que tens disponíveis. Até já!`;
+
+        for (const admin of adminUsers) {
+          await supabase
+            .from('messages')
+            .insert({
+              sender_id: admin.id,
+              recipient_id: user.id,
+              thread_type: 'direct',
+              body: secondMessage,
+              attachments: JSON.stringify({
+                action: {
+                  type: 'button',
+                  label: '🔎 Ver Recompensas',
+                  url: '/rewards'
+                }
+              })
+            });
+        }
 
         // Create notification about new messages
         await createNotification(
           user.id,
-          'Mensagem de Boas-vindas',
-          'Ghost Wayne enviou-te uma mensagem de boas-vindas!'
+          'Mensagem de Ghost Wayne 🦇',
+          'Recebeste uma mensagem de boas-vindas!'
         );
 
       }, 2000); // 2 second delay
-
-      // Create notification about enabling notifications
-      setTimeout(async () => {
-        await createNotification(
-          user.id,
-          'Ativar Notificações',
-          'Ativa as notificações para ficares a par das ofertas!'
-        );
-      }, 5000); // 5 second delay
 
     } catch (error) {
       console.error('Error sending welcome messages:', error);

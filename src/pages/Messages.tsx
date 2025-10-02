@@ -8,6 +8,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMessages } from '@/hooks/useMessages';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
+import { supabase } from '@/integrations/supabase/client';
 import AudioPlayer from '@/components/AudioPlayer';
 import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
@@ -64,6 +65,39 @@ const Messages = () => {
     }
   };
 
+  // Helper to get all admin IDs
+  const getAllAdminIds = async () => {
+    const { data: adminUsers } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('role', 'admin');
+    
+    return adminUsers?.map(admin => admin.id) || [];
+  };
+
+  // Send message to all admins (for users without existing threads)
+  const handleSendToAllAdmins = async () => {
+    if (!messageText.trim() && attachments.length === 0) return;
+
+    const adminIds = await getAllAdminIds();
+    
+    let success = false;
+    for (const adminId of adminIds) {
+      const result = await sendMessage(
+        adminId,
+        messageText.trim(),
+        'direct',
+        attachments
+      );
+      if (result) success = true;
+    }
+
+    if (success) {
+      setMessageText('');
+      setAttachments([]);
+    }
+  };
+
   const getFileIcon = (fileType: string) => {
     if (fileType.startsWith('image/')) return ImageIcon;
     if (fileType.startsWith('audio/')) return Music;
@@ -109,8 +143,16 @@ const Messages = () => {
                 A carregar conversas...
               </div>
             ) : threads.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                Ainda não há conversas
+              <div className="text-center py-8 px-4">
+                <p className="text-muted-foreground mb-4">Ainda não há conversas</p>
+                <Button
+                  onClick={handleSendToAllAdmins}
+                  disabled={!messageText.trim() && attachments.length === 0}
+                  variant="outline"
+                  size="sm"
+                >
+                  Enviar Mensagem aos Admins
+                </Button>
               </div>
             ) : (
               <div className="space-y-2">

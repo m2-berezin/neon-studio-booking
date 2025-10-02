@@ -234,11 +234,15 @@ export const useMessages = () => {
       console.log('✅ Mensagem enviada com sucesso');
 
       // Create notification for recipient
-      await createNotification(
-        recipientId, 
-        'New Message', 
-        `You have a new message: ${body.length > 50 ? body.substring(0, 50) + '...' : body}`
-      );
+      try {
+        await createNotification(
+          recipientId, 
+          'Nova Mensagem', 
+          `Tens uma nova mensagem: ${body.length > 50 ? body.substring(0, 50) + '...' : body}`
+        );
+      } catch (notifError) {
+        console.warn('⚠️ Erro ao criar notificação:', notifError);
+      }
 
       // Reload current thread if we're viewing it
       if (currentRecipient === recipientId) {
@@ -267,22 +271,30 @@ export const useMessages = () => {
     }
   };
 
-  // Start a conversation with admin
+  // Start a conversation with admin (sends to ALL admins)
   const startAdminConversation = async (initialMessage: string, threadType: string = 'direct') => {
     if (!user) return false;
 
     try {
-      // Find admin user
-      const { data: adminUser, error: adminError } = await supabase
+      // Find all admin users
+      const { data: adminUsers, error: adminError } = await supabase
         .from('profiles')
-        .select('id')
-        .eq('role', 'admin')
-        .maybeSingle();
+        .select('id, full_name')
+        .eq('role', 'admin');
 
       if (adminError) throw adminError;
 
-      if (adminUser) {
-        return await sendMessage(adminUser.id, initialMessage, threadType);
+      if (adminUsers && adminUsers.length > 0) {
+        console.log(`📤 Enviando mensagem para ${adminUsers.length} admin(s):`, adminUsers.map(a => a.full_name));
+        
+        // Send message to all admins
+        let success = false;
+        for (const admin of adminUsers) {
+          const result = await sendMessage(admin.id, initialMessage, threadType);
+          if (result) success = true;
+        }
+        
+        return success;
       }
 
       return false;
