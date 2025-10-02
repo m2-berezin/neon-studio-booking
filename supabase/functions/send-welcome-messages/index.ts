@@ -83,8 +83,7 @@ Deno.serve(async (req) => {
       sender_id: adminId,
       recipient_id: user.id,
       thread_type: 'direct',
-      body: `🦇 Olá! Sou o Ghost Wayne.
-🎧 Bem-vindo à 7T7Studios App, esta é a minha visão para a interação entre a música e a tecnologia.
+      body: `🎧 Bem-vindo à 7T7Studios App, esta é a minha visão para a interação entre a música e a tecnologia.
 Aqui podes fazer reservas, enviar projetos, comprar beats e ganhar ofertas.
 💬 Qualquer dúvida manda-me mensagem aqui no chat!`,
       attachments: null,

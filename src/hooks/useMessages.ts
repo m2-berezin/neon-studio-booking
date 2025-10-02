@@ -177,9 +177,9 @@ export const useMessages = () => {
 
   // Send a message
   const sendMessage = async (
-    recipientId: string, 
-    body: string, 
-    threadType: string = 'general',
+    recipientId: string,
+    body: string,
+    threadType: string = 'direct',
     attachments: File[] = []
   ) => {
     if (!user) return false;

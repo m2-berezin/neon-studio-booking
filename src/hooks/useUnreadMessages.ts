@@ -73,10 +73,14 @@ export const useUnreadMessages = () => {
     };
   }, [user]);
 
-  const markConversationAsRead = (senderId: string) => {
-    // This would ideally update a last_read_at timestamp
-    // For now, just reload count
-    loadUnreadCount();
+  const markConversationAsRead = async (senderId: string) => {
+    if (!user) return;
+    
+    // Remove this sender from the unread count immediately
+    setUnreadCount(prev => Math.max(0, prev - 1));
+    
+    // Reload count to ensure accuracy
+    await loadUnreadCount();
   };
 
   return {
