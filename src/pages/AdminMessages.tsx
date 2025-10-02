@@ -189,10 +189,22 @@ const AdminMessages = () => {
     if (!user || !selectedUserId || !newMessage.trim()) return;
 
     try {
+      // SEMPRE enviar como Ghost Wayne
+      const { data: ghostWayne } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('role', 'admin')
+        .limit(1)
+        .single();
+
+      if (!ghostWayne) {
+        throw new Error('Ghost Wayne admin account not found');
+      }
+
       const { error } = await supabase
         .from('messages')
         .insert({
-          sender_id: user.id,
+          sender_id: ghostWayne.id,  // SEMPRE Ghost Wayne
           recipient_id: selectedUserId,
           body: newMessage.trim(),
           thread_type: 'direct',

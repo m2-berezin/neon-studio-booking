@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.send-welcome-messages]
 verify_jwt = true
+
+[functions.send-welcome-to-existing]
+verify_jwt = false

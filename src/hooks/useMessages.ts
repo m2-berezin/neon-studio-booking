@@ -458,14 +458,26 @@ export const useMessages = () => {
         return true;
       }
 
-      // ADMIN sending message
-      // If recipientId is a user (not admin-inbox), send direct reply
-      console.log('📤 ADMIN → Sending direct message to user:', recipientId);
+      // ADMIN sending message - sempre usar Ghost Wayne como remetente
+      console.log('📤 ADMIN → Sending message as Ghost Wayne to user:', recipientId);
+
+      // Get Ghost Wayne's ID (primeiro admin encontrado)
+      const { data: ghostWayne } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('role', 'admin')
+        .limit(1)
+        .single();
+
+      if (!ghostWayne) {
+        console.error('❌ Ghost Wayne not found!');
+        throw new Error('Ghost Wayne admin account not found');
+      }
 
       const { error } = await supabase
         .from('messages')
         .insert({
-          sender_id: user.id,
+          sender_id: ghostWayne.id,  // SEMPRE Ghost Wayne
           recipient_id: recipientId,  // Direct to user
           receiver_role: null,  // NOT shared inbox
           body,
