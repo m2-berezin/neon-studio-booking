@@ -256,7 +256,7 @@ export const useMessages = () => {
   };
 
   // Start a conversation with admin
-  const startAdminConversation = async (initialMessage: string, threadType: string = 'general') => {
+  const startAdminConversation = async (initialMessage: string, threadType: string = 'direct') => {
     if (!user) return false;
 
     try {

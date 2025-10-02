@@ -54,7 +54,7 @@ const Messages = () => {
     const success = await sendMessage(
       currentRecipient,
       messageText.trim(),
-      'general',
+      'direct',
       attachments
     );
 
@@ -137,7 +137,7 @@ const Messages = () => {
                       <p className="text-xs text-muted-foreground line-clamp-2">
                         {thread.latest_message.body || 'Mensagem sem texto'}
                       </p>
-                      {thread.latest_message.thread_type !== 'general' && (
+                      {thread.latest_message.thread_type !== 'direct' && (
                         <Badge variant="secondary" className="text-xs mt-1">
                           {thread.latest_message.thread_type.replace('_', ' ')}
                         </Badge>
