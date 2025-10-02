@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      availabilities: {
+        Row: {
+          created_at: string | null
+          date: string
+          id: string
+          is_available: boolean | null
+          time_slot: string
+        }
+        Insert: {
+          created_at?: string | null
+          date: string
+          id?: string
+          is_available?: boolean | null
+          time_slot: string
+        }
+        Update: {
+          created_at?: string | null
+          date?: string
+          id?: string
+          is_available?: boolean | null
+          time_slot?: string
+        }
+        Relationships: []
+      }
       availability_rules: {
         Row: {
           created_at: string
@@ -118,6 +142,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      discounts: {
+        Row: {
+          code: string
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          is_used: boolean | null
+          percentage: number
+          user_id: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          is_used?: boolean | null
+          percentage: number
+          user_id?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          is_used?: boolean | null
+          percentage?: number
+          user_id?: string | null
+        }
+        Relationships: []
       }
       files: {
         Row: {
@@ -283,6 +337,50 @@ export type Database = {
           },
         ]
       }
+      offers: {
+        Row: {
+          created_at: string | null
+          discount_percentage: number
+          id: string
+          is_active: boolean | null
+          is_used: boolean | null
+          name: string
+          service_id: string | null
+          user_id: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          discount_percentage: number
+          id?: string
+          is_active?: boolean | null
+          is_used?: boolean | null
+          name: string
+          service_id?: string | null
+          user_id?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          discount_percentage?: number
+          id?: string
+          is_active?: boolean | null
+          is_used?: boolean | null
+          name?: string
+          service_id?: string | null
+          user_id?: string | null
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offers_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payment_requests: {
         Row: {
           amount: number
@@ -402,6 +500,57 @@ export type Database = {
           },
         ]
       }
+      reservations: {
+        Row: {
+          created_at: string | null
+          date: string
+          duration: number
+          id: string
+          payment_request_id: string | null
+          service_id: string
+          status: string | null
+          time_slot: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          date: string
+          duration: number
+          id?: string
+          payment_request_id?: string | null
+          service_id: string
+          status?: string | null
+          time_slot: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          date?: string
+          duration?: number
+          id?: string
+          payment_request_id?: string | null
+          service_id?: string
+          status?: string | null
+          time_slot?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reservations_payment_request_id_fkey"
+            columns: ["payment_request_id"]
+            isOneToOne: false
+            referencedRelation: "payment_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservations_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rewards_usage: {
         Row: {
           client_id: string
@@ -445,6 +594,7 @@ export type Database = {
           base_price: number
           created_at: string
           description: string | null
+          duration_prices: Json | null
           id: string
           is_active: boolean | null
           name: string
@@ -454,6 +604,7 @@ export type Database = {
           base_price: number
           created_at?: string
           description?: string | null
+          duration_prices?: Json | null
           id?: string
           is_active?: boolean | null
           name: string
@@ -463,6 +614,7 @@ export type Database = {
           base_price?: number
           created_at?: string
           description?: string | null
+          duration_prices?: Json | null
           id?: string
           is_active?: boolean | null
           name?: string
