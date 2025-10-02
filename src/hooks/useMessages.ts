@@ -106,14 +106,33 @@ export const useMessages = () => {
         let partnerName: string;
         
         if (!isUserAdmin) {
-          // NON-ADMIN: Show single "Admin Team" thread for all admin communications
+          // NON-ADMIN: Show admin name from messages
           const isAdminMessage = message.receiver_role === 'admin' || 
                                  message.sender_profile?.role === 'admin' ||
                                  message.recipient_profile?.role === 'admin';
           
           if (isAdminMessage) {
+            // Use admin-inbox as thread ID but show actual admin name
             partnerId = 'admin-inbox';
-            partnerName = 'Admin Team';
+            
+            // Get admin name from the message
+            const senderProfile = Array.isArray(message.sender_profile) 
+              ? message.sender_profile[0] 
+              : message.sender_profile;
+            const recipientProfile = Array.isArray(message.recipient_profile)
+              ? message.recipient_profile[0]
+              : message.recipient_profile;
+            
+            // If message is from admin, use admin name; otherwise use "Admin Team"
+            if (message.sender_id !== user.id && senderProfile?.role === 'admin') {
+              partnerName = senderProfile?.full_name || 'Admin';
+            } else if (recipientProfile?.role === 'admin') {
+              partnerName = recipientProfile?.full_name || 'Admin Team';
+            } else {
+              partnerName = 'Admin Team';
+            }
+            
+            console.log('📨 Admin thread - Partner:', partnerName, '| Message from:', message.sender_id === user.id ? 'me' : senderProfile?.full_name);
           } else {
             // Regular user-to-user message
             const isFromUser = message.sender_id === user.id;
@@ -202,6 +221,8 @@ export const useMessages = () => {
       
       // Handle admin inbox thread (all messages between user and any admin)
       if (recipientId === 'admin-inbox') {
+        console.log('🔍 Loading admin inbox thread for user:', user.id);
+        
         // Get current user role
         const { data: currentUserProfile } = await supabase
           .from('profiles')
@@ -210,6 +231,7 @@ export const useMessages = () => {
           .single();
 
         const isUserAdmin = currentUserProfile?.role === 'admin';
+        console.log('👤 User is admin:', isUserAdmin);
 
         if (isUserAdmin) {
           // Admin viewing admin inbox: messages from user to admin inbox OR admin responses
@@ -223,7 +245,9 @@ export const useMessages = () => {
             .or(`and(sender_id.eq.${user.id},receiver_role.eq.admin),and(recipient_id.eq.${user.id},sender_profile.role.eq.admin)`)
             .order('created_at', { ascending: true });
         } else {
-          // Non-admin viewing admin inbox: messages to/from ANY admin
+          // Non-admin viewing admin inbox: 
+          // 1. Messages they sent to admin inbox (receiver_role='admin')
+          // 2. Messages sent directly to them from admins (recipient_id=user.id AND sender is admin)
           query = supabase
             .from('messages')
             .select(`
@@ -231,8 +255,10 @@ export const useMessages = () => {
               sender_profile:profiles!messages_sender_id_fkey(full_name, role),
               recipient_profile:profiles!messages_recipient_id_fkey(full_name, role)
             `)
-            .or(`and(sender_id.eq.${user.id},receiver_role.eq.admin),recipient_id.eq.${user.id}`)
+            .or(`and(sender_id.eq.${user.id},receiver_role.eq.admin),and(recipient_id.eq.${user.id},sender_profile.role.eq.admin)`)
             .order('created_at', { ascending: true });
+            
+          console.log('📥 Non-admin loading: messages sent to admin OR received from admin');
         }
       } else {
         // Regular direct messages
@@ -249,7 +275,21 @@ export const useMessages = () => {
 
       const { data: messages, error } = await query;
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Error loading thread:', error);
+        throw error;
+      }
+
+      console.log('✅ Loaded', messages?.length || 0, 'messages for thread:', recipientId);
+      
+      if (messages && messages.length > 0) {
+        console.log('📨 Sample messages:', messages.slice(0, 3).map(m => ({
+          from: m.sender_profile?.full_name,
+          to: m.recipient_profile?.full_name || 'admin inbox',
+          body: m.body.substring(0, 30),
+          receiver_role: m.receiver_role
+        })));
+      }
 
       setCurrentThread((messages || []).map(msg => ({
         ...msg,
