@@ -204,42 +204,49 @@ export const useSubscriptions = () => {
 
     setLoading(true);
     try {
-      // Find admin user
-      const { data: adminUser, error: adminError } = await supabase
+      // Find ALL admin users
+      const { data: adminUsers, error: adminError } = await supabase
         .from('profiles')
-        .select('id')
-        .eq('role', 'admin')
-        .maybeSingle();
+        .select('id, full_name')
+        .eq('role', 'admin');
 
       if (adminError) throw adminError;
 
-      if (adminUser) {
-        // Send admin notification
+      if (adminUsers && adminUsers.length > 0) {
+        console.log(`📤 Enviando pedido de horário para ${adminUsers.length} admin(s):`, adminUsers.map(a => a.full_name));
+        
+        // Send notifications to ALL admins
+        const notifications = adminUsers.map(admin => ({
+          user_id: admin.id,
+          title: 'Pedido de Horário Mensal',
+          body: `${user.email} pediu o horário mensal para ${userSubscription.plan}.`,
+        }));
+        
         await supabase
           .from('notifications')
-          .insert({
-            user_id: adminUser.id,
-            title: 'Monthly Schedule Request',
-            body: `${user.email} has requested their monthly schedule for ${userSubscription.plan}.`,
-          });
+          .insert(notifications);
 
-        // Create message thread
-        await supabase
-          .from('messages')
-          .insert({
-            sender_id: user.id,
-            recipient_id: adminUser.id,
-            thread_type: 'subscription_schedule',
-            body: `Hi! I'd like to request my monthly schedule for my ${userSubscription.plan} subscription. Please let me know the available slots based on my preferences.`,
-          });
+        // Create message thread with each admin
+        for (const admin of adminUsers) {
+          await supabase
+            .from('messages')
+            .insert({
+              sender_id: user.id,
+              recipient_id: admin.id,
+              thread_type: 'subscription_schedule',
+              body: `Olá! Gostaria de pedir o meu horário mensal para a minha subscrição ${userSubscription.plan}. Por favor, informa-me dos horários disponíveis baseado nas minhas preferências.`,
+            });
+        }
+
+        toast({
+          title: 'Horário Pedido',
+          description: 'O teu pedido de horário mensal foi enviado para a equipa admin.',
+        });
+
+        return true;
       }
 
-      toast({
-        title: 'Schedule Requested',
-        description: 'Your monthly schedule request has been sent to the admin team.',
-      });
-
-      return true;
+      return false;
     } catch (error: any) {
       console.error('Error requesting schedule:', error);
       toast({

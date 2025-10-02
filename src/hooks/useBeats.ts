@@ -61,12 +61,11 @@ export const useBeats = () => {
 
     setLoading(true);
     try {
-      // Find admin user
-      const { data: adminUser, error: adminError } = await supabase
+      // Find ALL admin users
+      const { data: adminUsers, error: adminError } = await supabase
         .from('profiles')
-        .select('id')
-        .eq('role', 'admin')
-        .maybeSingle();
+        .select('id, full_name')
+        .eq('role', 'admin');
 
       if (adminError) throw adminError;
 
@@ -80,35 +79,41 @@ export const useBeats = () => {
         }
       }
 
-      if (adminUser) {
-        // Send message to admin
-        await supabase
-          .from('messages')
-          .insert({
-            sender_id: user.id,
-            recipient_id: adminUser.id,
-            thread_type: 'beat_purchase',
-            body: finalMessage,
-          });
+      if (adminUsers && adminUsers.length > 0) {
+        console.log(`📤 Enviando pedido de beat para ${adminUsers.length} admin(s):`, adminUsers.map(a => a.full_name));
+        
+        // Send message to ALL admins
+        for (const admin of adminUsers) {
+          await supabase
+            .from('messages')
+            .insert({
+              sender_id: user.id,
+              recipient_id: admin.id,
+              thread_type: 'beat_purchase',
+              body: finalMessage,
+            });
 
-        // Send admin notification
-        await supabase
-          .from('notifications')
-          .insert({
-            user_id: adminUser.id,
-            title: 'New Beat Purchase Inquiry',
-            body: `${user.email} is interested in purchasing ${beatType}.`,
-          });
+          // Send admin notification
+          await supabase
+            .from('notifications')
+            .insert({
+              user_id: admin.id,
+              title: 'Novo Pedido de Beat',
+              body: `${user.email} está interessado em comprar ${beatType}.`,
+            });
+        }
+
+        toast({
+          title: 'Mensagem Enviada',
+          description: 'O teu pedido de beat foi enviado para a nossa equipa.',
+        });
+
+        // Navigate to messages
+        navigate('/messages');
+        return true;
       }
 
-      toast({
-        title: 'Message Sent',
-        description: 'Your beat purchase inquiry has been sent to our team.',
-      });
-
-      // Navigate to messages
-      navigate('/messages');
-      return true;
+      return false;
     } catch (error: any) {
       console.error('Error starting conversation:', error);
       toast({

@@ -110,22 +110,32 @@ const ProjectDetail = () => {
     if (!message.trim() || !projectId) return;
 
     // Find the client or admin to send message to
-    let recipientId;
     if (isAdmin()) {
-      recipientId = currentProject.client_id;
-    } else {
-      const { data: adminUser } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('role', 'admin')
-        .maybeSingle();
-      recipientId = adminUser?.id;
-    }
-
-    if (recipientId) {
+      // Admin sending to client
+      const recipientId = currentProject.client_id;
       const success = await sendMessage(recipientId, message, 'project');
       if (success) {
         setMessage('');
+      }
+    } else {
+      // Client sending to ALL admins
+      const { data: adminUsers } = await supabase
+        .from('profiles')
+        .select('id, full_name')
+        .eq('role', 'admin');
+      
+      if (adminUsers && adminUsers.length > 0) {
+        console.log(`📤 Enviando mensagem de projeto para ${adminUsers.length} admin(s):`, adminUsers.map(a => a.full_name));
+        
+        let success = false;
+        for (const admin of adminUsers) {
+          const result = await sendMessage(admin.id, message, 'project');
+          if (result) success = true;
+        }
+        
+        if (success) {
+          setMessage('');
+        }
       }
     }
   };
