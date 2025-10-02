@@ -115,18 +115,20 @@ const Layout = ({ children }: { children: ReactNode }) => {
                       7
                     </span>
                   ) : (
-                    <div className="relative">
-                      <item.icon className="w-5 h-5" />
-                      {item.path === '/messages' && unreadCount > 0 && (
-                        <Badge 
-                          variant="destructive" 
-                          className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center text-xs"
-                        >
-                          {unreadCount}
-                        </Badge>
-                      )}
+                    <>
+                      <div className="relative">
+                        <item.icon className="w-5 h-5" />
+                        {item.path === '/messages' && unreadCount > 0 && (
+                          <Badge 
+                            variant="destructive" 
+                            className="absolute -top-2 -right-2 h-4 w-4 p-0 flex items-center justify-center text-[10px] font-semibold"
+                          >
+                            {unreadCount > 9 ? '9+' : unreadCount}
+                          </Badge>
+                        )}
+                      </div>
                       <span className="text-xs font-medium">{item.label}</span>
-                    </div>
+                    </>
                   )}
                 </button>
               );
