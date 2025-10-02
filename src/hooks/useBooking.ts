@@ -274,10 +274,11 @@ export const useBooking = () => {
         await supabase
           .from('messages')
           .insert({
-            thread_type: 'direct',
             sender_id: adminProfile.id,
-            recipient_id: user.id,
-            body: messageText,
+            receiver_id: user.id,
+            thread_id: crypto.randomUUID(),
+            message: messageText,
+            timestamp: new Date().toISOString(),
           });
       }
     } catch (error) {

@@ -228,9 +228,10 @@ export const useSubscriptions = () => {
           .from('messages')
           .insert({
             sender_id: user.id,
-            recipient_id: adminUser.id,
-            thread_type: 'subscription_schedule',
-            body: `Hi! I'd like to request my monthly schedule for my ${userSubscription.plan} subscription. Please let me know the available slots based on my preferences.`,
+            receiver_id: adminUser.id,
+            thread_id: crypto.randomUUID(),
+            message: `Hi! I'd like to request my monthly schedule for my ${userSubscription.plan} subscription. Please let me know the available slots based on my preferences.`,
+            timestamp: new Date().toISOString(),
           });
       }
 

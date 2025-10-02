@@ -570,9 +570,10 @@ export const useAdmin = () => {
       // Create messages
       const messages = clientIds.map(clientId => ({
         sender_id: user!.id,
-        recipient_id: clientId,
-        thread_type: 'admin_broadcast',
-        body: `${title}\n\n${body}`,
+        receiver_id: clientId,
+        thread_id: crypto.randomUUID(),
+        message: `${title}\n\n${body}`,
+        timestamp: new Date().toISOString(),
       }));
 
       const { error: messageError } = await supabase

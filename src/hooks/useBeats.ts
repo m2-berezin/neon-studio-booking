@@ -86,9 +86,10 @@ export const useBeats = () => {
           .from('messages')
           .insert({
             sender_id: user.id,
-            recipient_id: adminUser.id,
-            thread_type: 'beat_purchase',
-            body: finalMessage,
+            receiver_id: adminUser.id,
+            thread_id: crypto.randomUUID(),
+            message: finalMessage,
+            timestamp: new Date().toISOString(),
           });
 
         // Send admin notification

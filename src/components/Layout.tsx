@@ -6,11 +6,13 @@ import { Badge } from '@/components/ui/badge';
 import { Home, Calendar, Gift, MessageCircle, User, LogOut, Settings, Star, Music, Folder, Info } from 'lucide-react';
 import { NotificationBell } from '@/components/NotificationBell';
 import { Logo } from '@/components/Logo';
+import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 
 const Layout = ({ children }: { children: ReactNode }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, loading, signOut, isAdmin } = useAuth();
+  const { unreadCount } = useUnreadMessages();
 
   // Handle authentication redirect properly (non-blocking)
   useEffect(() => {
@@ -115,6 +117,14 @@ const Layout = ({ children }: { children: ReactNode }) => {
                   ) : (
                     <div className="relative">
                       <item.icon className="w-5 h-5" />
+                      {item.path === '/messages' && unreadCount > 0 && (
+                        <Badge 
+                          variant="destructive" 
+                          className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center text-xs"
+                        >
+                          {unreadCount}
+                        </Badge>
+                      )}
                       <span className="text-xs font-medium">{item.label}</span>
                     </div>
                   )}
