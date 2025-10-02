@@ -57,13 +57,18 @@ export const useMessages = () => {
         .from('messages')
         .select(`
           *,
-          sender_profile:profiles!sender_id(full_name, role),
-          recipient_profile:profiles!recipient_id(full_name, role)
+          sender_profile:profiles!messages_sender_id_fkey(full_name, role),
+          recipient_profile:profiles!messages_recipient_id_fkey(full_name, role)
         `)
         .or(`sender_id.eq.${user.id},recipient_id.eq.${user.id}`)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
+
+      console.log('Messages loaded:', messages?.length);
+      if (messages && messages.length > 0) {
+        console.log('Sample message:', messages[0]);
+      }
 
       // Group messages by conversation partner
       const threadMap = new Map<string, MessageThread>();
@@ -71,16 +76,27 @@ export const useMessages = () => {
       messages?.forEach((message: any) => {
         const isFromUser = message.sender_id === user.id;
         const partnerId = isFromUser ? message.recipient_id : message.sender_id;
+        
+        // Handle both object and array returns from Supabase
+        const senderProfile = Array.isArray(message.sender_profile) 
+          ? message.sender_profile[0] 
+          : message.sender_profile;
+        const recipientProfile = Array.isArray(message.recipient_profile)
+          ? message.recipient_profile[0]
+          : message.recipient_profile;
+        
         const partnerName = isFromUser 
-          ? message.recipient_profile?.full_name || 'Unknown'
-          : message.sender_profile?.full_name || 'Unknown';
+          ? recipientProfile?.full_name || 'Unknown'
+          : senderProfile?.full_name || 'Unknown';
+
+        console.log('Partner name:', partnerName, 'for partner:', partnerId);
 
         if (!threadMap.has(partnerId)) {
           threadMap.set(partnerId, {
             recipient_id: partnerId,
             recipient_name: partnerName,
             latest_message: message,
-            unread_count: 0 // TODO: implement read status
+            unread_count: 0
           });
         }
       });
@@ -108,8 +124,8 @@ export const useMessages = () => {
         .from('messages')
         .select(`
           *,
-          sender_profile:profiles!sender_id(full_name, role),
-          recipient_profile:profiles!recipient_id(full_name, role)
+          sender_profile:profiles!messages_sender_id_fkey(full_name, role),
+          recipient_profile:profiles!messages_recipient_id_fkey(full_name, role)
         `)
         .or(`and(sender_id.eq.${user.id},recipient_id.eq.${recipientId}),and(sender_id.eq.${recipientId},recipient_id.eq.${user.id})`)
         .order('created_at', { ascending: true });
