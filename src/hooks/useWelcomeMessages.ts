@@ -1,113 +1,80 @@
 import { useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useMessages } from '@/hooks/useMessages';
-import { useNotifications } from '@/hooks/useNotifications';
 import { supabase } from '@/integrations/supabase/client';
+
+const GHOST_WAYNE_EMAIL = 'ghostwayne777@hotmail.com';
 
 export const useWelcomeMessages = () => {
   const { user, profile } = useAuth();
-  const { createNotification } = useNotifications();
 
-  const sendWelcomeMessages = async () => {
+  useEffect(() => {
     if (!user || !profile) return;
 
-    try {
-      // Check if user already received welcome messages
-      const { data: existingMessages, error } = await supabase
-        .from('messages')
-        .select('id')
-        .eq('recipient_id', user.id)
-        .limit(1);
+    const sendWelcomeMessages = async () => {
+      try {
+        // Check if user already has welcome messages
+        const { data: existingMessages } = await supabase
+          .from('messages')
+          .select('id')
+          .eq('recipient_id', user.id)
+          .limit(1);
 
-      if (error) {
-        console.error('Error checking existing welcome messages:', error);
-        return;
-      }
+        if (existingMessages && existingMessages.length > 0) {
+          console.log('User already has messages, skipping welcome');
+          return;
+        }
 
-      // If already has welcome messages, don't send again
-      if (existingMessages && existingMessages.length > 0) {
-        console.log('✅ Utilizador já tem mensagens de boas-vindas');
-        return;
-      }
+        // Get Ghost Wayne admin
+        const { data: ghostWayne } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('role', 'admin')
+          .limit(1)
+          .single();
 
-      // Find Ghost Wayne admin (ghostwayne777@hotmail.com)
-      const { data: ghostWayne, error: adminError } = await supabase
-        .from('profiles')
-        .select('id, full_name')
-        .eq('role', 'admin')
-        .limit(1)
-        .single();
+        if (!ghostWayne) {
+          console.error('Ghost Wayne admin not found');
+          return;
+        }
 
-      if (adminError || !ghostWayne) {
-        console.error('Error finding Ghost Wayne:', adminError);
-        return;
-      }
+        // Send welcome message
+        const welcomeMessage = `🎙️ Bem-vindo à 777Studios App!
+Aqui podes fazer reservas, enviar beats para mistura e muito mais.
+💬 Qualquer dúvida manda-me mensagem!`;
 
-      console.log(`🎉 Enviando mensagens de boas-vindas de Ghost Wayne para`, user.id);
-
-      // Send first welcome message from Ghost Wayne
-      const firstMessage = `🎧 Bem-vindo à 7T7Studios App, esta é a minha visão para a interação entre a música e a tecnologia.
-Aqui podes fazer reservas, enviar projetos, comprar beats e ganhar ofertas.
-💬 Qualquer dúvida manda-me mensagem aqui no chat!`;
-
-      await supabase
-        .from('messages')
-        .insert({
-          sender_id: ghostWayne.id,
-          recipient_id: user.id,
-          thread_type: 'direct',
-          body: firstMessage,
-        });
-
-      // Send second welcome message after a short delay
-      setTimeout(async () => {
-        const secondMessage = `🎁 Já agora, pra não dizeres que não ganhas nada com isto...
-Vai até à Tab "Recompensas" e vê as ofertas que tens disponíveis. Até já!`;
-
-        await supabase
+        const { error } = await supabase
           .from('messages')
           .insert({
             sender_id: ghostWayne.id,
             recipient_id: user.id,
+            receiver_role: null,
+            body: welcomeMessage,
             thread_type: 'direct',
-            body: secondMessage,
-            attachments: JSON.stringify({
+            attachments: {
               action: {
-                type: 'button',
-                label: '🔎 Ver Recompensas',
+                label: '🎁 Ver Recompensas',
                 url: '/rewards'
               }
-            })
+            }
           });
 
-        // Create notification about new messages
-        await createNotification(
-          user.id,
-          'Mensagem de Ghost Wayne 🦇',
-          'Recebeste uma mensagem de boas-vindas!'
-        );
+        if (error) throw error;
 
-      }, 2000); // 2 second delay
-
-    } catch (error) {
-      console.error('Error sending welcome messages:', error);
-    }
-  };
-
-  useEffect(() => {
-    // Check if this is a new user (created within last 5 minutes)
-    if (user && profile) {
-      const profileCreatedAt = new Date(profile.created_at);
-      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
-      
-      if (profileCreatedAt > fiveMinutesAgo) {
-        // This is a new user, send welcome messages
-        setTimeout(() => {
-          sendWelcomeMessages();
-        }, 1000); // Wait 1 second after login
+        console.log('Welcome message sent successfully');
+      } catch (error) {
+        console.error('Error sending welcome messages:', error);
       }
+    };
+
+    // Check if user is new (created in last 5 minutes)
+    const createdAt = new Date(profile.created_at);
+    const now = new Date();
+    const diffMinutes = (now.getTime() - createdAt.getTime()) / 1000 / 60;
+
+    if (diffMinutes < 5) {
+      setTimeout(() => {
+        sendWelcomeMessages();
+      }, 1000);
     }
   }, [user, profile]);
-
-  return { sendWelcomeMessages };
 };

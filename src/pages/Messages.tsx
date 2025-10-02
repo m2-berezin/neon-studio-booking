@@ -1,15 +1,11 @@
 import React, { useState } from 'react';
-import { Send, Paperclip, X, FileText, Image as ImageIcon, Music } from 'lucide-react';
+import { Send, Paperclip, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAuth } from '@/contexts/AuthContext';
-import { useMessages } from '@/hooks/useMessages';
-import { useUnreadMessages } from '@/hooks/useUnreadMessages';
-import { supabase } from '@/integrations/supabase/client';
-import AudioPlayer from '@/components/AudioPlayer';
+import { useMessaging } from '@/hooks/useMessaging';
 import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
@@ -18,100 +14,34 @@ const Messages = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const {
-    loading,
-    uploading,
     threads,
-    currentThread,
-    currentRecipient,
-    loadThread,
-    sendMessage,
-  } = useMessages();
-  const { markConversationAsRead } = useUnreadMessages();
+    messages,
+    selectedThreadId,
+    loading,
+    loadMessages,
+    sendMessage
+  } = useMessaging();
 
   const [messageText, setMessageText] = useState('');
-  const [attachments, setAttachments] = useState<File[]>([]);
 
   if (!user) {
     return (
       <div className="text-center py-8">
-        <h2 className="text-2xl font-bold text-foreground mb-4">Login Necessário</h2>
+        <h2 className="text-2xl font-bold mb-4">Login Necessário</h2>
         <p className="text-muted-foreground">Por favor faz login para ver as tuas mensagens.</p>
       </div>
     );
   }
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    setAttachments(prev => [...prev, ...files]);
-  };
-
-  const removeAttachment = (index: number) => {
-    setAttachments(prev => prev.filter((_, i) => i !== index));
-  };
-
   const handleSendMessage = async () => {
-    if (!currentRecipient || (!messageText.trim() && attachments.length === 0)) return;
+    if (!messageText.trim()) return;
 
-    const success = await sendMessage(
-      currentRecipient,
-      messageText.trim(),
-      'direct',
-      attachments
-    );
-
+    const success = await sendMessage(messageText);
     if (success) {
       setMessageText('');
-      setAttachments([]);
     }
   };
 
-  // Helper to get all admin IDs
-  const getAllAdminIds = async () => {
-    const { data: adminUsers } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('role', 'admin');
-    
-    return adminUsers?.map(admin => admin.id) || [];
-  };
-
-  // Send message to all admins (for users without existing threads)
-  const handleSendToAllAdmins = async () => {
-    if (!messageText.trim() && attachments.length === 0) return;
-
-    // Send to admin-inbox (shared inbox)
-    const success = await sendMessage(
-      'admin-inbox',
-      messageText.trim(),
-      'direct',
-      attachments
-    );
-
-    if (success) {
-      setMessageText('');
-      setAttachments([]);
-    }
-  };
-
-  const getFileIcon = (fileType: string) => {
-    if (fileType.startsWith('image/')) return ImageIcon;
-    if (fileType.startsWith('audio/')) return Music;
-    return FileText;
-  };
-
-  const isAudioFile = (fileType: string) => {
-    return fileType.startsWith('audio/');
-  };
-
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
-
-  // Parse attachments to check for action buttons
   const parseAttachments = (attachments: any) => {
     if (typeof attachments === 'string') {
       try {
@@ -128,56 +58,41 @@ const Messages = () => {
       {/* Thread List */}
       <div className="w-1/3 border-r border-border">
         <div className="p-4 border-b border-border">
-          <h2 className="text-xl font-bold text-foreground">Conversas</h2>
+          <h2 className="text-xl font-bold">Conversas</h2>
         </div>
         
         <ScrollArea className="h-[calc(100%-4rem)]">
           <div className="p-2">
             {loading && threads.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
-                A carregar conversas...
+                A carregar...
               </div>
             ) : threads.length === 0 ? (
               <div className="text-center py-8 px-4">
-                <p className="text-muted-foreground mb-4">Ainda não há conversas</p>
-                <Button
-                  onClick={handleSendToAllAdmins}
-                  disabled={!messageText.trim() && attachments.length === 0}
-                  variant="outline"
-                  size="sm"
-                >
-                  Enviar Mensagem aos Admins
-                </Button>
+                <p className="text-muted-foreground">Ainda não há conversas</p>
               </div>
             ) : (
               <div className="space-y-2">
                 {threads.map((thread) => (
                   <Card
-                    key={thread.recipient_id}
+                    key={thread.id}
                     className={`cursor-pointer transition-colors hover:bg-accent/50 ${
-                      currentRecipient === thread.recipient_id ? 'bg-accent/20 border-primary' : ''
+                      selectedThreadId === thread.id ? 'bg-accent/20 border-primary' : ''
                     }`}
-                    onClick={() => {
-                      loadThread(thread.recipient_id);
-                    }}
+                    onClick={() => loadMessages(thread.id)}
                   >
                     <CardContent className="p-3">
                       <div className="flex items-center justify-between mb-1">
-                        <h3 className="font-semibold text-sm text-foreground">
-                          {thread.recipient_name}
+                        <h3 className="font-semibold text-sm">
+                          {thread.name}
                         </h3>
                         <span className="text-xs text-muted-foreground">
-                          {format(new Date(thread.latest_message.created_at), "d 'de' MMM", { locale: pt })}
+                          {format(new Date(thread.last_message_at), "d 'de' MMM", { locale: pt })}
                         </span>
                       </div>
                       <p className="text-xs text-muted-foreground line-clamp-2">
-                        {thread.latest_message.body || 'Mensagem sem texto'}
+                        {thread.last_message}
                       </p>
-                      {thread.latest_message.thread_type !== 'direct' && (
-                        <Badge variant="secondary" className="text-xs mt-1">
-                          {thread.latest_message.thread_type.replace('_', ' ')}
-                        </Badge>
-                      )}
                     </CardContent>
                   </Card>
                 ))}
@@ -189,20 +104,22 @@ const Messages = () => {
 
       {/* Chat Area */}
       <div className="flex-1 flex flex-col">
-        {currentRecipient ? (
+        {selectedThreadId ? (
           <>
             {/* Chat Header */}
             <div className="p-4 border-b border-border">
-              <h3 className="font-semibold text-foreground">
-                {threads.find(t => t.recipient_id === currentRecipient)?.recipient_name || 'Conversa'}
+              <h3 className="font-semibold">
+                {threads.find(t => t.id === selectedThreadId)?.name || 'Conversa'}
               </h3>
             </div>
 
             {/* Messages */}
             <ScrollArea className="flex-1 p-4">
               <div className="space-y-4">
-                {currentThread.map((message) => {
+                {messages.map((message) => {
                   const isFromUser = message.sender_id === user.id;
+                  const senderName = isFromUser ? 'Tu' : 'Ghost Wayne';
+                  
                   return (
                     <div
                       key={message.id}
@@ -215,13 +132,17 @@ const Messages = () => {
                             : 'bg-secondary text-secondary-foreground'
                         }`}
                       >
-                        {message.body && (
-                          <p className="text-sm whitespace-pre-wrap mb-2">
-                            {message.body}
+                        {!isFromUser && (
+                          <p className="text-xs font-semibold mb-1 opacity-70">
+                            {senderName}
                           </p>
                         )}
                         
-                        {/* Check for action button in attachments */}
+                        <p className="text-sm whitespace-pre-wrap">
+                          {message.body}
+                        </p>
+                        
+                        {/* Action button if present */}
                         {(() => {
                           const parsedAttachments = parseAttachments(message.attachments);
                           if (parsedAttachments?.action) {
@@ -239,52 +160,6 @@ const Messages = () => {
                           return null;
                         })()}
                         
-                        {/* Regular Attachments (files) */}
-                        {message.attachments && Array.isArray(message.attachments) && message.attachments.length > 0 && (
-                          <div className="space-y-2">
-                            {message.attachments.map((attachment, index) => (
-                              <div key={index}>
-                                {isAudioFile(attachment.type) ? (
-                                  <AudioPlayer
-                                    src={attachment.url}
-                                    fileName={attachment.name}
-                                    className="bg-background/10"
-                                  />
-                                ) : (
-                                  <div className="flex items-center gap-2 p-2 bg-background/10 rounded">
-                                    {React.createElement(getFileIcon(attachment.type), {
-                                      className: "h-4 w-4"
-                                    })}
-                                    <div className="flex-1 min-w-0">
-                                      <p className="text-xs font-medium truncate">
-                                        {attachment.name}
-                                      </p>
-                                      <p className="text-xs opacity-70">
-                                        {formatFileSize(attachment.size)}
-                                      </p>
-                                    </div>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      asChild
-                                      className="h-auto p-1"
-                                    >
-                                      <a
-                                        href={attachment.url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        download={attachment.name}
-                                      >
-                                        ↓
-                                      </a>
-                                    </Button>
-                                  </div>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                        
                         <p className="text-xs opacity-70 mt-2">
                           {format(new Date(message.created_at), "d 'de' MMM, HH:mm", { locale: pt })}
                         </p>
@@ -297,81 +172,38 @@ const Messages = () => {
 
             {/* Message Input */}
             <div className="p-4 border-t border-border">
-              {/* Attachments Preview */}
-              {attachments.length > 0 && (
-                <div className="mb-3 flex flex-wrap gap-2">
-                  {attachments.map((file, index) => (
-                    <div key={index} className="flex items-center gap-2 bg-secondary p-2 rounded text-xs">
-                      {React.createElement(getFileIcon(file.type), {
-                        className: "h-3 w-3"
-                      })}
-                      <span className="truncate max-w-24">{file.name}</span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeAttachment(index)}
-                        className="h-auto p-0 ml-1"
-                      >
-                        <X className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              )}
-
               <div className="flex gap-2">
-                <div className="flex-1">
-                  <Textarea
-                    value={messageText}
-                    onChange={(e) => setMessageText(e.target.value)}
-                    placeholder="Escreve a tua mensagem..."
-                    className="min-h-[60px] resize-none"
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        handleSendMessage();
-                      }
-                    }}
-                  />
-                </div>
+                <Textarea
+                  value={messageText}
+                  onChange={(e) => setMessageText(e.target.value)}
+                  placeholder="Escreve a tua mensagem..."
+                  className="min-h-[60px] resize-none"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSendMessage();
+                    }
+                  }}
+                />
                 
-                <div className="flex flex-col gap-2">
-                  <input
-                    type="file"
-                    id="attachment-upload"
-                    multiple
-                    onChange={handleFileUpload}
-                    className="hidden"
-                    accept="*/*"
-                  />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => document.getElementById('attachment-upload')?.click()}
-                    disabled={uploading}
-                  >
-                    <Paperclip className="h-4 w-4" />
-                  </Button>
-                  
-                  <Button
-                    onClick={handleSendMessage}
-                    disabled={loading || (!messageText.trim() && attachments.length === 0)}
-                    size="sm"
-                  >
-                    <Send className="h-4 w-4" />
-                  </Button>
-                </div>
+                <Button
+                  onClick={handleSendMessage}
+                  disabled={loading || !messageText.trim()}
+                  size="sm"
+                >
+                  <Send className="h-4 w-4" />
+                </Button>
               </div>
             </div>
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
-              <h3 className="text-lg font-semibold text-foreground mb-2">
-                Seleccione uma conversa
+              <h3 className="text-lg font-semibold mb-2">
+                Selecciona uma conversa
               </h3>
               <p className="text-muted-foreground">
-                Escolha uma conversa da lista para começar a enviar mensagens
+                Escolhe uma conversa para começar
               </p>
             </div>
           </div>

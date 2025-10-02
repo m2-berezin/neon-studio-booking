@@ -3,8 +3,8 @@ project_id = "esuascsrlfdbcpikzvlq"
 [functions.notify-admin-payment]
 verify_jwt = false
 
-[functions.send-welcome-messages]
-verify_jwt = true
+[functions.notify-payment-sms]
+verify_jwt = false
 
-[functions.send-welcome-to-existing]
+[functions.send-welcome]
 verify_jwt = false

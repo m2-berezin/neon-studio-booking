@@ -10,7 +10,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProjects } from '@/hooks/useProjects';
-import { useMessages } from '@/hooks/useMessages';
 import AudioPlayer from '@/components/AudioPlayer';
 import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
@@ -28,11 +27,6 @@ const ProjectDetail = () => {
     uploadProjectFile, 
     markAsDelivered 
   } = useProjects();
-  const {
-    currentThread,
-    loadThread,
-    sendMessage,
-  } = useMessages();
 
   const [message, setMessage] = useState('');
   const [selectedFiles, setSelectedFiles] = useState<{[key: string]: File[]}>({
@@ -45,10 +39,6 @@ const ProjectDetail = () => {
   useEffect(() => {
     if (projectId) {
       loadProject(projectId);
-      // Load project messages
-      if (user) {
-        loadThread(projectId);
-      }
     }
   }, [projectId, user]);
 
@@ -104,40 +94,6 @@ const ProjectDetail = () => {
       ...prev,
       [kind]: []
     }));
-  };
-
-  const handleSendMessage = async () => {
-    if (!message.trim() || !projectId) return;
-
-    // Find the client or admin to send message to
-    if (isAdmin()) {
-      // Admin sending to client
-      const recipientId = currentProject.client_id;
-      const success = await sendMessage(recipientId, message, 'project');
-      if (success) {
-        setMessage('');
-      }
-    } else {
-      // Client sending to ALL admins
-      const { data: adminUsers } = await supabase
-        .from('profiles')
-        .select('id, full_name')
-        .eq('role', 'admin');
-      
-      if (adminUsers && adminUsers.length > 0) {
-        console.log(`📤 Enviando mensagem de projeto para ${adminUsers.length} admin(s):`, adminUsers.map(a => a.full_name));
-        
-        let success = false;
-        for (const admin of adminUsers) {
-          const result = await sendMessage(admin.id, message, 'project');
-          if (result) success = true;
-        }
-        
-        if (success) {
-          setMessage('');
-        }
-      }
-    }
   };
 
   const handleMarkDelivered = async () => {
@@ -387,66 +343,6 @@ const ProjectDetail = () => {
         </TabsContent>
 
         <TabsContent value="messages" className="space-y-6">
-          <Card className="studio-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MessageSquare className="w-5 h-5 text-primary" />
-                Project Updates
-              </CardTitle>
-              <CardDescription>
-                Threaded conversation about this project
-              </CardDescription>
-            </CardHeader>
-
-            <CardContent>
-              {/* Messages */}
-              <ScrollArea className="h-96 mb-4">
-                <div className="space-y-4">
-                  {currentThread.map((msg) => {
-                    const isFromUser = msg.sender_id === user.id;
-                    return (
-                      <div
-                        key={msg.id}
-                        className={`flex ${isFromUser ? 'justify-end' : 'justify-start'}`}
-                      >
-                        <div
-                          className={`max-w-[80%] rounded-lg p-3 ${
-                            isFromUser
-                              ? 'bg-primary text-primary-foreground'
-                              : 'bg-secondary text-secondary-foreground'
-                          }`}
-                        >
-                          <p className="text-sm whitespace-pre-wrap mb-1">
-                            {msg.body}
-                          </p>
-                          <p className="text-xs opacity-70">
-                            {format(new Date(msg.created_at), "d 'de' MMM, HH:mm", { locale: pt })}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </ScrollArea>
-
-              {/* Message Input */}
-              <div className="flex gap-2">
-                <Textarea
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Add a project update..."
-                  className="flex-1"
-                  rows={2}
-                />
-                <Button
-                  onClick={handleSendMessage}
-                  disabled={!message.trim() || loading}
-                >
-                  Send
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
         </TabsContent>
       </Tabs>
     </div>
