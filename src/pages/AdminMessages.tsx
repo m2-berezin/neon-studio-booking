@@ -161,7 +161,7 @@ const AdminMessages = () => {
   };
 
   useEffect(() => {
-    if (isAdmin()) {
+    if (isAdmin() && user) {
       loadConversations();
 
       // Set up realtime subscription for new messages where admin is recipient
@@ -176,20 +176,34 @@ const AdminMessages = () => {
             filter: `recipient_id=eq.${user.id}`,
           },
           (payload) => {
-            console.log('Nova mensagem recebida pelo admin:', payload);
+            console.log('✅ Nova mensagem recebida pelo admin:', payload);
+            console.log('Sender ID:', payload.new.sender_id);
+            console.log('Recipient ID:', payload.new.recipient_id);
+            
+            // Reload conversations to show new message
             loadConversations();
+            
+            // If viewing this conversation, reload messages
             if (selectedUserId && payload.new.sender_id === selectedUserId) {
               loadMessages(selectedUserId);
             }
+            
+            // Show toast notification
+            toast({
+              title: 'Nova Mensagem',
+              description: 'Recebeste uma nova mensagem de um utilizador',
+            });
           }
         )
-        .subscribe();
+        .subscribe((status) => {
+          console.log('📡 Admin subscription status:', status);
+        });
 
       return () => {
         supabase.removeChannel(channel);
       };
     }
-  }, [isAdmin]);
+  }, [isAdmin, user, selectedUserId]);
 
   useEffect(() => {
     if (selectedUserId) {

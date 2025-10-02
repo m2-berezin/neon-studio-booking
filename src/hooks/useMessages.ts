@@ -209,6 +209,13 @@ export const useMessages = () => {
         messageAttachments = await uploadAttachments(attachments);
       }
 
+      console.log('📤 Enviando mensagem:', {
+        sender_id: user.id,
+        recipient_id: recipientId,
+        thread_type: threadType,
+        body: body.substring(0, 50)
+      });
+
       const { error } = await supabase
         .from('messages')
         .insert({
@@ -219,7 +226,12 @@ export const useMessages = () => {
           attachments: messageAttachments.length > 0 ? (messageAttachments as any) : null
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Erro ao enviar mensagem:', error);
+        throw error;
+      }
+
+      console.log('✅ Mensagem enviada com sucesso');
 
       // Create notification for recipient
       await createNotification(
@@ -296,7 +308,9 @@ export const useMessages = () => {
             filter: `recipient_id=eq.${user.id}`,
           },
           (payload) => {
-            console.log('New message received:', payload);
+            console.log('✅ Nova mensagem recebida:', payload);
+            console.log('Sender ID:', payload.new.sender_id);
+            console.log('Recipient ID:', payload.new.recipient_id);
             
             // Reload threads to show new message
             loadThreads();
@@ -307,7 +321,9 @@ export const useMessages = () => {
             }
           }
         )
-        .subscribe();
+        .subscribe((status) => {
+          console.log('📡 User subscription status:', status);
+        });
 
       return () => {
         supabase.removeChannel(messagesChannel);
