@@ -1,8 +1,6 @@
 import { ReactNode, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { useWelcomeMessages } from '@/hooks/useWelcomeMessages';
-import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Home, Calendar, Gift, MessageCircle, User, LogOut, Settings, Star, Music, Folder, Info } from 'lucide-react';
@@ -13,10 +11,6 @@ const Layout = ({ children }: { children: ReactNode }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, loading, signOut, isAdmin } = useAuth();
-  const { unreadCount: unreadMessagesCount } = useUnreadMessages();
-  
-  // Initialize welcome messages for new users
-  useWelcomeMessages();
 
   // Handle authentication redirect properly (non-blocking)
   useEffect(() => {
@@ -121,14 +115,6 @@ const Layout = ({ children }: { children: ReactNode }) => {
                   ) : (
                     <div className="relative">
                       <item.icon className="w-5 h-5" />
-                      {item.label === 'Mensagens' && unreadMessagesCount > 0 && (
-                        <Badge
-                          variant="destructive"
-                          className="absolute -top-2 -right-2 h-4 w-4 p-0 flex items-center justify-center text-[10px] animate-pulse"
-                        >
-                          {unreadMessagesCount > 9 ? '9+' : unreadMessagesCount}
-                        </Badge>
-                      )}
                       <span className="text-xs font-medium">{item.label}</span>
                     </div>
                   )}
