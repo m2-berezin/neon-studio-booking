@@ -48,35 +48,42 @@ const AdminMessages = () => {
     if (!user) return;
 
     try {
-      // Get all messages where admin is sender or recipient
+      // Get ALL messages to/from users (not just current admin's messages)
+      // This creates a shared inbox where all admins see all user conversations
       const { data: allMessages, error } = await supabase
         .from('messages')
         .select(`
           *,
-          sender:profiles!messages_sender_id_fkey(full_name),
-          recipient:profiles!messages_recipient_id_fkey(full_name)
+          sender:profiles!messages_sender_id_fkey(full_name, role),
+          recipient:profiles!messages_recipient_id_fkey(full_name, role)
         `)
-        .or(`sender_id.eq.${user.id},recipient_id.eq.${user.id}`)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
-      // Group messages by conversation
+      // Group messages by user conversations (excluding admin-to-admin messages)
       const conversationMap = new Map<string, Conversation>();
 
       allMessages?.forEach((msg: any) => {
-        const otherUserId = msg.sender_id === user.id ? msg.recipient_id : msg.sender_id;
-        const otherUserName = msg.sender_id === user.id 
-          ? msg.recipient?.full_name 
-          : msg.sender?.full_name;
+        const senderRole = msg.sender?.role;
+        const recipientRole = msg.recipient?.role;
+        
+        // Skip admin-to-admin messages
+        if (senderRole === 'admin' && recipientRole === 'admin') return;
+        
+        // Determine which participant is the user (non-admin)
+        const isUserSender = senderRole !== 'admin';
+        const userId = isUserSender ? msg.sender_id : msg.recipient_id;
+        const userName = isUserSender ? msg.sender?.full_name : msg.recipient?.full_name;
 
-        if (!conversationMap.has(otherUserId)) {
-          conversationMap.set(otherUserId, {
-            userId: otherUserId,
-            userName: otherUserName || 'Utilizador Desconhecido',
+        if (!conversationMap.has(userId) || 
+            new Date(msg.created_at) > new Date(conversationMap.get(userId)!.lastMessageTime)) {
+          conversationMap.set(userId, {
+            userId: userId,
+            userName: userName || 'Utilizador Desconhecido',
             lastMessage: msg.body,
             lastMessageTime: msg.created_at,
-            unreadCount: 0, // TODO: Implement unread count
+            unreadCount: 0,
           });
         }
       });
@@ -110,6 +117,32 @@ const AdminMessages = () => {
 
       if (error) throw error;
       setMessages(data || []);
+      
+      // Mark messages as read when admin opens the conversation
+      const unreadMessageIds = (data || [])
+        .filter(msg => msg.recipient_id === user.id)
+        .map(msg => msg.id);
+      
+      if (unreadMessageIds.length > 0) {
+        // Get already marked messages
+        const { data: alreadyRead } = await supabase
+          .from('message_reads')
+          .select('message_id')
+          .eq('user_id', user.id)
+          .in('message_id', unreadMessageIds);
+        
+        const alreadyReadIds = new Set(alreadyRead?.map(r => r.message_id) || []);
+        
+        // Mark new messages as read
+        const toMark = unreadMessageIds
+          .filter(id => !alreadyReadIds.has(id))
+          .map(id => ({ user_id: user.id, message_id: id }));
+        
+        if (toMark.length > 0) {
+          await supabase.from('message_reads').insert(toMark);
+          console.log('✅ Marcadas', toMark.length, 'mensagens como lidas');
+        }
+      }
     } catch (error) {
       console.error('Error loading messages:', error);
       toast({
@@ -166,39 +199,55 @@ const AdminMessages = () => {
     if (isAdmin() && user) {
       loadConversations();
 
-      // Set up realtime subscription for new messages where admin is recipient
+      // Set up realtime subscription for ALL new messages (shared inbox for all admins)
       const channel = supabase
-        .channel('admin-messages')
+        .channel('admin-shared-inbox')
         .on(
           'postgres_changes',
           {
             event: 'INSERT',
             schema: 'public',
             table: 'messages',
-            filter: `recipient_id=eq.${user.id}`,
           },
-          (payload) => {
-            console.log('✅ Nova mensagem recebida pelo admin:', payload);
-            console.log('Sender ID:', payload.new.sender_id);
-            console.log('Recipient ID:', payload.new.recipient_id);
+          async (payload) => {
+            console.log('✅ Nova mensagem recebida (shared inbox):', payload);
             
-            // Reload conversations to show new message
-            loadConversations();
+            // Check if this is a user message (not admin-to-admin)
+            const { data: senderProfile } = await supabase
+              .from('profiles')
+              .select('role')
+              .eq('id', payload.new.sender_id)
+              .single();
             
-            // If viewing this conversation, reload messages
-            if (selectedUserId && payload.new.sender_id === selectedUserId) {
-              loadMessages(selectedUserId);
+            const { data: recipientProfile } = await supabase
+              .from('profiles')
+              .select('role')
+              .eq('id', payload.new.recipient_id)
+              .single();
+            
+            // Only process if at least one participant is not an admin
+            if (senderProfile?.role !== 'admin' || recipientProfile?.role !== 'admin') {
+              // Reload conversations to show new message
+              loadConversations();
+              
+              // If viewing this conversation, reload messages
+              const userId = senderProfile?.role !== 'admin' ? payload.new.sender_id : payload.new.recipient_id;
+              if (selectedUserId && userId === selectedUserId) {
+                loadMessages(selectedUserId);
+              }
+              
+              // Show toast notification only for incoming user messages
+              if (senderProfile?.role !== 'admin' && payload.new.recipient_id === user.id) {
+                toast({
+                  title: 'Nova Mensagem',
+                  description: 'Recebeste uma nova mensagem de um utilizador',
+                });
+              }
             }
-            
-            // Show toast notification
-            toast({
-              title: 'Nova Mensagem',
-              description: 'Recebeste uma nova mensagem de um utilizador',
-            });
           }
         )
         .subscribe((status) => {
-          console.log('📡 Admin subscription status:', status);
+          console.log('📡 Admin shared inbox subscription status:', status);
         });
 
       return () => {
@@ -259,7 +308,6 @@ const AdminMessages = () => {
                     }`}
                     onClick={() => {
                       setSelectedUserId(conv.userId);
-                      markConversationAsRead(conv.userId);
                     }}
                   >
                     <div className="flex items-center justify-between mb-1">

@@ -164,7 +164,6 @@ const Messages = () => {
                     }`}
                     onClick={() => {
                       loadThread(thread.recipient_id);
-                      markConversationAsRead(thread.recipient_id);
                     }}
                   >
                     <CardContent className="p-3">

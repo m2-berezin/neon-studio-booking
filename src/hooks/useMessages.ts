@@ -137,6 +137,32 @@ export const useMessages = () => {
         attachments: msg.attachments ? (msg.attachments as any) : undefined
       })));
       setCurrentRecipient(recipientId);
+      
+      // Mark messages from this sender as read
+      const unreadMessageIds = (messages || [])
+        .filter(msg => msg.recipient_id === user.id && msg.sender_id === recipientId)
+        .map(msg => msg.id);
+      
+      if (unreadMessageIds.length > 0) {
+        // Get already marked messages
+        const { data: alreadyRead } = await supabase
+          .from('message_reads')
+          .select('message_id')
+          .eq('user_id', user.id)
+          .in('message_id', unreadMessageIds);
+        
+        const alreadyReadIds = new Set(alreadyRead?.map(r => r.message_id) || []);
+        
+        // Mark new messages as read
+        const toMark = unreadMessageIds
+          .filter(id => !alreadyReadIds.has(id))
+          .map(id => ({ user_id: user.id, message_id: id }));
+        
+        if (toMark.length > 0) {
+          await supabase.from('message_reads').insert(toMark);
+          console.log('✅ Marcadas', toMark.length, 'mensagens como lidas');
+        }
+      }
     } catch (error) {
       console.error('Error loading thread:', error);
       toast({

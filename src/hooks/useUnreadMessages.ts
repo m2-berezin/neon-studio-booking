@@ -40,27 +40,11 @@ export const useUnreadMessages = () => {
 
       const readMessageIds = new Set(readMessages?.map(r => r.message_id) || []);
 
-      // Group by sender and count unread messages per conversation
-      const conversationUnreadMap = new Map<string, boolean>();
+      // Count total unread messages (not conversations)
+      const unreadMessages = allMessages.filter(msg => !readMessageIds.has(msg.id));
       
-      allMessages.forEach(message => {
-        const senderId = message.sender_id;
-        if (!conversationUnreadMap.has(senderId)) {
-          // Check if this conversation has any unread messages
-          const hasUnread = !readMessageIds.has(message.id);
-          conversationUnreadMap.set(senderId, hasUnread);
-        } else if (!conversationUnreadMap.get(senderId)) {
-          // If we already marked it as read, check if this message is unread
-          const hasUnread = !readMessageIds.has(message.id);
-          if (hasUnread) {
-            conversationUnreadMap.set(senderId, true);
-          }
-        }
-      });
-
-      // Count conversations with unread messages
-      const unreadConversations = Array.from(conversationUnreadMap.values()).filter(hasUnread => hasUnread).length;
-      setUnreadCount(unreadConversations);
+      setUnreadCount(unreadMessages.length);
+      console.log('📬 Unread count updated:', unreadMessages.length);
     } catch (error) {
       console.error('Error loading unread message count:', error);
       setUnreadCount(0);
