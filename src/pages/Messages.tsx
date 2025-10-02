@@ -135,10 +135,7 @@ const Messages = () => {
                         </span>
                       </div>
                       <p className="text-xs text-muted-foreground line-clamp-2">
-                        {thread.latest_message.attachments?.length 
-                          ? `📎 ${thread.latest_message.attachments.length} anexo(s)`
-                          : thread.latest_message.body
-                        }
+                        {thread.latest_message.body || 'Mensagem sem texto'}
                       </p>
                       {thread.latest_message.thread_type !== 'general' && (
                         <Badge variant="secondary" className="text-xs mt-1">

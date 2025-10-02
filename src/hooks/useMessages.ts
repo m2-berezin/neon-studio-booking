@@ -86,8 +86,8 @@ export const useMessages = () => {
           : message.recipient_profile;
         
         const partnerName = isFromUser 
-          ? recipientProfile?.full_name || 'Unknown'
-          : senderProfile?.full_name || 'Unknown';
+          ? recipientProfile?.full_name || 'Ghost Wayne'
+          : senderProfile?.full_name || 'Ghost Wayne';
 
         console.log('Partner name:', partnerName, 'for partner:', partnerId);
 
