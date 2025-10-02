@@ -331,6 +331,13 @@ export const useMessages = () => {
 
       const isUserAdmin = currentUserProfile?.role === 'admin';
 
+      console.log('🔍 Verificação de envio:', {
+        user_id: user.id,
+        isUserAdmin,
+        recipientId,
+        currentUserRole: currentUserProfile?.role
+      });
+
       // Check if recipient is admin (for non-admin users sending to admins)
       let isRecipientAdmin = false;
       if (!isUserAdmin && recipientId !== 'admin-inbox') {
@@ -341,6 +348,12 @@ export const useMessages = () => {
           .single();
         
         isRecipientAdmin = recipientProfile?.role === 'admin';
+        
+        console.log('🔍 Destinatário:', {
+          recipientId,
+          isRecipientAdmin,
+          recipientRole: recipientProfile?.role
+        });
       }
 
       // If non-admin user is sending to admin, use shared inbox

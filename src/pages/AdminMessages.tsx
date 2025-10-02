@@ -48,6 +48,8 @@ const AdminMessages = () => {
     if (!user) return;
 
     try {
+      console.log('📥 Admin carregando conversas, user:', user.id);
+      
       // Get messages from shared admin inbox (receiver_role='admin') or direct admin messages
       const { data: allMessages, error } = await supabase
         .from('messages')
@@ -60,6 +62,20 @@ const AdminMessages = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
+
+      console.log('📨 Total mensagens encontradas:', allMessages?.length);
+      
+      // Log sample of messages with receiver_role
+      if (allMessages && allMessages.length > 0) {
+        const adminInboxMessages = allMessages.filter(m => m.receiver_role === 'admin');
+        console.log('📬 Mensagens no inbox partilhado:', adminInboxMessages.length);
+        console.log('📬 Sample:', adminInboxMessages.slice(0, 3).map(m => ({
+          id: m.id,
+          from: m.sender?.full_name,
+          receiver_role: m.receiver_role,
+          body: m.body.substring(0, 50)
+        })));
+      }
 
       // Group messages by user conversations
       const conversationMap = new Map<string, Conversation>();
@@ -79,6 +95,7 @@ const AdminMessages = () => {
           // Message from user to shared admin inbox
           userId = msg.sender_id;
           userName = msg.sender?.full_name || 'Utilizador Desconhecido';
+          console.log('👤 User conversa (inbox partilhado):', userName, userId);
         } else if (senderRole !== 'admin') {
           // Message from user to specific admin
           userId = msg.sender_id;
@@ -101,6 +118,7 @@ const AdminMessages = () => {
         }
       });
 
+      console.log('👥 Total conversas:', conversationMap.size);
       setConversations(Array.from(conversationMap.values()));
     } catch (error) {
       console.error('Error loading conversations:', error);
