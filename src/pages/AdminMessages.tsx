@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { MessageSquare, Send, User, Shield } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 
 interface Message {
   id: string;
@@ -36,6 +37,7 @@ interface Conversation {
 const AdminMessages = () => {
   const { user, isAdmin } = useAuth();
   const { toast } = useToast();
+  const { markConversationAsRead } = useUnreadMessages();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -255,7 +257,10 @@ const AdminMessages = () => {
                         ? 'bg-primary/10 border border-primary/20'
                         : 'hover:bg-muted/50'
                     }`}
-                    onClick={() => setSelectedUserId(conv.userId)}
+                    onClick={() => {
+                      setSelectedUserId(conv.userId);
+                      markConversationAsRead(conv.userId);
+                    }}
                   >
                     <div className="flex items-center justify-between mb-1">
                       <span className="font-medium">{conv.userName}</span>
