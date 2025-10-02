@@ -118,7 +118,7 @@ const AdminMessages = () => {
     if (!user) return;
 
     try {
-      // Load messages from shared admin inbox OR direct messages with this user
+      // Load messages from shared admin inbox OR responses from ANY admin to this user
       const { data, error } = await supabase
         .from('messages')
         .select(`
@@ -126,7 +126,7 @@ const AdminMessages = () => {
           sender:profiles!messages_sender_id_fkey(full_name),
           recipient:profiles!messages_recipient_id_fkey(full_name)
         `)
-        .or(`and(sender_id.eq.${userId},receiver_role.eq.admin),and(sender_id.eq.${user.id},recipient_id.eq.${userId}),and(sender_id.eq.${userId},recipient_id.eq.${user.id})`)
+        .or(`and(sender_id.eq.${userId},receiver_role.eq.admin),recipient_id.eq.${userId}`)
         .order('created_at', { ascending: true });
 
       if (error) throw error;
