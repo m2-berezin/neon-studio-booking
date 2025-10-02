@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from 'react';
-import Layout from '@/components/Layout';
 import { useMessaging } from '@/hooks/useMessaging';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -38,8 +37,7 @@ const Messages = () => {
   };
 
   return (
-    <Layout>
-      <Card className="h-[calc(100vh-180px)] flex overflow-hidden bg-gradient-to-br from-background via-background to-primary/5 shadow-2xl border-primary/20 -mx-4">
+    <Card className="h-[calc(100vh-180px)] flex overflow-hidden bg-gradient-to-br from-background via-background to-primary/5 shadow-2xl border-primary/20 -mx-4">
           {/* Threads List */}
           {!selectedThreadId ? (
             <div className="w-full p-6">
@@ -231,8 +229,7 @@ const Messages = () => {
               </div>
             </div>
           )}
-        </Card>
-    </Layout>
+    </Card>
   );
 };
 
