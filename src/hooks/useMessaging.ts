@@ -103,7 +103,10 @@ export const useMessaging = () => {
       // Mark messages as read (update on actual table)
       await supabase
         .from('messages')
-        .update({ is_read: true })
+        .update({ 
+          is_read: true,
+          read_at: new Date().toISOString()
+        })
         .eq('thread_id', threadId)
         .eq('receiver_id', user.id);
 
