@@ -179,13 +179,16 @@ export const useMessaging = () => {
           event: '*',
           schema: 'public',
           table: 'messages',
-          filter: `sender_id=eq.${user.id},receiver_id=eq.${user.id}`,
         },
-        () => {
-          // Reload threads and messages
-          loadThreads();
-          if (selectedThreadId) {
-            loadMessages(selectedThreadId);
+        (payload) => {
+          // Only reload if this user is involved
+          const msg = payload.new as any;
+          if (msg?.sender_id === user.id || msg?.receiver_id === user.id) {
+            // Force reload threads to get fresh display names from view
+            loadThreads();
+            if (selectedThreadId) {
+              loadMessages(selectedThreadId);
+            }
           }
         }
       )
@@ -196,12 +199,13 @@ export const useMessaging = () => {
     };
   }, [user, selectedThreadId]);
 
-  // Load threads on mount
+  // Force initial load on mount and when user changes
   useEffect(() => {
     if (user) {
       loadThreads();
     }
   }, [user]);
+
 
   return {
     threads,
