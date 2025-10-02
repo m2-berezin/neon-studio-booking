@@ -33,6 +33,7 @@ interface PriceSummaryProps {
   bookingDate?: Date;
   className?: string;
   onPriceChange?: (finalPrice: number, breakdown: PriceBreakdown) => void;
+  showFriendCode?: boolean;
 }
 
 interface LineItem {
@@ -52,7 +53,7 @@ interface PriceBreakdown {
   appliedVoucher?: Voucher;
 }
 
-export const PriceSummary = ({ services, bookingDate, className, onPriceChange }: PriceSummaryProps) => {
+export const PriceSummary = ({ services, bookingDate, className, onPriceChange, showFriendCode = true }: PriceSummaryProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const { userSubscription } = useSubscriptions();
@@ -313,7 +314,7 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange }
         )}
 
         {/* Friend Code Input */}
-        {!appliedVoucher && (
+        {showFriendCode && !appliedVoucher && (
           <div className="space-y-2">
             <Label htmlFor="friend-code">Código de Amigo</Label>
             {appliedReward ? (

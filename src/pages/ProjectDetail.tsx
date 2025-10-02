@@ -13,6 +13,7 @@ import { useProjects } from '@/hooks/useProjects';
 import { useMessages } from '@/hooks/useMessages';
 import AudioPlayer from '@/components/AudioPlayer';
 import { format } from 'date-fns';
+import { pt } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
 
 const ProjectDetail = () => {
@@ -222,12 +223,12 @@ const ProjectDetail = () => {
             <div>
               <p className="text-sm text-muted-foreground">Data e Hora</p>
               <p className="font-medium">
-                {format(new Date(currentProject.booking.date), 'dd/MM/yyyy')} às {currentProject.booking.start_time} - {currentProject.booking.end_time}
+                {format(new Date(currentProject.booking.date), 'dd/MM/yyyy', { locale: pt })} às {currentProject.booking.start_time.slice(0, 5)} - {currentProject.booking.end_time.slice(0, 5)}
               </p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Morada</p>
-              <p className="font-medium">Rua do Estúdio, 123 - Lisboa</p>
+              <p className="font-medium">Pinhal do General, Seixal</p>
             </div>
             {currentProject.booking.notes && (
               <div>
@@ -281,17 +282,17 @@ const ProjectDetail = () => {
                             {file.url.match(/\.(mp3|wav|m4a|aac|flac|ogg)$/i) ? (
                               <AudioPlayer
                                 src={file.url}
-                                fileName={`${kind}-${format(new Date(file.created_at), 'MMM-d')}`}
+                                fileName={`${kind}-${format(new Date(file.created_at), "d 'de' MMM", { locale: pt })}`}
                               />
                             ) : (
                               <div className="flex items-center gap-2 p-2 bg-secondary rounded">
                                 <Icon className="w-4 h-4" />
                                 <div className="flex-1">
                                   <p className="text-sm font-medium">
-                                    {kind}-{format(new Date(file.created_at), 'MMM-d')}
+                                    {kind}-{format(new Date(file.created_at), "d 'de' MMM", { locale: pt })}
                                   </p>
                                   <p className="text-xs text-muted-foreground">
-                                    {format(new Date(file.created_at), 'MMM d, yyyy')}
+                                    {format(new Date(file.created_at), "d 'de' MMM, yyyy", { locale: pt })}
                                   </p>
                                 </div>
                                 <Button
@@ -409,7 +410,7 @@ const ProjectDetail = () => {
                             {msg.body}
                           </p>
                           <p className="text-xs opacity-70">
-                            {format(new Date(msg.created_at), 'MMM d, HH:mm')}
+                            {format(new Date(msg.created_at), "d 'de' MMM, HH:mm", { locale: pt })}
                           </p>
                         </div>
                       </div>

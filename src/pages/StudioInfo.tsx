@@ -20,15 +20,9 @@ import {
 
 const StudioInfo = () => {
   const whatsappNumber = "+351934941263";
-  const studioAddress = "Rua Abade Correia da Serra 20A, 2865-207 Fernão Ferro";
-  const googleMapsLink = `https://www.google.com/maps/place/${encodeURIComponent(studioAddress)}`;
+  const studioLocation = "Pinhal do General, Seixal";
   const whatsappLink = `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}?text=Hi! I'd like to inquire about studio sessions.`;
 
-  const handleGoogleMapsClick = () => {
-    console.log('Google Maps URL:', googleMapsLink);
-    // Use window.location.href instead of window.open to avoid popup blockers
-    window.location.href = googleMapsLink;
-  };
 
   const houseRules = [
     {
@@ -113,15 +107,12 @@ const StudioInfo = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <p className="text-foreground font-medium mb-2">{studioAddress}</p>
-              <Button
-                variant="outline"
-                onClick={handleGoogleMapsClick}
-                className="w-full"
-              >
-                <ExternalLink className="h-4 w-4 mr-2" />
-                Abrir no Google Maps
-              </Button>
+              <p className="text-foreground font-medium mb-2">{studioLocation}</p>
+              <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-xs text-blue-700">
+                  A morada exata será disponibilizada após pagamento da sessão
+                </p>
+              </div>
             </div>
             
             <Separator />
@@ -161,7 +152,7 @@ const StudioInfo = () => {
                 <AlertTriangle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="font-medium text-sm">Menos de 3 Dias</p>
-                  <p className="text-xs text-muted-foreground">Não há devolução, cobrança de €15 como taxa</p>
+                  <p className="text-xs text-muted-foreground">O valor do sinal não é reembolsável</p>
                 </div>
               </div>
 

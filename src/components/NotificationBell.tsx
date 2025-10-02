@@ -8,14 +8,23 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { useNotifications } from '@/hooks/useNotifications';
 import { formatDistanceToNow } from 'date-fns';
+import { pt } from 'date-fns/locale';
+import { useNavigate } from 'react-router-dom';
 
 export const NotificationBell = () => {
   const { notifications, unreadCount, loading, markAsRead, markAllAsRead } = useNotifications();
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
 
-  const handleNotificationClick = async (notificationId: string, isRead: boolean) => {
+  const handleNotificationClick = async (notificationId: string, isRead: boolean, title: string) => {
     if (!isRead) {
       await markAsRead(notificationId);
+    }
+    
+    // Navigate to projects if it's a payment approval notification
+    if (title === 'Pagamento aprovado') {
+      setOpen(false);
+      navigate('/projects');
     }
   };
 
@@ -84,7 +93,7 @@ export const NotificationBell = () => {
                         className={`p-4 cursor-pointer transition-colors hover:bg-muted/50 ${
                           !notification.read ? 'bg-primary/5 border-l-4 border-l-primary' : ''
                         }`}
-                        onClick={() => handleNotificationClick(notification.id, notification.read)}
+                        onClick={() => handleNotificationClick(notification.id, notification.read, notification.title)}
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex-1 min-w-0">
@@ -102,7 +111,7 @@ export const NotificationBell = () => {
                               {notification.body}
                             </p>
                             <p className="text-xs text-muted-foreground mt-2">
-                              {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
+                              {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true, locale: pt })}
                             </p>
                           </div>
                           {!notification.read && (

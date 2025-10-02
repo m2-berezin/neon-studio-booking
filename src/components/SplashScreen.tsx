@@ -11,7 +11,7 @@ const SplashScreen = ({ onComplete }: SplashScreenProps) => {
     const timer = setTimeout(() => {
       setIsVisible(false);
       setTimeout(onComplete, 300); // Wait for fade out animation
-    }, 1700); // 1.7 seconds
+    }, 1300); // 1.3 seconds
 
     return () => clearTimeout(timer);
   }, [onComplete]);
@@ -30,7 +30,15 @@ const SplashScreen = ({ onComplete }: SplashScreenProps) => {
   return (
     <div className="fixed inset-0 bg-background z-50 flex items-center justify-center transition-opacity duration-300">
       <div className="text-center">
-        <h1 className="text-6xl font-bold text-primary mb-2">7T7</h1>
+        <h1 
+          className="text-6xl font-bold text-primary mb-2"
+          style={{ 
+            fontFamily: 'Georgia, serif',
+            textShadow: '0 0 20px rgba(255, 255, 255, 0.3), 0 0 40px rgba(255, 255, 255, 0.2)'
+          }}
+        >
+          7T7
+        </h1>
         <p className="text-xl text-muted-foreground">Studios</p>
       </div>
     </div>

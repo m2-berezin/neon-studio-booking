@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { format, parse } from 'date-fns';
+import { pt } from 'date-fns/locale';
 import PriceSummary from '@/components/PriceSummary';
 import { 
   Calendar as CalendarIcon, 
@@ -194,8 +195,8 @@ const Book = () => {
               <h3 className="text-lg font-semibold mb-2">Detalhes da Sessão</h3>
               <div className="space-y-2 text-sm text-muted-foreground">
                 <p><span className="font-medium">Serviço:</span> {selectedServiceDetails?.name}</p>
-                <p><span className="font-medium">Data:</span> {selectedDate && format(selectedDate, 'EEEE, MMMM do, yyyy')}</p>
-                <p><span className="font-medium">Horário:</span> {selectedSlot && format(parse(selectedSlot.start_time, 'HH:mm:ss', new Date()), 'h:mm a')} - {selectedSlot && format(parse(selectedSlot.end_time, 'HH:mm:ss', new Date()), 'h:mm a')}</p>
+                <p><span className="font-medium">Data:</span> {selectedDate && format(selectedDate, "EEEE, d 'de' MMMM 'de' yyyy", { locale: pt })}</p>
+                <p><span className="font-medium">Horário:</span> {selectedSlot && selectedSlot.start_time.slice(0, 5)} - {selectedSlot && selectedSlot.end_time.slice(0, 5)}</p>
               </div>
             </div>
 
@@ -342,7 +343,7 @@ const Book = () => {
           
           <div className="text-center mb-4">
             <p className="text-sm text-muted-foreground">
-              {selectedDate && format(selectedDate, 'EEEE, MMMM do, yyyy')}
+              {selectedDate && format(selectedDate, "EEEE, d 'de' MMMM 'de' yyyy", { locale: pt })}
             </p>
           </div>
 
@@ -360,7 +361,7 @@ const Book = () => {
               >
                 <Clock className="w-4 h-4 mb-1" />
                 <span className="text-xs">
-                  {format(parse(slot.start_time, 'HH:mm:ss', new Date()), 'h:mm a')}
+                  {slot.start_time.slice(0, 5)}
                 </span>
               </Button>
             ))}
@@ -394,13 +395,13 @@ const Book = () => {
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Data:</span>
                 <span className="font-medium">
-                  {selectedDate && format(selectedDate, 'EEEE, MMMM do, yyyy')}
+                  {selectedDate && format(selectedDate, "EEEE, d 'de' MMMM 'de' yyyy", { locale: pt })}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Horário:</span>
                 <span className="font-medium">
-                  {selectedSlot && format(parse(selectedSlot.start_time, 'HH:mm:ss', new Date()), 'h:mm a')} - {selectedSlot && format(parse(selectedSlot.end_time, 'HH:mm:ss', new Date()), 'h:mm a')}
+                  {selectedSlot && selectedSlot.start_time.slice(0, 5)} - {selectedSlot && selectedSlot.end_time.slice(0, 5)}
                 </span>
               </div>
             </div>
@@ -409,6 +410,7 @@ const Book = () => {
           <PriceSummary 
             services={selectedServiceDetails ? [selectedServiceDetails] : []}
             bookingDate={selectedDate || undefined}
+            showFriendCode={false}
           />
 
           <div className="space-y-3">

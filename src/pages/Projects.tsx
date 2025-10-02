@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useProjects } from '@/hooks/useProjects';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
+import { pt } from 'date-fns/locale';
 
 const Projects = () => {
   const { user, isAdmin } = useAuth();
@@ -127,7 +128,7 @@ const Projects = () => {
                      {/* Last Update */}
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Clock className="w-4 h-4" />
-                      <span>Atualizado {format(new Date(project.created_at), 'MMM d, yyyy')}</span>
+                      <span>Atualizado {format(new Date(project.created_at), "d 'de' MMM, yyyy", { locale: pt })}</span>
                     </div>
 
                     {/* Booking Info if available */}
