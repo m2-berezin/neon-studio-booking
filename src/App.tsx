@@ -23,7 +23,6 @@ import AdminPayments from "@/pages/AdminPayments";
 import AdminBookings from "@/pages/AdminBookings";
 import AdminDashboard from "@/pages/AdminDashboard";
 import AdminMessages from "@/pages/AdminMessages";
-import { AdminLayout } from "@/components/admin/AdminLayout";
 import StudioInfo from "@/pages/StudioInfo";
 import MixMaster from "./pages/MixMaster";
 import Payment from "./pages/Payment";
