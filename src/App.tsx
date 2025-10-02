@@ -75,11 +75,11 @@ const App = () => {
                 <Route path="/admin" element={<Admin />} />
                 <Route path="/studio-info" element={<StudioInfo />} />
                 
-                {/* Admin Routes with AdminLayout */}
-                <Route path="/admin/dashboard" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
-                <Route path="/admin/bookings" element={<AdminLayout><AdminBookings /></AdminLayout>} />
-                <Route path="/admin/payments" element={<AdminLayout><AdminPayments /></AdminLayout>} />
-                <Route path="/admin/messages" element={<AdminLayout><AdminMessages /></AdminLayout>} />
+                {/* Admin Routes - AdminLayout is already inside each page */}
+                <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                <Route path="/admin/bookings" element={<AdminBookings />} />
+                <Route path="/admin/payments" element={<AdminPayments />} />
+                <Route path="/admin/messages" element={<AdminMessages />} />
                 
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
