@@ -244,6 +244,20 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "messages_receiver_id_fkey"
+            columns: ["receiver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "messages_service_id_fkey"
             columns: ["service_id"]
             isOneToOne: false
@@ -727,6 +741,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      backfill_welcome_messages: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       check_user_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
