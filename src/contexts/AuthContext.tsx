@@ -42,6 +42,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(false); // Start as false for instant loading
 
+  // Send welcome messages on first login
+  const sendWelcomeMessages = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      await supabase.functions.invoke('send-welcome-messages', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+    } catch (error) {
+      console.error('Error sending welcome messages:', error);
+    }
+  };
+
   // Fetch user profile (non-blocking)
   const fetchProfile = async (userId: string) => {
     try {
@@ -57,6 +73,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       setProfile(data);
+
+      // Check if welcome messages need to be sent
+      if (data && !data.welcome_messages_sent) {
+        setTimeout(() => {
+          sendWelcomeMessages();
+        }, 1000); // Delay to ensure profile is fully set up
+      }
     } catch (error) {
       console.error('Unexpected error fetching profile:', error);
     }

@@ -295,6 +295,7 @@ export type Database = {
           phone: string | null
           role: string | null
           updated_at: string
+          welcome_messages_sent: boolean | null
         }
         Insert: {
           created_at?: string
@@ -305,6 +306,7 @@ export type Database = {
           phone?: string | null
           role?: string | null
           updated_at?: string
+          welcome_messages_sent?: boolean | null
         }
         Update: {
           created_at?: string
@@ -315,6 +317,7 @@ export type Database = {
           phone?: string | null
           role?: string | null
           updated_at?: string
+          welcome_messages_sent?: boolean | null
         }
         Relationships: []
       }

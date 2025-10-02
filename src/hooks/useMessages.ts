@@ -267,8 +267,37 @@ export const useMessages = () => {
   useEffect(() => {
     if (user) {
       loadThreads();
+
+      // Set up realtime subscription for new messages
+      const messagesChannel = supabase
+        .channel('messages-realtime')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'messages',
+            filter: `recipient_id=eq.${user.id}`,
+          },
+          (payload) => {
+            console.log('New message received:', payload);
+            
+            // Reload threads to show new message
+            loadThreads();
+            
+            // If the new message is for the current conversation, reload it
+            if (payload.new.sender_id === currentRecipient) {
+              loadThread(currentRecipient);
+            }
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(messagesChannel);
+      };
     }
-  }, [user]);
+  }, [user, currentRecipient]);
 
   return {
     loading,

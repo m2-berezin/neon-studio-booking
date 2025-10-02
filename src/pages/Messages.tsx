@@ -10,9 +10,12 @@ import { useMessages } from '@/hooks/useMessages';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import AudioPlayer from '@/components/AudioPlayer';
 import { format } from 'date-fns';
+import { pt } from 'date-fns/locale';
+import { useNavigate } from 'react-router-dom';
 
 const Messages = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const {
     loading,
     uploading,
@@ -79,6 +82,18 @@ const Messages = () => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
+  // Parse attachments to check for action buttons
+  const parseAttachments = (attachments: any) => {
+    if (typeof attachments === 'string') {
+      try {
+        return JSON.parse(attachments);
+      } catch {
+        return null;
+      }
+    }
+    return attachments;
+  };
+
   return (
     <div className="h-[calc(100vh-8rem)] flex gap-4">
       {/* Thread List */}
@@ -116,7 +131,7 @@ const Messages = () => {
                           {thread.recipient_name}
                         </h3>
                         <span className="text-xs text-muted-foreground">
-                          {format(new Date(thread.latest_message.created_at), 'MMM d')}
+                          {format(new Date(thread.latest_message.created_at), "d 'de' MMM", { locale: pt })}
                         </span>
                       </div>
                       <p className="text-xs text-muted-foreground line-clamp-2">
@@ -173,8 +188,26 @@ const Messages = () => {
                           </p>
                         )}
                         
-                        {/* Attachments */}
-                        {message.attachments && message.attachments.length > 0 && (
+                        {/* Check for action button in attachments */}
+                        {(() => {
+                          const parsedAttachments = parseAttachments(message.attachments);
+                          if (parsedAttachments?.action) {
+                            return (
+                              <Button
+                                variant={isFromUser ? "secondary" : "default"}
+                                size="sm"
+                                onClick={() => navigate(parsedAttachments.action.url)}
+                                className="mt-2 w-full"
+                              >
+                                {parsedAttachments.action.label}
+                              </Button>
+                            );
+                          }
+                          return null;
+                        })()}
+                        
+                        {/* Regular Attachments (files) */}
+                        {message.attachments && Array.isArray(message.attachments) && message.attachments.length > 0 && (
                           <div className="space-y-2">
                             {message.attachments.map((attachment, index) => (
                               <div key={index}>
@@ -220,7 +253,7 @@ const Messages = () => {
                         )}
                         
                         <p className="text-xs opacity-70 mt-2">
-                          {format(new Date(message.created_at), 'MMM d, HH:mm')}
+                          {format(new Date(message.created_at), "d 'de' MMM, HH:mm", { locale: pt })}
                         </p>
                       </div>
                     </div>
