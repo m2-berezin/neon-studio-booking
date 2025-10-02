@@ -17,13 +17,28 @@ const AdminMessages = () => {
 
   const selectedThread = threads.find(t => t.thread_id === selectedThreadId);
 
+  const [isUserScrolling, setIsUserScrolling] = useState(false);
+
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (!isUserScrolling) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
+  // Only auto-scroll when new messages arrive and user is not manually scrolling
   useEffect(() => {
-    scrollToBottom();
+    const timer = setTimeout(() => {
+      scrollToBottom();
+      setIsUserScrolling(false);
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, [messages]);
+
+  // Detect manual scrolling
+  const handleScroll = () => {
+    setIsUserScrolling(true);
+  };
 
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !selectedThreadId || !selectedThread) return;
@@ -129,7 +144,7 @@ const AdminMessages = () => {
               </div>
 
               {/* Messages */}
-              <ScrollArea className="flex-1 p-6">
+              <ScrollArea className="flex-1 p-6" onScrollCapture={handleScroll}>
                 <div className="space-y-6">
                   {messages.map((message, index) => {
                     const isSender = message.sender_id === user?.id;

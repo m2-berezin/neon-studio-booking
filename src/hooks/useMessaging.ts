@@ -172,7 +172,7 @@ export const useMessaging = () => {
     if (!user) return;
 
     const channel = supabase
-      .channel(`messages-changes-${user.id}`)
+      .channel(`messages-user-${user.id}`)
       .on(
         'postgres_changes',
         {
@@ -181,14 +181,11 @@ export const useMessaging = () => {
           table: 'messages',
         },
         (payload) => {
-          // Only reload if this user is involved
-          const msg = payload.new as any;
-          if (msg?.sender_id === user.id || msg?.receiver_id === user.id) {
-            // Force reload threads to get fresh display names from view
-            loadThreads();
-            if (selectedThreadId) {
-              loadMessages(selectedThreadId);
-            }
+          console.log('Realtime message event:', payload.eventType);
+          // Reload threads and messages when any change happens
+          loadThreads();
+          if (selectedThreadId) {
+            loadMessages(selectedThreadId);
           }
         }
       )
