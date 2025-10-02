@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card } from '@/components/ui/card';
-import { ArrowLeft, Send, Music, MessageCircle } from 'lucide-react';
+import { ArrowLeft, Send, Music, Music2, MessageCircle, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -39,56 +39,74 @@ const Messages = () => {
     }
   };
 
+  const isFromGhostWayne = (thread: typeof threads[0]) => {
+    return thread.other_user_name === 'Ghost Wayne';
+  };
+
   return (
     <Layout>
       <div 
-        className="container mx-auto px-4 py-4 max-w-6xl"
+        className="container mx-auto px-4 py-4 max-w-6xl min-h-screen"
         style={{
-          backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%239C92AC\' fill-opacity=\'0.03\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
+          backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'80\' height=\'80\' viewBox=\'0 0 80 80\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%239333ea\' fill-opacity=\'0.03\'%3E%3Cpath d=\'M0 0h40v40H0V0zm40 40h40v40H40V40z\'/%3E%3Cpath d=\'M20 10c5.523 0 10 4.477 10 10s-4.477 10-10 10-10-4.477-10-10 4.477-10 10-10zm40 40c5.523 0 10 4.477 10 10s-4.477 10-10 10-10-4.477-10-10 4.477-10 10-10z\'/%3E%3C/g%3E%3C/svg%3E")',
         }}
       >
-        <Card className="h-[calc(100vh-140px)] flex overflow-hidden bg-background/95 backdrop-blur">
+        <Card className="h-[calc(100vh-140px)] flex overflow-hidden bg-gradient-to-br from-background via-background to-primary/5 shadow-2xl border-primary/20">
           {/* Threads List */}
           {!selectedThreadId ? (
-            <div className="w-full p-4">
-              <h1 className="text-2xl font-bold mb-6 flex items-center gap-3">
-                <Music className="w-7 h-7 text-primary animate-pulse" />
-                <span className="bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">
-                  Mensagens
-                </span>
+            <div className="w-full p-6">
+              <h1 className="text-3xl font-bold mb-6 flex items-center gap-3 bg-gradient-to-r from-primary via-purple-600 to-blue-500 bg-clip-text text-transparent">
+                <Music2 className="w-8 h-8 text-primary animate-pulse" />
+                Mensagens
               </h1>
               
               <ScrollArea className="h-[calc(100vh-240px)]">
                 {threads.length === 0 ? (
-                  <div className="text-center text-muted-foreground py-12">
-                    <MessageCircle className="w-16 h-16 mx-auto mb-4 opacity-20" />
-                    <p>Nenhuma conversa ainda</p>
+                  <div className="text-center text-muted-foreground py-12 flex flex-col items-center gap-4">
+                    <MessageCircle className="w-20 h-20 opacity-20 animate-bounce" />
+                    <p className="text-lg">Nenhuma conversa ainda</p>
+                    <p className="text-sm opacity-70">As tuas mensagens aparecerão aqui 🎵</p>
                   </div>
                 ) : (
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     {threads.map((thread) => (
                       <Button
                         key={thread.thread_id}
                         variant="ghost"
-                        className="w-full justify-start h-auto p-4 hover:bg-primary/10 transition-all duration-200 rounded-xl"
+                        className={cn(
+                          "w-full justify-start h-auto p-5 transition-all hover:bg-primary/10 hover:scale-[1.02] rounded-2xl",
+                          isFromGhostWayne(thread) && "border-l-4 border-primary bg-gradient-to-r from-primary/10 via-purple-600/5 to-transparent shadow-md"
+                        )}
                         onClick={() => loadMessages(thread.thread_id)}
                       >
                         <div className="flex-1 text-left">
                           <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-2">
-                              <Music className="w-5 h-5 text-primary" />
-                              <span className="font-semibold text-lg">{thread.other_user_name}</span>
+                            <div className="flex items-center gap-3">
+                              {isFromGhostWayne(thread) ? (
+                                <div className="relative">
+                                  <Music className="w-6 h-6 text-primary animate-pulse" />
+                                  <Sparkles className="w-3 h-3 text-purple-600 absolute -top-1 -right-1 animate-ping" />
+                                </div>
+                              ) : (
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-purple-600/20 flex items-center justify-center">
+                                  <span className="text-primary font-bold">
+                                    {thread.other_user_name.charAt(0)}
+                                  </span>
+                                </div>
+                              )}
+                              <span className="font-bold text-lg">{thread.other_user_name}</span>
                             </div>
                             {thread.unread_count > 0 && (
-                              <span className="bg-destructive text-destructive-foreground text-xs font-bold px-2.5 py-1 rounded-full animate-pulse">
+                              <span className="relative bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
                                 {thread.unread_count}
+                                <span className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-75"></span>
                               </span>
                             )}
                           </div>
-                          <p className="text-sm text-muted-foreground line-clamp-1 pl-7">
+                          <p className="text-sm text-muted-foreground line-clamp-2 mb-2 pl-1">
                             {thread.last_message}
                           </p>
-                          <p className="text-xs text-muted-foreground/60 mt-1 pl-7">
+                          <p className="text-xs text-muted-foreground/70 pl-1">
                             {new Date(thread.last_message_time).toLocaleString('pt-PT', {
                               day: '2-digit',
                               month: '2-digit',
@@ -105,61 +123,85 @@ const Messages = () => {
             </div>
           ) : (
             /* Messages View */
-            <div className="flex-1 flex flex-col">
+            <div className="flex-1 flex flex-col bg-gradient-to-b from-background to-primary/5">
               {/* Header */}
-              <div className="p-4 border-b bg-gradient-to-r from-primary/10 to-purple-500/10 flex items-center gap-3">
+              <div className="p-5 border-b bg-card/50 backdrop-blur-sm flex items-center gap-3 shadow-sm">
                 <Button
                   variant="ghost"
                   size="icon"
+                  className="hover:bg-primary/10"
                   onClick={() => setSelectedThreadId(null)}
-                  className="hover:bg-background/50"
                 >
                   <ArrowLeft className="w-5 h-5" />
                 </Button>
-                <div className="flex items-center gap-2">
-                  <Music className="w-6 h-6 text-primary" />
+                <div className="flex items-center gap-3 flex-1">
+                  {selectedThread?.other_user_name === 'Ghost Wayne' ? (
+                    <div className="relative w-12 h-12 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-lg">
+                      <Music className="w-6 h-6 text-white animate-pulse" />
+                      <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-background"></div>
+                    </div>
+                  ) : (
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-purple-600/20 flex items-center justify-center shadow-md">
+                      <span className="text-primary font-bold text-lg">
+                        {selectedThread?.other_user_name.charAt(0)}
+                      </span>
+                    </div>
+                  )}
                   <div>
                     <h2 className="font-bold text-lg">{selectedThread?.other_user_name}</h2>
-                    <p className="text-xs text-muted-foreground">Studio Producer</p>
+                    <p className="text-xs text-muted-foreground flex items-center gap-1">
+                      <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                      Online • Sempre disponível 🎵
+                    </p>
                   </div>
                 </div>
               </div>
 
               {/* Messages */}
-              <ScrollArea className="flex-1 p-4 bg-muted/20">
-                <div className="space-y-4">
-                  {messages.map((message) => {
+              <ScrollArea className="flex-1 p-6">
+                <div className="space-y-6">
+                  {messages.map((message, index) => {
                     const isSender = message.sender_id === user?.id;
-                    const isWelcomeMessage = message.message.includes('Bem-vindo') || message.message.includes('Recompensas');
+                    const isFromAdmin = !isSender;
+                    const isWelcomeMessage = isFromAdmin && (
+                      message.message.includes('Bem-vindo à 7T7Studios') ||
+                      message.message.includes('Recompensas')
+                    );
                     
                     return (
                       <div
                         key={message.id}
                         className={cn(
-                          'flex',
+                          'flex gap-3 animate-in fade-in slide-in-from-bottom-2',
                           isSender ? 'justify-end' : 'justify-start'
                         )}
+                        style={{ animationDelay: `${index * 50}ms` }}
                       >
+                        {isFromAdmin && (
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-lg flex-shrink-0">
+                            <Music className="w-5 h-5 text-white" />
+                          </div>
+                        )}
                         <div
                           className={cn(
-                            'max-w-[75%] rounded-2xl px-4 py-3 shadow-lg transition-all duration-200 hover:shadow-xl',
+                            'max-w-[75%] rounded-2xl px-5 py-3 shadow-md transition-all hover:scale-[1.02]',
                             isSender
-                              ? 'bg-primary text-primary-foreground rounded-br-sm'
+                              ? 'bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rounded-br-sm'
                               : isWelcomeMessage
-                              ? 'bg-gradient-to-br from-purple-500 to-primary text-white rounded-bl-sm border-2 border-primary/30'
-                              : 'bg-secondary text-secondary-foreground rounded-bl-sm'
+                              ? 'bg-gradient-to-br from-primary via-purple-600 to-blue-600 text-white rounded-bl-sm border-2 border-white/20 shadow-xl'
+                              : 'bg-card text-card-foreground rounded-bl-sm border shadow-sm'
                           )}
                         >
-                          {!isSender && isWelcomeMessage && (
-                            <div className="flex items-center gap-2 mb-2 text-white/90">
-                              <Music className="w-4 h-4 animate-pulse" />
-                              <span className="text-xs font-semibold">{selectedThread?.other_user_name}</span>
+                          {isWelcomeMessage && (
+                            <div className="flex items-center gap-2 mb-3 pb-2 border-b border-white/20">
+                              <Music2 className="w-5 h-5 animate-pulse" />
+                              <span className="text-xs font-bold tracking-wide">✨ MENSAGEM ESPECIAL</span>
                             </div>
                           )}
                           <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.message}</p>
                           <p className={cn(
                             "text-xs mt-2 flex items-center gap-1",
-                            isSender ? "opacity-80" : isWelcomeMessage ? "text-white/70" : "opacity-70"
+                            isSender ? "opacity-80" : isWelcomeMessage ? "text-white/80" : "opacity-60"
                           )}>
                             {new Date(message.timestamp).toLocaleTimeString('pt-PT', {
                               hour: '2-digit',
@@ -167,6 +209,11 @@ const Messages = () => {
                             })}
                           </p>
                         </div>
+                        {isSender && (
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-accent to-accent/80 flex items-center justify-center shadow-md flex-shrink-0">
+                            <span className="text-sm font-bold text-accent-foreground">Tu</span>
+                          </div>
+                        )}
                       </div>
                     );
                   })}
@@ -175,19 +222,20 @@ const Messages = () => {
               </ScrollArea>
 
               {/* Input */}
-              <div className="p-4 border-t bg-background/50 backdrop-blur">
-                <div className="flex gap-2">
+              <div className="p-5 border-t bg-card/50 backdrop-blur-sm">
+                <div className="flex gap-3">
                   <Input
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    placeholder="Escreve a tua mensagem..."
-                    className="flex-1 rounded-full border-2 focus:border-primary transition-colors"
+                    placeholder="Escreve a tua mensagem... 🎵"
+                    className="flex-1 text-base h-12 rounded-full px-6 bg-background/50 border-primary/20 focus:border-primary transition-all"
                   />
                   <Button 
                     onClick={handleSendMessage} 
                     size="icon"
-                    className="rounded-full w-12 h-12 bg-gradient-to-r from-primary to-purple-500 hover:shadow-lg transition-all"
+                    className="h-12 w-12 rounded-full bg-gradient-to-br from-primary to-purple-600 hover:scale-110 transition-transform shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={!newMessage.trim()}
                   >
                     <Send className="w-5 h-5" />
                   </Button>
