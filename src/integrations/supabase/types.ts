@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      availabilities: {
+        Row: {
+          created_at: string | null
+          date: string
+          id: string
+          is_available: boolean | null
+          time_slot: string
+        }
+        Insert: {
+          created_at?: string | null
+          date: string
+          id?: string
+          is_available?: boolean | null
+          time_slot: string
+        }
+        Update: {
+          created_at?: string | null
+          date?: string
+          id?: string
+          is_available?: boolean | null
+          time_slot?: string
+        }
+        Relationships: []
+      }
       availability_rules: {
         Row: {
           created_at: string
@@ -119,6 +143,36 @@ export type Database = {
           },
         ]
       }
+      discounts: {
+        Row: {
+          code: string
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          is_used: boolean | null
+          percentage: number
+          user_id: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          is_used?: boolean | null
+          percentage: number
+          user_id?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          is_used?: boolean | null
+          percentage?: number
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       files: {
         Row: {
           created_at: string
@@ -156,55 +210,44 @@ export type Database = {
       }
       messages: {
         Row: {
-          attachments: Json | null
-          body: string
-          created_at: string
+          created_at: string | null
           id: string
-          project_id: string | null
-          recipient_id: string | null
+          is_read: boolean | null
+          message: string
+          receiver_id: string
           sender_id: string
-          thread_type: string
+          service_id: string | null
+          thread_id: string
+          timestamp: string | null
         }
         Insert: {
-          attachments?: Json | null
-          body: string
-          created_at?: string
+          created_at?: string | null
           id?: string
-          project_id?: string | null
-          recipient_id?: string | null
+          is_read?: boolean | null
+          message: string
+          receiver_id: string
           sender_id: string
-          thread_type: string
+          service_id?: string | null
+          thread_id: string
+          timestamp?: string | null
         }
         Update: {
-          attachments?: Json | null
-          body?: string
-          created_at?: string
+          created_at?: string | null
           id?: string
-          project_id?: string | null
-          recipient_id?: string | null
+          is_read?: boolean | null
+          message?: string
+          receiver_id?: string
           sender_id?: string
-          thread_type?: string
+          service_id?: string | null
+          thread_id?: string
+          timestamp?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "messages_project_id_fkey"
-            columns: ["project_id"]
+            foreignKeyName: "messages_service_id_fkey"
+            columns: ["service_id"]
             isOneToOne: false
-            referencedRelation: "projects"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "messages_recipient_id_fkey"
-            columns: ["recipient_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "messages_sender_id_fkey"
-            columns: ["sender_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
+            referencedRelation: "services"
             referencedColumns: ["id"]
           },
         ]
@@ -240,6 +283,50 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      offers: {
+        Row: {
+          created_at: string | null
+          discount_percentage: number
+          id: string
+          is_active: boolean | null
+          is_used: boolean | null
+          name: string
+          service_id: string | null
+          user_id: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          discount_percentage: number
+          id?: string
+          is_active?: boolean | null
+          is_used?: boolean | null
+          name: string
+          service_id?: string | null
+          user_id?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          discount_percentage?: number
+          id?: string
+          is_active?: boolean | null
+          is_used?: boolean | null
+          name?: string
+          service_id?: string | null
+          user_id?: string | null
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offers_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
             referencedColumns: ["id"]
           },
         ]
@@ -291,6 +378,7 @@ export type Database = {
           full_name: string | null
           id: string
           last_voucher_at: string | null
+          onboarding_completed: boolean | null
           penalty_until: string | null
           phone: string | null
           role: string | null
@@ -302,6 +390,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           last_voucher_at?: string | null
+          onboarding_completed?: boolean | null
           penalty_until?: string | null
           phone?: string | null
           role?: string | null
@@ -313,6 +402,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           last_voucher_at?: string | null
+          onboarding_completed?: boolean | null
           penalty_until?: string | null
           phone?: string | null
           role?: string | null
@@ -363,6 +453,57 @@ export type Database = {
           },
         ]
       }
+      reservations: {
+        Row: {
+          created_at: string | null
+          date: string
+          duration: number
+          id: string
+          payment_request_id: string | null
+          service_id: string
+          status: string | null
+          time_slot: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          date: string
+          duration: number
+          id?: string
+          payment_request_id?: string | null
+          service_id: string
+          status?: string | null
+          time_slot: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          date?: string
+          duration?: number
+          id?: string
+          payment_request_id?: string | null
+          service_id?: string
+          status?: string | null
+          time_slot?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reservations_payment_request_id_fkey"
+            columns: ["payment_request_id"]
+            isOneToOne: false
+            referencedRelation: "payment_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservations_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rewards_usage: {
         Row: {
           client_id: string
@@ -406,6 +547,7 @@ export type Database = {
           base_price: number
           created_at: string
           description: string | null
+          duration_prices: Json | null
           id: string
           is_active: boolean | null
           name: string
@@ -415,6 +557,7 @@ export type Database = {
           base_price: number
           created_at?: string
           description?: string | null
+          duration_prices?: Json | null
           id?: string
           is_active?: boolean | null
           name: string
@@ -424,6 +567,7 @@ export type Database = {
           base_price?: number
           created_at?: string
           description?: string | null
+          duration_prices?: Json | null
           id?: string
           is_active?: boolean | null
           name?: string
@@ -513,6 +657,27 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       vouchers: {
         Row: {
           amount: number
@@ -562,13 +727,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_user_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       is_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -695,6 +867,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
