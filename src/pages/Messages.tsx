@@ -79,18 +79,13 @@ const Messages = () => {
   const handleSendToAllAdmins = async () => {
     if (!messageText.trim() && attachments.length === 0) return;
 
-    const adminIds = await getAllAdminIds();
-    
-    let success = false;
-    for (const adminId of adminIds) {
-      const result = await sendMessage(
-        adminId,
-        messageText.trim(),
-        'direct',
-        attachments
-      );
-      if (result) success = true;
-    }
+    // Send to admin-inbox (shared inbox)
+    const success = await sendMessage(
+      'admin-inbox',
+      messageText.trim(),
+      'direct',
+      attachments
+    );
 
     if (success) {
       setMessageText('');

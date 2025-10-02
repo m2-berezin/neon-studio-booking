@@ -54,6 +54,15 @@ export const useMessages = () => {
 
     setLoading(true);
     try {
+      // Check if current user is admin
+      const { data: currentUserProfile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+      const isUserAdmin = currentUserProfile?.role === 'admin';
+
       // Load messages from direct conversations OR shared admin inbox
       const { data: messages, error } = await supabase
         .from('messages')
@@ -79,24 +88,51 @@ export const useMessages = () => {
         let partnerId: string;
         let partnerName: string;
         
-        // Handle shared admin inbox messages
-        if (message.receiver_role === 'admin' && message.sender_id === user.id) {
-          partnerId = 'admin-inbox';
-          partnerName = 'Admin Team';
+        // For non-admin users, show single "Admin Team" thread for all admin communications
+        if (!isUserAdmin) {
+          const isAdminMessage = message.receiver_role === 'admin' || 
+                                 message.sender_profile?.role === 'admin' ||
+                                 message.recipient_profile?.role === 'admin';
+          
+          if (isAdminMessage) {
+            partnerId = 'admin-inbox';
+            partnerName = 'Admin Team';
+          } else {
+            // Regular user-to-user message
+            const isFromUser = message.sender_id === user.id;
+            partnerId = isFromUser ? message.recipient_id : message.sender_id;
+            
+            const senderProfile = Array.isArray(message.sender_profile) 
+              ? message.sender_profile[0] 
+              : message.sender_profile;
+            const recipientProfile = Array.isArray(message.recipient_profile)
+              ? message.recipient_profile[0]
+              : message.recipient_profile;
+            
+            partnerName = isFromUser 
+              ? recipientProfile?.full_name || 'Unknown User'
+              : senderProfile?.full_name || 'Unknown User';
+          }
         } else {
-          const isFromUser = message.sender_id === user.id;
-          partnerId = isFromUser ? message.recipient_id : message.sender_id;
-          
-          const senderProfile = Array.isArray(message.sender_profile) 
-            ? message.sender_profile[0] 
-            : message.sender_profile;
-          const recipientProfile = Array.isArray(message.recipient_profile)
-            ? message.recipient_profile[0]
-            : message.recipient_profile;
-          
-          partnerName = isFromUser 
-            ? recipientProfile?.full_name || 'Ghost Wayne'
-            : senderProfile?.full_name || 'Ghost Wayne';
+          // Admin users see individual user threads
+          if (message.receiver_role === 'admin' && message.sender_id === user.id) {
+            partnerId = 'admin-inbox';
+            partnerName = 'Admin Team';
+          } else {
+            const isFromUser = message.sender_id === user.id;
+            partnerId = isFromUser ? message.recipient_id : message.sender_id;
+            
+            const senderProfile = Array.isArray(message.sender_profile) 
+              ? message.sender_profile[0] 
+              : message.sender_profile;
+            const recipientProfile = Array.isArray(message.recipient_profile)
+              ? message.recipient_profile[0]
+              : message.recipient_profile;
+            
+            partnerName = isFromUser 
+              ? recipientProfile?.full_name || 'Unknown User'
+              : senderProfile?.full_name || 'Unknown User';
+          }
         }
 
         console.log('Partner name:', partnerName, 'for partner:', partnerId);
@@ -132,17 +168,40 @@ export const useMessages = () => {
     try {
       let query;
       
-      // Handle admin inbox thread
+      // Handle admin inbox thread (all messages between user and any admin)
       if (recipientId === 'admin-inbox') {
-        query = supabase
-          .from('messages')
-          .select(`
-            *,
-            sender_profile:profiles!messages_sender_id_fkey(full_name, role),
-            recipient_profile:profiles!messages_recipient_id_fkey(full_name, role)
-          `)
-          .or(`and(sender_id.eq.${user.id},receiver_role.eq.admin),and(recipient_id.eq.${user.id},sender_profile.role.eq.admin)`)
-          .order('created_at', { ascending: true });
+        // Get current user role
+        const { data: currentUserProfile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+
+        const isUserAdmin = currentUserProfile?.role === 'admin';
+
+        if (isUserAdmin) {
+          // Admin viewing admin inbox: messages from user to admin inbox OR admin responses
+          query = supabase
+            .from('messages')
+            .select(`
+              *,
+              sender_profile:profiles!messages_sender_id_fkey(full_name, role),
+              recipient_profile:profiles!messages_recipient_id_fkey(full_name, role)
+            `)
+            .or(`and(sender_id.eq.${user.id},receiver_role.eq.admin),and(recipient_id.eq.${user.id},sender_profile.role.eq.admin)`)
+            .order('created_at', { ascending: true });
+        } else {
+          // Non-admin viewing admin inbox: messages to/from ANY admin
+          query = supabase
+            .from('messages')
+            .select(`
+              *,
+              sender_profile:profiles!messages_sender_id_fkey(full_name, role),
+              recipient_profile:profiles!messages_recipient_id_fkey(full_name, role)
+            `)
+            .or(`and(sender_id.eq.${user.id},receiver_role.eq.admin),recipient_id.eq.${user.id}`)
+            .order('created_at', { ascending: true });
+        }
       } else {
         // Regular direct messages
         query = supabase
@@ -168,7 +227,7 @@ export const useMessages = () => {
       
       // Mark messages from this sender as read
       const unreadMessageIds = (messages || [])
-        .filter(msg => msg.recipient_id === user.id && msg.sender_id === recipientId)
+        .filter(msg => msg.recipient_id === user.id)
         .map(msg => msg.id);
       
       if (unreadMessageIds.length > 0) {
@@ -287,6 +346,14 @@ export const useMessages = () => {
       // If non-admin user is sending to admin, use shared inbox
       if (!isUserAdmin && (isRecipientAdmin || recipientId === 'admin-inbox')) {
         console.log('📤 Enviando mensagem para inbox partilhado de admins');
+        console.log('📋 Detalhes:', {
+          sender_id: user.id,
+          recipient_id: null,
+          receiver_role: 'admin',
+          isUserAdmin,
+          isRecipientAdmin,
+          recipientId
+        });
 
         const { error } = await supabase
           .from('messages')
@@ -313,6 +380,7 @@ export const useMessages = () => {
           .eq('role', 'admin');
 
         if (adminUsers) {
+          console.log('📢 Criando notificações para', adminUsers.length, 'admins');
           for (const admin of adminUsers) {
             try {
               await createNotification(
