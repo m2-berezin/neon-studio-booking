@@ -752,32 +752,6 @@ export type Database = {
           thread_id: string | null
           timestamp: string | null
         }
-        Insert: {
-          created_at?: string | null
-          id?: string | null
-          is_read?: boolean | null
-          message?: string | null
-          receiver_display_name?: never
-          receiver_id?: string | null
-          sender_display_name?: never
-          sender_id?: string | null
-          service_id?: string | null
-          thread_id?: string | null
-          timestamp?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string | null
-          is_read?: boolean | null
-          message?: string | null
-          receiver_display_name?: never
-          receiver_id?: string | null
-          sender_display_name?: never
-          sender_id?: string | null
-          service_id?: string | null
-          thread_id?: string | null
-          timestamp?: string | null
-        }
         Relationships: [
           {
             foreignKeyName: "messages_receiver_id_fkey"
