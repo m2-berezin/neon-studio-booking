@@ -128,7 +128,7 @@ const AdminMessages = () => {
           sender_id: user.id,
           recipient_id: selectedUserId,
           body: newMessage.trim(),
-          thread_type: 'support',
+          thread_type: 'direct',
         });
 
       if (error) throw error;
@@ -164,7 +164,7 @@ const AdminMessages = () => {
     if (isAdmin()) {
       loadConversations();
 
-      // Set up realtime subscription for new messages
+      // Set up realtime subscription for new messages where admin is recipient
       const channel = supabase
         .channel('admin-messages')
         .on(
@@ -173,10 +173,12 @@ const AdminMessages = () => {
             event: 'INSERT',
             schema: 'public',
             table: 'messages',
+            filter: `recipient_id=eq.${user.id}`,
           },
-          () => {
+          (payload) => {
+            console.log('Nova mensagem recebida pelo admin:', payload);
             loadConversations();
-            if (selectedUserId) {
+            if (selectedUserId && payload.new.sender_id === selectedUserId) {
               loadMessages(selectedUserId);
             }
           }
