@@ -105,60 +105,51 @@ export const useMessages = () => {
         let partnerId: string;
         let partnerName: string;
         
+        const senderProfile = Array.isArray(message.sender_profile) 
+          ? message.sender_profile[0] 
+          : message.sender_profile;
+        const recipientProfile = Array.isArray(message.recipient_profile)
+          ? message.recipient_profile[0]
+          : message.recipient_profile;
+        
         if (!isUserAdmin) {
-          // NON-ADMIN: Show "Ghost Wayne" as single admin contact
+          // NON-ADMIN: ALL admin communication goes to ONE thread "Ghost Wayne"
           const isAdminMessage = message.receiver_role === 'admin' || 
-                                 message.sender_profile?.role === 'admin' ||
-                                 message.recipient_profile?.role === 'admin';
+                                 senderProfile?.role === 'admin' ||
+                                 recipientProfile?.role === 'admin';
           
           if (isAdminMessage) {
-            // Use admin-inbox as thread ID and ALWAYS show "Ghost Wayne"
+            // Single unified thread for all admin communication
             partnerId = 'admin-inbox';
             partnerName = 'Ghost Wayne';
-            
-            console.log('📨 Admin thread - Partner: Ghost Wayne');
+            console.log('📨 Client: All admin messages → Ghost Wayne thread');
           } else {
-            // Regular user-to-user message
+            // Regular user-to-user message (shouldn't exist in current setup)
             const isFromUser = message.sender_id === user.id;
             partnerId = isFromUser ? message.recipient_id : message.sender_id;
-            
-            const senderProfile = Array.isArray(message.sender_profile) 
-              ? message.sender_profile[0] 
-              : message.sender_profile;
-            const recipientProfile = Array.isArray(message.recipient_profile)
-              ? message.recipient_profile[0]
-              : message.recipient_profile;
-            
             partnerName = isFromUser 
               ? recipientProfile?.full_name || 'Unknown User'
               : senderProfile?.full_name || 'Unknown User';
           }
         } else {
-          // ADMIN: Group by user who sent message to admin inbox OR direct messages
+          // ADMIN: Group by client user - all messages with same client in one thread
           if (message.receiver_role === 'admin') {
-            // Message sent TO admin inbox - group by sender
+            // Message FROM client TO admin inbox
             partnerId = message.sender_id;
-            const senderProfile = Array.isArray(message.sender_profile) 
-              ? message.sender_profile[0] 
-              : message.sender_profile;
             partnerName = senderProfile?.full_name || 'Utilizador Desconhecido';
-            console.log('📥 Admin inbox message from:', partnerName, partnerId);
-          } else if (message.sender_id === user.id) {
-            // Message sent BY this admin - group by recipient
+            console.log('📥 Admin: Message from client', partnerName);
+          } else if (senderProfile?.role === 'admin') {
+            // Message FROM admin (Ghost Wayne) TO client
             partnerId = message.recipient_id;
-            const recipientProfile = Array.isArray(message.recipient_profile)
-              ? message.recipient_profile[0]
-              : message.recipient_profile;
             partnerName = recipientProfile?.full_name || 'Utilizador Desconhecido';
-            console.log('📤 Admin sent to:', partnerName, partnerId);
+            console.log('📤 Admin: Message to client', partnerName);
           } else {
-            // Direct message TO this admin
-            partnerId = message.sender_id;
-            const senderProfile = Array.isArray(message.sender_profile) 
-              ? message.sender_profile[0] 
-              : message.sender_profile;
-            partnerName = senderProfile?.full_name || 'Utilizador Desconhecido';
-            console.log('📨 Direct to admin from:', partnerName, partnerId);
+            // Fallback: message involving this admin
+            const isFromUser = message.sender_id === user.id;
+            partnerId = isFromUser ? message.recipient_id : message.sender_id;
+            partnerName = isFromUser 
+              ? recipientProfile?.full_name || 'Utilizador Desconhecido'
+              : senderProfile?.full_name || 'Utilizador Desconhecido';
           }
         }
 
@@ -205,7 +196,7 @@ export const useMessages = () => {
       
       // Handle admin inbox thread (all messages between user and any admin)
       if (recipientId === 'admin-inbox') {
-        console.log('🔍 Loading admin inbox thread for user:', user.id);
+        console.log('🔍 Loading admin inbox thread');
         
         // Get current user role
         const { data: currentUserProfile } = await supabase
@@ -215,37 +206,9 @@ export const useMessages = () => {
           .single();
 
         const isUserAdmin = currentUserProfile?.role === 'admin';
-        console.log('👤 User is admin:', isUserAdmin);
 
-        if (isUserAdmin) {
-          // Admin viewing admin inbox: messages from user to admin inbox OR admin responses
-          query = supabase
-            .from('messages')
-            .select(`
-              *,
-              sender_profile:profiles!messages_sender_id_fkey(full_name, role),
-              recipient_profile:profiles!messages_recipient_id_fkey(full_name, role)
-            `)
-            .or(`and(sender_id.eq.${user.id},receiver_role.eq.admin),and(recipient_id.eq.${user.id},sender_profile.role.eq.admin)`)
-            .order('created_at', { ascending: true });
-        } else {
-          // Non-admin viewing admin inbox: 
-          // 1. Messages they sent to admin inbox (receiver_role='admin')
-          // 2. Messages sent directly to them from admins (recipient_id=user.id AND sender is admin)
-          query = supabase
-            .from('messages')
-            .select(`
-              *,
-              sender_profile:profiles!messages_sender_id_fkey(full_name, role),
-              recipient_profile:profiles!messages_recipient_id_fkey(full_name, role)
-            `)
-            .or(`and(sender_id.eq.${user.id},receiver_role.eq.admin),and(recipient_id.eq.${user.id},sender_profile.role.eq.admin)`)
-            .order('created_at', { ascending: true });
-            
-          console.log('📥 Non-admin loading: messages sent to admin OR received from admin');
-        }
-      } else {
-        // Regular direct messages
+        // Non-admin: Load ALL messages between them and admins (unified thread)
+        // Messages they sent to admin inbox OR messages sent to them from any admin
         query = supabase
           .from('messages')
           .select(`
@@ -253,8 +216,46 @@ export const useMessages = () => {
             sender_profile:profiles!messages_sender_id_fkey(full_name, role),
             recipient_profile:profiles!messages_recipient_id_fkey(full_name, role)
           `)
-          .or(`and(sender_id.eq.${user.id},recipient_id.eq.${recipientId}),and(sender_id.eq.${recipientId},recipient_id.eq.${user.id})`)
+          .or(`and(sender_id.eq.${user.id},receiver_role.eq.admin),and(recipient_id.eq.${user.id},sender_profile.role.eq.admin)`)
           .order('created_at', { ascending: true });
+          
+        console.log('📥 Loading unified admin thread for user:', user.id);
+      } else if (recipientId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+        // Check if current user is admin to determine query type
+        const { data: currentUserProfile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+
+        const isUserAdmin = currentUserProfile?.role === 'admin';
+        
+        if (isUserAdmin) {
+          // Admin viewing specific client thread: 
+          // Messages FROM client to admin inbox OR TO client from any admin
+          query = supabase
+            .from('messages')
+            .select(`
+              *,
+              sender_profile:profiles!messages_sender_id_fkey(full_name, role),
+              recipient_profile:profiles!messages_recipient_id_fkey(full_name, role)
+            `)
+            .or(`and(sender_id.eq.${recipientId},receiver_role.eq.admin),and(recipient_id.eq.${recipientId},sender_profile.role.eq.admin)`)
+            .order('created_at', { ascending: true });
+            
+          console.log('📥 Admin loading thread with client:', recipientId);
+        } else {
+          // Non-admin direct messages (shouldn't happen in current setup)
+          query = supabase
+            .from('messages')
+            .select(`
+              *,
+              sender_profile:profiles!messages_sender_id_fkey(full_name, role),
+              recipient_profile:profiles!messages_recipient_id_fkey(full_name, role)
+            `)
+            .or(`and(sender_id.eq.${user.id},recipient_id.eq.${recipientId}),and(sender_id.eq.${recipientId},recipient_id.eq.${user.id})`)
+            .order('created_at', { ascending: true });
+        }
       }
 
       const { data: messages, error } = await query;
