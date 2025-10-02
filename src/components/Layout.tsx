@@ -1,10 +1,7 @@
 import { ReactNode, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { useWelcomeMessages } from '@/hooks/useWelcomeMessages';
-import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Home, Calendar, Gift, MessageCircle, User, LogOut, Settings, Star, Music, Folder, Info } from 'lucide-react';
 import { NotificationBell } from '@/components/NotificationBell';
 import { Logo } from '@/components/Logo';
@@ -13,10 +10,6 @@ const Layout = ({ children }: { children: ReactNode }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, loading, signOut, isAdmin } = useAuth();
-  const { unreadCount: unreadMessagesCount } = useUnreadMessages();
-  
-  // Initialize welcome messages for new users
-  useWelcomeMessages();
 
   // Handle authentication redirect properly (non-blocking)
   useEffect(() => {
@@ -120,17 +113,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
                     </span>
                   ) : (
                     <>
-                      <div className="relative">
-                        <item.icon className="w-5 h-5" />
-                        {item.label === 'Mensagens' && unreadMessagesCount > 0 && (
-                          <Badge
-                            variant="destructive"
-                            className="absolute -top-1 -right-1 h-3.5 w-3.5 p-0 flex items-center justify-center text-[9px] animate-pulse"
-                          >
-                            {unreadMessagesCount > 9 ? '9+' : unreadMessagesCount}
-                          </Badge>
-                        )}
-                      </div>
+                      <item.icon className="w-5 h-5" />
                       <span className="text-xs font-medium">{item.label}</span>
                     </>
                   )}
