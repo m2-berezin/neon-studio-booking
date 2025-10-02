@@ -39,13 +39,7 @@ const Messages = () => {
 
   return (
     <Layout>
-      <div 
-        className="container mx-auto px-0 max-w-6xl"
-        style={{
-          backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'80\' height=\'80\' viewBox=\'0 0 80 80\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%239333ea\' fill-opacity=\'0.03\'%3E%3Cpath d=\'M0 0h40v40H0V0zm40 40h40v40H40V40z\'/%3E%3Cpath d=\'M20 10c5.523 0 10 4.477 10 10s-4.477 10-10 10-10-4.477-10-10 4.477-10 10-10zm40 40c5.523 0 10 4.477 10 10s-4.477 10-10 10-10-4.477-10-10 4.477-10 10-10z\'/%3E%3C/g%3E%3C/svg%3E")',
-        }}
-      >
-        <Card className="h-[calc(100vh-200px)] flex overflow-hidden bg-gradient-to-br from-background via-background to-primary/5 shadow-2xl border-primary/20">
+      <Card className="h-[calc(100vh-180px)] flex overflow-hidden bg-gradient-to-br from-background via-background to-primary/5 shadow-2xl border-primary/20 -mx-4">
           {/* Threads List */}
           {!selectedThreadId ? (
             <div className="w-full p-6">
@@ -238,7 +232,6 @@ const Messages = () => {
             </div>
           )}
         </Card>
-      </div>
     </Layout>
   );
 };
