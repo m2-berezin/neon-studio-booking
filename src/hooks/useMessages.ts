@@ -106,33 +106,17 @@ export const useMessages = () => {
         let partnerName: string;
         
         if (!isUserAdmin) {
-          // NON-ADMIN: Show admin name from messages
+          // NON-ADMIN: Show "Ghost Wayne" as single admin contact
           const isAdminMessage = message.receiver_role === 'admin' || 
                                  message.sender_profile?.role === 'admin' ||
                                  message.recipient_profile?.role === 'admin';
           
           if (isAdminMessage) {
-            // Use admin-inbox as thread ID but show actual admin name
+            // Use admin-inbox as thread ID and ALWAYS show "Ghost Wayne"
             partnerId = 'admin-inbox';
+            partnerName = 'Ghost Wayne';
             
-            // Get admin name from the message
-            const senderProfile = Array.isArray(message.sender_profile) 
-              ? message.sender_profile[0] 
-              : message.sender_profile;
-            const recipientProfile = Array.isArray(message.recipient_profile)
-              ? message.recipient_profile[0]
-              : message.recipient_profile;
-            
-            // If message is from admin, use admin name; otherwise use "Admin Team"
-            if (message.sender_id !== user.id && senderProfile?.role === 'admin') {
-              partnerName = senderProfile?.full_name || 'Admin';
-            } else if (recipientProfile?.role === 'admin') {
-              partnerName = recipientProfile?.full_name || 'Admin Team';
-            } else {
-              partnerName = 'Admin Team';
-            }
-            
-            console.log('📨 Admin thread - Partner:', partnerName, '| Message from:', message.sender_id === user.id ? 'me' : senderProfile?.full_name);
+            console.log('📨 Admin thread - Partner: Ghost Wayne');
           } else {
             // Regular user-to-user message
             const isFromUser = message.sender_id === user.id;
