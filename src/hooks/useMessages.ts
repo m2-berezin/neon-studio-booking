@@ -46,6 +46,7 @@ export const useMessages = () => {
   const [threads, setThreads] = useState<MessageThread[]>([]);
   const [currentThread, setCurrentThread] = useState<Message[]>([]);
   const [currentRecipient, setCurrentRecipient] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   // Load message threads (conversations)
   const loadThreads = async () => {
@@ -467,31 +468,27 @@ export const useMessages = () => {
 
   useEffect(() => {
     if (user) {
+      // Check if user is admin once on mount
+      const checkAdminStatus = async () => {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+        
+        setIsAdmin(profile?.role === 'admin');
+        console.log('👤 User role:', profile?.role, '| Is Admin:', profile?.role === 'admin');
+      };
+
+      checkAdminStatus();
       loadThreads();
 
-      // Set up realtime subscription for new messages
+      // Create unique channel name per user to avoid conflicts
+      const channelName = `messages-${user.id}`;
+      console.log('📡 Creating channel:', channelName);
+
       const messagesChannel = supabase
-        .channel('messages-realtime')
-        .on(
-          'postgres_changes',
-          {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'messages',
-            filter: `recipient_id=eq.${user.id}`,
-          },
-          (payload) => {
-            console.log('✅ Nova mensagem recebida (direct):', payload);
-            
-            // Reload threads to show new message
-            loadThreads();
-            
-            // If the new message is for the current conversation, reload it
-            if (payload.new.sender_id === currentRecipient) {
-              loadThread(currentRecipient);
-            }
-          }
-        )
+        .channel(channelName)
         .on(
           'postgres_changes',
           {
@@ -499,44 +496,61 @@ export const useMessages = () => {
             schema: 'public',
             table: 'messages',
           },
-          async (payload) => {
-            // Listen for messages in shared admin inbox
-            if (payload.new.receiver_role === 'admin' && payload.new.sender_id !== user.id) {
-              console.log('✅ Nova mensagem recebida (shared inbox):', payload);
+          (payload: any) => {
+            console.log('📨 New message event received:', {
+              sender_id: payload.new.sender_id,
+              recipient_id: payload.new.recipient_id,
+              receiver_role: payload.new.receiver_role,
+              current_user: user.id,
+              is_admin: isAdmin
+            });
+
+            // Direct message to this user
+            const isDirectToMe = payload.new.recipient_id === user.id;
+            
+            // Message from this user
+            const isFromMe = payload.new.sender_id === user.id;
+            
+            // Shared admin inbox message (for admins only)
+            const isAdminInboxMessage = payload.new.receiver_role === 'admin' && 
+                                       payload.new.sender_id !== user.id &&
+                                       isAdmin;
+
+            if (isDirectToMe) {
+              console.log('✅ Direct message to me');
+              loadThreads();
               
-              // Check if current user is admin
-              const { data: profile } = await supabase
-                .from('profiles')
-                .select('role')
-                .eq('id', user.id)
-                .single();
-
-              if (profile?.role === 'admin') {
-                // Reload threads to show new message
-                loadThreads();
-                
-                // If viewing admin inbox, reload it
-                if (currentRecipient === 'admin-inbox') {
-                  loadThread('admin-inbox');
-                }
-
-                toast({
-                  title: 'Nova Mensagem',
-                  description: 'Recebeste uma nova mensagem de um utilizador',
-                });
+              if (payload.new.sender_id === currentRecipient) {
+                loadThread(currentRecipient);
               }
+            } else if (isAdminInboxMessage) {
+              console.log('✅ Admin inbox message (I am admin)');
+              loadThreads();
+              
+              if (currentRecipient === 'admin-inbox') {
+                loadThread('admin-inbox');
+              }
+
+              toast({
+                title: 'Nova Mensagem',
+                description: 'Recebeste uma nova mensagem de um utilizador',
+              });
+            } else if (isFromMe) {
+              console.log('✅ Message from me, reloading threads');
+              loadThreads();
             }
           }
         )
         .subscribe((status) => {
-          console.log('📡 User subscription status:', status);
+          console.log('📡 Channel subscription status:', status, 'for user:', user.id);
         });
 
       return () => {
+        console.log('📡 Removing channel:', channelName);
         supabase.removeChannel(messagesChannel);
       };
     }
-  }, [user, currentRecipient]);
+  }, [user, currentRecipient, isAdmin]);
 
   return {
     loading,

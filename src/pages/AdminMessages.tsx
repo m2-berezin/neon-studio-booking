@@ -213,9 +213,13 @@ const AdminMessages = () => {
     if (isAdmin() && user) {
       loadConversations();
 
+      // Create unique channel name for this admin to avoid conflicts
+      const channelName = `admin-inbox-${user.id}`;
+      console.log('📡 Admin creating channel:', channelName);
+
       // Set up realtime subscription for shared admin inbox
       const channel = supabase
-        .channel('admin-shared-inbox')
+        .channel(channelName)
         .on(
           'postgres_changes',
           {
@@ -223,15 +227,28 @@ const AdminMessages = () => {
             schema: 'public',
             table: 'messages',
           },
-          async (payload) => {
-            console.log('✅ Nova mensagem recebida (shared inbox):', payload);
+          (payload: any) => {
+            console.log('📨 Admin received message event:', {
+              sender_id: payload.new.sender_id,
+              recipient_id: payload.new.recipient_id,
+              receiver_role: payload.new.receiver_role,
+              current_admin: user.id
+            });
             
             // Check if message is for admin inbox or involves current admin
             const isAdminInboxMessage = payload.new.receiver_role === 'admin';
             const isDirectToAdmin = payload.new.recipient_id === user.id;
             const isFromAdmin = payload.new.sender_id === user.id;
             
+            console.log('📨 Message type:', {
+              isAdminInboxMessage,
+              isDirectToAdmin,
+              isFromAdmin
+            });
+            
             if (isAdminInboxMessage || isDirectToAdmin || isFromAdmin) {
+              console.log('✅ Message relevant to this admin, reloading conversations');
+              
               // Reload conversations to show new message
               loadConversations();
               
@@ -240,24 +257,29 @@ const AdminMessages = () => {
                             (isFromAdmin ? payload.new.recipient_id : payload.new.sender_id);
               
               if (selectedUserId && userId === selectedUserId) {
+                console.log('✅ Reloading current conversation with user:', userId);
                 loadMessages(selectedUserId);
               }
               
               // Show toast notification for new user messages to admin inbox
               if (isAdminInboxMessage && payload.new.sender_id !== user.id) {
+                console.log('🔔 Showing notification for new user message');
                 toast({
                   title: 'Nova Mensagem',
                   description: 'Recebeste uma nova mensagem de um utilizador',
                 });
               }
+            } else {
+              console.log('⏭️ Message not relevant to this admin, ignoring');
             }
           }
         )
         .subscribe((status) => {
-          console.log('📡 Admin shared inbox subscription status:', status);
+          console.log('📡 Admin subscription status:', status, 'for admin:', user.id);
         });
 
       return () => {
+        console.log('📡 Admin removing channel:', channelName);
         supabase.removeChannel(channel);
       };
     }
