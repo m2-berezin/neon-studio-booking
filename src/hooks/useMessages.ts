@@ -262,7 +262,81 @@ export const useMessages = () => {
         messageAttachments = await uploadAttachments(attachments);
       }
 
-      console.log('📤 Enviando mensagem:', {
+      // Check if current user is admin
+      const { data: currentUserProfile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+      const isUserAdmin = currentUserProfile?.role === 'admin';
+
+      // Check if recipient is admin (for non-admin users sending to admins)
+      let isRecipientAdmin = false;
+      if (!isUserAdmin && recipientId !== 'admin-inbox') {
+        const { data: recipientProfile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', recipientId)
+          .single();
+        
+        isRecipientAdmin = recipientProfile?.role === 'admin';
+      }
+
+      // If non-admin user is sending to admin, use shared inbox
+      if (!isUserAdmin && (isRecipientAdmin || recipientId === 'admin-inbox')) {
+        console.log('📤 Enviando mensagem para inbox partilhado de admins');
+
+        const { error } = await supabase
+          .from('messages')
+          .insert({
+            sender_id: user.id,
+            recipient_id: null,
+            receiver_role: 'admin',
+            body,
+            thread_type: threadType,
+            attachments: messageAttachments.length > 0 ? (messageAttachments as any) : null
+          });
+
+        if (error) {
+          console.error('❌ Erro ao enviar mensagem:', error);
+          throw error;
+        }
+
+        console.log('✅ Mensagem enviada para inbox partilhado');
+
+        // Create notification for all admins
+        const { data: adminUsers } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('role', 'admin');
+
+        if (adminUsers) {
+          for (const admin of adminUsers) {
+            try {
+              await createNotification(
+                admin.id,
+                'Nova Mensagem de Utilizador',
+                `${user.user_metadata?.full_name || 'Um utilizador'}: ${body.length > 50 ? body.substring(0, 50) + '...' : body}`
+              );
+            } catch (notifError) {
+              console.warn('⚠️ Erro ao criar notificação:', notifError);
+            }
+          }
+        }
+
+        await loadThreads();
+
+        toast({
+          title: 'Message Sent',
+          description: 'Your message has been sent to the admin team.',
+        });
+
+        return true;
+      }
+
+      // Regular direct message (admin to user, or user to user)
+      console.log('📤 Enviando mensagem direta:', {
         sender_id: user.id,
         recipient_id: recipientId,
         thread_type: threadType,
@@ -407,9 +481,7 @@ export const useMessages = () => {
             filter: `recipient_id=eq.${user.id}`,
           },
           (payload) => {
-            console.log('✅ Nova mensagem recebida:', payload);
-            console.log('Sender ID:', payload.new.sender_id);
-            console.log('Recipient ID:', payload.new.recipient_id);
+            console.log('✅ Nova mensagem recebida (direct):', payload);
             
             // Reload threads to show new message
             loadThreads();
@@ -417,6 +489,42 @@ export const useMessages = () => {
             // If the new message is for the current conversation, reload it
             if (payload.new.sender_id === currentRecipient) {
               loadThread(currentRecipient);
+            }
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'messages',
+          },
+          async (payload) => {
+            // Listen for messages in shared admin inbox
+            if (payload.new.receiver_role === 'admin' && payload.new.sender_id !== user.id) {
+              console.log('✅ Nova mensagem recebida (shared inbox):', payload);
+              
+              // Check if current user is admin
+              const { data: profile } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', user.id)
+                .single();
+
+              if (profile?.role === 'admin') {
+                // Reload threads to show new message
+                loadThreads();
+                
+                // If viewing admin inbox, reload it
+                if (currentRecipient === 'admin-inbox') {
+                  loadThread('admin-inbox');
+                }
+
+                toast({
+                  title: 'Nova Mensagem',
+                  description: 'Recebeste uma nova mensagem de um utilizador',
+                });
+              }
             }
           }
         )
