@@ -48,8 +48,7 @@ const AdminMessages = () => {
     if (!user) return;
 
     try {
-      // Get ALL messages to/from users (not just current admin's messages)
-      // This creates a shared inbox where all admins see all user conversations
+      // Get messages from shared admin inbox (receiver_role='admin') or direct admin messages
       const { data: allMessages, error } = await supabase
         .from('messages')
         .select(`
@@ -57,30 +56,44 @@ const AdminMessages = () => {
           sender:profiles!messages_sender_id_fkey(full_name, role),
           recipient:profiles!messages_recipient_id_fkey(full_name, role)
         `)
+        .or(`receiver_role.eq.admin,recipient_id.eq.${user.id},sender_id.eq.${user.id}`)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
-      // Group messages by user conversations (excluding admin-to-admin messages)
+      // Group messages by user conversations
       const conversationMap = new Map<string, Conversation>();
 
       allMessages?.forEach((msg: any) => {
         const senderRole = msg.sender?.role;
         const recipientRole = msg.recipient?.role;
         
-        // Skip admin-to-admin messages
-        if (senderRole === 'admin' && recipientRole === 'admin') return;
+        // Skip admin-to-admin messages (unless they're in shared inbox)
+        if (senderRole === 'admin' && recipientRole === 'admin' && !msg.receiver_role) return;
         
         // Determine which participant is the user (non-admin)
-        const isUserSender = senderRole !== 'admin';
-        const userId = isUserSender ? msg.sender_id : msg.recipient_id;
-        const userName = isUserSender ? msg.sender?.full_name : msg.recipient?.full_name;
+        let userId: string;
+        let userName: string;
+        
+        if (msg.receiver_role === 'admin') {
+          // Message from user to shared admin inbox
+          userId = msg.sender_id;
+          userName = msg.sender?.full_name || 'Utilizador Desconhecido';
+        } else if (senderRole !== 'admin') {
+          // Message from user to specific admin
+          userId = msg.sender_id;
+          userName = msg.sender?.full_name || 'Utilizador Desconhecido';
+        } else {
+          // Message from admin to user
+          userId = msg.recipient_id;
+          userName = msg.recipient?.full_name || 'Utilizador Desconhecido';
+        }
 
         if (!conversationMap.has(userId) || 
             new Date(msg.created_at) > new Date(conversationMap.get(userId)!.lastMessageTime)) {
           conversationMap.set(userId, {
             userId: userId,
-            userName: userName || 'Utilizador Desconhecido',
+            userName: userName,
             lastMessage: msg.body,
             lastMessageTime: msg.created_at,
             unreadCount: 0,
@@ -105,6 +118,7 @@ const AdminMessages = () => {
     if (!user) return;
 
     try {
+      // Load messages from shared admin inbox OR direct messages with this user
       const { data, error } = await supabase
         .from('messages')
         .select(`
@@ -112,7 +126,7 @@ const AdminMessages = () => {
           sender:profiles!messages_sender_id_fkey(full_name),
           recipient:profiles!messages_recipient_id_fkey(full_name)
         `)
-        .or(`and(sender_id.eq.${user.id},recipient_id.eq.${userId}),and(sender_id.eq.${userId},recipient_id.eq.${user.id})`)
+        .or(`and(sender_id.eq.${userId},receiver_role.eq.admin),and(sender_id.eq.${user.id},recipient_id.eq.${userId}),and(sender_id.eq.${userId},recipient_id.eq.${user.id})`)
         .order('created_at', { ascending: true });
 
       if (error) throw error;
@@ -199,7 +213,7 @@ const AdminMessages = () => {
     if (isAdmin() && user) {
       loadConversations();
 
-      // Set up realtime subscription for ALL new messages (shared inbox for all admins)
+      // Set up realtime subscription for shared admin inbox
       const channel = supabase
         .channel('admin-shared-inbox')
         .on(
@@ -212,32 +226,25 @@ const AdminMessages = () => {
           async (payload) => {
             console.log('✅ Nova mensagem recebida (shared inbox):', payload);
             
-            // Check if this is a user message (not admin-to-admin)
-            const { data: senderProfile } = await supabase
-              .from('profiles')
-              .select('role')
-              .eq('id', payload.new.sender_id)
-              .single();
+            // Check if message is for admin inbox or involves current admin
+            const isAdminInboxMessage = payload.new.receiver_role === 'admin';
+            const isDirectToAdmin = payload.new.recipient_id === user.id;
+            const isFromAdmin = payload.new.sender_id === user.id;
             
-            const { data: recipientProfile } = await supabase
-              .from('profiles')
-              .select('role')
-              .eq('id', payload.new.recipient_id)
-              .single();
-            
-            // Only process if at least one participant is not an admin
-            if (senderProfile?.role !== 'admin' || recipientProfile?.role !== 'admin') {
+            if (isAdminInboxMessage || isDirectToAdmin || isFromAdmin) {
               // Reload conversations to show new message
               loadConversations();
               
               // If viewing this conversation, reload messages
-              const userId = senderProfile?.role !== 'admin' ? payload.new.sender_id : payload.new.recipient_id;
+              const userId = isAdminInboxMessage ? payload.new.sender_id : 
+                            (isFromAdmin ? payload.new.recipient_id : payload.new.sender_id);
+              
               if (selectedUserId && userId === selectedUserId) {
                 loadMessages(selectedUserId);
               }
               
-              // Show toast notification only for incoming user messages
-              if (senderProfile?.role !== 'admin' && payload.new.recipient_id === user.id) {
+              // Show toast notification for new user messages to admin inbox
+              if (isAdminInboxMessage && payload.new.sender_id !== user.id) {
                 toast({
                   title: 'Nova Mensagem',
                   description: 'Recebeste uma nova mensagem de um utilizador',

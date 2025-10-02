@@ -197,6 +197,7 @@ export type Database = {
           created_at: string
           id: string
           project_id: string | null
+          receiver_role: string | null
           recipient_id: string | null
           sender_id: string
           thread_type: string
@@ -207,6 +208,7 @@ export type Database = {
           created_at?: string
           id?: string
           project_id?: string | null
+          receiver_role?: string | null
           recipient_id?: string | null
           sender_id: string
           thread_type: string
@@ -217,6 +219,7 @@ export type Database = {
           created_at?: string
           id?: string
           project_id?: string | null
+          receiver_role?: string | null
           recipient_id?: string | null
           sender_id?: string
           thread_type?: string
