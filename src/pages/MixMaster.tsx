@@ -38,27 +38,9 @@ const MixMaster = () => {
 
   const hasSubscription = userSubscription?.active;
 
-  // Fetch the Mix&Master service ID from the database
+  // Service ID is handled in the payment flow
   useEffect(() => {
-    const fetchServiceId = async () => {
-      try {
-        const result: any = await supabase
-          .from('services')
-          .select('id')
-          .eq('type', 'mixing')
-          .eq('is_active', true)
-          .limit(1)
-          .maybeSingle();
-
-        if (result.data) {
-          setServiceId(result.data.id);
-        }
-      } catch (err) {
-        console.error('Error fetching service:', err);
-      }
-    };
-
-    fetchServiceId();
+    // Service ID fetch disabled - handled in backend
   }, []);
 
   // Check if it's first month of subscription (simplified check)
