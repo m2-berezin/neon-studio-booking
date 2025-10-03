@@ -104,8 +104,8 @@ const AdminPayments = () => {
 
           let bookingId = null;
 
-          // If we have a reservation, move it to bookings
-          if (reservation) {
+          // If we have a reservation with a valid time slot (not placeholder), move it to bookings
+          if (reservation && reservation.time_slot && reservation.time_slot !== '00:00:00') {
             // Calculate end time from start time + duration
             const [hours, minutes] = reservation.time_slot.split(':');
             const startHour = parseInt(hours);
@@ -163,6 +163,13 @@ const AdminPayments = () => {
               });
 
             // Delete the reservation after moving to bookings
+            await supabase
+              .from('reservations')
+              .delete()
+              .eq('id', reservation.id);
+          } else if (reservation) {
+            // For Mix&Master, Beats, or other services without specific time slots
+            // Just delete the placeholder reservation
             await supabase
               .from('reservations')
               .delete()
