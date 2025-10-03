@@ -155,15 +155,16 @@ const Payment = () => {
         return;
       }
 
+      // Success notification with clear instructions
       toast({
-        title: 'Pedido Enviado',
-        description: 'Reserva de sessão pendente de verificação de pagamento.',
+        title: 'Pedido Enviado ✅',
+        description: 'Reserva de sessão pendente de verificação de pagamento. Aguarde aprovação do administrador.',
         duration: 5000,
       });
       
-      // Navigate to home after a short delay to let user read the toast
+      // Navigate to projects page after a short delay
       setTimeout(() => {
-        navigate('/');
+        navigate('/projects');
       }, 1500);
       
     } catch (error) {
