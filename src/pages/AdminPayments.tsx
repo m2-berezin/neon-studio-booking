@@ -117,19 +117,32 @@ const AdminPayments = () => {
             const endHour = startHour + reservation.duration;
             const endTime = `${endHour.toString().padStart(2, '0')}:${minutes}:00`;
 
-            // Get a default service_id if not present
+            // Get service_id - use from reservation or get default
             let serviceId = reservation.service_id;
             if (!serviceId) {
+              console.log('No service_id in reservation, fetching default recording service');
               // Try to get the "Recording Session" service as default
-              const { data: defaultService } = await supabase
+              const { data: defaultService, error: serviceError } = await supabase
                 .from('services')
                 .select('id')
                 .eq('type', 'recording')
+                .eq('is_active', true)
                 .limit(1)
-                .single();
+                .maybeSingle();
+              
+              if (serviceError) {
+                console.error('Error fetching default service:', serviceError);
+              }
               
               serviceId = defaultService?.id;
+              
+              if (!serviceId) {
+                console.error('No default service found');
+                throw new Error('Nenhum serviço disponível para criar a reserva');
+              }
             }
+
+            console.log('Creating booking with service_id:', serviceId);
 
             const { data: booking, error: bookingError } = await supabase
               .from('bookings')
@@ -151,6 +164,7 @@ const AdminPayments = () => {
             }
             
             bookingId = booking.id;
+            console.log('Booking created successfully:', bookingId);
 
             // Create unavailable slot with 1 hour buffer
             const startDateTime = `${reservation.date}T${reservation.time_slot}`;
