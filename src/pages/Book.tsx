@@ -72,8 +72,8 @@ const Book = () => {
       subscriptionPrice: 59.5,
       type: 'captacao_mixmaster',
       description: 'Pacote completo: captação 3h + mistura e masterização',
-      duration: 240, // 3h captação + 1h mix = 240min
-      hasHourSelector: true,
+      duration: 180, // 3h puro
+      hasHourSelector: false, // Sem seletor, vai direto ao calendário
       backendServiceId: BACKEND_SERVICE_IDS.captacaoMixMaster
     }
   ];
@@ -172,7 +172,7 @@ const Book = () => {
       return {
         ...service,
         base_price: 70,
-        duration: 240, // 3h + 1h mix = 240min
+        duration: 180, // 3h puro
         backendServiceId: selectedBackendServiceId
       };
     }
@@ -193,7 +193,7 @@ const Book = () => {
     if (service?.id === 'captacao') {
       sessionDuration = selectedHours * 60;
     } else if (service?.id === 'captacao_mixmaster') {
-      sessionDuration = 240; // 3h + 1h mix
+      sessionDuration = 180; // 3h puro
     } else {
       sessionDuration = service?.duration || 120;
     }
@@ -307,7 +307,7 @@ const Book = () => {
     }
     
     if (selectedService === 'captacao_mixmaster') {
-      const endTime = calculateEndTime(selectedSlot.start_time, 240); // 4h total
+      const endTime = calculateEndTime(selectedSlot.start_time, 180); // 3h puro
       return `${startTime} - ${endTime.slice(0, 5)}`;
     }
     
@@ -477,32 +477,6 @@ const Book = () => {
                         </Button>
                       </div>
                     )}
-
-                    {/* Hour Selector for Mix&Master Service */}
-                    {isSelected && service.id === 'captacao_mixmaster' && (
-                      <div className="border-t pt-4 space-y-3">
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium">Horas (3h base + Mix&Master)</label>
-                          <Select
-                            value={selectedMixMasterHours.toString()}
-                            onValueChange={(value) => handleMixMasterHoursChange(parseInt(value))}
-                          >
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Selecione" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="3">3h + Mix&Master - €70</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <Button 
-                          onClick={() => setStep(2)} 
-                          className="w-full"
-                        >
-                          Continuar
-                        </Button>
-                      </div>
-                    )}
                   </div>
                 </Card>
               );
@@ -564,7 +538,7 @@ const Book = () => {
             )}
             {selectedService === 'captacao_mixmaster' && (
               <p className="text-xs text-muted-foreground mt-2">
-                Sessão de 4h total (3h captação + 1h mix&master) | Estúdio fecha às 22:00
+                Sessão de 3h (captação + mix&master) | Estúdio fecha às 22:00
               </p>
             )}
           </div>
@@ -623,7 +597,7 @@ const Book = () => {
               {selectedService === 'captacao_mixmaster' && (
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Duração:</span>
-                  <span className="font-medium">4h (3h captação + 1h mix&master)</span>
+                  <span className="font-medium">3h</span>
                 </div>
               )}
               <div className="flex justify-between">
@@ -644,7 +618,7 @@ const Book = () => {
                   {selectedService === 'captacao' 
                     ? calculateEndTime(selectedSlot?.start_time || '', selectedHours * 60).slice(0, 5)
                     : selectedService === 'captacao_mixmaster'
-                    ? calculateEndTime(selectedSlot?.start_time || '', 240).slice(0, 5)
+                    ? calculateEndTime(selectedSlot?.start_time || '', 180).slice(0, 5)
                     : selectedSlot?.end_time.slice(0, 5)
                   }
                 </span>
