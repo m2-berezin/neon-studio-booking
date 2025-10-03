@@ -138,9 +138,9 @@ const Book = () => {
     
     // If a date is already selected, regenerate time slots with new duration
     if (selectedDate) {
-      await fetchBookingsForDate(selectedDate);
+      const unavailableSlots = await fetchBookingsForDate(selectedDate);
       const sessionDuration = hours * 60;
-      const slots = generateTimeSlots(selectedDate, sessionDuration);
+      const slots = generateTimeSlots(selectedDate, sessionDuration, unavailableSlots);
       setTimeSlots(slots);
     }
   };
@@ -154,9 +154,9 @@ const Book = () => {
     
     // If a date is already selected, regenerate time slots with new duration
     if (selectedDate) {
-      await fetchBookingsForDate(selectedDate);
+      const unavailableSlots = await fetchBookingsForDate(selectedDate);
       const sessionDuration = 240; // 3h captação + 1h mix = 240min
-      const slots = generateTimeSlots(selectedDate, sessionDuration);
+      const slots = generateTimeSlots(selectedDate, sessionDuration, unavailableSlots);
       setTimeSlots(slots);
     }
   };
@@ -194,8 +194,9 @@ const Book = () => {
   const handleDateSelect = async (date: Date | undefined) => {
     if (!date) return;
     
+    console.log('📅 [BOOK PAGE] Date selected:', format(date, 'yyyy-MM-dd'));
+    
     setSelectedDate(date);
-    await fetchBookingsForDate(date);
     
     // Calculate session duration based on service and selected hours
     const service = services.find(s => s.id === selectedService);
@@ -209,7 +210,21 @@ const Book = () => {
       sessionDuration = service?.duration || 120;
     }
     
-    const slots = generateTimeSlots(date, sessionDuration);
+    console.log('📅 [BOOK PAGE] Session duration:', sessionDuration, 'minutes');
+    
+    // Fetch unavailable times for this date and wait for completion
+    const unavailableSlots = await fetchBookingsForDate(date);
+    
+    console.log('📅 [BOOK PAGE] Fetched bookings:', unavailableSlots.length, 'blocked ranges');
+    console.log('📅 [BOOK PAGE] Now generating time slots...');
+    
+    // Generate time slots - pass the unavailable slots directly to avoid state timing issues
+    const slots = generateTimeSlots(date, sessionDuration, unavailableSlots);
+    
+    console.log('📅 [BOOK PAGE] Generated slots:', slots.length, 'total');
+    console.log('📅 [BOOK PAGE] Available slots:', slots.filter(s => s.available).length);
+    console.log('📅 [BOOK PAGE] Blocked slots:', slots.filter(s => !s.available).length);
+    
     setTimeSlots(slots);
     setStep(3);
   };

@@ -131,7 +131,7 @@ export const useBooking = () => {
   };
 
   // Fetch unavailable time slots for a specific date
-  const fetchBookingsForDate = async (date: Date) => {
+  const fetchBookingsForDate = async (date: Date): Promise<UnavailableSlot[]> => {
     try {
       const dateStr = format(date, 'yyyy-MM-dd');
       console.log('🔍 [FETCH] Fetching unavailable times for date:', dateStr);
@@ -170,10 +170,13 @@ export const useBooking = () => {
       
       setUnavailableSlots(slots);
       setExistingBookings([]);
+      
+      return slots; // Return the slots directly
     } catch (error) {
       console.error('❌ [FETCH] Error fetching unavailable times:', error);
       setUnavailableSlots([]);
       setExistingBookings([]);
+      return [];
     }
   };
 
@@ -197,7 +200,8 @@ export const useBooking = () => {
   };
 
   // Check if a time range overlaps with unavailable slots
-  const hasTimeOverlap = (date: Date, slotStart: string, sessionDurationMinutes: number): boolean => {
+  const hasTimeOverlap = (date: Date, slotStart: string, sessionDurationMinutes: number, unavailableSlotsOverride?: UnavailableSlot[]): boolean => {
+    const slotsToCheck = unavailableSlotsOverride || unavailableSlots;
     // Create local Date object for the slot start time
     const [hours, minutes] = slotStart.split(':').map(Number);
     const slotStartTime = new Date(date);
@@ -214,7 +218,7 @@ export const useBooking = () => {
     console.log(`   Slot start: ${slotStartTime.toLocaleTimeString('pt-PT')}`);
     console.log(`   Slot end: ${sessionEndTime.toLocaleTimeString('pt-PT')}`);
     console.log(`   Duration_min: ${sessionDurationMinutes}, ms: ${durationMs} (${sessionDurationMinutes} * 60 * 1000)`);
-    console.log(`   Total blocked ranges: ${unavailableSlots.length}`);
+    console.log(`   Total blocked ranges: ${slotsToCheck.length}`);
     
     // Hard-coded test for 2025-10-22 at 10:00 with 120 min
     if (dateStr === '2025-10-22' && slotStart === '10:00:00') {
@@ -223,7 +227,7 @@ export const useBooking = () => {
 
     let hasOverlap = false;
     
-    unavailableSlots.forEach((unavailable, index) => {
+    slotsToCheck.forEach((unavailable, index) => {
       const blocked_start = unavailable.starts_at;
       const blocked_end = unavailable.ends_at;
       
@@ -252,16 +256,17 @@ export const useBooking = () => {
   };
 
   // Generate time slots for a specific date
-  const generateTimeSlots = (date: Date, sessionDurationMinutes: number = 30): TimeSlot[] => {
+  const generateTimeSlots = (date: Date, sessionDurationMinutes: number = 30, unavailableSlotsOverride?: UnavailableSlot[]): TimeSlot[] => {
+    const slotsToUse = unavailableSlotsOverride || unavailableSlots;
     const dateStr = format(date, 'yyyy-MM-dd');
     console.log(`\n\n📅 [GENERATE SLOTS] ========================================`);
     console.log(`📅 [GENERATE SLOTS] Generating slots for ${dateStr}`);
     console.log(`📅 [GENERATE SLOTS] Session duration: ${sessionDurationMinutes}min`);
-    console.log(`📅 [GENERATE SLOTS] Unavailable blocks in memory: ${unavailableSlots.length}`);
+    console.log(`📅 [GENERATE SLOTS] Unavailable blocks in memory: ${slotsToUse.length}`);
     
-    if (unavailableSlots.length > 0) {
+    if (slotsToUse.length > 0) {
       console.log(`📅 [GENERATE SLOTS] Blocked ranges (local time):`);
-      unavailableSlots.forEach((s, i) => {
+      slotsToUse.forEach((s, i) => {
         console.log(`  [${i}] ${s.starts_at.toISOString()} → ${s.ends_at.toISOString()}`);
         console.log(`      (${s.starts_at.toLocaleString('pt-PT')} → ${s.ends_at.toLocaleString('pt-PT')})`);
         console.log(`      Reason: ${s.reason}`);
@@ -305,7 +310,7 @@ export const useBooking = () => {
           const slotEndStr = format(slotEnd, 'HH:mm:ss');
           
           // Check if this slot overlaps with any unavailable time (using local time comparison)
-          const isAvailable = !hasTimeOverlap(date, slotStartStr, sessionDurationMinutes);
+          const isAvailable = !hasTimeOverlap(date, slotStartStr, sessionDurationMinutes, slotsToUse);
           
           slots.push({
             start_time: slotStartStr,
