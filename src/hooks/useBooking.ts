@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { useNotifications } from '@/hooks/useNotifications';
 import { format, startOfDay, addMinutes, parse, isBefore, isAfter, isSameDay } from 'date-fns';
 
 interface Service {
@@ -50,7 +49,6 @@ interface TimeSlot {
 export const useBooking = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { createNotification } = useNotifications();
   
   const [services, setServices] = useState<Service[]>([]);
   const [availabilityRules, setAvailabilityRules] = useState<AvailabilityRule[]>([]);

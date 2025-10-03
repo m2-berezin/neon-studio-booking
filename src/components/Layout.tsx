@@ -7,6 +7,7 @@ import { Home, Calendar, Gift, MessageCircle, User, LogOut, Settings, Star, Musi
 import { NotificationBell } from '@/components/NotificationBell';
 import { Logo } from '@/components/Logo';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
+import { NotificationHandler } from '@/components/NotificationHandler';
 
 const Layout = ({ children }: { children: ReactNode }) => {
   const location = useLocation();
@@ -51,6 +52,9 @@ const Layout = ({ children }: { children: ReactNode }) => {
   // Show content immediately, handle auth state reactively
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      {/* Notification Handler */}
+      <NotificationHandler />
+      
       {/* Header with Profile, Logo, and Logout */}
       <header className="flex items-center justify-between py-6 px-4">
         {/* Profile Icon - Left */}
