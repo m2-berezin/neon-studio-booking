@@ -222,19 +222,12 @@ const Book = () => {
         }
       }
 
-      // Send in-app message
-      await sendBookingMessage(
-        selectedBackendServiceId,
-        selectedDate,
-        selectedSlot.start_time
-      );
+      // Send in-app message (stub)
+      const serviceName = services.find(s => s.id === selectedService)?.name || 'Serviço';
+      await sendBookingMessage(`Reserva confirmada: ${serviceName} para ${format(selectedDate, 'dd/MM/yyyy')} às ${selectedSlot.start_time}`);
 
-      // Generate WhatsApp link
-      const link = generateWhatsAppLink(
-        selectedBackendServiceId,
-        selectedDate,
-        selectedSlot.start_time
-      );
+      // Generate WhatsApp link (stub)
+      const link = generateWhatsAppLink(serviceName, format(selectedDate, 'dd/MM/yyyy'), selectedSlot.start_time);
       setWhatsAppLink(link);
 
       setBookingComplete(true);

@@ -86,7 +86,7 @@ const ProjectDetail = () => {
     if (files.length === 0 || !projectId) return;
 
     for (const file of files) {
-      await uploadProjectFile(projectId, file, kind);
+      await uploadProjectFile(projectId, file);
     }
 
     // Clear selected files after upload

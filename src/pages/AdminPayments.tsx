@@ -11,14 +11,12 @@ import { useToast } from '@/hooks/use-toast';
 interface PaymentRequest {
   id: string;
   user_id: string;
-  amount: number;
-  method: string;
+  amount_eur: number;
   status: string;
   created_at: string;
-  notes?: string;
+  note?: string;
   profiles: {
     full_name: string;
-    phone: string;
   };
 }
 
@@ -30,23 +28,20 @@ const AdminPayments = () => {
 
   const loadPaymentRequests = async () => {
     try {
+      // No relation between payment_requests and profiles exists
       const { data, error } = await supabase
         .from('payment_requests')
-        .select(`
-          *,
-          profiles (
-            full_name,
-            phone
-          )
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
+      
+      // Map to expected format
       const mappedData = (data || []).map(p => ({
         ...p,
-        amount: p.amount_eur,
-        method: 'bank_transfer'
+        profiles: { full_name: 'Cliente' }
       }));
+      
       setPaymentRequests(mappedData);
     } catch (error) {
       console.error('Error loading payment requests:', error);
@@ -210,15 +205,14 @@ const AdminPayments = () => {
                   <div className="space-y-2 flex-1">
                     <div className="flex items-center gap-3">
                       {getStatusBadge(request.status)}
-                      <span className="font-semibold">€{request.amount}</span>
+                      <span className="font-semibold">€{request.amount_eur}</span>
                     </div>
                     <div className="text-sm space-y-1">
                       <p><span className="font-medium">Cliente:</span> {request.profiles.full_name}</p>
-                      <p><span className="font-medium">Telemóvel:</span> {request.profiles.phone || 'N/A'}</p>
-                      <p><span className="font-medium">Método:</span> {request.method}</p>
-                      {request.notes && (() => {
+                      <p><span className="font-medium">Método:</span> Transferência Bancária</p>
+                      {request.note && (() => {
                         try {
-                          const bookingInfo = JSON.parse(request.notes);
+                          const bookingInfo = JSON.parse(request.note);
                           return (
                             <p className="text-xs bg-muted p-2 rounded mt-2">
                               <span className="font-medium">Detalhes:</span> {bookingInfo.booking_details || bookingInfo.service}
@@ -280,7 +274,7 @@ const AdminPayments = () => {
                   <div className="space-y-2 flex-1">
                     <div className="flex items-center gap-3">
                       {getStatusBadge(request.status)}
-                      <span className="font-semibold">€{request.amount}</span>
+                      <span className="font-semibold">€{request.amount_eur}</span>
                     </div>
                     <div className="text-sm space-y-1">
                       <p><span className="font-medium">Cliente:</span> {request.profiles.full_name}</p>

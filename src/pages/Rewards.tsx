@@ -38,15 +38,15 @@ const Rewards = () => {
 
   const penaltyEndDate = getPenaltyEndDate();
 
-  const handleApplyReward = (rewardCode: string, description: string) => {
-    const success = applyReward(rewardCode, description);
+  const handleApplyReward = async (rewardCode: string) => {
+    const success = await applyReward(rewardCode);
     if (success) {
       setAppliedRewards(prev => ({ ...prev, [rewardCode]: true }));
     }
   };
 
-  const handleLoyaltyRedeem = async () => {
-    const success = await redeemLoyaltyReward();
+  const handleLoyaltyRedeem = async (rewardType: string) => {
+    const success = await redeemLoyaltyReward(rewardType);
     if (success) {
       // Loyalty reward redeemed successfully - component will update automatically
     }
@@ -133,7 +133,7 @@ const Rewards = () => {
                 </div>
                 <Button
                   onClick={() => {
-                    handleApplyReward('W_REC_3FOR20', '3h recording for €20');
+                    handleApplyReward('W_REC_3FOR20');
                     window.location.href = '/book?discount=W_REC_3FOR20';
                   }}
                   disabled={!isWeeklyOfferAAvailable() || appliedRewards['W_REC_3FOR20'] || loading}
@@ -166,7 +166,7 @@ const Rewards = () => {
                 </div>
                 <Button
                   onClick={() => {
-                    handleApplyReward('W_MM_BUNDLE', 'M&M bundle €35 each');
+                    handleApplyReward('W_MM_BUNDLE');
                     window.location.href = '/mix-master?discount=W_MM_BUNDLE';
                   }}
                   disabled={hasActivePenalty() || appliedRewards['W_MM_BUNDLE'] || loading}
@@ -212,7 +212,7 @@ const Rewards = () => {
               </div>
               <div className="flex flex-col sm:flex-row gap-2">
                 <Button
-                  onClick={() => handleApplyReward('M_PACKAGE_70', 'Full package €70')}
+                  onClick={() => handleApplyReward('M_PACKAGE_70')}
                   disabled={hasActivePenalty() || appliedRewards['M_PACKAGE_70'] || loading}
                   variant={appliedRewards['M_PACKAGE_70'] ? 'outline' : 'secondary'}
                   size="sm"
@@ -221,7 +221,7 @@ const Rewards = () => {
                     {appliedRewards['M_PACKAGE_70'] ? 'Aplicado ✓' : 'Aplicar €70'}
                   </Button>
                   <Button
-                    onClick={() => handleApplyReward('M_PACKAGE_65', 'Full package €65')}
+                    onClick={() => handleApplyReward('M_PACKAGE_65')}
                     disabled={hasActivePenalty() || appliedRewards['M_PACKAGE_65'] || loading}
                     variant={appliedRewards['M_PACKAGE_65'] ? 'outline' : 'default'}
                     size="sm"
@@ -270,7 +270,7 @@ const Rewards = () => {
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="text-center sm:text-left">
                   <p className="font-medium text-foreground">
-                    {isLoyaltyRewardAvailable() 
+                  {isLoyaltyRewardAvailable('mixingMastering') 
                       ? 'Parabéns! Ganhou uma sessão M&M grátis' 
                       : 'Continua a completar projetos para ganhar a tua sessão grátis'
                     }
@@ -280,12 +280,12 @@ const Rewards = () => {
                   </p>
                 </div>
                 <Button
-                  onClick={handleLoyaltyRedeem}
-                  disabled={!isLoyaltyRewardAvailable() || loading}
-                  variant={isLoyaltyRewardAvailable() ? 'default' : 'outline'}
+                  onClick={() => handleLoyaltyRedeem('mixingMastering')}
+                  disabled={!isLoyaltyRewardAvailable('mixingMastering') || loading}
+                  variant={isLoyaltyRewardAvailable('mixingMastering') ? 'default' : 'outline'}
                   className="w-full sm:w-auto"
                 >
-                  {loading ? 'A resgatar...' : isLoyaltyRewardAvailable() ? 'Resgatar M&M Grátis' : 'Não Disponível'}
+                  {loading ? 'A resgatar...' : isLoyaltyRewardAvailable('mixingMastering') ? 'Resgatar M&M Grátis' : 'Não Disponível'}
                 </Button>
               </div>
             </div>

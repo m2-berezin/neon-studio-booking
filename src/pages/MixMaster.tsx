@@ -41,16 +41,20 @@ const MixMaster = () => {
   // Fetch the Mix&Master service ID from the database
   useEffect(() => {
     const fetchServiceId = async () => {
-      const { data, error } = await supabase
-        .from('services')
-        .select('id')
-        .eq('type', 'mixing')
-        .eq('is_active', true)
-        .limit(1)
-        .single();
+      try {
+        const result: any = await supabase
+          .from('services')
+          .select('id')
+          .eq('type', 'mixing')
+          .eq('is_active', true)
+          .limit(1)
+          .maybeSingle();
 
-      if (data && !error) {
-        setServiceId(data.id);
+        if (result.data) {
+          setServiceId(result.data.id);
+        }
+      } catch (err) {
+        console.error('Error fetching service:', err);
       }
     };
 
