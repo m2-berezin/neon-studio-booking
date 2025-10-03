@@ -90,6 +90,11 @@ export const useProjects = () => {
     return [];
   };
 
+  // Stub methods for compatibility
+  const uploadProjectFile = async (projectId: string, file: File) => null;
+  const markAsDelivered = async (projectId: string) => false;
+  const getFileCounts = (projectFiles: any[]) => ({ audio: 0, video: 0, stems: 0 });
+
   return {
     loading,
     uploading,
@@ -101,5 +106,8 @@ export const useProjects = () => {
     updateProjectStatus,
     deleteProject,
     uploadProjectFiles,
+    uploadProjectFile,
+    markAsDelivered,
+    getFileCounts,
   };
 };

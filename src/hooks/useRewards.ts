@@ -78,6 +78,14 @@ export const useRewards = () => {
     return false;
   };
 
+  // Stub methods for compatibility
+  const applyReward = async (rewardCode: string) => false;
+  const redeemLoyaltyReward = async (rewardType: string) => false;
+  const isWeeklyOfferAAvailable = () => false;
+  const isLoyaltyRewardAvailable = (type: string) => false;
+  const isVoucherAvailable = () => false;
+  const claimVoucher = async () => false;
+
   return {
     loading,
     rewardUsage,
@@ -92,5 +100,11 @@ export const useRewards = () => {
     claimReward,
     canClaimLoyaltyReward,
     claimLoyaltyReward,
+    applyReward,
+    redeemLoyaltyReward,
+    isWeeklyOfferAAvailable,
+    isLoyaltyRewardAvailable,
+    isVoucherAvailable,
+    claimVoucher,
   };
 };

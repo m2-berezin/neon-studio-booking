@@ -214,7 +214,8 @@ const Book = () => {
               read: false
             }));
 
-            await supabase.from('notifications').insert(notifications);
+            // Notifications table doesn't exist - disabled
+            // await supabase.from<any>('notifications').insert(notifications);
           }
         } catch (error) {
           console.error('Error notifying admin:', error);

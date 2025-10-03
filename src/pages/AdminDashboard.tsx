@@ -51,7 +51,7 @@ const AdminDashboard = () => {
     try {
       // Load bookings count
       const { count: bookingsCount } = await supabase
-        .from('bookings')
+        .from<any>('bookings')
         .select('*', { count: 'exact', head: true });
 
       // Load pending payments

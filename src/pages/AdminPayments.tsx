@@ -42,7 +42,12 @@ const AdminPayments = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setPaymentRequests(data || []);
+      const mappedData = (data || []).map(p => ({
+        ...p,
+        amount: p.amount_eur,
+        method: 'bank_transfer'
+      }));
+      setPaymentRequests(mappedData);
     } catch (error) {
       console.error('Error loading payment requests:', error);
       toast({

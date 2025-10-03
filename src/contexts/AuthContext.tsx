@@ -9,6 +9,9 @@ interface Profile {
   role: string;
   created_at: string;
   updated_at: string;
+  phone?: string | null;
+  penalty_until?: string | null;
+  last_voucher_at?: string | null;
 }
 
 interface AuthContextType {

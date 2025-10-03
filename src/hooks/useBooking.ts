@@ -224,6 +224,10 @@ export const useBooking = () => {
     fetchBlackoutDates();
   }, []);
 
+  // Stub methods for compatibility
+  const sendBookingMessage = async (message: string) => {};
+  const generateWhatsAppLink = (service: string, date: string, time: string) => '';
+
   return {
     services,
     availabilityRules,
@@ -239,5 +243,7 @@ export const useBooking = () => {
     createBooking,
     cancelBooking,
     rescheduleBooking,
+    sendBookingMessage,
+    generateWhatsAppLink,
   };
 };
