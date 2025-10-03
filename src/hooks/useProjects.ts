@@ -22,9 +22,7 @@ interface Project {
   end_time: string;
   status: string;
   user_id: string;
-  booking_id: string;
   created_at: string;
-  files?: ProjectFile[];
 }
 
 export const useProjects = () => {
@@ -45,13 +43,28 @@ export const useProjects = () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from('projects' as any)
+        .from('bookings')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setProjects((data as any) || []);
+      
+      // Map bookings to projects format
+      const mappedProjects: Project[] = (data || []).map((booking: any) => ({
+        id: booking.id,
+        title: booking.service_name_snapshot || 'Sessão de Estúdio',
+        description: `Reserva confirmada - ${booking.currency_snapshot || 'EUR'} ${booking.price_eur_snapshot || ''}`,
+        address: 'Rua do Estúdio 123, Lisboa',
+        date_day: booking.starts_at,
+        start_time: booking.starts_at,
+        end_time: booking.ends_at,
+        status: booking.status,
+        user_id: booking.user_id,
+        created_at: booking.created_at,
+      }));
+      
+      setProjects(mappedProjects);
     } catch (error: any) {
       console.error('Error loading projects:', error);
       toast({
