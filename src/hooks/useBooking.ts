@@ -36,8 +36,8 @@ interface Booking {
 }
 
 interface UnavailableSlot {
-  start_time: string;
-  end_time: string;
+  starts_at: Date;
+  ends_at: Date;
   reason?: string;
 }
 
@@ -149,8 +149,8 @@ export const useBooking = () => {
       console.log('📊 [FETCH] Number of blocked ranges:', data?.length || 0);
       
       const slots = (data || []).map((slot: any) => ({
-        start_time: format(new Date(slot.starts_at), 'HH:mm:ss'),
-        end_time: format(new Date(slot.ends_at), 'HH:mm:ss'),
+        starts_at: new Date(slot.starts_at),
+        ends_at: new Date(slot.ends_at),
         reason: slot.reason
       }));
       
@@ -185,27 +185,24 @@ export const useBooking = () => {
   };
 
   // Check if a time range overlaps with unavailable slots
-  const hasTimeOverlap = (slotStart: string, sessionDuration: number): boolean => {
-    const slotStartTime = parse(slotStart, 'HH:mm:ss', new Date());
+  const hasTimeOverlap = (date: Date, slotStart: string, sessionDuration: number): boolean => {
+    const slotStartTime = parse(slotStart, 'HH:mm:ss', date);
     const sessionEndTime = addMinutes(slotStartTime, sessionDuration);
     
-    console.log(`🕐 [OVERLAP CHECK] Checking slot ${slotStart} with duration ${sessionDuration}min (ends at ${format(sessionEndTime, 'HH:mm:ss')})`);
+    console.log(`🕐 [OVERLAP CHECK] Checking slot ${format(date, 'yyyy-MM-dd')} ${slotStart} with duration ${sessionDuration}min (ends at ${format(sessionEndTime, 'HH:mm:ss')})`);
     console.log(`🕐 [OVERLAP CHECK] Total unavailable slots to check: ${unavailableSlots.length}`);
 
     const hasOverlap = unavailableSlots.some(unavailable => {
-      const unavailStart = parse(unavailable.start_time, 'HH:mm:ss', new Date());
-      const unavailEnd = parse(unavailable.end_time, 'HH:mm:ss', new Date());
-
       // Check if session overlaps with unavailable slot
       // Overlap occurs if: slot_start < blocked_end AND slot_end > blocked_start
-      const overlaps = isBefore(slotStartTime, unavailEnd) && isAfter(sessionEndTime, unavailStart);
+      const overlaps = isBefore(slotStartTime, unavailable.ends_at) && isAfter(sessionEndTime, unavailable.starts_at);
       
       if (overlaps) {
         console.log(`⚠️ [OVERLAP DETECTED] Slot ${slotStart} overlaps with blocked range:`, {
           slotStart: format(slotStartTime, 'HH:mm'),
           slotEnd: format(sessionEndTime, 'HH:mm'),
-          blockedStart: format(unavailStart, 'HH:mm'),
-          blockedEnd: format(unavailEnd, 'HH:mm'),
+          blockedStart: format(unavailable.starts_at, 'HH:mm'),
+          blockedEnd: format(unavailable.ends_at, 'HH:mm'),
           reason: unavailable.reason
         });
       }
@@ -261,7 +258,7 @@ export const useBooking = () => {
           }
           
           // Check if this slot overlaps with any unavailable time
-          const isAvailable = !hasTimeOverlap(slotStartStr, sessionDurationMinutes);
+          const isAvailable = !hasTimeOverlap(date, slotStartStr, sessionDurationMinutes);
           
           slots.push({
             start_time: slotStartStr,
