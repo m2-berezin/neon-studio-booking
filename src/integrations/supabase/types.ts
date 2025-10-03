@@ -269,6 +269,47 @@ export type Database = {
           },
         ]
       }
+      NoCanDo: {
+        Row: {
+          created_at: string | null
+          date: string | null
+          end_time: string | null
+          id: string
+          reason: string | null
+          reservation_id: string | null
+          start_time: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          date?: string | null
+          end_time?: string | null
+          id?: string
+          reason?: string | null
+          reservation_id?: string | null
+          start_time?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          date?: string | null
+          end_time?: string | null
+          id?: string
+          reason?: string | null
+          reservation_id?: string | null
+          start_time?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "NoCanDo_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "reservations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           body: string
@@ -351,6 +392,7 @@ export type Database = {
       payment_requests: {
         Row: {
           amount: number
+          booking_id: string | null
           created_at: string
           id: string
           method: string
@@ -361,6 +403,7 @@ export type Database = {
         }
         Insert: {
           amount: number
+          booking_id?: string | null
           created_at?: string
           id?: string
           method: string
@@ -371,6 +414,7 @@ export type Database = {
         }
         Update: {
           amount?: number
+          booking_id?: string | null
           created_at?: string
           id?: string
           method?: string
@@ -477,7 +521,7 @@ export type Database = {
           duration: number
           id: string
           payment_request_id: string | null
-          service_id: string
+          service_id: string | null
           status: string | null
           time_slot: string
           user_id: string
@@ -488,7 +532,7 @@ export type Database = {
           duration: number
           id?: string
           payment_request_id?: string | null
-          service_id: string
+          service_id?: string | null
           status?: string | null
           time_slot: string
           user_id: string
@@ -499,7 +543,7 @@ export type Database = {
           duration?: number
           id?: string
           payment_request_id?: string | null
-          service_id?: string
+          service_id?: string | null
           status?: string | null
           time_slot?: string
           user_id?: string
@@ -676,6 +720,7 @@ export type Database = {
       }
       unavailable_slots: {
         Row: {
+          booking_id: string | null
           created_at: string
           end_time: string
           id: string
@@ -683,6 +728,7 @@ export type Database = {
           start_time: string
         }
         Insert: {
+          booking_id?: string | null
           created_at?: string
           end_time: string
           id?: string
@@ -690,6 +736,7 @@ export type Database = {
           start_time: string
         }
         Update: {
+          booking_id?: string | null
           created_at?: string
           end_time?: string
           id?: string

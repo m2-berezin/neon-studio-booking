@@ -126,15 +126,16 @@ const Payment = () => {
 
       // 1. Create reservation ONLY for booking service
       if (service === 'booking' && bookingDate && startTime) {
+        const reservationInsert = {
+          date: bookingDate,
+          time_slot: startTime,
+          duration: durationHours,
+          status: 'pending',
+        } as any;
+
         const { data: reservationData, error: reservationError } = await supabase
           .from('reservations')
-          .insert({
-            user_id: user.id,
-            date: bookingDate,
-            time_slot: startTime,
-            duration: durationHours,
-            status: 'pending',
-          })
+          .insert(reservationInsert)
           .select()
           .single();
 
