@@ -14,9 +14,208 @@ export type Database = {
   }
   public: {
     Tables: {
+      availability_rules: {
+        Row: {
+          created_at: string
+          end_time: string
+          id: string
+          is_active: boolean
+          start_time: string
+          weekday: number | null
+        }
+        Insert: {
+          created_at?: string
+          end_time: string
+          id?: string
+          is_active?: boolean
+          start_time: string
+          weekday?: number | null
+        }
+        Update: {
+          created_at?: string
+          end_time?: string
+          id?: string
+          is_active?: boolean
+          start_time?: string
+          weekday?: number | null
+        }
+        Relationships: []
+      }
+      blackout_dates: {
+        Row: {
+          created_at: string
+          ends_at: string
+          id: string
+          is_active: boolean
+          reason: string | null
+          starts_at: string
+        }
+        Insert: {
+          created_at?: string
+          ends_at: string
+          id?: string
+          is_active?: boolean
+          reason?: string | null
+          starts_at: string
+        }
+        Update: {
+          created_at?: string
+          ends_at?: string
+          id?: string
+          is_active?: boolean
+          reason?: string | null
+          starts_at?: string
+        }
+        Relationships: []
+      }
+      bookings: {
+        Row: {
+          created_at: string
+          currency_snapshot: string | null
+          duration_minutes_snapshot: number | null
+          ends_at: string
+          id: string
+          price_eur_snapshot: number | null
+          service_id: string
+          service_name_snapshot: string | null
+          starts_at: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          currency_snapshot?: string | null
+          duration_minutes_snapshot?: number | null
+          ends_at: string
+          id?: string
+          price_eur_snapshot?: number | null
+          service_id: string
+          service_name_snapshot?: string | null
+          starts_at: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          currency_snapshot?: string | null
+          duration_minutes_snapshot?: number | null
+          ends_at?: string
+          id?: string
+          price_eur_snapshot?: number | null
+          service_id?: string
+          service_name_snapshot?: string | null
+          starts_at?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "v_active_services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      info: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          is_active: boolean
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          id: string
+          message: string
+          receiver_id: string
+          sender_id: string
+          thread_id: string
+          timestamp: string
+        }
+        Insert: {
+          id?: string
+          message: string
+          receiver_id: string
+          sender_id: string
+          thread_id: string
+          timestamp?: string
+        }
+        Update: {
+          id?: string
+          message?: string
+          receiver_id?: string
+          sender_id?: string
+          thread_id?: string
+          timestamp?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          read: boolean
+          role: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          read?: boolean
+          role?: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          read?: boolean
+          role?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       payment_requests: {
         Row: {
           amount_eur: number
+          client_id: string | null
           created_at: string
           currency: string
           decided_at: string | null
@@ -31,6 +230,7 @@ export type Database = {
         }
         Insert: {
           amount_eur: number
+          client_id?: string | null
           created_at?: string
           currency?: string
           decided_at?: string | null
@@ -45,6 +245,7 @@ export type Database = {
         }
         Update: {
           amount_eur?: number
+          client_id?: string | null
           created_at?: string
           currency?: string
           decided_at?: string | null
@@ -67,12 +268,66 @@ export type Database = {
           },
         ]
       }
+      payments: {
+        Row: {
+          amount_eur: number
+          booking_id: string | null
+          created_at: string
+          currency: string
+          id: string
+          method: string | null
+          payment_request_id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          amount_eur: number
+          booking_id?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          method?: string | null
+          payment_request_id: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          amount_eur?: number
+          booking_id?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          method?: string | null
+          payment_request_id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_payment_request_id_fkey"
+            columns: ["payment_request_id"]
+            isOneToOne: false
+            referencedRelation: "payment_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
           created_at: string
           full_name: string | null
           id: string
+          last_voucher_at: string | null
+          penalty_until: string | null
+          phone: string | null
           role: string
           updated_at: string
         }
@@ -81,6 +336,9 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id: string
+          last_voucher_at?: string | null
+          penalty_until?: string | null
+          phone?: string | null
           role?: string
           updated_at?: string
         }
@@ -89,6 +347,9 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
+          last_voucher_at?: string | null
+          penalty_until?: string | null
+          phone?: string | null
           role?: string
           updated_at?: string
         }
@@ -154,6 +415,33 @@ export type Database = {
           },
         ]
       }
+      rewards: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          points: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          points?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          points?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       service_categories: {
         Row: {
           created_at: string
@@ -186,6 +474,7 @@ export type Database = {
       }
       services: {
         Row: {
+          base_price: number | null
           category_id: string | null
           created_at: string
           created_by: string | null
@@ -202,9 +491,11 @@ export type Database = {
           requires_deposit: boolean
           slug: string
           sort_order: number
+          type: string | null
           updated_at: string
         }
         Insert: {
+          base_price?: number | null
           category_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -221,9 +512,11 @@ export type Database = {
           requires_deposit?: boolean
           slug: string
           sort_order?: number
+          type?: string | null
           updated_at?: string
         }
         Update: {
+          base_price?: number | null
           category_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -240,6 +533,7 @@ export type Database = {
           requires_deposit?: boolean
           slug?: string
           sort_order?: number
+          type?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -251,6 +545,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      unavailable_slots: {
+        Row: {
+          created_at: string
+          ends_at: string
+          id: string
+          reason: string
+          starts_at: string
+        }
+        Insert: {
+          created_at?: string
+          ends_at: string
+          id?: string
+          reason?: string
+          starts_at: string
+        }
+        Update: {
+          created_at?: string
+          ends_at?: string
+          id?: string
+          reason?: string
+          starts_at?: string
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {
@@ -270,6 +588,33 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      vouchers: {
+        Row: {
+          amount_eur: number
+          client_id: string
+          code: string
+          created_at: string
+          expires_at: string | null
+          id: string
+        }
+        Insert: {
+          amount_eur: number
+          client_id: string
+          code: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+        }
+        Update: {
+          amount_eur?: number
+          client_id?: string
+          code?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
         }
         Relationships: []
       }
@@ -312,15 +657,30 @@ export type Database = {
     Functions: {
       admin_approve_payment: {
         Args: { p_payment_id: string }
-        Returns: undefined
+        Returns: string
       }
       admin_reject_payment: {
         Args: { p_payment_id: string; p_reason?: string }
-        Returns: undefined
+        Returns: boolean
       }
       backfill_welcome_messages: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      captacao_mixmaster_options: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          currency: string
+          duration_minutes: number
+          hours: number
+          price_eur: number
+          service_id: string
+          service_name: string
+        }[]
+      }
+      captacao_mixmaster_service_by_hours: {
+        Args: { p_hours: number }
+        Returns: string
       }
       captacao_options: {
         Args: Record<PropertyKey, never>
@@ -346,6 +706,12 @@ export type Database = {
       }
       create_booking_captacao: {
         Args: { p_hours: number; p_starts_at: string; p_user_id: string }
+        Returns: string
+      }
+      create_reservation_mixmaster: {
+        Args:
+          | { p_hours: number; p_starts_at: string; p_user_id: string }
+          | { p_starts_at: string; p_user_id: string }
         Returns: string
       }
       gbt_bit_compress: {
@@ -572,6 +938,23 @@ export type Database = {
         Args: { "": unknown }
         Returns: unknown
       }
+      get_unavailable_days: {
+        Args: { p_month: number; p_year: number }
+        Returns: {
+          day: number
+        }[]
+      }
+      get_unavailable_times: {
+        Args: { p_date: string }
+        Returns: {
+          ends_at: string
+          starts_at: string
+        }[]
+      }
+      insert_booking_buffer: {
+        Args: { p_ends_at: string; p_starts_at: string }
+        Returns: undefined
+      }
       is_admin: {
         Args: Record<PropertyKey, never> | { uid: string }
         Returns: boolean
@@ -579,6 +962,7 @@ export type Database = {
       list_active_services: {
         Args: Record<PropertyKey, never>
         Returns: {
+          base_price: number | null
           category_id: string | null
           created_at: string
           created_by: string | null
@@ -595,7 +979,27 @@ export type Database = {
           requires_deposit: boolean
           slug: string
           sort_order: number
+          type: string | null
           updated_at: string
+        }[]
+      }
+      list_admin_payment_requests: {
+        Args: { p_status?: string }
+        Returns: {
+          amount_eur: number
+          client_email: string
+          client_id: string
+          client_name: string
+          created_at: string
+          currency: string
+          note: string
+          payment_id: string
+          proof_url: string
+          reservation_id: string
+          service_id: string
+          service_name: string
+          starts_at: string
+          status: string
         }[]
       }
       request_payment: {
