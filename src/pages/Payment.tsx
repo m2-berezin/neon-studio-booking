@@ -24,7 +24,10 @@ const Payment = () => {
   const delivery = searchParams.get('delivery');
   const price = searchParams.get('price');
   const notes = searchParams.get('notes');
-  const bookingId = searchParams.get('booking_id');
+  const bookingDate = searchParams.get('date');
+  const startTime = searchParams.get('start_time');
+  const endTime = searchParams.get('end_time');
+  const serviceId = searchParams.get('service_id');
   
   // Determine service title based on service and option
   let serviceTitle = '';
@@ -89,7 +92,8 @@ const Payment = () => {
         booking_details: notes
       } : null;
 
-      const { error } = await supabase
+      // 1. Create payment request with status pending
+      const { data: paymentData, error: paymentError } = await supabase
         .from('payment_requests')
         .insert({
           user_id: user.id,
@@ -97,12 +101,30 @@ const Payment = () => {
           method: 'manual',
           status: 'pending',
           notes: JSON.stringify(bookingInfo),
-          booking_id: bookingId || null
-        });
+        })
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (paymentError) throw paymentError;
 
-      // Create notification for admin
+      // 2. Create reservation with status pending (only for bookings)
+      if (service === 'booking' && bookingDate && startTime && endTime && serviceId) {
+        const { error: reservationError } = await supabase
+          .from('reservations')
+          .insert({
+            user_id: user.id,
+            service_id: serviceId,
+            date: bookingDate,
+            time_slot: startTime,
+            duration: 2, // Default 2 hours, adjust based on service
+            status: 'pending',
+            payment_request_id: paymentData.id
+          });
+
+        if (reservationError) throw reservationError;
+      }
+
+      // 3. Create notification for admin
       const { data: profile } = await supabase
         .from('profiles')
         .select('full_name')
