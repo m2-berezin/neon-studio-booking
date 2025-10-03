@@ -577,29 +577,21 @@ const Book = () => {
           <TooltipProvider>
             <div className="grid grid-cols-2 gap-3">
               {timeSlots.map((slot, index) => {
-                const slotButton = (
-                  <Button
-                    variant={slot.available ? "outline" : "ghost"}
-                    disabled={!slot.available}
-                    onClick={() => handleSlotSelect(slot)}
-                    className={cn(
-                      "h-12 flex flex-col items-center justify-center",
-                      !slot.available && "bg-muted/50 text-muted-foreground opacity-60 cursor-not-allowed hover:bg-muted/50"
-                    )}
-                  >
-                    <Clock className="w-4 h-4 mb-1" />
-                    <span className="text-xs">
-                      {slot.start_time.slice(0, 5)}
-                    </span>
-                  </Button>
-                );
-
                 // Wrap disabled slots in tooltip
                 if (!slot.available) {
                   return (
                     <Tooltip key={index}>
                       <TooltipTrigger asChild>
-                        {slotButton}
+                        <Button
+                          variant="ghost"
+                          disabled={true}
+                          className="h-12 flex flex-col items-center justify-center bg-muted/50 text-muted-foreground opacity-60 cursor-not-allowed hover:bg-muted/50"
+                        >
+                          <Clock className="w-4 h-4 mb-1" />
+                          <span className="text-xs">
+                            {slot.start_time.slice(0, 5)}
+                          </span>
+                        </Button>
                       </TooltipTrigger>
                       <TooltipContent>
                         <p className="text-xs">Indisponível - já reservado com buffer de limpeza</p>
@@ -608,7 +600,19 @@ const Book = () => {
                   );
                 }
 
-                return <div key={index}>{slotButton}</div>;
+                return (
+                  <Button
+                    key={index}
+                    variant="outline"
+                    onClick={() => handleSlotSelect(slot)}
+                    className="h-12 flex flex-col items-center justify-center"
+                  >
+                    <Clock className="w-4 h-4 mb-1" />
+                    <span className="text-xs">
+                      {slot.start_time.slice(0, 5)}
+                    </span>
+                  </Button>
+                );
               })}
             </div>
           </TooltipProvider>

@@ -38,6 +38,7 @@ interface Booking {
 interface UnavailableSlot {
   start_time: string;
   end_time: string;
+  reason?: string;
 }
 
 interface TimeSlot {
@@ -133,6 +134,7 @@ export const useBooking = () => {
   const fetchBookingsForDate = async (date: Date) => {
     try {
       const dateStr = format(date, 'yyyy-MM-dd');
+      console.log('🔍 Fetching unavailable times for date:', dateStr);
       
       const { data, error } = await supabase.rpc('get_unavailable_times', {
         p_date: dateStr
@@ -140,15 +142,20 @@ export const useBooking = () => {
 
       if (error) throw error;
       
+      console.log('📊 Raw data from get_unavailable_times:', data);
+      
       const slots = (data || []).map((slot: any) => ({
         start_time: format(new Date(slot.starts_at), 'HH:mm:ss'),
-        end_time: format(new Date(slot.ends_at), 'HH:mm:ss')
+        end_time: format(new Date(slot.ends_at), 'HH:mm:ss'),
+        reason: slot.reason
       }));
+      
+      console.log('🚫 Processed unavailable slots:', slots);
       
       setUnavailableSlots(slots);
       setExistingBookings([]);
     } catch (error) {
-      console.error('Error fetching unavailable times:', error);
+      console.error('❌ Error fetching unavailable times:', error);
       setUnavailableSlots([]);
       setExistingBookings([]);
     }
@@ -178,13 +185,27 @@ export const useBooking = () => {
     const slotStartTime = parse(slotStart, 'HH:mm:ss', new Date());
     const sessionEndTime = addMinutes(slotStartTime, sessionDuration);
 
-    return unavailableSlots.some(unavailable => {
+    const hasOverlap = unavailableSlots.some(unavailable => {
       const unavailStart = parse(unavailable.start_time, 'HH:mm:ss', new Date());
       const unavailEnd = parse(unavailable.end_time, 'HH:mm:ss', new Date());
 
       // Check if session overlaps with unavailable slot
-      return isBefore(slotStartTime, unavailEnd) && isAfter(sessionEndTime, unavailStart);
+      const overlaps = isBefore(slotStartTime, unavailEnd) && isAfter(sessionEndTime, unavailStart);
+      
+      if (overlaps) {
+        console.log(`⚠️ Overlap detected:`, {
+          slotStart: format(slotStartTime, 'HH:mm'),
+          slotEnd: format(sessionEndTime, 'HH:mm'),
+          unavailStart: format(unavailStart, 'HH:mm'),
+          unavailEnd: format(unavailEnd, 'HH:mm'),
+          reason: unavailable.reason
+        });
+      }
+      
+      return overlaps;
     });
+    
+    return hasOverlap;
   };
 
   // Generate time slots for a specific date
