@@ -82,22 +82,76 @@ const Payment = () => {
       return;
     }
 
+    // Validate required fields
+    if (!price || !service) {
+      toast({
+        title: 'Erro',
+        description: 'Dados de pagamento incompletos',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Additional validation for booking service
+    if (service === 'booking' && (!bookingDate || !startTime || !endTime)) {
+      toast({
+        title: 'Erro',
+        description: 'Dados da reserva incompletos',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setLoading(true);
     
     try {
-      // Store booking details in payment request
+      // Store booking details
       const bookingInfo = notes ? {
         service: serviceTitle,
         option: optionTitle,
         booking_details: notes
       } : null;
 
-      // 1. Create payment request with status pending
+      // Calculate duration in hours
+      let durationHours = 2; // default
+      if (startTime && endTime) {
+        const [startH, startM] = startTime.split(':').map(Number);
+        const [endH, endM] = endTime.split(':').map(Number);
+        const startMinutes = startH * 60 + startM;
+        const endMinutes = endH * 60 + endM;
+        durationHours = Math.max(1, Math.round((endMinutes - startMinutes) / 60));
+      }
+
+      let reservationId: string | null = null;
+
+      // 1. Create reservation ONLY for booking service
+      if (service === 'booking' && bookingDate && startTime) {
+        const { data: reservationData, error: reservationError } = await supabase
+          .from('reservations')
+          .insert({
+            user_id: user.id,
+            date: bookingDate,
+            time_slot: startTime,
+            duration: durationHours,
+            status: 'pending',
+          })
+          .select()
+          .single();
+
+        if (reservationError) {
+          console.error('Reservation error:', reservationError);
+          throw new Error(`Erro ao criar reserva: ${reservationError.message}`);
+        }
+
+        reservationId = reservationData?.id;
+      }
+
+      // 2. Create payment request
       const { data: paymentData, error: paymentError } = await supabase
         .from('payment_requests')
         .insert({
           user_id: user.id,
-          amount: parseFloat(price || '0'),
+          amount: parseFloat(price),
           method: 'manual',
           status: 'pending',
           notes: JSON.stringify(bookingInfo),
@@ -105,26 +159,25 @@ const Payment = () => {
         .select()
         .single();
 
-      if (paymentError) throw paymentError;
-
-      // 2. Create reservation with status pending (only for bookings)
-      if (service === 'booking' && bookingDate && startTime && endTime && serviceId) {
-        const { error: reservationError } = await supabase
-          .from('reservations')
-          .insert({
-            user_id: user.id,
-            service_id: serviceId,
-            date: bookingDate,
-            time_slot: startTime,
-            duration: 2, // Default 2 hours, adjust based on service
-            status: 'pending',
-            payment_request_id: paymentData.id
-          });
-
-        if (reservationError) throw reservationError;
+      if (paymentError) {
+        console.error('Payment error:', paymentError);
+        throw new Error(`Erro ao criar pedido de pagamento: ${paymentError.message}`);
       }
 
-      // 3. Create notification for admin
+      // 3. Update reservation with payment_request_id if we created a reservation
+      if (reservationId && paymentData) {
+        const { error: updateError } = await supabase
+          .from('reservations')
+          .update({ payment_request_id: paymentData.id })
+          .eq('id', reservationId);
+
+        if (updateError) {
+          console.error('Update error:', updateError);
+          // Non-critical error, continue
+        }
+      }
+
+      // 4. Create notification for admin
       const { data: profile } = await supabase
         .from('profiles')
         .select('full_name')
@@ -133,7 +186,6 @@ const Payment = () => {
 
       const userName = profile?.full_name || user.email || 'Usuário';
 
-      // Get admin users
       const { data: admins } = await supabase
         .from('profiles')
         .select('id')
@@ -163,9 +215,10 @@ const Payment = () => {
       
     } catch (error) {
       console.error('Error registering payment:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro ao registar o pagamento';
       toast({
         title: 'Erro no Pagamento',
-        description: 'Ocorreu um erro ao registar o pagamento',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
