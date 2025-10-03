@@ -144,10 +144,13 @@ export const useBooking = () => {
     return hasRules && !isBlackedOut && !isBefore(date, startOfDay(new Date()));
   };
 
-  // Generate time slots for a specific date
-  const generateTimeSlots = (date: Date): TimeSlot[] => {
+  // Generate time slots for a specific date with session duration constraint
+  const generateTimeSlots = (date: Date, sessionDurationMinutes: number = 30): TimeSlot[] => {
     const dayOfWeek = date.getDay();
     const dateStr = format(date, 'yyyy-MM-dd');
+    
+    // Studio closes at 22:00
+    const studioCloseTime = parse('22:00:00', 'HH:mm:ss', new Date());
     
     // Get availability rules for this day
     const dayRules = availabilityRules.filter(rule => {
@@ -169,7 +172,12 @@ export const useBooking = () => {
       
       while (isBefore(currentTime, endTime)) {
         const slotEnd = addMinutes(currentTime, 30);
-        if (!isAfter(slotEnd, endTime)) {
+        
+        // Check if session would end after studio closing time (22:00)
+        const sessionEnd = addMinutes(currentTime, sessionDurationMinutes);
+        const exceedsCloseTime = isAfter(sessionEnd, studioCloseTime);
+        
+        if (!isAfter(slotEnd, endTime) && !exceedsCloseTime) {
           const slotStartStr = format(currentTime, 'HH:mm:ss');
           const slotEndStr = format(slotEnd, 'HH:mm:ss');
           

@@ -81,10 +81,27 @@ const Book = () => {
     // Reset hours to 2 when selecting a new service
     setSelectedHours(2);
     
+    // Reset date and slots when changing service
+    setSelectedDate(undefined);
+    setTimeSlots([]);
+    
     // If service has hour selector, don't advance step yet
     const service = services.find(s => s.id === serviceId);
     if (!service?.hasHourSelector) {
       setStep(2);
+    }
+  };
+
+  // Handle hour selection change
+  const handleHoursChange = async (hours: number) => {
+    setSelectedHours(hours);
+    
+    // If a date is already selected, regenerate time slots with new duration
+    if (selectedDate) {
+      await fetchBookingsForDate(selectedDate);
+      const sessionDuration = hours * 60;
+      const slots = generateTimeSlots(selectedDate, sessionDuration);
+      setTimeSlots(slots);
     }
   };
 
@@ -111,7 +128,13 @@ const Book = () => {
     
     setSelectedDate(date);
     await fetchBookingsForDate(date);
-    const slots = generateTimeSlots(date);
+    
+    // Calculate session duration based on service and selected hours
+    const sessionDuration = selectedService === 'recording' 
+      ? selectedHours * 60 
+      : 120; // Default 2 hours for other services
+    
+    const slots = generateTimeSlots(date, sessionDuration);
     setTimeSlots(slots);
     setStep(3);
   };
@@ -369,7 +392,7 @@ const Book = () => {
                           <label className="text-sm font-medium">Número de Horas</label>
                           <Select
                             value={selectedHours.toString()}
-                            onValueChange={(value) => setSelectedHours(parseInt(value))}
+                            onValueChange={(value) => handleHoursChange(parseInt(value))}
                           >
                             <SelectTrigger className="w-full">
                               <SelectValue placeholder="Selecione as horas" />
@@ -444,6 +467,11 @@ const Book = () => {
             <p className="text-sm text-muted-foreground">
               {selectedDate && format(selectedDate, "EEEE, d 'de' MMMM 'de' yyyy", { locale: pt })}
             </p>
+            {selectedService === 'recording' && (
+              <p className="text-xs text-muted-foreground mt-2">
+                Sessão de {selectedHours}h | Estúdio fecha às 22:00
+              </p>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-3">
