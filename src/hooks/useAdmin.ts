@@ -37,19 +37,25 @@ interface Booking {
 interface Client {
   id: string;
   full_name: string | null;
-  phone: string | null;
-  penalty_until: string | null;
-  last_voucher_at: string | null;
+  avatar_url: string | null;
+  role: string;
   created_at: string;
+  updated_at: string;
 }
 
 interface Service {
   id: string;
   name: string;
-  type: string;
-  base_price: number;
+  slug: string;
   description: string | null;
+  price_eur: number | null;
+  currency: string;
+  duration_minutes: number | null;
   is_active: boolean;
+  image_url: string | null;
+  category_id: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 interface RewardSummary {
@@ -180,214 +186,61 @@ export const useAdmin = () => {
 
   // CRUD Operations
 
-  // Availability Rules
+  // Availability Rules (table doesn't exist - disabled)
   const createAvailabilityRule = async (rule: Omit<AvailabilityRule, 'id'>) => {
-    setLoading(true);
-    try {
-      const { error } = await supabase
-        .from('availability_rules')
-        .insert(rule);
-
-      if (error) throw error;
-
-      toast({
-        title: 'Success',
-        description: 'Availability rule created successfully',
-      });
-
-      loadAvailabilityRules();
-      return true;
-    } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: error.message || 'Failed to create availability rule',
-        variant: 'destructive',
-      });
-      return false;
-    } finally {
-      setLoading(false);
-    }
+    toast({
+      title: 'Error',
+      description: 'Availability rules table not implemented',
+      variant: 'destructive',
+    });
+    return false;
   };
 
   const updateAvailabilityRule = async (id: string, updates: Partial<AvailabilityRule>) => {
-    setLoading(true);
-    try {
-      const { error } = await supabase
-        .from('availability_rules')
-        .update(updates)
-        .eq('id', id);
-
-      if (error) throw error;
-
-      toast({
-        title: 'Success',
-        description: 'Availability rule updated successfully',
-      });
-
-      loadAvailabilityRules();
-      return true;
-    } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: error.message || 'Failed to update availability rule',
-        variant: 'destructive',
-      });
-      return false;
-    } finally {
-      setLoading(false);
-    }
+    toast({
+      title: 'Error',
+      description: 'Availability rules table not implemented',
+      variant: 'destructive',
+    });
+    return false;
   };
 
   const deleteAvailabilityRule = async (id: string) => {
-    setLoading(true);
-    try {
-      const { error } = await supabase
-        .from('availability_rules')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-
-      toast({
-        title: 'Success',
-        description: 'Availability rule deleted successfully',
-      });
-
-      loadAvailabilityRules();
-      return true;
-    } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: error.message || 'Failed to delete availability rule',
-        variant: 'destructive',
-      });
-      return false;
-    } finally {
-      setLoading(false);
-    }
+    toast({
+      title: 'Error',
+      description: 'Availability rules table not implemented',
+      variant: 'destructive',
+    });
+    return false;
   };
 
-  // Blackout Dates
+  // Blackout Dates (table doesn't exist - disabled)
   const createBlackoutDate = async (blackoutDate: Omit<BlackoutDate, 'id'>) => {
-    setLoading(true);
-    try {
-      const { error } = await supabase
-        .from('blackout_dates')
-        .insert(blackoutDate);
-
-      if (error) throw error;
-
-      toast({
-        title: 'Success',
-        description: 'Blackout date created successfully',
-      });
-
-      loadBlackoutDates();
-      return true;
-    } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: error.message || 'Failed to create blackout date',
-        variant: 'destructive',
-      });
-      return false;
-    } finally {
-      setLoading(false);
-    }
+    toast({
+      title: 'Error',
+      description: 'Blackout dates table not implemented',
+      variant: 'destructive',
+    });
+    return false;
   };
 
   const deleteBlackoutDate = async (id: string) => {
-    setLoading(true);
-    try {
-      const { error } = await supabase
-        .from('blackout_dates')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-
-      toast({
-        title: 'Success',
-        description: 'Blackout date deleted successfully',
-      });
-
-      loadBlackoutDates();
-      return true;
-    } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: error.message || 'Failed to delete blackout date',
-        variant: 'destructive',
-      });
-      return false;
-    } finally {
-      setLoading(false);
-    }
+    toast({
+      title: 'Error',
+      description: 'Blackout dates table not implemented',
+      variant: 'destructive',
+    });
+    return false;
   };
 
-  // Bookings
+  // Bookings (table doesn't exist - disabled)
   const updateBookingStatus = async (id: string, status: string) => {
-    setLoading(true);
-    try {
-      // First, get the booking details
-      const { data: booking, error: bookingError } = await supabase
-        .from('bookings')
-        .select('id, client_id, status')
-        .eq('id', id)
-        .single();
-
-      if (bookingError) throw bookingError;
-
-      const { error } = await supabase
-        .from('bookings')
-        .update({ status })
-        .eq('id', id);
-
-      if (error) throw error;
-
-      // If status is 'no_show', apply penalty to client
-      if (status === 'no_show') {
-        const penaltyUntil = format(addMonths(new Date(), 3), 'yyyy-MM-dd');
-        
-        const { error: penaltyError } = await supabase
-          .from('profiles')
-          .update({ penalty_until: penaltyUntil })
-          .eq('id', booking.client_id);
-
-        if (penaltyError) throw penaltyError;
-
-        // Create notification for the client about the penalty
-        await supabase
-          .from('notifications')
-          .insert({
-            user_id: booking.client_id,
-            title: 'Session Penalty Applied',
-            body: `A penalty has been applied to your account due to a no-show. Rewards are paused until ${format(addMonths(new Date(), 3), 'MMMM do, yyyy')}.`,
-          });
-
-        toast({
-          title: 'Status Updated',
-          description: `Booking marked as no-show. 3-month penalty applied to client.`,
-        });
-      } else {
-        toast({
-          title: 'Success',
-          description: 'Booking status updated successfully',
-        });
-      }
-
-      loadBookings();
-      return true;
-    } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: error.message || 'Failed to update booking status',
-        variant: 'destructive',
-      });
-      return false;
-    } finally {
-      setLoading(false);
-    }
+    toast({
+      title: 'Error',
+      description: 'Bookings table not implemented',
+      variant: 'destructive',
+    });
+    return false;
   };
 
   // Services
@@ -477,92 +330,24 @@ export const useAdmin = () => {
     }
   };
 
-  // Issue manual voucher
+  // Issue manual voucher (table doesn't exist - disabled)
   const issueVoucher = async (clientId: string, amount: number, expiryDays: number = 60) => {
-    setLoading(true);
-    try {
-      const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + expiryDays);
-
-      const { error } = await supabase
-        .from('vouchers')
-        .insert({
-          client_id: clientId,
-          code: `ADMIN_${Date.now()}`,
-          amount,
-          expires_at: expiresAt.toISOString().split('T')[0],
-          combinable: false,
-          redeemed: false
-        });
-
-      if (error) throw error;
-
-      toast({
-        title: 'Success',
-        description: `€${amount} voucher issued successfully`,
-      });
-
-      return true;
-    } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: error.message || 'Failed to issue voucher',
-        variant: 'destructive',
-      });
-      return false;
-    } finally {
-      setLoading(false);
-    }
+    toast({
+      title: 'Error',
+      description: 'Vouchers table not implemented',
+      variant: 'destructive',
+    });
+    return false;
   };
 
-  // Broadcast message
+  // Broadcast message (tables don't exist - disabled)
   const broadcastMessage = async (clientIds: string[], title: string, body: string) => {
-    setLoading(true);
-    try {
-      // Create notifications
-      const notifications = clientIds.map(clientId => ({
-        user_id: clientId,
-        title,
-        body,
-      }));
-
-      const { error: notificationError } = await supabase
-        .from('notifications')
-        .insert(notifications);
-
-      if (notificationError) throw notificationError;
-
-      // Create messages
-      const messages = clientIds.map(clientId => ({
-        sender_id: user!.id,
-        receiver_id: clientId,
-        thread_id: crypto.randomUUID(),
-        message: `${title}\n\n${body}`,
-        timestamp: new Date().toISOString(),
-      }));
-
-      const { error: messageError } = await supabase
-        .from('messages')
-        .insert(messages);
-
-      if (messageError) throw messageError;
-
-      toast({
-        title: 'Success',
-        description: `Message sent to ${clientIds.length} client(s)`,
-      });
-
-      return true;
-    } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: error.message || 'Failed to broadcast message',
-        variant: 'destructive',
-      });
-      return false;
-    } finally {
-      setLoading(false);
-    }
+    toast({
+      title: 'Error',
+      description: 'Notifications and messages tables not implemented',
+      variant: 'destructive',
+    });
+    return false;
   };
 
   // Load all data on mount if user is admin

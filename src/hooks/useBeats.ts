@@ -80,8 +80,8 @@ export const useBeats = () => {
         }
       }
 
-      if (adminUser) {
-        // Send message to admin
+      // Messages and notifications tables don't exist - disabled
+      /* if (adminUser) {
         await supabase
           .from('messages')
           .insert({
@@ -92,7 +92,6 @@ export const useBeats = () => {
             timestamp: new Date().toISOString(),
           });
 
-        // Send admin notification
         await supabase
           .from('notifications')
           .insert({
@@ -100,7 +99,7 @@ export const useBeats = () => {
             title: 'New Beat Purchase Inquiry',
             body: `${user.email} is interested in purchasing ${beatType}.`,
           });
-      }
+      } */
 
       toast({
         title: 'Message Sent',
