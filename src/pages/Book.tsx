@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Calendar } from '@/components/ui/calendar';
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useBooking } from '@/hooks/useBooking';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -47,11 +48,12 @@ const Book = () => {
   const services = [
     {
       id: 'recording',
-      name: 'Captação 3h (mínimo)',
+      name: 'Captação 2h (mínimo)',
       base_price: 20,
       type: 'recording',
-      description: 'Sessão de gravação profissional de 3 horas mínimo',
-      duration: 180
+      description: 'Sessão de gravação profissional',
+      duration: 120,
+      hasHourSelector: true
     },
     {
       id: 'recording_mix',
@@ -66,6 +68,7 @@ const Book = () => {
 
   const [step, setStep] = useState(1);
   const [selectedService, setSelectedService] = useState<string>('');
+  const [selectedHours, setSelectedHours] = useState<number>(2);
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot>();
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
@@ -75,7 +78,31 @@ const Book = () => {
   // Handle service selection
   const handleServiceSelect = (serviceId: string) => {
     setSelectedService(serviceId);
-    setStep(2);
+    // Reset hours to 2 when selecting a new service
+    setSelectedHours(2);
+    
+    // If service has hour selector, don't advance step yet
+    const service = services.find(s => s.id === serviceId);
+    if (!service?.hasHourSelector) {
+      setStep(2);
+    }
+  };
+
+  // Calculate dynamic price for recording service
+  const getRecordingPrice = () => {
+    return selectedHours * 10; // €10 per hour
+  };
+
+  // Get service with updated price
+  const getServiceWithPrice = (service: any) => {
+    if (service.id === 'recording') {
+      return {
+        ...service,
+        base_price: getRecordingPrice(),
+        duration: selectedHours * 60
+      };
+    }
+    return service;
   };
 
   // Handle date selection
@@ -173,8 +200,10 @@ const Book = () => {
     setWhatsAppLink('');
   };
 
-  // Get selected service details
-  const selectedServiceDetails = services.find(s => s.id === selectedService);
+  // Get selected service details with dynamic pricing
+  const selectedServiceDetails = selectedService 
+    ? getServiceWithPrice(services.find(s => s.id === selectedService))
+    : undefined;
 
   if (bookingComplete) {
     return (
@@ -263,38 +292,78 @@ const Book = () => {
         <div className="space-y-4">
           <h2 className="text-xl font-semibold text-center">Escolhe o Teu Serviço</h2>
           <div className="space-y-3">
-            {services.map((service) => (
-              <Card
-                key={service.id}
-                className="p-4 cursor-pointer hover:shadow-md transition-shadow"
-                onClick={() => handleServiceSelect(service.id)}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                      <Music className="w-5 h-5 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-foreground">{service.name}</h3>
-                      <p className="text-sm text-muted-foreground">{service.description}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="space-y-1">
-                      <div className="flex flex-col">
-                        <p className="text-lg font-bold">€{service.base_price}</p>
-                        {service.subscriptionPrice && (
-                          <p className="text-lg font-bold text-primary">€{service.subscriptionPrice} <span className="text-xs text-muted-foreground">(com subscrição)</span></p>
-                        )}
+            {services.map((service) => {
+              const isRecording = service.id === 'recording';
+              const isSelected = selectedService === service.id;
+              const currentPrice = isRecording ? getRecordingPrice() : service.base_price;
+
+              return (
+                <Card
+                  key={service.id}
+                  className={cn(
+                    "p-4 transition-shadow",
+                    isSelected && isRecording ? "border-primary" : "cursor-pointer hover:shadow-md"
+                  )}
+                  onClick={() => !isSelected && handleServiceSelect(service.id)}
+                >
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-primary/10 rounded-lg">
+                          <Music className="w-5 h-5 text-primary" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-foreground">{service.name}</h3>
+                          <p className="text-sm text-muted-foreground">{service.description}</p>
+                        </div>
                       </div>
-                      {service.subscriptionPrice && (
-                        <p className="text-xs text-green-600">Poupe 15% com subscrição</p>
-                      )}
+                      <div className="text-right">
+                        <div className="space-y-1">
+                          <div className="flex flex-col">
+                            <p className="text-lg font-bold">€{currentPrice}</p>
+                            {service.subscriptionPrice && (
+                              <p className="text-lg font-bold text-primary">€{service.subscriptionPrice} <span className="text-xs text-muted-foreground">(com subscrição)</span></p>
+                            )}
+                          </div>
+                          {service.subscriptionPrice && (
+                            <p className="text-xs text-green-600">Poupe 15% com subscrição</p>
+                          )}
+                        </div>
+                      </div>
                     </div>
+
+                    {/* Hour Selector for Recording Service */}
+                    {isSelected && isRecording && (
+                      <div className="border-t pt-4 space-y-3">
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Número de Horas</label>
+                          <Select
+                            value={selectedHours.toString()}
+                            onValueChange={(value) => setSelectedHours(parseInt(value))}
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Selecione as horas" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="2">2 horas - €20</SelectItem>
+                              <SelectItem value="3">3 horas - €30</SelectItem>
+                              <SelectItem value="4">4 horas - €40</SelectItem>
+                              <SelectItem value="5">5 horas - €50</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <Button 
+                          onClick={() => setStep(2)} 
+                          className="w-full"
+                        >
+                          Continuar
+                        </Button>
+                      </div>
+                    )}
                   </div>
-                </div>
-              </Card>
-            ))}
+                </Card>
+              );
+            })}
           </div>
         </div>
       )}
