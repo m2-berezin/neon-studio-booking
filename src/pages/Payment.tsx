@@ -124,10 +124,10 @@ const Payment = () => {
 
       let reservationId: string | null = null;
 
-      // 1. Create reservation ONLY for booking service with conflict check
+      // 1. Create reservation for ALL services (booking, mixmaster, beats)
+      // This ensures slots are blocked to prevent overbooking
       if (service === 'booking' && bookingDate && startTime) {
-        // Check for conflicts before creating reservation
-        const dateForCheck = new Date(bookingDate);
+        // For booking service with specific date/time
         const startDateTime = new Date(`${bookingDate}T${startTime}`);
         const endDateTime = new Date(`${bookingDate}T${endTime}`);
         const durationMinutes = (endDateTime.getTime() - startDateTime.getTime()) / (1000 * 60);
@@ -209,6 +209,27 @@ const Payment = () => {
         }
 
         reservationId = reservationData?.id;
+      } else if (service === 'mixmaster' || service === 'beats') {
+        // For non-time-specific services (mixmaster, beats), create a reservation entry
+        // to track the order and prevent overbooking of studio resources
+        const reservationInsert = {
+          user_id: user.id,
+          date: new Date().toISOString().split('T')[0], // today's date
+          time_slot: '00:00:00', // placeholder - these services don't have specific times
+          duration: 1, // placeholder duration
+          status: 'pending',
+          service_id: serviceId || null, // include service_id if available
+        } as any;
+
+        const { data: reservationData, error: reservationError } = await supabase
+          .from('reservations')
+          .insert(reservationInsert)
+          .select()
+          .single();
+
+        if (!reservationError && reservationData) {
+          reservationId = reservationData.id;
+        }
       }
 
       // 2. Create payment request

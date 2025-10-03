@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubscriptions } from '@/hooks/useSubscriptions';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   Upload, 
   Link as LinkIcon, 
@@ -33,8 +34,28 @@ const MixMaster = () => {
   const [transferLink, setTransferLink] = useState('');
   const [projectNotes, setProjectNotes] = useState('');
   const [files, setFiles] = useState<FileList | null>(null);
+  const [serviceId, setServiceId] = useState<string | null>(null);
 
   const hasSubscription = userSubscription?.active;
+
+  // Fetch the Mix&Master service ID from the database
+  useEffect(() => {
+    const fetchServiceId = async () => {
+      const { data, error } = await supabase
+        .from('services')
+        .select('id')
+        .eq('type', 'mixing')
+        .eq('is_active', true)
+        .limit(1)
+        .single();
+
+      if (data && !error) {
+        setServiceId(data.id);
+      }
+    };
+
+    fetchServiceId();
+  }, []);
 
   // Check if it's first month of subscription (simplified check)
   const isFirstMonth = false; // TODO: Implement proper first month detection
@@ -112,7 +133,7 @@ const MixMaster = () => {
     window.open(whatsappUrl, '_blank');
   };
 
-  const handleProceedToPayment = () => {
+  const handleProceedToPayment = async () => {
     if (!selectedOption) {
       toast({
         title: "Erro",
@@ -128,6 +149,16 @@ const MixMaster = () => {
         description: "Por favor seleccione um método de entrega",
         variant: "destructive",
       });
+      return;
+    }
+
+    if (!user) {
+      toast({
+        title: "Erro",
+        description: "Por favor faça login para continuar",
+        variant: "destructive",
+      });
+      navigate('/auth');
       return;
     }
 
