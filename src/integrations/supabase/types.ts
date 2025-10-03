@@ -674,6 +674,30 @@ export type Database = {
           },
         ]
       }
+      unavailable_slots: {
+        Row: {
+          created_at: string
+          end_time: string
+          id: string
+          reason: string | null
+          start_time: string
+        }
+        Insert: {
+          created_at?: string
+          end_time: string
+          id?: string
+          reason?: string | null
+          start_time: string
+        }
+        Update: {
+          created_at?: string
+          end_time?: string
+          id?: string
+          reason?: string | null
+          start_time?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null

@@ -36,6 +36,11 @@ interface Booking {
   status: string;
 }
 
+interface UnavailableSlot {
+  start_time: string;
+  end_time: string;
+}
+
 interface TimeSlot {
   start_time: string;
   end_time: string;
@@ -51,6 +56,7 @@ export const useBooking = () => {
   const [availabilityRules, setAvailabilityRules] = useState<AvailabilityRule[]>([]);
   const [blackoutDates, setBlackoutDates] = useState<BlackoutDate[]>([]);
   const [existingBookings, setExistingBookings] = useState<Booking[]>([]);
+  const [unavailableSlots, setUnavailableSlots] = useState<UnavailableSlot[]>([]);
   const [loading, setLoading] = useState(false);
 
   // Fetch services
@@ -110,14 +116,30 @@ export const useBooking = () => {
   // Fetch existing bookings for a specific date
   const fetchBookingsForDate = async (date: Date) => {
     try {
-      const { data, error } = await supabase
+      const dateStr = format(date, 'yyyy-MM-dd');
+      
+      // Fetch bookings
+      const { data: bookingsData, error: bookingsError } = await supabase
         .from('bookings')
         .select('id, date, start_time, end_time, status')
-        .eq('date', format(date, 'yyyy-MM-dd'))
+        .eq('date', dateStr)
         .in('status', ['confirmed', 'pending']);
 
-      if (error) throw error;
-      setExistingBookings(data || []);
+      if (bookingsError) throw bookingsError;
+      setExistingBookings(bookingsData || []);
+
+      // Fetch unavailable slots for this date
+      const startOfDayDate = `${dateStr}T00:00:00`;
+      const endOfDayDate = `${dateStr}T23:59:59`;
+      
+      const { data: slotsData, error: slotsError } = await supabase
+        .from('unavailable_slots')
+        .select('start_time, end_time')
+        .gte('start_time', startOfDayDate)
+        .lte('start_time', endOfDayDate);
+
+      if (slotsError) throw slotsError;
+      setUnavailableSlots(slotsData || []);
     } catch (error) {
       console.error('Error fetching bookings:', error);
     }
@@ -182,7 +204,7 @@ export const useBooking = () => {
           const slotEndStr = format(slotEnd, 'HH:mm:ss');
           
           // Check if slot conflicts with existing bookings (including 1h buffer after each booking)
-          const isConflict = existingBookings.some(booking => {
+          const isBookingConflict = existingBookings.some(booking => {
             const bookingStart = parse(booking.start_time, 'HH:mm:ss', new Date());
             const bookingEnd = parse(booking.end_time, 'HH:mm:ss', new Date());
             // Add 1 hour buffer after booking ends
@@ -193,6 +215,26 @@ export const useBooking = () => {
               (isBefore(currentTime, bookingEndWithBuffer) && isAfter(sessionEnd, bookingStart))
             );
           });
+
+          // Check if slot conflicts with unavailable slots
+          const isUnavailableConflict = unavailableSlots.some(slot => {
+            const slotStart = new Date(slot.start_time);
+            const slotEnd = new Date(slot.end_time);
+            
+            // Create proper date objects for comparison
+            const sessionStartDate = new Date(date);
+            sessionStartDate.setHours(currentTime.getHours(), currentTime.getMinutes(), 0, 0);
+            
+            const sessionEndDate = new Date(date);
+            sessionEndDate.setHours(sessionEnd.getHours(), sessionEnd.getMinutes(), 0, 0);
+            
+            // Check if new session would overlap with unavailable slot
+            return (
+              (isBefore(sessionStartDate, slotEnd) && isAfter(sessionEndDate, slotStart))
+            );
+          });
+
+          const isConflict = isBookingConflict || isUnavailableConflict;
 
           slots.push({
             start_time: slotStartStr,
@@ -227,6 +269,21 @@ export const useBooking = () => {
         .single();
 
       if (error) throw error;
+
+      // Create unavailable slot with 1 hour buffer
+      const dateStr = format(date, 'yyyy-MM-dd');
+      const startDateTime = `${dateStr}T${startTime}`;
+      const endDateTime = parse(endTime, 'HH:mm:ss', new Date());
+      const endWithBuffer = addMinutes(endDateTime, 60); // Add 1 hour buffer
+      const endWithBufferStr = `${dateStr}T${format(endWithBuffer, 'HH:mm:ss')}`;
+
+      await supabase
+        .from('unavailable_slots')
+        .insert({
+          start_time: startDateTime,
+          end_time: endWithBufferStr,
+          reason: 'Sessão reservada + descanso'
+        });
 
       // Create admin notification
       const { data: adminProfile } = await supabase
