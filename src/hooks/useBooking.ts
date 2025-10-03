@@ -55,6 +55,7 @@ export const useBooking = () => {
   const [blackoutDates, setBlackoutDates] = useState<BlackoutDate[]>([]);
   const [existingBookings, setExistingBookings] = useState<Booking[]>([]);
   const [unavailableSlots, setUnavailableSlots] = useState<UnavailableSlot[]>([]);
+  const [unavailableDays, setUnavailableDays] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
 
   // Fetch services
@@ -111,10 +112,46 @@ export const useBooking = () => {
     setBlackoutDates([]);
   };
 
-  // Fetch existing bookings (tables don't exist - using empty array)
+  // Fetch unavailable days for a given month
+  const fetchUnavailableDays = async (month: number, year: number) => {
+    try {
+      const { data, error } = await supabase.rpc('get_unavailable_days', {
+        p_month: month,
+        p_year: year
+      });
+
+      if (error) throw error;
+      
+      setUnavailableDays(data?.map((row: any) => row.day) || []);
+    } catch (error) {
+      console.error('Error fetching unavailable days:', error);
+      setUnavailableDays([]);
+    }
+  };
+
+  // Fetch unavailable time slots for a specific date
   const fetchBookingsForDate = async (date: Date) => {
-    setExistingBookings([]);
-    setUnavailableSlots([]);
+    try {
+      const dateStr = format(date, 'yyyy-MM-dd');
+      
+      const { data, error } = await supabase.rpc('get_unavailable_times', {
+        p_date: dateStr
+      });
+
+      if (error) throw error;
+      
+      const slots = (data || []).map((slot: any) => ({
+        start_time: format(new Date(slot.starts_at), 'HH:mm:ss'),
+        end_time: format(new Date(slot.ends_at), 'HH:mm:ss')
+      }));
+      
+      setUnavailableSlots(slots);
+      setExistingBookings([]);
+    } catch (error) {
+      console.error('Error fetching unavailable times:', error);
+      setUnavailableSlots([]);
+      setExistingBookings([]);
+    }
   };
 
   // Check if a date is available
@@ -134,6 +171,20 @@ export const useBooking = () => {
     const isBlackedOut = blackoutDates.some(blackout => blackout.date === dateStr);
 
     return hasRules && !isBlackedOut && !isBefore(date, startOfDay(new Date()));
+  };
+
+  // Check if a time range overlaps with unavailable slots
+  const hasTimeOverlap = (slotStart: string, sessionDuration: number): boolean => {
+    const slotStartTime = parse(slotStart, 'HH:mm:ss', new Date());
+    const sessionEndTime = addMinutes(slotStartTime, sessionDuration);
+
+    return unavailableSlots.some(unavailable => {
+      const unavailStart = parse(unavailable.start_time, 'HH:mm:ss', new Date());
+      const unavailEnd = parse(unavailable.end_time, 'HH:mm:ss', new Date());
+
+      // Check if session overlaps with unavailable slot
+      return isBefore(slotStartTime, unavailEnd) && isAfter(sessionEndTime, unavailStart);
+    });
   };
 
   // Generate time slots for a specific date
@@ -167,10 +218,13 @@ export const useBooking = () => {
           const slotStartStr = format(currentTime, 'HH:mm:ss');
           const slotEndStr = format(slotEnd, 'HH:mm:ss');
           
+          // Check if this slot overlaps with any unavailable time
+          const isAvailable = !hasTimeOverlap(slotStartStr, sessionDurationMinutes);
+          
           slots.push({
             start_time: slotStartStr,
             end_time: slotEndStr,
-            available: true, // No bookings to check against
+            available: isAvailable,
           });
         }
         currentTime = addMinutes(currentTime, 30);
@@ -232,9 +286,11 @@ export const useBooking = () => {
     blackoutDates,
     existingBookings,
     unavailableSlots,
+    unavailableDays,
     loading,
     fetchServices,
     fetchBookingsForDate,
+    fetchUnavailableDays,
     isDateAvailable,
     generateTimeSlots,
     checkTimeSlotConflict,

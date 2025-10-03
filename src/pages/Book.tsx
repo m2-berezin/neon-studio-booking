@@ -37,13 +37,16 @@ const Book = () => {
     loading, 
     createBooking, 
     fetchBookingsForDate, 
+    fetchUnavailableDays,
     generateTimeSlots, 
-    isDateAvailable, 
+    isDateAvailable,
+    unavailableDays,
     sendBookingMessage, 
     generateWhatsAppLink 
   } = useBooking();
   const { user } = useAuth();
   const { toast } = useToast();
+  const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
 
   // Service IDs from backend (Supabase)
   const BACKEND_SERVICE_IDS = {
@@ -88,6 +91,13 @@ const Book = () => {
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
   const [bookingComplete, setBookingComplete] = useState(false);
   const [whatsAppLink, setWhatsAppLink] = useState<string>('');
+
+  // Fetch unavailable days when month changes
+  useEffect(() => {
+    const month = currentMonth.getMonth() + 1; // JavaScript months are 0-indexed
+    const year = currentMonth.getFullYear();
+    fetchUnavailableDays(month, year);
+  }, [currentMonth, fetchUnavailableDays]);
 
   // Handle service selection
   const handleServiceSelect = (serviceId: string) => {
@@ -506,14 +516,34 @@ const Book = () => {
               mode="single"
               selected={selectedDate}
               onSelect={handleDateSelect}
+              onMonthChange={setCurrentMonth}
               disabled={(date) => !isDateAvailable(date)}
+              modifiers={{
+                occupied: (date) => {
+                  const day = date.getDate();
+                  const month = date.getMonth() + 1;
+                  const year = date.getFullYear();
+                  const currentMonthNum = currentMonth.getMonth() + 1;
+                  const currentYear = currentMonth.getFullYear();
+                  
+                  return month === currentMonthNum && 
+                         year === currentYear && 
+                         unavailableDays.includes(day);
+                }
+              }}
+              modifiersClassNames={{
+                occupied: "bg-orange-100 dark:bg-orange-900/30 text-orange-900 dark:text-orange-100 font-semibold hover:bg-orange-200 dark:hover:bg-orange-900/50"
+              }}
               className="rounded-md border pointer-events-auto"
             />
           </div>
           
-          <p className="text-xs text-muted-foreground text-center">
-            Apenas datas disponíveis são seleccionáveis
-          </p>
+          <div className="flex items-center justify-center gap-4 text-xs">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-orange-500"></div>
+              <span className="text-muted-foreground">Com reservas</span>
+            </div>
+          </div>
         </div>
       )}
 
