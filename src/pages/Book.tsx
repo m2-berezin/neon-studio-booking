@@ -6,6 +6,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useBooking } from '@/hooks/useBooking';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -573,25 +574,45 @@ const Book = () => {
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            {timeSlots.map((slot, index) => (
-              <Button
-                key={index}
-                variant={slot.available ? "outline" : "ghost"}
-                disabled={!slot.available}
-                onClick={() => handleSlotSelect(slot)}
-                className={cn(
-                  "h-12 flex flex-col items-center justify-center",
-                  !slot.available && "opacity-50 cursor-not-allowed"
-                )}
-              >
-                <Clock className="w-4 h-4 mb-1" />
-                <span className="text-xs">
-                  {slot.start_time.slice(0, 5)}
-                </span>
-              </Button>
-            ))}
-          </div>
+          <TooltipProvider>
+            <div className="grid grid-cols-2 gap-3">
+              {timeSlots.map((slot, index) => {
+                const slotButton = (
+                  <Button
+                    key={index}
+                    variant={slot.available ? "outline" : "ghost"}
+                    disabled={!slot.available}
+                    onClick={() => handleSlotSelect(slot)}
+                    className={cn(
+                      "h-12 flex flex-col items-center justify-center",
+                      !slot.available && "bg-muted/50 text-muted-foreground opacity-60 cursor-not-allowed hover:bg-muted/50"
+                    )}
+                  >
+                    <Clock className="w-4 h-4 mb-1" />
+                    <span className="text-xs">
+                      {slot.start_time.slice(0, 5)}
+                    </span>
+                  </Button>
+                );
+
+                // Wrap disabled slots in tooltip
+                if (!slot.available) {
+                  return (
+                    <Tooltip key={index}>
+                      <TooltipTrigger asChild>
+                        {slotButton}
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="text-xs">Indisponível - já reservado com buffer de limpeza</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  );
+                }
+
+                return slotButton;
+              })}
+            </div>
+          </TooltipProvider>
 
           {timeSlots.filter(s => s.available).length === 0 && (
             <div className="text-center py-8">
