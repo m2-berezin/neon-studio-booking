@@ -579,7 +579,6 @@ const Book = () => {
               {timeSlots.map((slot, index) => {
                 const slotButton = (
                   <Button
-                    key={index}
                     variant={slot.available ? "outline" : "ghost"}
                     disabled={!slot.available}
                     onClick={() => handleSlotSelect(slot)}
@@ -609,7 +608,7 @@ const Book = () => {
                   );
                 }
 
-                return slotButton;
+                return <div key={index}>{slotButton}</div>;
               })}
             </div>
           </TooltipProvider>
