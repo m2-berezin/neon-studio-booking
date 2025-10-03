@@ -87,17 +87,72 @@ const AdminPayments = () => {
 
   const handleUpdateStatus = async (id: string, newStatus: 'approved' | 'rejected', request: PaymentRequest) => {
     try {
-      const { error } = await supabase
-        .from('payment_requests')
-        .update({ status: newStatus })
-        .eq('id', id);
-
-      if (error) throw error;
-
-      // If approved, create booking and project
+      // If approved, move reservation to bookings first
       if (newStatus === 'approved') {
         try {
-          // Parse booking info from notes
+          // Find the reservation linked to this payment request
+          const { data: reservation, error: reservationError } = await supabase
+            .from('reservations')
+            .select('*')
+            .eq('payment_request_id', id)
+            .eq('status', 'pending')
+            .single();
+
+          if (reservationError && reservationError.code !== 'PGRST116') {
+            throw reservationError;
+          }
+
+          let bookingId = null;
+
+          // If we have a reservation, move it to bookings
+          if (reservation) {
+            // Calculate end time from start time + duration
+            const [hours, minutes] = reservation.time_slot.split(':');
+            const startHour = parseInt(hours);
+            const endHour = startHour + reservation.duration;
+            const endTime = `${endHour.toString().padStart(2, '0')}:${minutes}:00`;
+
+            const { data: booking, error: bookingError } = await supabase
+              .from('bookings')
+              .insert({
+                client_id: request.user_id,
+                service_id: reservation.service_id,
+                date: reservation.date,
+                start_time: reservation.time_slot,
+                end_time: endTime,
+                status: 'confirmed',
+                notes: request.notes || 'Reserva aprovada'
+              })
+              .select()
+              .single();
+
+            if (bookingError) throw bookingError;
+            
+            bookingId = booking.id;
+
+            // Create unavailable slot with 1 hour buffer
+            const startDateTime = `${reservation.date}T${reservation.time_slot}`;
+            const endDateTime = new Date(`${reservation.date}T${endTime}`);
+            endDateTime.setHours(endDateTime.getHours() + 1); // Add 1 hour buffer
+            const endWithBufferStr = endDateTime.toISOString().slice(0, 19).replace('T', ' ');
+
+            await supabase
+              .from('unavailable_slots')
+              .insert({
+                start_time: startDateTime,
+                end_time: endWithBufferStr,
+                reason: 'Sessão reservada + descanso',
+                booking_id: bookingId
+              });
+
+            // Delete the reservation after moving to bookings
+            await supabase
+              .from('reservations')
+              .delete()
+              .eq('id', reservation.id);
+          }
+
+          // Create project
           let bookingInfo = null;
           if (request.notes) {
             try {
@@ -107,79 +162,18 @@ const AdminPayments = () => {
             }
           }
 
-          // Extract date and time from booking details if available
-          let bookingDate = null;
-          let startTime = null;
-          let endTime = null;
-
-          if (bookingInfo?.booking_details) {
-            const details = bookingInfo.booking_details;
-            // Extract date (format: "Reserva para 01/01/2025 às 14:00")
-            const dateMatch = details.match(/(\d{2}\/\d{2}\/\d{4})/);
-            const timeMatch = details.match(/às (\d{2}:\d{2})/);
-            
-            if (dateMatch) {
-              const [day, month, year] = dateMatch[1].split('/');
-              bookingDate = `${year}-${month}-${day}`;
-            }
-            if (timeMatch) {
-              startTime = timeMatch[1];
-              // Add 1 hour for end time
-              const [hours, minutes] = startTime.split(':');
-              endTime = `${String(parseInt(hours) + 1).padStart(2, '0')}:${minutes}`;
-            }
-          }
-
-          // Create booking if we have date and time
-          let bookingId = null;
-          if (bookingDate && startTime && endTime) {
-            // Get the service ID (simplified - you may need to adjust)
-            const { data: services } = await supabase
-              .from('services')
-              .select('id')
-              .eq('name', 'Recording Session')
-              .single();
-
-            if (services) {
-              const { data: booking, error: bookingError } = await supabase
-                .from('bookings')
-                .insert({
-                  client_id: request.user_id,
-                  service_id: services.id,
-                  date: bookingDate,
-                  start_time: startTime,
-                  end_time: endTime,
-                  status: 'confirmed',
-                  notes: bookingInfo?.booking_details || 'Reserva via pagamento'
-                })
-                .select()
-                .single();
-
-              if (!bookingError && booking) {
-                bookingId = booking.id;
-              }
-            }
-          }
-
-          // Create project
           const projectTitle = bookingInfo?.service 
             ? `${bookingInfo.service} - ${bookingInfo.option || ''}`
             : 'Novo Projeto';
 
-          const { data: project, error: projectError } = await supabase
+          await supabase
             .from('projects')
             .insert({
               client_id: request.user_id,
               title: projectTitle,
               status: 'in_progress',
               booking_id: bookingId
-            })
-            .select()
-            .single();
-
-          if (projectError) {
-            console.error('Error creating project:', projectError);
-          }
+            });
 
           // Notify client
           await supabase.from('notifications').insert({
@@ -189,10 +183,23 @@ const AdminPayments = () => {
             read: false
           });
 
-        } catch (projectError) {
-          console.error('Error creating booking/project:', projectError);
+        } catch (error) {
+          console.error('Error processing reservation:', error);
+          toast({
+            title: 'Erro',
+            description: 'Erro ao processar reserva. Por favor tenta novamente.',
+            variant: 'destructive',
+          });
+          return;
         }
       } else if (newStatus === 'rejected') {
+        // Delete the pending reservation if rejected
+        await supabase
+          .from('reservations')
+          .delete()
+          .eq('payment_request_id', id)
+          .eq('status', 'pending');
+
         // Notify client of rejection
         await supabase.from('notifications').insert({
           user_id: request.user_id,
@@ -201,6 +208,14 @@ const AdminPayments = () => {
           read: false
         });
       }
+
+      // Update payment request status
+      const { error } = await supabase
+        .from('payment_requests')
+        .update({ status: newStatus })
+        .eq('id', id);
+
+      if (error) throw error;
 
       toast({
         title: newStatus === 'approved' ? 'Pagamento Aprovado' : 'Pagamento Rejeitado',
