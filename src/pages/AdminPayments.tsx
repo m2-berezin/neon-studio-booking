@@ -15,8 +15,16 @@ interface PaymentRequest {
   status: string;
   created_at: string;
   note?: string;
+  reservation_id: string;
   profiles: {
     full_name: string;
+  };
+  reservations?: {
+    starts_at: string;
+    ends_at: string;
+    services?: {
+      name: string;
+    };
   };
 }
 
@@ -28,18 +36,37 @@ const AdminPayments = () => {
 
   const loadPaymentRequests = async () => {
     try {
-      // No relation between payment_requests and profiles exists
       const { data, error } = await supabase
         .from('payment_requests')
-        .select('*')
+        .select(`
+          *,
+          reservations (
+            starts_at,
+            ends_at,
+            services (
+              name
+            )
+          )
+        `)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
       
+      // Fetch user profiles separately
+      const userIds = [...new Set(data?.map(p => p.user_id) || [])];
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('id, full_name')
+        .in('id', userIds);
+
+      const profilesMap = new Map(profilesData?.map(p => [p.id, p]) || []);
+      
       // Map to expected format
       const mappedData = (data || []).map(p => ({
         ...p,
-        profiles: { full_name: 'Cliente' }
+        profiles: {
+          full_name: profilesMap.get(p.user_id)?.full_name || 'Cliente Desconhecido'
+        }
       }));
       
       setPaymentRequests(mappedData);
@@ -209,21 +236,14 @@ const AdminPayments = () => {
                     </div>
                     <div className="text-sm space-y-1">
                       <p><span className="font-medium">Cliente:</span> {request.profiles.full_name}</p>
-                      <p><span className="font-medium">Método:</span> Transferência Bancária</p>
-                      {request.note && (() => {
-                        try {
-                          const bookingInfo = JSON.parse(request.note);
-                          return (
-                            <p className="text-xs bg-muted p-2 rounded mt-2">
-                              <span className="font-medium">Detalhes:</span> {bookingInfo.booking_details || bookingInfo.service}
-                            </p>
-                          );
-                        } catch {
-                          return null;
-                        }
-                      })()}
+                      {request.reservations?.services?.name && (
+                        <p><span className="font-medium">Serviço:</span> {request.reservations.services.name}</p>
+                      )}
+                      {request.reservations?.starts_at && (
+                        <p><span className="font-medium">Data/Hora da Reserva:</span> {format(new Date(request.reservations.starts_at), "dd/MM/yyyy 'às' HH:mm")}</p>
+                      )}
                       <p className="text-muted-foreground">
-                        Solicitado em {format(new Date(request.created_at), "dd/MM/yyyy 'às' HH:mm")}
+                        <span className="font-medium">Pedido em:</span> {format(new Date(request.created_at), "dd/MM/yyyy 'às' HH:mm")}
                       </p>
                     </div>
                   </div>
