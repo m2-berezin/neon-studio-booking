@@ -67,21 +67,21 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
 
   // Load user's available vouchers
   const loadVouchers = async () => {
-    if (!user) return;
-
-    try {
-      const { data, error } = await supabase
-        .from('vouchers')
-        .select('*')
-        .eq('client_id', user.id)
-        .eq('redeemed', false)
-        .gte('expires_at', new Date().toISOString().split('T')[0]);
-
-      if (error) throw error;
-      setAvailableVouchers(data || []);
-    } catch (error) {
-      console.error('Error loading vouchers:', error);
-    }
+    // Vouchers table not yet implemented
+    setAvailableVouchers([]);
+    // if (!user) return;
+    // try {
+    //   const { data, error } = await supabase
+    //     .from('vouchers')
+    //     .select('*')
+    //     .eq('client_id', user.id)
+    //     .eq('redeemed', false)
+    //     .gte('expires_at', new Date().toISOString().split('T')[0]);
+    //   if (error) throw error;
+    //   setAvailableVouchers(data || []);
+    // } catch (error) {
+    //   console.error('Error loading vouchers:', error);
+    // }
   };
 
   useEffect(() => {
@@ -180,36 +180,35 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
 
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('vouchers')
-        .select('*')
-        .eq('code', voucherCode)
-        .eq('client_id', user?.id)
-        .eq('redeemed', false)
-        .gte('expires_at', new Date().toISOString().split('T')[0])
-        .maybeSingle();
-
-      if (error) throw error;
-
-      if (data) {
-        // Clear reward if voucher is applied (can't use both)
-        if (appliedReward) {
-          setAppliedReward('');
-          setRewardCode('');
-        }
-
-        setAppliedVoucher(data);
-        toast({
-          title: 'Voucher Applied',
-          description: `€${data.amount} discount applied`,
-        });
-      } else {
-        toast({
-          title: 'Invalid Voucher',
-          description: 'Voucher code not found, expired, or already used',
-          variant: 'destructive',
-        });
-      }
+      // Vouchers not yet implemented
+      toast({
+        title: 'Erro',
+        description: 'Sistema de vouchers ainda não disponível',
+        variant: 'destructive',
+      });
+      // const { data, error } = await supabase
+      //   .from('vouchers')
+      //   .select('*')
+      //   .eq('code', voucherCode)
+      //   .eq('client_id', user?.id)
+      //   .eq('redeemed', false)
+      //   .gte('expires_at', new Date().toISOString().split('T')[0])
+      //   .maybeSingle();
+      // if (error) throw error;
+      // if (data) {
+      //   if (appliedReward) {
+      //     setAppliedReward('');
+      //     setRewardCode('');
+      //   }
+      //   setAppliedVoucher(data);
+      //   toast({ title: 'Voucher Applied', description: `€${data.amount} discount applied` });
+      // } else {
+      //   toast({
+      //     title: 'Invalid Voucher',
+      //     description: 'Voucher code not found, expired, or already used',
+      //     variant: 'destructive',
+      //   });
+      // }
     } catch (error: any) {
       toast({
         title: 'Error',

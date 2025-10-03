@@ -74,12 +74,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       setProfile(data);
 
-      // Check if welcome messages need to be sent
-      if (data && !data.welcome_messages_sent) {
-        setTimeout(() => {
-          sendWelcomeMessages();
-        }, 1000); // Delay to ensure profile is fully set up
-      }
+      // Welcome messages functionality removed (column doesn't exist)
+      // if (data && !data.welcome_messages_sent) {
+      //   setTimeout(() => {
+      //     sendWelcomeMessages();
+      //   }, 1000);
+      // }
     } catch (error) {
       console.error('Unexpected error fetching profile:', error);
     }

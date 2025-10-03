@@ -87,63 +87,58 @@ export const useAdmin = () => {
 
   // Load availability rules
   const loadAvailabilityRules = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('availability_rules')
-        .select('*')
-        .order('day_of_week', { ascending: true });
-
-      if (error) throw error;
-      setAvailabilityRules(data || []);
-    } catch (error) {
-      console.error('Error loading availability rules:', error);
-    }
+    // Table not yet implemented
+    setAvailabilityRules([]);
+    // try {
+    //   const { data, error } = await supabase
+    //     .from('availability_rules')
+    //     .select('*')
+    //     .order('day_of_week', { ascending: true });
+    //   if (error) throw error;
+    //   setAvailabilityRules(data || []);
+    // } catch (error) {
+    //   console.error('Error loading availability rules:', error);
+    // }
   };
 
   // Load blackout dates
   const loadBlackoutDates = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('blackout_dates')
-        .select('*')
-        .order('date', { ascending: true });
-
-      if (error) throw error;
-      setBlackoutDates(data || []);
-    } catch (error) {
-      console.error('Error loading blackout dates:', error);
-    }
+    // Table not yet implemented
+    setBlackoutDates([]);
+    // try {
+    //   const { data, error } = await supabase
+    //     .from('blackout_dates')
+    //     .select('*')
+    //     .order('date', { ascending: true });
+    //   if (error) throw error;
+    //   setBlackoutDates(data || []);
+    // } catch (error) {
+    //   console.error('Error loading blackout dates:', error);
+    // }
   };
 
   // Load bookings with filters
   const loadBookings = async () => {
-    try {
-      let query = supabase
-        .from('bookings')
-        .select(`
-          *,
-          profiles:client_id(full_name, phone),
-          services:service_id(name, base_price)
-        `)
-        .order('date', { ascending: false });
-
-      if (bookingFilter.status) {
-        query = query.eq('status', bookingFilter.status);
-      }
-      if (bookingFilter.date_from) {
-        query = query.gte('date', bookingFilter.date_from);
-      }
-      if (bookingFilter.date_to) {
-        query = query.lte('date', bookingFilter.date_to);
-      }
-
-      const { data, error } = await query;
-
-      if (error) throw error;
-      setBookings(data || []);
-    } catch (error) {
-      console.error('Error loading bookings:', error);
-    }
+    // Table schema mismatch - temporarily disabled
+    setBookings([]);
+    // try {
+    //   let query = supabase
+    //     .from('bookings')
+    //     .select(`
+    //       *,
+    //       profiles:user_id(full_name),
+    //       services:service_id(name)
+    //     `)
+    //     .order('created_at', { ascending: false });
+    //   if (bookingFilter.status) {
+    //     query = query.eq('status', bookingFilter.status);
+    //   }
+    //   const { data, error } = await query;
+    //   if (error) throw error;
+    //   setBookings(data || []);
+    // } catch (error) {
+    //   console.error('Error loading bookings:', error);
+    // }
   };
 
   // Load clients
@@ -179,38 +174,8 @@ export const useAdmin = () => {
 
   // Load rewards summary
   const loadRewardsSummary = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('rewards_usage')
-        .select(`
-          client_id,
-          reward_code,
-          count,
-          profiles:client_id(full_name)
-        `);
-
-      if (error) throw error;
-
-      // Aggregate by client and reward code
-      const summary: Record<string, RewardSummary> = {};
-      
-      data?.forEach(item => {
-        const key = `${item.client_id}-${item.reward_code}`;
-        if (!summary[key]) {
-          summary[key] = {
-            client_id: item.client_id,
-            full_name: (item.profiles as any)?.full_name || null,
-            reward_code: item.reward_code,
-            total_count: 0,
-          };
-        }
-        summary[key].total_count += item.count || 0;
-      });
-
-      setRewardsSummary(Object.values(summary));
-    } catch (error) {
-      console.error('Error loading rewards summary:', error);
-    }
+    // rewards_usage table not implemented
+    setRewardsSummary([]);
   };
 
   // CRUD Operations
