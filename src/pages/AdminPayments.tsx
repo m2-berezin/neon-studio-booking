@@ -112,11 +112,25 @@ const AdminPayments = () => {
             const endHour = startHour + reservation.duration;
             const endTime = `${endHour.toString().padStart(2, '0')}:${minutes}:00`;
 
+            // Get a default service_id if not present
+            let serviceId = reservation.service_id;
+            if (!serviceId) {
+              // Try to get the "Recording Session" service as default
+              const { data: defaultService } = await supabase
+                .from('services')
+                .select('id')
+                .eq('type', 'recording')
+                .limit(1)
+                .single();
+              
+              serviceId = defaultService?.id;
+            }
+
             const { data: booking, error: bookingError } = await supabase
               .from('bookings')
               .insert({
                 client_id: request.user_id,
-                service_id: reservation.service_id,
+                service_id: serviceId,
                 date: reservation.date,
                 start_time: reservation.time_slot,
                 end_time: endTime,
@@ -126,7 +140,10 @@ const AdminPayments = () => {
               .select()
               .single();
 
-            if (bookingError) throw bookingError;
+            if (bookingError) {
+              console.error('Booking error:', bookingError);
+              throw bookingError;
+            }
             
             bookingId = booking.id;
 
