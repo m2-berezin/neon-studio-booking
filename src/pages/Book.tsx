@@ -533,7 +533,15 @@ const Book = () => {
               selected={selectedDate}
               onSelect={handleDateSelect}
               onMonthChange={setCurrentMonth}
-              disabled={(date) => !isDateAvailable(date)}
+              disabled={(date) => {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const checkDate = new Date(date);
+                checkDate.setHours(0, 0, 0, 0);
+                
+                // Block today and any dates that aren't available
+                return checkDate <= today || !isDateAvailable(date);
+              }}
               modifiers={{
                 occupied: (date) => {
                   const day = date.getDate();
@@ -552,6 +560,12 @@ const Book = () => {
               }}
               className="rounded-md border pointer-events-auto"
             />
+          </div>
+          
+          <div className="flex justify-center mt-3">
+            <p className="text-xs text-muted-foreground italic">
+              Não é possível reservar para o dia de hoje
+            </p>
           </div>
           
           <div className="flex items-center justify-center gap-4 text-xs">
