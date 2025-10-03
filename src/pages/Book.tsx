@@ -200,6 +200,33 @@ const Book = () => {
     setWhatsAppLink('');
   };
 
+  // Calculate end time based on start time and selected hours
+  const calculateEndTime = (startTime: string, hours: number): string => {
+    const [hoursStr, minutesStr] = startTime.split(':');
+    const startHour = parseInt(hoursStr);
+    const startMinute = parseInt(minutesStr);
+    
+    const endHour = startHour + hours;
+    const endMinute = startMinute;
+    
+    return `${endHour.toString().padStart(2, '0')}:${endMinute.toString().padStart(2, '0')}:00`;
+  };
+
+  // Get formatted time range for display
+  const getTimeRange = (): string => {
+    if (!selectedSlot) return '';
+    
+    const startTime = selectedSlot.start_time.slice(0, 5);
+    const isRecording = selectedService === 'recording';
+    
+    if (isRecording) {
+      const endTime = calculateEndTime(selectedSlot.start_time, selectedHours);
+      return `${startTime} - ${endTime.slice(0, 5)}`;
+    }
+    
+    return `${startTime} - ${selectedSlot.end_time.slice(0, 5)}`;
+  };
+
   // Get selected service details with dynamic pricing
   const selectedServiceDetails = selectedService 
     ? getServiceWithPrice(services.find(s => s.id === selectedService))
@@ -224,8 +251,11 @@ const Book = () => {
               <h3 className="text-lg font-semibold mb-2">Detalhes da Sessão</h3>
               <div className="space-y-2 text-sm text-muted-foreground">
                 <p><span className="font-medium">Serviço:</span> {selectedServiceDetails?.name}</p>
+                {selectedService === 'recording' && (
+                  <p><span className="font-medium">Duração:</span> {selectedHours}h</p>
+                )}
                 <p><span className="font-medium">Data:</span> {selectedDate && format(selectedDate, "EEEE, d 'de' MMMM 'de' yyyy", { locale: pt })}</p>
-                <p><span className="font-medium">Horário:</span> {selectedSlot && selectedSlot.start_time.slice(0, 5)} - {selectedSlot && selectedSlot.end_time.slice(0, 5)}</p>
+                <p><span className="font-medium">Horário:</span> {getTimeRange()}</p>
               </div>
             </div>
 
@@ -456,11 +486,17 @@ const Book = () => {
 
           <Card className="p-6">
             <h3 className="text-lg font-semibold mb-4">Resumo da Reserva</h3>
-            <div className="space-y-3 text-sm mb-6">
+              <div className="space-y-3 text-sm mb-6">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Serviço:</span>
                 <span className="font-medium">{selectedServiceDetails?.name}</span>
               </div>
+              {selectedService === 'recording' && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Duração:</span>
+                  <span className="font-medium">{selectedHours}h</span>
+                </div>
+              )}
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Data:</span>
                 <span className="font-medium">
@@ -470,7 +506,7 @@ const Book = () => {
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Horário:</span>
                 <span className="font-medium">
-                  {selectedSlot && selectedSlot.start_time.slice(0, 5)} - {selectedSlot && selectedSlot.end_time.slice(0, 5)}
+                  {getTimeRange()}
                 </span>
               </div>
             </div>
