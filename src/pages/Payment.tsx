@@ -24,6 +24,7 @@ const Payment = () => {
   const delivery = searchParams.get('delivery');
   const price = searchParams.get('price');
   const notes = searchParams.get('notes');
+  const bookingId = searchParams.get('booking_id');
   
   // Determine service title based on service and option
   let serviceTitle = '';
@@ -95,7 +96,8 @@ const Payment = () => {
           amount: parseFloat(price || '0'),
           method: 'manual',
           status: 'pending',
-          notes: JSON.stringify(bookingInfo)
+          notes: JSON.stringify(bookingInfo),
+          booking_id: bookingId || null
         });
 
       if (error) throw error;

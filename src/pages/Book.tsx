@@ -548,15 +548,47 @@ const Book = () => {
 
           <div className="space-y-3">
             <Button 
-              onClick={() => {
-                const queryParams = new URLSearchParams({
-                  service: 'booking',
-                  option: selectedService,
-                  delivery: 'in-person',
-                  price: '20',
-                  notes: `Reserva para ${selectedDate ? format(selectedDate, 'dd/MM/yyyy') : ''} às ${selectedSlot ? selectedSlot.start_time : ''}`,
-                });
-                navigate(`/payment?${queryParams.toString()}`);
+              onClick={async () => {
+                if (!selectedService || !selectedDate || !selectedSlot) return;
+
+                try {
+                  // Create the booking first
+                  const { data: bookingData, error: bookingError } = await supabase
+                    .from('bookings')
+                    .insert({
+                      service_id: selectedService,
+                      client_id: user?.id,
+                      date: format(selectedDate, 'yyyy-MM-dd'),
+                      start_time: selectedSlot.start_time,
+                      end_time: selectedSlot.end_time,
+                      status: 'confirmed'
+                    })
+                    .select()
+                    .single();
+
+                  if (bookingError) throw bookingError;
+
+                  const serviceName = services.find(s => s.id === selectedService)?.name || 'Serviço';
+                  const bookingPrice = selectedService === 'recording' ? getRecordingPrice() : selectedServiceDetails?.base_price || 0;
+                  
+                  // Navigate to payment with booking_id
+                  const queryParams = new URLSearchParams({
+                    service: 'booking',
+                    option: selectedService,
+                    delivery: 'in-person',
+                    price: bookingPrice.toString(),
+                    notes: `${serviceName} - ${format(selectedDate, 'dd/MM/yyyy')} às ${selectedSlot.start_time}`,
+                    booking_id: bookingData.id
+                  });
+                  navigate(`/payment?${queryParams.toString()}`);
+                } catch (error) {
+                  console.error('Error creating booking:', error);
+                  toast({
+                    title: 'Erro',
+                    description: 'Erro ao criar reserva. Tente novamente.',
+                    variant: 'destructive'
+                  });
+                }
               }}
               className="w-full"
               disabled={loading}
