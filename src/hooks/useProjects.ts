@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ProjectFile {
   id: string;
@@ -14,86 +15,61 @@ interface ProjectFile {
 interface Project {
   id: string;
   title: string;
+  description?: string;
+  address: string;
+  date_day: string;
+  start_time: string;
+  end_time: string;
   status: string;
-  client_id: string;
-  booking_id?: string;
+  user_id: string;
+  booking_id: string;
   created_at: string;
   files?: ProjectFile[];
-  client_profile?: {
-    full_name: string;
-    role: string;
-  };
-  booking?: {
-    id: string;
-    date: string;
-    start_time: string;
-    end_time: string;
-    status: string;
-    notes?: string;
-    service?: {
-      name: string;
-      description?: string;
-    };
-  };
 }
 
 export const useProjects = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [uploading, setUploading] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
-  const [currentProject, setCurrentProject] = useState<Project | null>(null);
 
-  // Projects table doesn't exist - all functions disabled
+  useEffect(() => {
+    if (user) {
+      loadProjects();
+    }
+  }, [user]);
+
   const loadProjects = async () => {
-    setProjects([]);
+    if (!user) return;
+    
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('projects' as any)
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setProjects((data as any) || []);
+    } catch (error: any) {
+      console.error('Error loading projects:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível carregar as sessões',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const loadProject = async (projectId: string) => {
-    setCurrentProject(null);
-  };
-
-  const createProject = async (title: string, description: string, files: File[], bookingId?: string) => {
-    toast({
-      title: 'Error',
-      description: 'Projects system not implemented',
-      variant: 'destructive',
-    });
-    return null;
-  };
-
-  const updateProjectStatus = async (projectId: string, status: string, adminNotes?: string) => {
-    toast({
-      title: 'Error',
-      description: 'Projects system not implemented',
-      variant: 'destructive',
-    });
-    return false;
-  };
-
-  const deleteProject = async (projectId: string) => {
-    toast({
-      title: 'Error',
-      description: 'Projects system not implemented',
-      variant: 'destructive',
-    });
-    return false;
-  };
-
-  const uploadProjectFiles = async (files: File[]) => {
-    toast({
-      title: 'Error',
-      description: 'Projects system not implemented',
-      variant: 'destructive',
-    });
-    return [];
-  };
-
-  // Stub methods for compatibility
+  // Stub methods for compatibility with ProjectDetail
+  const currentProject = null;
+  const uploading = false;
+  const loadProject = async (projectId: string) => {};
   const uploadProjectFile = async (projectId: string, file: File) => null;
   const markAsDelivered = async (projectId: string) => false;
-  const getFileCounts = (projectFiles: any[]) => ({ audio: 0, video: 0, stems: 0 });
 
   return {
     loading,
@@ -102,12 +78,7 @@ export const useProjects = () => {
     currentProject,
     loadProjects,
     loadProject,
-    createProject,
-    updateProjectStatus,
-    deleteProject,
-    uploadProjectFiles,
     uploadProjectFile,
     markAsDelivered,
-    getFileCounts,
   };
 };
