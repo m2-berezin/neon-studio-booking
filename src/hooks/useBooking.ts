@@ -205,30 +205,43 @@ export const useBooking = () => {
     
     const sessionEndTime = addMinutes(slotStartTime, sessionDuration);
     
-    console.log(`🕐 [OVERLAP CHECK] Checking slot ${format(date, 'yyyy-MM-dd')} ${slotStart} (local)`);
-    console.log(`   Slot range: ${slotStartTime.toLocaleString('pt-PT')} → ${sessionEndTime.toLocaleString('pt-PT')}`);
-    console.log(`   Duration: ${sessionDuration}min, Total unavailable blocks: ${unavailableSlots.length}`);
+    const dateStr = format(date, 'yyyy-MM-dd');
+    
+    console.log(`\n🕐 [OVERLAP CHECK] Checking slot ${slotStart}`);
+    console.log(`   Slot start: ${slotStartTime.toISOString()} (${slotStartTime.toLocaleString('pt-PT')})`);
+    console.log(`   Slot end: ${sessionEndTime.toISOString()} (${sessionEndTime.toLocaleString('pt-PT')})`);
+    console.log(`   Duration: ${sessionDuration}min`);
+    console.log(`   Total blocked ranges: ${unavailableSlots.length}`);
+    
+    // Hard-coded test for 2025-10-22 at 10:00
+    if (dateStr === '2025-10-22' && slotStart === '10:00:00') {
+      console.log('🧪 [FORCE TEST] Hard-coded test for 22/10/2025 at 10h slot');
+    }
 
-    const hasOverlap = unavailableSlots.some(unavailable => {
-      // Both slot times and unavailable times are now in local time
+    let hasOverlap = false;
+    
+    unavailableSlots.forEach((unavailable, index) => {
+      console.log(`   Checking against blocked[${index}]:`);
+      console.log(`     Blocked start: ${unavailable.starts_at.toISOString()} (${unavailable.starts_at.toLocaleString('pt-PT')})`);
+      console.log(`     Blocked end: ${unavailable.ends_at.toISOString()} (${unavailable.ends_at.toLocaleString('pt-PT')})`);
+      console.log(`     Reason: ${unavailable.reason}`);
+      
       // Overlap occurs if: slot_start < blocked_end AND slot_end > blocked_start
       const overlaps = slotStartTime < unavailable.ends_at && sessionEndTime > unavailable.starts_at;
       
-      if (overlaps) {
-        console.log(`⚠️ [OVERLAP DETECTED] Slot ${slotStart} overlaps with blocked range:`, {
-          slotStart: slotStartTime.toLocaleString('pt-PT'),
-          slotEnd: sessionEndTime.toLocaleString('pt-PT'),
-          blockedStart: unavailable.starts_at.toLocaleString('pt-PT'),
-          blockedEnd: unavailable.ends_at.toLocaleString('pt-PT'),
-          reason: unavailable.reason
-        });
-      }
+      console.log(`     Comparison: slot_start(${slotStartTime.getTime()}) < blocked_end(${unavailable.ends_at.getTime()}) = ${slotStartTime < unavailable.ends_at}`);
+      console.log(`     Comparison: slot_end(${sessionEndTime.getTime()}) > blocked_start(${unavailable.starts_at.getTime()}) = ${sessionEndTime > unavailable.starts_at}`);
+      console.log(`     Result: ${overlaps ? '⚠️ OVERLAP DETECTED!' : '✅ No overlap'}`);
       
-      return overlaps;
+      if (overlaps) {
+        hasOverlap = true;
+      }
     });
     
-    if (!hasOverlap) {
-      console.log(`✅ [OVERLAP CHECK] Slot ${slotStart} is AVAILABLE (no overlaps)`);
+    if (hasOverlap) {
+      console.log(`\n❌ [FINAL] Slot ${slotStart} is BLOCKED (overlap detected)`);
+    } else {
+      console.log(`\n✅ [FINAL] Slot ${slotStart} is AVAILABLE (no overlaps)`);
     }
     
     return hasOverlap;
@@ -237,15 +250,20 @@ export const useBooking = () => {
   // Generate time slots for a specific date
   const generateTimeSlots = (date: Date, sessionDurationMinutes: number = 30): TimeSlot[] => {
     const dateStr = format(date, 'yyyy-MM-dd');
-    console.log(`\n📅 [GENERATE SLOTS] Generating slots for ${dateStr} (local time) with session duration ${sessionDurationMinutes}min`);
+    console.log(`\n\n📅 [GENERATE SLOTS] ========================================`);
+    console.log(`📅 [GENERATE SLOTS] Generating slots for ${dateStr}`);
+    console.log(`📅 [GENERATE SLOTS] Session duration: ${sessionDurationMinutes}min`);
     console.log(`📅 [GENERATE SLOTS] Unavailable blocks in memory: ${unavailableSlots.length}`);
     
     if (unavailableSlots.length > 0) {
-      console.log(`📅 [GENERATE SLOTS] Blocked ranges (local time):`, unavailableSlots.map(s => ({
-        start: s.starts_at.toLocaleString('pt-PT'),
-        end: s.ends_at.toLocaleString('pt-PT'),
-        reason: s.reason
-      })));
+      console.log(`📅 [GENERATE SLOTS] Blocked ranges (local time):`);
+      unavailableSlots.forEach((s, i) => {
+        console.log(`  [${i}] ${s.starts_at.toISOString()} → ${s.ends_at.toISOString()}`);
+        console.log(`      (${s.starts_at.toLocaleString('pt-PT')} → ${s.ends_at.toLocaleString('pt-PT')})`);
+        console.log(`      Reason: ${s.reason}`);
+      });
+    } else {
+      console.log(`⚠️ [GENERATE SLOTS] WARNING: No blocked ranges in memory!`);
     }
     
     const dayOfWeek = date.getDay();
@@ -282,11 +300,6 @@ export const useBooking = () => {
           const slotStartStr = format(currentTime, 'HH:mm:ss');
           const slotEndStr = format(slotEnd, 'HH:mm:ss');
           
-          // Hard-coded test for 22/10/2025 at 10h
-          if (dateStr === '2025-10-22' && slotStartStr === '10:00:00') {
-            console.log('🧪 [TEST] Hard-coded test for 22/10/2025 at 10h slot (local time)');
-          }
-          
           // Check if this slot overlaps with any unavailable time (using local time comparison)
           const isAvailable = !hasTimeOverlap(date, slotStartStr, sessionDurationMinutes);
           
@@ -302,7 +315,11 @@ export const useBooking = () => {
     
     const availableCount = slots.filter(s => s.available).length;
     const blockedCount = slots.filter(s => !s.available).length;
-    console.log(`📅 [GENERATE SLOTS] Generated ${slots.length} total slots: ${availableCount} available, ${blockedCount} blocked`);
+    console.log(`\n📅 [GENERATE SLOTS] ========================================`);
+    console.log(`📅 [GENERATE SLOTS] SUMMARY: Generated ${slots.length} total slots`);
+    console.log(`📅 [GENERATE SLOTS] - ${availableCount} available (green)`);
+    console.log(`📅 [GENERATE SLOTS] - ${blockedCount} blocked (gray/disabled)`);
+    console.log(`📅 [GENERATE SLOTS] ========================================\n`);
 
     return slots;
   };
