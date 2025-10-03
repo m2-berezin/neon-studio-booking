@@ -8,9 +8,9 @@ import { format, startOfDay, addMinutes, parse, isBefore, isAfter, isSameDay } f
 interface Service {
   id: string;
   name: string;
-  type: string;
   base_price: number;
   description: string;
+  duration_minutes?: number;
 }
 
 interface AvailabilityRule {
@@ -66,11 +66,20 @@ export const useBooking = () => {
         .from('services')
         .select('*')
         .eq('is_active', true)
-        .in('type', ['recording', 'mixing', 'mastering'])
-        .order('name');
+        .order('sort_order');
 
       if (error) throw error;
-      setServices(data || []);
+      
+      // Map to expected format
+      const mappedServices = (data || []).map((service: any) => ({
+        id: service.id,
+        name: service.name,
+        description: service.description || '',
+        base_price: Number(service.price_eur) || 0,
+        duration_minutes: service.duration_minutes
+      }));
+      
+      setServices(mappedServices);
     } catch (error) {
       console.error('Error fetching services:', error);
       toast({
@@ -81,7 +90,7 @@ export const useBooking = () => {
     }
   };
 
-  // Fetch availability rules
+  // Fetch availability rules (gracefully handle if table doesn't exist)
   const fetchAvailabilityRules = async () => {
     try {
       const { data, error } = await supabase
@@ -90,14 +99,44 @@ export const useBooking = () => {
         .eq('is_active', true)
         .order('day_of_week');
 
-      if (error) throw error;
+      if (error) {
+        // Table doesn't exist, use default rules (Mon-Sun, 10:00-22:00)
+        const defaultRules: AvailabilityRule[] = [];
+        for (let day = 0; day <= 6; day++) {
+          defaultRules.push({
+            id: `default-${day}`,
+            day_of_week: day,
+            start_time: '10:00:00',
+            end_time: '22:00:00',
+            effective_from: '2024-01-01',
+            effective_to: null,
+            is_active: true
+          });
+        }
+        setAvailabilityRules(defaultRules);
+        return;
+      }
       setAvailabilityRules(data || []);
     } catch (error) {
       console.error('Error fetching availability rules:', error);
+      // Set default rules on error
+      const defaultRules: AvailabilityRule[] = [];
+      for (let day = 0; day <= 6; day++) {
+        defaultRules.push({
+          id: `default-${day}`,
+          day_of_week: day,
+          start_time: '10:00:00',
+          end_time: '22:00:00',
+          effective_from: '2024-01-01',
+          effective_to: null,
+          is_active: true
+        });
+      }
+      setAvailabilityRules(defaultRules);
     }
   };
 
-  // Fetch blackout dates
+  // Fetch blackout dates (gracefully handle if table doesn't exist)
   const fetchBlackoutDates = async () => {
     try {
       const { data, error } = await supabase
@@ -106,10 +145,15 @@ export const useBooking = () => {
         .gte('date', format(new Date(), 'yyyy-MM-dd'))
         .order('date');
 
-      if (error) throw error;
+      if (error) {
+        // Table doesn't exist, set empty array
+        setBlackoutDates([]);
+        return;
+      }
       setBlackoutDates(data || []);
     } catch (error) {
       console.error('Error fetching blackout dates:', error);
+      setBlackoutDates([]);
     }
   };
 
