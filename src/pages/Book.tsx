@@ -553,7 +553,7 @@ const Book = () => {
                   service: 'booking',
                   option: selectedService,
                   delivery: 'in-person',
-                  price: selectedServiceDetails?.base_price.toString() || '0',
+                  price: '20',
                   notes: `Reserva para ${selectedDate ? format(selectedDate, 'dd/MM/yyyy') : ''} às ${selectedSlot ? selectedSlot.start_time : ''}`,
                 });
                 navigate(`/payment?${queryParams.toString()}`);

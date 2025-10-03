@@ -181,14 +181,16 @@ export const useBooking = () => {
           const slotStartStr = format(currentTime, 'HH:mm:ss');
           const slotEndStr = format(slotEnd, 'HH:mm:ss');
           
-          // Check if slot conflicts with existing bookings
+          // Check if slot conflicts with existing bookings (including 1h buffer after each booking)
           const isConflict = existingBookings.some(booking => {
             const bookingStart = parse(booking.start_time, 'HH:mm:ss', new Date());
             const bookingEnd = parse(booking.end_time, 'HH:mm:ss', new Date());
+            // Add 1 hour buffer after booking ends
+            const bookingEndWithBuffer = addMinutes(bookingEnd, 60);
             
+            // Check if new session would overlap with existing booking + buffer
             return (
-              (isBefore(currentTime, bookingEnd) && isAfter(slotEnd, bookingStart)) ||
-              (isBefore(bookingStart, slotEnd) && isAfter(bookingEnd, currentTime))
+              (isBefore(currentTime, bookingEndWithBuffer) && isAfter(sessionEnd, bookingStart))
             );
           });
 
