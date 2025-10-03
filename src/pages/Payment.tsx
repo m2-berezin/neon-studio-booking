@@ -174,6 +174,7 @@ const Payment = () => {
         }
 
         const reservationInsert = {
+          user_id: user.id,
           date: bookingDate,
           time_slot: startTime,
           duration: durationHours,
