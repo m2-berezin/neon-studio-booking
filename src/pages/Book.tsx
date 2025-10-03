@@ -45,30 +45,42 @@ const Book = () => {
   const { user } = useAuth();
   const { toast } = useToast();
 
+  // Service IDs from backend (Supabase)
+  const BACKEND_SERVICE_IDS = {
+    captacao2h: 'b1041ae7-af06-494e-89e3-a3eafcd1e8e0', // Captacao 2h - 20EUR
+    captacao3h: 'dd60e9fe-395f-4b16-a4c9-96a7d96696a6', // Captacao 3h - 30EUR
+    captacao4h: '2c91d14c-a08a-4d31-99e7-13630ced02cd', // Captacao 4h - 40EUR
+    captacao5h: 'ecd1a25b-7188-4ec7-9ae9-237a0fe380d1', // Captacao 5h - 50EUR
+    captacaoMixMaster: '3542c1c1-544c-4aa6-b157-7f909468aa4a', // Captacao 3h + MixMaster - 70EUR
+  };
+
   const services = [
     {
-      id: 'recording',
+      id: 'captacao',
       name: 'Captação 2h (mínimo)',
       base_price: 20,
-      type: 'recording',
+      type: 'captacao',
       description: 'Sessão de gravação profissional',
       duration: 120,
-      hasHourSelector: true
+      hasHourSelector: true,
+      backendServiceId: BACKEND_SERVICE_IDS.captacao2h // Default to 2h
     },
     {
-      id: 'recording_mix',
-      name: 'Captação Mix e Master',
+      id: 'captacao_mixmaster',
+      name: 'Captação 3h + Mix & Master',
       base_price: 70,
       subscriptionPrice: 59.5,
-      type: 'full_service',
-      description: 'Pacote completo: captação + mistura e masterização',
-      duration: 120
+      type: 'captacao_mixmaster',
+      description: 'Pacote completo: captação 3h + mistura e masterização',
+      duration: 180,
+      backendServiceId: BACKEND_SERVICE_IDS.captacaoMixMaster
     }
   ];
 
   const [step, setStep] = useState(1);
   const [selectedService, setSelectedService] = useState<string>('');
   const [selectedHours, setSelectedHours] = useState<number>(2);
+  const [selectedBackendServiceId, setSelectedBackendServiceId] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot>();
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
@@ -85,8 +97,13 @@ const Book = () => {
     setSelectedDate(undefined);
     setTimeSlots([]);
     
-    // If service has hour selector, don't advance step yet
+    // Set initial backend service ID
     const service = services.find(s => s.id === serviceId);
+    if (service) {
+      setSelectedBackendServiceId(service.backendServiceId);
+    }
+    
+    // If service has hour selector, don't advance step yet
     if (!service?.hasHourSelector) {
       setStep(2);
     }
@@ -95,6 +112,16 @@ const Book = () => {
   // Handle hour selection change
   const handleHoursChange = async (hours: number) => {
     setSelectedHours(hours);
+    
+    // Update backend service ID based on selected hours
+    const hourToServiceMap: { [key: number]: string } = {
+      2: BACKEND_SERVICE_IDS.captacao2h,
+      3: BACKEND_SERVICE_IDS.captacao3h,
+      4: BACKEND_SERVICE_IDS.captacao4h,
+      5: BACKEND_SERVICE_IDS.captacao5h,
+    };
+    
+    setSelectedBackendServiceId(hourToServiceMap[hours]);
     
     // If a date is already selected, regenerate time slots with new duration
     if (selectedDate) {
@@ -110,13 +137,14 @@ const Book = () => {
     return selectedHours * 10; // €10 per hour
   };
 
-  // Get service with updated price
+  // Get service with updated price and backend service ID
   const getServiceWithPrice = (service: any) => {
-    if (service.id === 'recording') {
+    if (service.id === 'captacao') {
       return {
         ...service,
         base_price: getRecordingPrice(),
-        duration: selectedHours * 60
+        duration: selectedHours * 60,
+        backendServiceId: selectedBackendServiceId
       };
     }
     return service;
@@ -130,9 +158,10 @@ const Book = () => {
     await fetchBookingsForDate(date);
     
     // Calculate session duration based on service and selected hours
-    const sessionDuration = selectedService === 'recording' 
+    const service = services.find(s => s.id === selectedService);
+    const sessionDuration = service?.id === 'captacao' 
       ? selectedHours * 60 
-      : 120; // Default 2 hours for other services
+      : (service?.duration || 120); // Use service duration or default to 2 hours
     
     const slots = generateTimeSlots(date, sessionDuration);
     setTimeSlots(slots);
@@ -149,11 +178,12 @@ const Book = () => {
 
   // Handle booking confirmation
   const handleBookingConfirm = async () => {
-    if (!selectedService || !selectedDate || !selectedSlot) return;
+    if (!selectedBackendServiceId || !selectedDate || !selectedSlot) return;
 
     try {
+      // Use the backend service ID for creating booking
       await createBooking(
-        selectedService,
+        selectedBackendServiceId,
         selectedDate,
         selectedSlot.start_time,
         selectedSlot.end_time
@@ -193,14 +223,14 @@ const Book = () => {
 
       // Send in-app message
       await sendBookingMessage(
-        selectedService,
+        selectedBackendServiceId,
         selectedDate,
         selectedSlot.start_time
       );
 
       // Generate WhatsApp link
       const link = generateWhatsAppLink(
-        selectedService,
+        selectedBackendServiceId,
         selectedDate,
         selectedSlot.start_time
       );
@@ -240,9 +270,9 @@ const Book = () => {
     if (!selectedSlot) return '';
     
     const startTime = selectedSlot.start_time.slice(0, 5);
-    const isRecording = selectedService === 'recording';
+    const isCaptacao = selectedService === 'captacao';
     
-    if (isRecording) {
+    if (isCaptacao) {
       const endTime = calculateEndTime(selectedSlot.start_time, selectedHours);
       return `${startTime} - ${endTime.slice(0, 5)}`;
     }
@@ -346,16 +376,16 @@ const Book = () => {
           <h2 className="text-xl font-semibold text-center">Escolhe o Teu Serviço</h2>
           <div className="space-y-3">
             {services.map((service) => {
-              const isRecording = service.id === 'recording';
+              const isCaptacao = service.id === 'captacao';
               const isSelected = selectedService === service.id;
-              const currentPrice = isRecording ? getRecordingPrice() : service.base_price;
+              const currentPrice = isCaptacao ? getRecordingPrice() : service.base_price;
 
               return (
                 <Card
                   key={service.id}
                   className={cn(
                     "p-4 transition-shadow",
-                    isSelected && isRecording ? "border-primary" : "cursor-pointer hover:shadow-md"
+                    isSelected && isCaptacao ? "border-primary" : "cursor-pointer hover:shadow-md"
                   )}
                   onClick={() => !isSelected && handleServiceSelect(service.id)}
                 >
@@ -385,8 +415,8 @@ const Book = () => {
                       </div>
                     </div>
 
-                    {/* Hour Selector for Recording Service */}
-                    {isSelected && isRecording && (
+                    {/* Hour Selector for Captacao Service */}
+                    {isSelected && isCaptacao && (
                       <div className="border-t pt-4 space-y-3">
                         <div className="space-y-2">
                           <label className="text-sm font-medium">Número de Horas</label>
@@ -467,7 +497,7 @@ const Book = () => {
             <p className="text-sm text-muted-foreground">
               {selectedDate && format(selectedDate, "EEEE, d 'de' MMMM 'de' yyyy", { locale: pt })}
             </p>
-            {selectedService === 'recording' && (
+            {selectedService === 'captacao' && (
               <p className="text-xs text-muted-foreground mt-2">
                 Sessão de {selectedHours}h | Estúdio fecha às 22:00
               </p>
@@ -519,7 +549,7 @@ const Book = () => {
                 <span className="text-muted-foreground">Serviço:</span>
                 <span className="font-medium">{selectedServiceDetails?.name}</span>
               </div>
-              {selectedService === 'recording' && (
+              {selectedService === 'captacao' && (
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Duração:</span>
                   <span className="font-medium">{selectedHours}h</span>
@@ -549,12 +579,12 @@ const Book = () => {
           <div className="space-y-3">
             <Button 
               onClick={() => {
-                if (!selectedService || !selectedDate || !selectedSlot) return;
+                if (!selectedService || !selectedDate || !selectedSlot || !selectedBackendServiceId) return;
 
                 const serviceName = services.find(s => s.id === selectedService)?.name || 'Serviço';
-                const bookingPrice = selectedService === 'recording' ? getRecordingPrice() : selectedServiceDetails?.base_price || 0;
+                const bookingPrice = selectedService === 'captacao' ? getRecordingPrice() : selectedServiceDetails?.base_price || 0;
                 
-                // Navigate to payment without creating booking yet
+                // Navigate to payment with backend service ID
                 const queryParams = new URLSearchParams({
                   service: 'booking',
                   option: selectedService,
@@ -564,7 +594,8 @@ const Book = () => {
                   date: format(selectedDate, 'yyyy-MM-dd'),
                   start_time: selectedSlot.start_time,
                   end_time: selectedSlot.end_time,
-                  service_id: selectedService,
+                  service_id: selectedBackendServiceId, // Use backend service ID
+                  hours: selectedService === 'captacao' ? selectedHours.toString() : undefined,
                 });
                 navigate(`/payment?${queryParams.toString()}`);
               }}
