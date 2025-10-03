@@ -149,11 +149,15 @@ export const useBooking = () => {
       console.log('📊 [FETCH] Number of blocked ranges:', data?.length || 0);
       
       // Convert UTC timestamps to local Date objects (automatically handles DST)
-      const slots = (data || []).map((slot: any) => {
+      const slots = (data || []).map((slot: any, index: number) => {
+        // Parse UTC timestamp and convert to local
         const startsUtc = new Date(slot.starts_at);
         const endsUtc = new Date(slot.ends_at);
         
-        console.log(`🌍 [TIMEZONE] UTC: ${startsUtc.toISOString()} → Local: ${startsUtc.toLocaleString('pt-PT')} (${format(startsUtc, 'HH:mm')})`);
+        console.log(`🌍 [TIMEZONE ${index}] UTC → Local conversion:`);
+        console.log(`   UTC: ${slot.starts_at} → Local: ${startsUtc.toLocaleString('pt-PT', {timeZone: 'Europe/Lisbon'})} (${format(startsUtc, 'HH:mm')})`);
+        console.log(`   UTC: ${slot.ends_at} → Local: ${endsUtc.toLocaleString('pt-PT', {timeZone: 'Europe/Lisbon'})} (${format(endsUtc, 'HH:mm')})`);
+        console.log(`   Reason: ${slot.reason}`);
         
         return {
           starts_at: startsUtc,
