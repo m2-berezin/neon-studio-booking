@@ -83,7 +83,7 @@ const Payment = () => {
     }
 
     // Validate required fields
-    if (!price || !service) {
+    if (!price || !service || !serviceId) {
       toast({
         title: 'Erro',
         description: 'Dados de pagamento incompletos',
@@ -105,205 +105,62 @@ const Payment = () => {
     setLoading(true);
     
     try {
-      // Store booking details
-      const bookingInfo = notes ? {
-        service: serviceTitle,
-        option: optionTitle,
-        booking_details: notes
-      } : null;
-
-      // Calculate duration in hours
-      let durationHours = 2; // default
-      if (startTime && endTime) {
-        const [startH, startM] = startTime.split(':').map(Number);
-        const [endH, endM] = endTime.split(':').map(Number);
-        const startMinutes = startH * 60 + startM;
-        const endMinutes = endH * 60 + endM;
-        durationHours = Math.max(1, Math.round((endMinutes - startMinutes) / 60));
-      }
-
-      let reservationId: string | null = null;
-
-      // 1. Create reservation for ALL services (booking, mixmaster, beats)
-      // This ensures slots are blocked to prevent overbooking
-      if (service === 'booking' && bookingDate && startTime) {
-        // For booking service with specific date/time
-        const startDateTime = new Date(`${bookingDate}T${startTime}`);
-        const endDateTime = new Date(`${bookingDate}T${endTime}`);
-        const durationMinutes = (endDateTime.getTime() - startDateTime.getTime()) / (1000 * 60);
-
-        // Check bookings
-        const { data: existingBookings } = await supabase
-          .from('bookings')
-          .select('start_time, end_time')
-          .eq('date', bookingDate)
-          .in('status', ['confirmed', 'pending']);
-
-        // Check reservations
-        const { data: existingReservations } = await supabase
-          .from('reservations')
-          .select('time_slot, duration')
-          .eq('date', bookingDate)
-          .in('status', ['confirmed', 'pending']);
-
-        // Check for conflicts
-        const hasBookingConflict = existingBookings?.some(booking => {
-          const bookStart = new Date(`${bookingDate}T${booking.start_time}`);
-          const bookEnd = new Date(`${bookingDate}T${booking.end_time}`);
-          const bookEndWithBuffer = new Date(bookEnd.getTime() + 60 * 60 * 1000);
-          
-          return (startDateTime < bookEndWithBuffer && endDateTime > bookStart);
-        });
-
-        const hasReservationConflict = existingReservations?.some(reservation => {
-          const resStart = new Date(`${bookingDate}T${reservation.time_slot}`);
-          const resEnd = new Date(resStart.getTime() + reservation.duration * 60 * 60 * 1000);
-          const resEndWithBuffer = new Date(resEnd.getTime() + 60 * 60 * 1000);
-          
-          return (startDateTime < resEndWithBuffer && endDateTime > resStart);
-        });
-
-        if (hasBookingConflict || hasReservationConflict) {
-          toast({
-            title: 'Horário Indisponível',
-            description: 'Esse horário já está reservado. Escolhe outro, por favor.',
-            variant: 'destructive',
-          });
-          setLoading(false);
-          return;
-        }
-
-        const reservationInsert = {
-          user_id: user.id,
-          date: bookingDate,
-          time_slot: startTime,
-          duration: durationHours,
-          status: 'pending',
-        } as any;
-
-        const { data: reservationData, error: reservationError } = await supabase
-          .from('reservations')
-          .insert(reservationInsert)
-          .select()
-          .single();
-
-        if (reservationError) {
-          console.error('Reservation error:', reservationError);
-          
-          // Check if it's a race condition
-          if (reservationError.message?.includes('conflict') || reservationError.code === '23505') {
-            toast({
-              title: 'Horário Indisponível',
-              description: 'Esse horário acabou de ser reservado por outra pessoa.',
-              variant: 'destructive',
-            });
-          } else {
-            toast({
-              title: 'Erro',
-              description: 'Não foi possível confirmar a reserva. Tenta novamente.',
-              variant: 'destructive',
-            });
-          }
-          setLoading(false);
-          return;
-        }
-
-        reservationId = reservationData?.id;
-      } else if (service === 'mixmaster' || service === 'beats') {
-        // For non-time-specific services (mixmaster, beats), create a reservation entry
-        // to track the order and prevent overbooking of studio resources
-        const reservationInsert = {
-          user_id: user.id,
-          date: new Date().toISOString().split('T')[0], // today's date
-          time_slot: '00:00:00', // placeholder - these services don't have specific times
-          duration: 1, // placeholder duration
-          status: 'pending',
-          service_id: serviceId || null, // include service_id if available
-        } as any;
-
-        const { data: reservationData, error: reservationError } = await supabase
-          .from('reservations')
-          .insert(reservationInsert)
-          .select()
-          .single();
-
-        if (!reservationError && reservationData) {
-          reservationId = reservationData.id;
-        }
-      }
-
-      // 2. Create payment request
-      const { data: paymentData, error: paymentError } = await supabase
-        .from('payment_requests')
+      // 1. Create reservation first
+      const startDateTime = new Date(`${bookingDate}T${startTime}`);
+      const endDateTime = new Date(`${bookingDate}T${endTime}`);
+      
+      const { data: reservationData, error: reservationError } = await supabase
+        .from('reservations')
         .insert({
           user_id: user.id,
-          amount: parseFloat(price),
-          method: 'manual',
-          status: 'pending',
-          notes: JSON.stringify(bookingInfo),
+          service_id: serviceId,
+          starts_at: startDateTime.toISOString(),
+          ends_at: endDateTime.toISOString(),
+          status: 'pending'
         })
         .select()
         .single();
 
-      if (paymentError) {
-        console.error('Payment error:', paymentError);
+      if (reservationError) {
+        console.error('Reservation error:', reservationError);
         toast({
           title: 'Erro',
-          description: 'Não foi possível confirmar a reserva. Tenta novamente.',
+          description: 'Não foi possível criar a reserva. Tenta novamente.',
           variant: 'destructive',
         });
         setLoading(false);
         return;
       }
 
-      // 3. Update reservation with payment_request_id if we created a reservation
-      if (reservationId && paymentData) {
-        const { error: updateError } = await supabase
-          .from('reservations')
-          .update({ payment_request_id: paymentData.id })
-          .eq('id', reservationId);
+      // 2. Call RPC to create payment request
+      const { data: paymentId, error: paymentError } = await supabase
+        .rpc('request_payment', {
+          p_reservation_id: reservationData.id,
+          p_amount_eur: parseFloat(price),
+          p_currency: 'EUR',
+          p_note: notes || `${serviceTitle} - ${optionTitle}`
+        });
 
-        if (updateError) {
-          console.error('Update error:', updateError);
-          // Non-critical error, continue
-        }
-      }
-
-      // 4. Create notification for admin
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('full_name')
-        .eq('id', user.id)
-        .single();
-
-      const userName = profile?.full_name || user.email || 'Usuário';
-
-      const { data: admins } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('role', 'admin');
-
-      if (admins && admins.length > 0) {
-        const notificationBody = notes 
-          ? `${userName} confirmou pagamento de €${price} para ${serviceTitle} - ${notes}`
-          : `${userName} confirmou pagamento de €${price} para ${serviceTitle} - ${optionTitle}`;
-
-        const notifications = admins.map(admin => ({
-          user_id: admin.id,
-          title: 'Novo Pagamento Pendente',
-          body: notificationBody,
-          read: false
-        }));
-
-        await supabase.from('notifications').insert(notifications);
+      if (paymentError) {
+        console.error('Payment error:', paymentError);
+        // Cleanup: delete the reservation if payment request failed
+        await supabase.from('reservations').delete().eq('id', reservationData.id);
+        
+        toast({
+          title: 'Erro',
+          description: 'Não foi possível criar o pedido de pagamento. Tenta novamente.',
+          variant: 'destructive',
+        });
+        setLoading(false);
+        return;
       }
 
       toast({
-        title: 'Pagamento Registado',
-        description: 'O teu pagamento está a ser verificado. Receberás uma confirmação em breve.',
+        title: 'Pedido Enviado',
+        description: 'Reserva pendente de verificação de pagamento. Receberás uma notificação quando for aprovada.',
       });
       
-      navigate('/projects');
+      navigate('/');
       
     } catch (error) {
       console.error('Error registering payment:', error);

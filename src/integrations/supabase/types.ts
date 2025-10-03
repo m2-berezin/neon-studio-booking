@@ -14,295 +14,52 @@ export type Database = {
   }
   public: {
     Tables: {
-      availabilities: {
+      payment_requests: {
         Row: {
-          created_at: string | null
-          date: string
-          id: string
-          is_available: boolean | null
-          time_slot: string
-        }
-        Insert: {
-          created_at?: string | null
-          date: string
-          id?: string
-          is_available?: boolean | null
-          time_slot: string
-        }
-        Update: {
-          created_at?: string | null
-          date?: string
-          id?: string
-          is_available?: boolean | null
-          time_slot?: string
-        }
-        Relationships: []
-      }
-      availability_rules: {
-        Row: {
+          amount_eur: number
           created_at: string
-          day_of_week: number
-          effective_from: string
-          effective_to: string | null
-          end_time: string
+          currency: string
+          decided_at: string | null
+          decided_by: string | null
           id: string
-          is_active: boolean | null
-          start_time: string
+          note: string | null
+          proof_url: string | null
+          reservation_id: string
+          status: string
+          updated_at: string
+          user_id: string
         }
         Insert: {
+          amount_eur: number
           created_at?: string
-          day_of_week: number
-          effective_from: string
-          effective_to?: string | null
-          end_time: string
+          currency?: string
+          decided_at?: string | null
+          decided_by?: string | null
           id?: string
-          is_active?: boolean | null
-          start_time: string
+          note?: string | null
+          proof_url?: string | null
+          reservation_id: string
+          status?: string
+          updated_at?: string
+          user_id: string
         }
         Update: {
+          amount_eur?: number
           created_at?: string
-          day_of_week?: number
-          effective_from?: string
-          effective_to?: string | null
-          end_time?: string
+          currency?: string
+          decided_at?: string | null
+          decided_by?: string | null
           id?: string
-          is_active?: boolean | null
-          start_time?: string
-        }
-        Relationships: []
-      }
-      blackout_dates: {
-        Row: {
-          created_at: string
-          date: string
-          id: string
-          reason: string | null
-        }
-        Insert: {
-          created_at?: string
-          date: string
-          id?: string
-          reason?: string | null
-        }
-        Update: {
-          created_at?: string
-          date?: string
-          id?: string
-          reason?: string | null
-        }
-        Relationships: []
-      }
-      bookings: {
-        Row: {
-          client_id: string
-          created_at: string
-          date: string
-          end_time: string
-          id: string
-          notes: string | null
-          service_id: string
-          start_time: string
-          status: string | null
-        }
-        Insert: {
-          client_id: string
-          created_at?: string
-          date: string
-          end_time: string
-          id?: string
-          notes?: string | null
-          service_id: string
-          start_time: string
-          status?: string | null
-        }
-        Update: {
-          client_id?: string
-          created_at?: string
-          date?: string
-          end_time?: string
-          id?: string
-          notes?: string | null
-          service_id?: string
-          start_time?: string
-          status?: string | null
+          note?: string | null
+          proof_url?: string | null
+          reservation_id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "bookings_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "bookings_service_id_fkey"
-            columns: ["service_id"]
-            isOneToOne: false
-            referencedRelation: "services"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      discounts: {
-        Row: {
-          code: string
-          created_at: string | null
-          expires_at: string | null
-          id: string
-          is_used: boolean | null
-          percentage: number
-          user_id: string | null
-        }
-        Insert: {
-          code: string
-          created_at?: string | null
-          expires_at?: string | null
-          id?: string
-          is_used?: boolean | null
-          percentage: number
-          user_id?: string | null
-        }
-        Update: {
-          code?: string
-          created_at?: string | null
-          expires_at?: string | null
-          id?: string
-          is_used?: boolean | null
-          percentage?: number
-          user_id?: string | null
-        }
-        Relationships: []
-      }
-      files: {
-        Row: {
-          created_at: string
-          duration_seconds: number | null
-          id: string
-          kind: string
-          project_id: string
-          url: string
-        }
-        Insert: {
-          created_at?: string
-          duration_seconds?: number | null
-          id?: string
-          kind: string
-          project_id: string
-          url: string
-        }
-        Update: {
-          created_at?: string
-          duration_seconds?: number | null
-          id?: string
-          kind?: string
-          project_id?: string
-          url?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "files_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "projects"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      messages: {
-        Row: {
-          created_at: string | null
-          id: string
-          is_read: boolean | null
-          message: string
-          read_at: string | null
-          receiver_id: string
-          sender_id: string
-          service_id: string | null
-          thread_id: string
-          timestamp: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          is_read?: boolean | null
-          message: string
-          read_at?: string | null
-          receiver_id: string
-          sender_id: string
-          service_id?: string | null
-          thread_id: string
-          timestamp?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          is_read?: boolean | null
-          message?: string
-          read_at?: string | null
-          receiver_id?: string
-          sender_id?: string
-          service_id?: string | null
-          thread_id?: string
-          timestamp?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "messages_receiver_id_fkey"
-            columns: ["receiver_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "messages_sender_id_fkey"
-            columns: ["sender_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "messages_service_id_fkey"
-            columns: ["service_id"]
-            isOneToOne: false
-            referencedRelation: "services"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      NoCanDo: {
-        Row: {
-          created_at: string | null
-          date: string | null
-          end_time: string | null
-          id: string
-          reason: string | null
-          reservation_id: string | null
-          start_time: string | null
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          date?: string | null
-          end_time?: string | null
-          id?: string
-          reason?: string | null
-          reservation_id?: string | null
-          start_time?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          date?: string | null
-          end_time?: string | null
-          id?: string
-          reason?: string | null
-          reservation_id?: string | null
-          start_time?: string | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "NoCanDo_reservation_id_fkey"
+            foreignKeyName: "payment_requests_reservation_id_fkey"
             columns: ["reservation_id"]
             isOneToOne: false
             referencedRelation: "reservations"
@@ -310,252 +67,77 @@ export type Database = {
           },
         ]
       }
-      notifications: {
+      profiles: {
         Row: {
-          body: string
+          avatar_url: string | null
           created_at: string
+          full_name: string | null
           id: string
-          read: boolean | null
-          title: string
-          user_id: string
+          role: string
+          updated_at: string
         }
         Insert: {
-          body: string
+          avatar_url?: string | null
           created_at?: string
-          id?: string
-          read?: boolean | null
-          title: string
-          user_id: string
-        }
-        Update: {
-          body?: string
-          created_at?: string
-          id?: string
-          read?: boolean | null
-          title?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "notifications_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      offers: {
-        Row: {
-          created_at: string | null
-          discount_percentage: number
+          full_name?: string | null
           id: string
-          is_active: boolean | null
-          is_used: boolean | null
-          name: string
-          service_id: string | null
-          user_id: string | null
-          valid_until: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          discount_percentage: number
-          id?: string
-          is_active?: boolean | null
-          is_used?: boolean | null
-          name: string
-          service_id?: string | null
-          user_id?: string | null
-          valid_until?: string | null
+          role?: string
+          updated_at?: string
         }
         Update: {
-          created_at?: string | null
-          discount_percentage?: number
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
           id?: string
-          is_active?: boolean | null
-          is_used?: boolean | null
-          name?: string
-          service_id?: string | null
-          user_id?: string | null
-          valid_until?: string | null
+          role?: string
+          updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "offers_service_id_fkey"
-            columns: ["service_id"]
-            isOneToOne: false
-            referencedRelation: "services"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
-      payment_requests: {
+      reservations: {
         Row: {
-          amount: number
-          booking_id: string | null
           created_at: string
+          currency_snapshot: string | null
+          duration_minutes_snapshot: number | null
+          ends_at: string
           id: string
-          method: string
-          notes: string | null
+          price_eur_snapshot: number | null
+          service_id: string
+          service_name_snapshot: string | null
+          starts_at: string
           status: string
           updated_at: string
           user_id: string
         }
         Insert: {
-          amount: number
-          booking_id?: string | null
           created_at?: string
+          currency_snapshot?: string | null
+          duration_minutes_snapshot?: number | null
+          ends_at: string
           id?: string
-          method: string
-          notes?: string | null
+          price_eur_snapshot?: number | null
+          service_id: string
+          service_name_snapshot?: string | null
+          starts_at: string
           status?: string
           updated_at?: string
           user_id: string
         }
         Update: {
-          amount?: number
-          booking_id?: string | null
           created_at?: string
+          currency_snapshot?: string | null
+          duration_minutes_snapshot?: number | null
+          ends_at?: string
           id?: string
-          method?: string
-          notes?: string | null
+          price_eur_snapshot?: number | null
+          service_id?: string
+          service_name_snapshot?: string | null
+          starts_at?: string
           status?: string
           updated_at?: string
           user_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "payment_requests_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      profiles: {
-        Row: {
-          created_at: string
-          full_name: string | null
-          id: string
-          last_voucher_at: string | null
-          onboarding_completed: boolean | null
-          penalty_until: string | null
-          phone: string | null
-          role: string | null
-          updated_at: string
-          welcome_messages_sent: boolean | null
-        }
-        Insert: {
-          created_at?: string
-          full_name?: string | null
-          id?: string
-          last_voucher_at?: string | null
-          onboarding_completed?: boolean | null
-          penalty_until?: string | null
-          phone?: string | null
-          role?: string | null
-          updated_at?: string
-          welcome_messages_sent?: boolean | null
-        }
-        Update: {
-          created_at?: string
-          full_name?: string | null
-          id?: string
-          last_voucher_at?: string | null
-          onboarding_completed?: boolean | null
-          penalty_until?: string | null
-          phone?: string | null
-          role?: string | null
-          updated_at?: string
-          welcome_messages_sent?: boolean | null
-        }
-        Relationships: []
-      }
-      projects: {
-        Row: {
-          booking_id: string | null
-          client_id: string
-          created_at: string
-          id: string
-          status: string | null
-          title: string
-        }
-        Insert: {
-          booking_id?: string | null
-          client_id: string
-          created_at?: string
-          id?: string
-          status?: string | null
-          title: string
-        }
-        Update: {
-          booking_id?: string | null
-          client_id?: string
-          created_at?: string
-          id?: string
-          status?: string | null
-          title?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "projects_booking_id_fkey"
-            columns: ["booking_id"]
-            isOneToOne: false
-            referencedRelation: "bookings"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "projects_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      reservations: {
-        Row: {
-          created_at: string | null
-          date: string
-          duration: number
-          id: string
-          payment_request_id: string | null
-          service_id: string | null
-          status: string | null
-          time_slot: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string | null
-          date: string
-          duration: number
-          id?: string
-          payment_request_id?: string | null
-          service_id?: string | null
-          status?: string | null
-          time_slot: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string | null
-          date?: string
-          duration?: number
-          id?: string
-          payment_request_id?: string | null
-          service_id?: string | null
-          status?: string | null
-          time_slot?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "reservations_payment_request_id_fkey"
-            columns: ["payment_request_id"]
-            isOneToOne: false
-            referencedRelation: "payment_requests"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "reservations_service_id_fkey"
             columns: ["service_id"]
@@ -563,187 +145,112 @@ export type Database = {
             referencedRelation: "services"
             referencedColumns: ["id"]
           },
-        ]
-      }
-      rewards_usage: {
-        Row: {
-          client_id: string
-          count: number | null
-          created_at: string
-          id: string
-          month: number
-          reward_code: string
-          year: number
-        }
-        Insert: {
-          client_id: string
-          count?: number | null
-          created_at?: string
-          id?: string
-          month: number
-          reward_code: string
-          year: number
-        }
-        Update: {
-          client_id?: string
-          count?: number | null
-          created_at?: string
-          id?: string
-          month?: number
-          reward_code?: string
-          year?: number
-        }
-        Relationships: [
           {
-            foreignKeyName: "rewards_usage_client_id_fkey"
-            columns: ["client_id"]
+            foreignKeyName: "reservations_service_id_fkey"
+            columns: ["service_id"]
             isOneToOne: false
-            referencedRelation: "profiles"
+            referencedRelation: "v_active_services"
             referencedColumns: ["id"]
           },
         ]
+      }
+      service_categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       services: {
         Row: {
-          base_price: number
+          category_id: string | null
           created_at: string
+          created_by: string | null
+          currency: string
+          deposit_eur: number | null
           description: string | null
-          duration_prices: Json | null
+          duration_minutes: number | null
           id: string
-          is_active: boolean | null
+          image_url: string | null
+          is_active: boolean
+          max_capacity: number
           name: string
-          type: string
+          price_eur: number | null
+          requires_deposit: boolean
+          slug: string
+          sort_order: number
+          updated_at: string
         }
         Insert: {
-          base_price: number
+          category_id?: string | null
           created_at?: string
+          created_by?: string | null
+          currency?: string
+          deposit_eur?: number | null
           description?: string | null
-          duration_prices?: Json | null
+          duration_minutes?: number | null
           id?: string
-          is_active?: boolean | null
+          image_url?: string | null
+          is_active?: boolean
+          max_capacity?: number
           name: string
-          type: string
+          price_eur?: number | null
+          requires_deposit?: boolean
+          slug: string
+          sort_order?: number
+          updated_at?: string
         }
         Update: {
-          base_price?: number
+          category_id?: string | null
           created_at?: string
+          created_by?: string | null
+          currency?: string
+          deposit_eur?: number | null
           description?: string | null
-          duration_prices?: Json | null
+          duration_minutes?: number | null
           id?: string
-          is_active?: boolean | null
+          image_url?: string | null
+          is_active?: boolean
+          max_capacity?: number
           name?: string
-          type?: string
-        }
-        Relationships: []
-      }
-      subscription_preferences: {
-        Row: {
-          created_at: string
-          id: string
-          preferred_days: string[] | null
-          preferred_time_windows: Json | null
-          subscription_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          preferred_days?: string[] | null
-          preferred_time_windows?: Json | null
-          subscription_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          preferred_days?: string[] | null
-          preferred_time_windows?: Json | null
-          subscription_id?: string
+          price_eur?: number | null
+          requires_deposit?: boolean
+          slug?: string
+          sort_order?: number
+          updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "subscription_preferences_subscription_id_fkey"
-            columns: ["subscription_id"]
+            foreignKeyName: "services_category_id_fkey"
+            columns: ["category_id"]
             isOneToOne: false
-            referencedRelation: "subscriptions"
+            referencedRelation: "service_categories"
             referencedColumns: ["id"]
           },
         ]
-      }
-      subscriptions: {
-        Row: {
-          active: boolean | null
-          client_id: string
-          created_at: string
-          discounted_price: number | null
-          end_date: string | null
-          hours_per_month: number
-          id: string
-          notes: string | null
-          plan: string
-          price: number
-          start_date: string
-        }
-        Insert: {
-          active?: boolean | null
-          client_id: string
-          created_at?: string
-          discounted_price?: number | null
-          end_date?: string | null
-          hours_per_month: number
-          id?: string
-          notes?: string | null
-          plan: string
-          price: number
-          start_date: string
-        }
-        Update: {
-          active?: boolean | null
-          client_id?: string
-          created_at?: string
-          discounted_price?: number | null
-          end_date?: string | null
-          hours_per_month?: number
-          id?: string
-          notes?: string | null
-          plan?: string
-          price?: number
-          start_date?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "subscriptions_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      unavailable_slots: {
-        Row: {
-          booking_id: string | null
-          created_at: string
-          end_time: string
-          id: string
-          reason: string | null
-          start_time: string
-        }
-        Insert: {
-          booking_id?: string | null
-          created_at?: string
-          end_time: string
-          id?: string
-          reason?: string | null
-          start_time: string
-        }
-        Update: {
-          booking_id?: string | null
-          created_at?: string
-          end_time?: string
-          id?: string
-          reason?: string | null
-          start_time?: string
-        }
-        Relationships: []
       }
       user_roles: {
         Row: {
@@ -766,95 +273,69 @@ export type Database = {
         }
         Relationships: []
       }
-      vouchers: {
-        Row: {
-          amount: number
-          client_id: string
-          code: string
-          combinable: boolean | null
-          created_at: string
-          expires_at: string
-          id: string
-          issued_at: string
-          redeemed: boolean | null
-        }
-        Insert: {
-          amount: number
-          client_id: string
-          code: string
-          combinable?: boolean | null
-          created_at?: string
-          expires_at: string
-          id?: string
-          issued_at?: string
-          redeemed?: boolean | null
-        }
-        Update: {
-          amount?: number
-          client_id?: string
-          code?: string
-          combinable?: boolean | null
-          created_at?: string
-          expires_at?: string
-          id?: string
-          issued_at?: string
-          redeemed?: boolean | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "vouchers_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
     }
     Views: {
-      v_messages: {
+      v_active_services: {
         Row: {
-          created_at: string | null
+          currency: string | null
+          description: string | null
+          duration_minutes: number | null
           id: string | null
-          is_read: boolean | null
-          message: string | null
-          receiver_display_name: string | null
-          receiver_id: string | null
-          sender_display_name: string | null
-          sender_id: string | null
-          service_id: string | null
-          thread_id: string | null
-          timestamp: string | null
+          image_url: string | null
+          name: string | null
+          price_eur: number | null
+          sort_order: number | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "messages_receiver_id_fkey"
-            columns: ["receiver_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "messages_sender_id_fkey"
-            columns: ["sender_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "messages_service_id_fkey"
-            columns: ["service_id"]
-            isOneToOne: false
-            referencedRelation: "services"
-            referencedColumns: ["id"]
-          },
-        ]
+        Insert: {
+          currency?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string | null
+          image_url?: string | null
+          name?: string | null
+          price_eur?: number | null
+          sort_order?: number | null
+        }
+        Update: {
+          currency?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string | null
+          image_url?: string | null
+          name?: string | null
+          price_eur?: number | null
+          sort_order?: number | null
+        }
+        Relationships: []
       }
     }
     Functions: {
+      admin_approve_payment: {
+        Args: { p_payment_id: string }
+        Returns: undefined
+      }
+      admin_reject_payment: {
+        Args: { p_payment_id: string; p_reason?: string }
+        Returns: undefined
+      }
       backfill_welcome_messages: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      captacao_options: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          currency: string
+          duration_minutes: number
+          hours: number
+          price_eur: number
+          service_id: string
+          service_name: string
+        }[]
+      }
+      captacao_service_by_hours: {
+        Args: { p_hours: number }
+        Returns: string
       }
       check_user_role: {
         Args: {
@@ -863,9 +344,273 @@ export type Database = {
         }
         Returns: boolean
       }
+      create_booking_captacao: {
+        Args: { p_hours: number; p_starts_at: string; p_user_id: string }
+        Returns: string
+      }
+      gbt_bit_compress: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbt_bool_compress: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbt_bool_fetch: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbt_bpchar_compress: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbt_bytea_compress: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbt_cash_compress: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbt_cash_fetch: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbt_date_compress: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbt_date_fetch: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbt_decompress: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbt_enum_compress: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbt_enum_fetch: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbt_float4_compress: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbt_float4_fetch: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbt_float8_compress: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbt_float8_fetch: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbt_inet_compress: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbt_int2_compress: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbt_int2_fetch: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbt_int4_compress: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbt_int4_fetch: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbt_int8_compress: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbt_int8_fetch: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbt_intv_compress: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbt_intv_decompress: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbt_intv_fetch: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbt_macad_compress: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbt_macad_fetch: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbt_macad8_compress: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbt_macad8_fetch: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbt_numeric_compress: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbt_oid_compress: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbt_oid_fetch: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbt_text_compress: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbt_time_compress: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbt_time_fetch: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbt_timetz_compress: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbt_ts_compress: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbt_ts_fetch: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbt_tstz_compress: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbt_uuid_compress: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbt_uuid_fetch: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbt_var_decompress: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbt_var_fetch: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbtreekey_var_in: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbtreekey_var_out: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbtreekey16_in: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbtreekey16_out: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbtreekey2_in: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbtreekey2_out: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbtreekey32_in: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbtreekey32_out: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbtreekey4_in: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbtreekey4_out: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbtreekey8_in: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gbtreekey8_out: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
       is_admin: {
-        Args: Record<PropertyKey, never>
+        Args: Record<PropertyKey, never> | { uid: string }
         Returns: boolean
+      }
+      list_active_services: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          category_id: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          deposit_eur: number | null
+          description: string | null
+          duration_minutes: number | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          max_capacity: number
+          name: string
+          price_eur: number | null
+          requires_deposit: boolean
+          slug: string
+          sort_order: number
+          updated_at: string
+        }[]
+      }
+      request_payment: {
+        Args: {
+          p_amount_eur: number
+          p_currency?: string
+          p_note?: string
+          p_proof_url?: string
+          p_reservation_id: string
+        }
+        Returns: string
+      }
+      slugify: {
+        Args: { txt: string }
+        Returns: string
       }
     }
     Enums: {
