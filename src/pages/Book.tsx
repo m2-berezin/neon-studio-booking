@@ -72,7 +72,8 @@ const Book = () => {
       subscriptionPrice: 59.5,
       type: 'captacao_mixmaster',
       description: 'Pacote completo: captação 3h + mistura e masterização',
-      duration: 180,
+      duration: 240, // 3h captação + 1h mix = 240min
+      hasHourSelector: true,
       backendServiceId: BACKEND_SERVICE_IDS.captacaoMixMaster
     }
   ];
@@ -80,6 +81,7 @@ const Book = () => {
   const [step, setStep] = useState(1);
   const [selectedService, setSelectedService] = useState<string>('');
   const [selectedHours, setSelectedHours] = useState<number>(2);
+  const [selectedMixMasterHours, setSelectedMixMasterHours] = useState<number>(3);
   const [selectedBackendServiceId, setSelectedBackendServiceId] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot>();
@@ -132,9 +134,28 @@ const Book = () => {
     }
   };
 
+  // Handle mix&master hours selection
+  const handleMixMasterHoursChange = async (hours: number) => {
+    setSelectedMixMasterHours(hours);
+    
+    // Mix&Master always uses the same service ID (3h base + mix)
+    setSelectedBackendServiceId(BACKEND_SERVICE_IDS.captacaoMixMaster);
+    
+    // If a date is already selected, regenerate time slots with new duration
+    if (selectedDate) {
+      await fetchBookingsForDate(selectedDate);
+      const sessionDuration = 240; // 3h captação + 1h mix = 240min
+      const slots = generateTimeSlots(selectedDate, sessionDuration);
+      setTimeSlots(slots);
+    }
+  };
+
   // Calculate dynamic price for recording service
   const getRecordingPrice = () => {
-    return selectedHours * 10; // €10 per hour
+    if (selectedService === 'captacao') {
+      return selectedHours * 10; // €10 per hour
+    }
+    return 70; // Mix&Master base price
   };
 
   // Get service with updated price and backend service ID
@@ -144,6 +165,14 @@ const Book = () => {
         ...service,
         base_price: getRecordingPrice(),
         duration: selectedHours * 60,
+        backendServiceId: selectedBackendServiceId
+      };
+    }
+    if (service.id === 'captacao_mixmaster') {
+      return {
+        ...service,
+        base_price: 70,
+        duration: 240, // 3h + 1h mix = 240min
         backendServiceId: selectedBackendServiceId
       };
     }
@@ -159,9 +188,15 @@ const Book = () => {
     
     // Calculate session duration based on service and selected hours
     const service = services.find(s => s.id === selectedService);
-    const sessionDuration = service?.id === 'captacao' 
-      ? selectedHours * 60 
-      : (service?.duration || 120); // Use service duration or default to 2 hours
+    let sessionDuration = 120; // default 2h
+    
+    if (service?.id === 'captacao') {
+      sessionDuration = selectedHours * 60;
+    } else if (service?.id === 'captacao_mixmaster') {
+      sessionDuration = 240; // 3h + 1h mix
+    } else {
+      sessionDuration = service?.duration || 120;
+    }
     
     const slots = generateTimeSlots(date, sessionDuration);
     setTimeSlots(slots);
@@ -247,14 +282,15 @@ const Book = () => {
     setWhatsAppLink('');
   };
 
-  // Calculate end time based on start time and selected hours
-  const calculateEndTime = (startTime: string, hours: number): string => {
+  // Calculate end time based on start time and duration in minutes
+  const calculateEndTime = (startTime: string, durationMinutes: number): string => {
     const [hoursStr, minutesStr] = startTime.split(':');
     const startHour = parseInt(hoursStr);
     const startMinute = parseInt(minutesStr);
     
-    const endHour = startHour + hours;
-    const endMinute = startMinute;
+    const totalMinutes = startHour * 60 + startMinute + durationMinutes;
+    const endHour = Math.floor(totalMinutes / 60);
+    const endMinute = totalMinutes % 60;
     
     return `${endHour.toString().padStart(2, '0')}:${endMinute.toString().padStart(2, '0')}:00`;
   };
@@ -264,10 +300,14 @@ const Book = () => {
     if (!selectedSlot) return '';
     
     const startTime = selectedSlot.start_time.slice(0, 5);
-    const isCaptacao = selectedService === 'captacao';
     
-    if (isCaptacao) {
-      const endTime = calculateEndTime(selectedSlot.start_time, selectedHours);
+    if (selectedService === 'captacao') {
+      const endTime = calculateEndTime(selectedSlot.start_time, selectedHours * 60);
+      return `${startTime} - ${endTime.slice(0, 5)}`;
+    }
+    
+    if (selectedService === 'captacao_mixmaster') {
+      const endTime = calculateEndTime(selectedSlot.start_time, 240); // 4h total
       return `${startTime} - ${endTime.slice(0, 5)}`;
     }
     
@@ -437,6 +477,32 @@ const Book = () => {
                         </Button>
                       </div>
                     )}
+
+                    {/* Hour Selector for Mix&Master Service */}
+                    {isSelected && service.id === 'captacao_mixmaster' && (
+                      <div className="border-t pt-4 space-y-3">
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Horas (3h base + Mix&Master)</label>
+                          <Select
+                            value={selectedMixMasterHours.toString()}
+                            onValueChange={(value) => handleMixMasterHoursChange(parseInt(value))}
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Selecione" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="3">3h + Mix&Master - €70</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <Button 
+                          onClick={() => setStep(2)} 
+                          className="w-full"
+                        >
+                          Continuar
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </Card>
               );
@@ -496,6 +562,11 @@ const Book = () => {
                 Sessão de {selectedHours}h | Estúdio fecha às 22:00
               </p>
             )}
+            {selectedService === 'captacao_mixmaster' && (
+              <p className="text-xs text-muted-foreground mt-2">
+                Sessão de 4h total (3h captação + 1h mix&master) | Estúdio fecha às 22:00
+              </p>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -549,6 +620,12 @@ const Book = () => {
                   <span className="font-medium">{selectedHours}h</span>
                 </div>
               )}
+              {selectedService === 'captacao_mixmaster' && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Duração:</span>
+                  <span className="font-medium">4h (3h captação + 1h mix&master)</span>
+                </div>
+              )}
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Data:</span>
                 <span className="font-medium">
@@ -556,9 +633,20 @@ const Book = () => {
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Horário:</span>
+                <span className="text-muted-foreground">Hora de Início:</span>
                 <span className="font-medium">
-                  {getTimeRange()}
+                  {selectedSlot?.start_time.slice(0, 5)}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Hora de Fim:</span>
+                <span className="font-medium">
+                  {selectedService === 'captacao' 
+                    ? calculateEndTime(selectedSlot?.start_time || '', selectedHours * 60).slice(0, 5)
+                    : selectedService === 'captacao_mixmaster'
+                    ? calculateEndTime(selectedSlot?.start_time || '', 240).slice(0, 5)
+                    : selectedSlot?.end_time.slice(0, 5)
+                  }
                 </span>
               </div>
             </div>
