@@ -157,10 +157,14 @@ const Payment = () => {
 
       toast({
         title: 'Pedido Enviado',
-        description: 'Reserva pendente de verificação de pagamento. Receberás uma notificação quando for aprovada.',
+        description: 'Reserva de sessão pendente de verificação de pagamento.',
+        duration: 5000,
       });
       
-      navigate('/');
+      // Navigate to home after a short delay to let user read the toast
+      setTimeout(() => {
+        navigate('/');
+      }, 1500);
       
     } catch (error) {
       console.error('Error registering payment:', error);
