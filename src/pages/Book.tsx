@@ -585,7 +585,7 @@ const Book = () => {
                         <Button
                           variant="ghost"
                           disabled={true}
-                          className="h-12 flex flex-col items-center justify-center bg-muted/50 text-muted-foreground opacity-60 cursor-not-allowed hover:bg-muted/50"
+                          className="h-12 flex flex-col items-center justify-center bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 opacity-50 cursor-not-allowed hover:bg-gray-300 dark:hover:bg-gray-700"
                         >
                           <Clock className="w-4 h-4 mb-1" />
                           <span className="text-xs">

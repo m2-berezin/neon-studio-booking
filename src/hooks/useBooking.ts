@@ -134,15 +134,19 @@ export const useBooking = () => {
   const fetchBookingsForDate = async (date: Date) => {
     try {
       const dateStr = format(date, 'yyyy-MM-dd');
-      console.log('🔍 Fetching unavailable times for date:', dateStr);
+      console.log('🔍 [FETCH] Fetching unavailable times for date:', dateStr);
       
       const { data, error } = await supabase.rpc('get_unavailable_times', {
         p_date: dateStr
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ [FETCH] RPC Error:', error);
+        throw error;
+      }
       
-      console.log('📊 Raw data from get_unavailable_times:', data);
+      console.log('📊 [FETCH] Raw data from get_unavailable_times:', data);
+      console.log('📊 [FETCH] Number of blocked ranges:', data?.length || 0);
       
       const slots = (data || []).map((slot: any) => ({
         start_time: format(new Date(slot.starts_at), 'HH:mm:ss'),
@@ -150,12 +154,12 @@ export const useBooking = () => {
         reason: slot.reason
       }));
       
-      console.log('🚫 Processed unavailable slots:', slots);
+      console.log('🚫 [FETCH] Processed unavailable slots:', slots);
       
       setUnavailableSlots(slots);
       setExistingBookings([]);
     } catch (error) {
-      console.error('❌ Error fetching unavailable times:', error);
+      console.error('❌ [FETCH] Error fetching unavailable times:', error);
       setUnavailableSlots([]);
       setExistingBookings([]);
     }
@@ -184,20 +188,24 @@ export const useBooking = () => {
   const hasTimeOverlap = (slotStart: string, sessionDuration: number): boolean => {
     const slotStartTime = parse(slotStart, 'HH:mm:ss', new Date());
     const sessionEndTime = addMinutes(slotStartTime, sessionDuration);
+    
+    console.log(`🕐 [OVERLAP CHECK] Checking slot ${slotStart} with duration ${sessionDuration}min (ends at ${format(sessionEndTime, 'HH:mm:ss')})`);
+    console.log(`🕐 [OVERLAP CHECK] Total unavailable slots to check: ${unavailableSlots.length}`);
 
     const hasOverlap = unavailableSlots.some(unavailable => {
       const unavailStart = parse(unavailable.start_time, 'HH:mm:ss', new Date());
       const unavailEnd = parse(unavailable.end_time, 'HH:mm:ss', new Date());
 
       // Check if session overlaps with unavailable slot
+      // Overlap occurs if: slot_start < blocked_end AND slot_end > blocked_start
       const overlaps = isBefore(slotStartTime, unavailEnd) && isAfter(sessionEndTime, unavailStart);
       
       if (overlaps) {
-        console.log(`⚠️ Overlap detected:`, {
+        console.log(`⚠️ [OVERLAP DETECTED] Slot ${slotStart} overlaps with blocked range:`, {
           slotStart: format(slotStartTime, 'HH:mm'),
           slotEnd: format(sessionEndTime, 'HH:mm'),
-          unavailStart: format(unavailStart, 'HH:mm'),
-          unavailEnd: format(unavailEnd, 'HH:mm'),
+          blockedStart: format(unavailStart, 'HH:mm'),
+          blockedEnd: format(unavailEnd, 'HH:mm'),
           reason: unavailable.reason
         });
       }
@@ -205,11 +213,19 @@ export const useBooking = () => {
       return overlaps;
     });
     
+    if (!hasOverlap) {
+      console.log(`✅ [OVERLAP CHECK] Slot ${slotStart} is AVAILABLE (no overlaps)`);
+    }
+    
     return hasOverlap;
   };
 
   // Generate time slots for a specific date
   const generateTimeSlots = (date: Date, sessionDurationMinutes: number = 30): TimeSlot[] => {
+    const dateStr = format(date, 'yyyy-MM-dd');
+    console.log(`\n📅 [GENERATE SLOTS] Generating slots for ${dateStr} with session duration ${sessionDurationMinutes}min`);
+    console.log(`📅 [GENERATE SLOTS] Unavailable slots in memory: ${unavailableSlots.length}`);
+    
     const dayOfWeek = date.getDay();
     const studioCloseTime = parse('22:00:00', 'HH:mm:ss', new Date());
     
@@ -239,6 +255,11 @@ export const useBooking = () => {
           const slotStartStr = format(currentTime, 'HH:mm:ss');
           const slotEndStr = format(slotEnd, 'HH:mm:ss');
           
+          // Hard-coded test for 22/10/2025 at 10h
+          if (dateStr === '2025-10-22' && slotStartStr === '10:00:00') {
+            console.log('🧪 [TEST] Hard-coded test for 22/10/2025 at 10h slot');
+          }
+          
           // Check if this slot overlaps with any unavailable time
           const isAvailable = !hasTimeOverlap(slotStartStr, sessionDurationMinutes);
           
@@ -251,6 +272,8 @@ export const useBooking = () => {
         currentTime = addMinutes(currentTime, 30);
       }
     });
+    
+    console.log(`📅 [GENERATE SLOTS] Generated ${slots.length} total slots, ${slots.filter(s => s.available).length} available, ${slots.filter(s => !s.available).length} blocked`);
 
     return slots;
   };
