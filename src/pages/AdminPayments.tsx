@@ -240,7 +240,11 @@ const AdminPayments = () => {
                         <p><span className="font-medium">Serviço:</span> {request.reservations.services.name}</p>
                       )}
                       {request.reservations?.starts_at && (
-                        <p><span className="font-medium">Data/Hora da Reserva:</span> {format(new Date(request.reservations.starts_at), "dd/MM/yyyy 'às' HH:mm")}</p>
+                        <p>
+                          <span className="font-medium">Data/Hora da Reserva:</span>{' '}
+                          {format(new Date(request.reservations.starts_at), "dd/MM/yyyy 'das' HH:mm")}
+                          {request.reservations.ends_at && ` às ${format(new Date(request.reservations.ends_at), "HH:mm")}`}
+                        </p>
                       )}
                       <p className="text-muted-foreground">
                         <span className="font-medium">Pedido em:</span> {format(new Date(request.created_at), "dd/MM/yyyy 'às' HH:mm")}
