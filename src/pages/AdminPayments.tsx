@@ -87,6 +87,8 @@ const AdminPayments = () => {
 
   const handleUpdateStatus = async (id: string, newStatus: 'approved' | 'rejected', request: PaymentRequest) => {
     try {
+      console.log('Starting payment status update:', { id, newStatus, request });
+      
       // If approved, move reservation to bookings first
       if (newStatus === 'approved') {
         try {
@@ -98,6 +100,8 @@ const AdminPayments = () => {
             .eq('status', 'pending')
             .single();
 
+          console.log('Reservation query result:', { reservation, reservationError });
+
           if (reservationError && reservationError.code !== 'PGRST116') {
             throw reservationError;
           }
@@ -106,6 +110,7 @@ const AdminPayments = () => {
 
           // If we have a reservation with a valid time slot (not placeholder), move it to bookings
           if (reservation && reservation.time_slot && reservation.time_slot !== '00:00:00') {
+            console.log('Processing reservation with valid time slot');
             // Calculate end time from start time + duration
             const [hours, minutes] = reservation.time_slot.split(':');
             const startHour = parseInt(hours);
@@ -168,6 +173,7 @@ const AdminPayments = () => {
               .delete()
               .eq('id', reservation.id);
           } else if (reservation) {
+            console.log('Processing placeholder reservation (Mix&Master/Beats)');
             // For Mix&Master, Beats, or other services without specific time slots
             // Just delete the placeholder reservation
             await supabase
@@ -186,11 +192,13 @@ const AdminPayments = () => {
             }
           }
 
+          console.log('Creating project with info:', bookingInfo);
+
           const projectTitle = bookingInfo?.service 
             ? `${bookingInfo.service} - ${bookingInfo.option || ''}`
             : 'Novo Projeto';
 
-          await supabase
+          const { error: projectError } = await supabase
             .from('projects')
             .insert({
               client_id: request.user_id,
@@ -199,13 +207,24 @@ const AdminPayments = () => {
               booking_id: bookingId
             });
 
+          if (projectError) {
+            console.error('Project creation error:', projectError);
+            throw projectError;
+          }
+
+          console.log('Creating client notification');
           // Notify client
-          await supabase.from('notifications').insert({
+          const { error: notificationError } = await supabase.from('notifications').insert({
             user_id: request.user_id,
             title: 'Pagamento aprovado',
             body: 'A tua sessão está reservada',
             read: false
           });
+
+          if (notificationError) {
+            console.error('Notification error:', notificationError);
+            throw notificationError;
+          }
 
         } catch (error) {
           console.error('Error processing reservation:', error);
@@ -217,6 +236,7 @@ const AdminPayments = () => {
           return;
         }
       } else if (newStatus === 'rejected') {
+        console.log('Processing rejection');
         // Delete the pending reservation if rejected
         await supabase
           .from('reservations')
@@ -233,13 +253,19 @@ const AdminPayments = () => {
         });
       }
 
+      console.log('Updating payment request status to:', newStatus);
       // Update payment request status
       const { error } = await supabase
         .from('payment_requests')
         .update({ status: newStatus })
         .eq('id', id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Payment update error:', error);
+        throw error;
+      }
+
+      console.log('Payment status updated successfully');
 
       toast({
         title: newStatus === 'approved' ? 'Pagamento Aprovado' : 'Pagamento Rejeitado',
