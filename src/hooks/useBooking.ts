@@ -113,12 +113,12 @@ export const useBooking = () => {
     }
   };
 
-  // Fetch existing bookings for a specific date
+  // Fetch existing bookings AND reservations for a specific date
   const fetchBookingsForDate = async (date: Date) => {
     try {
       const dateStr = format(date, 'yyyy-MM-dd');
       
-      // Fetch bookings
+      // Fetch confirmed/pending bookings
       const { data: bookingsData, error: bookingsError } = await supabase
         .from('bookings')
         .select('id, date, start_time, end_time, status')
@@ -126,7 +126,33 @@ export const useBooking = () => {
         .in('status', ['confirmed', 'pending']);
 
       if (bookingsError) throw bookingsError;
-      setExistingBookings(bookingsData || []);
+
+      // Fetch confirmed/pending reservations and convert to booking format
+      const { data: reservationsData, error: reservationsError } = await supabase
+        .from('reservations')
+        .select('id, date, time_slot, duration, status')
+        .eq('date', dateStr)
+        .in('status', ['confirmed', 'pending']);
+
+      if (reservationsError) throw reservationsError;
+
+      // Convert reservations to booking format
+      const convertedReservations = (reservationsData || []).map(res => {
+        const startTime = res.time_slot;
+        const startDateTime = parse(startTime, 'HH:mm:ss', new Date());
+        const endDateTime = addMinutes(startDateTime, res.duration * 60);
+        
+        return {
+          id: res.id,
+          date: res.date,
+          start_time: startTime,
+          end_time: format(endDateTime, 'HH:mm:ss'),
+          status: res.status
+        };
+      });
+
+      // Combine bookings and converted reservations
+      setExistingBookings([...(bookingsData || []), ...convertedReservations]);
 
       // Fetch unavailable slots for this date
       const startOfDayDate = `${dateStr}T00:00:00`;
@@ -249,12 +275,126 @@ export const useBooking = () => {
     return slots;
   };
 
-  // Create booking
+  // Check if time slot has conflicts with existing bookings/reservations
+  const checkTimeSlotConflict = async (date: Date, startTime: string, durationMinutes: number): Promise<{ hasConflict: boolean; message?: string }> => {
+    try {
+      const dateStr = format(date, 'yyyy-MM-dd');
+      const startDateTime = parse(startTime, 'HH:mm:ss', date);
+      const endDateTime = addMinutes(startDateTime, durationMinutes);
+      const endTimeStr = format(endDateTime, 'HH:mm:ss');
+
+      // Check bookings table
+      const { data: bookings, error: bookingsError } = await supabase
+        .from('bookings')
+        .select('start_time, end_time')
+        .eq('date', dateStr)
+        .in('status', ['confirmed', 'pending']);
+
+      if (bookingsError) throw bookingsError;
+
+      // Check reservations table
+      const { data: reservations, error: reservationsError } = await supabase
+        .from('reservations')
+        .select('time_slot, duration')
+        .eq('date', dateStr)
+        .in('status', ['confirmed', 'pending']);
+
+      if (reservationsError) throw reservationsError;
+
+      // Check for conflicts in bookings
+      if (bookings && bookings.length > 0) {
+        const hasBookingConflict = bookings.some(booking => {
+          const bookingStart = parse(booking.start_time, 'HH:mm:ss', date);
+          const bookingEnd = parse(booking.end_time, 'HH:mm:ss', date);
+          const bookingEndWithBuffer = addMinutes(bookingEnd, 60);
+          
+          return (
+            (isBefore(startDateTime, bookingEndWithBuffer) && isAfter(endDateTime, bookingStart))
+          );
+        });
+
+        if (hasBookingConflict) {
+          return { hasConflict: true, message: 'Esse horário já está reservado. Escolhe outro, por favor.' };
+        }
+      }
+
+      // Check for conflicts in reservations
+      if (reservations && reservations.length > 0) {
+        const hasReservationConflict = reservations.some(reservation => {
+          const reservationStart = parse(reservation.time_slot, 'HH:mm:ss', date);
+          const reservationEnd = addMinutes(reservationStart, reservation.duration * 60);
+          const reservationEndWithBuffer = addMinutes(reservationEnd, 60);
+          
+          return (
+            (isBefore(startDateTime, reservationEndWithBuffer) && isAfter(endDateTime, reservationStart))
+          );
+        });
+
+        if (hasReservationConflict) {
+          return { hasConflict: true, message: 'Esse horário já está reservado. Escolhe outro, por favor.' };
+        }
+      }
+
+      // Check unavailable_slots
+      const startOfDayDate = `${dateStr}T00:00:00`;
+      const endOfDayDate = `${dateStr}T23:59:59`;
+      
+      const { data: unavailableSlots, error: slotsError } = await supabase
+        .from('unavailable_slots')
+        .select('start_time, end_time')
+        .gte('start_time', startOfDayDate)
+        .lte('start_time', endOfDayDate);
+
+      if (slotsError) throw slotsError;
+
+      if (unavailableSlots && unavailableSlots.length > 0) {
+        const sessionStartDate = new Date(`${dateStr}T${startTime}`);
+        const sessionEndDate = new Date(`${dateStr}T${endTimeStr}`);
+        
+        const hasSlotConflict = unavailableSlots.some(slot => {
+          const slotStart = new Date(slot.start_time);
+          const slotEnd = new Date(slot.end_time);
+          
+          return (
+            (isBefore(sessionStartDate, slotEnd) && isAfter(sessionEndDate, slotStart))
+          );
+        });
+
+        if (hasSlotConflict) {
+          return { hasConflict: true, message: 'Esse horário já está reservado. Escolhe outro, por favor.' };
+        }
+      }
+
+      return { hasConflict: false };
+    } catch (error) {
+      console.error('Error checking time slot conflict:', error);
+      throw error;
+    }
+  };
+
+  // Create booking with conflict check
   const createBooking = async (serviceId: string, date: Date, startTime: string, endTime: string) => {
     if (!user) throw new Error('User not authenticated');
 
     setLoading(true);
     try {
+      // Calculate duration
+      const startDateTime = parse(startTime, 'HH:mm:ss', date);
+      const endDateTime = parse(endTime, 'HH:mm:ss', date);
+      const durationMinutes = (endDateTime.getTime() - startDateTime.getTime()) / (1000 * 60);
+
+      // Check for conflicts before creating booking
+      const conflictCheck = await checkTimeSlotConflict(date, startTime, durationMinutes);
+      
+      if (conflictCheck.hasConflict) {
+        toast({
+          title: 'Horário Indisponível',
+          description: conflictCheck.message || 'Esse horário já está reservado.',
+          variant: 'destructive',
+        });
+        throw new Error('Time slot conflict');
+      }
+
       const { data, error } = await supabase
         .from('bookings')
         .insert({
@@ -268,21 +408,31 @@ export const useBooking = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        // Check if it's a conflict error (race condition)
+        if (error.message?.includes('conflict') || error.code === '23505') {
+          toast({
+            title: 'Horário Indisponível',
+            description: 'Esse horário acabou de ser reservado por outra pessoa.',
+            variant: 'destructive',
+          });
+        }
+        throw error;
+      }
 
       // Create unavailable slot with 1 hour buffer
       const dateStr = format(date, 'yyyy-MM-dd');
-      const startDateTime = `${dateStr}T${startTime}`;
-      const endDateTime = parse(endTime, 'HH:mm:ss', new Date());
-      const endWithBuffer = addMinutes(endDateTime, 60); // Add 1 hour buffer
+      const startDateTimeStr = `${dateStr}T${startTime}`;
+      const endWithBuffer = addMinutes(endDateTime, 60);
       const endWithBufferStr = `${dateStr}T${format(endWithBuffer, 'HH:mm:ss')}`;
 
       await supabase
         .from('unavailable_slots')
         .insert({
-          start_time: startDateTime,
+          start_time: startDateTimeStr,
           end_time: endWithBufferStr,
-          reason: 'Sessão reservada + descanso'
+          reason: 'Sessão reservada + descanso',
+          booking_id: data.id
         });
 
       // Create admin notification
@@ -298,24 +448,27 @@ export const useBooking = () => {
           .from('notifications')
           .insert({
             user_id: adminProfile.id,
-            title: 'New Session Booked',
-            body: `A new ${services.find(s => s.id === serviceId)?.name} session has been booked for ${format(date, 'PPP')} at ${startTime}`,
+            title: 'Nova Reserva',
+            body: `Nova sessão de ${services.find(s => s.id === serviceId)?.name} para ${format(date, 'dd/MM/yyyy')} às ${startTime}`,
           });
       }
 
       toast({
-        title: 'Booking Confirmed',
-        description: 'Your session has been successfully booked!',
+        title: 'Reserva Confirmada!',
+        description: 'Até já.',
       });
 
       return data;
     } catch (error: any) {
       console.error('Error creating booking:', error);
-      toast({
-        title: 'Booking Failed',
-        description: error.message || 'Failed to create booking',
-        variant: 'destructive',
-      });
+      
+      if (error.message !== 'Time slot conflict') {
+        toast({
+          title: 'Erro',
+          description: 'Não foi possível confirmar a reserva. Tenta novamente.',
+          variant: 'destructive',
+        });
+      }
       throw error;
     } finally {
       setLoading(false);
@@ -373,6 +526,7 @@ export const useBooking = () => {
     isDateAvailable,
     generateTimeSlots,
     fetchBookingsForDate,
+    checkTimeSlotConflict,
     createBooking,
     sendBookingMessage,
     generateWhatsAppLink,

@@ -124,8 +124,55 @@ const Payment = () => {
 
       let reservationId: string | null = null;
 
-      // 1. Create reservation ONLY for booking service
+      // 1. Create reservation ONLY for booking service with conflict check
       if (service === 'booking' && bookingDate && startTime) {
+        // Check for conflicts before creating reservation
+        const dateForCheck = new Date(bookingDate);
+        const startDateTime = new Date(`${bookingDate}T${startTime}`);
+        const endDateTime = new Date(`${bookingDate}T${endTime}`);
+        const durationMinutes = (endDateTime.getTime() - startDateTime.getTime()) / (1000 * 60);
+
+        // Check bookings
+        const { data: existingBookings } = await supabase
+          .from('bookings')
+          .select('start_time, end_time')
+          .eq('date', bookingDate)
+          .in('status', ['confirmed', 'pending']);
+
+        // Check reservations
+        const { data: existingReservations } = await supabase
+          .from('reservations')
+          .select('time_slot, duration')
+          .eq('date', bookingDate)
+          .in('status', ['confirmed', 'pending']);
+
+        // Check for conflicts
+        const hasBookingConflict = existingBookings?.some(booking => {
+          const bookStart = new Date(`${bookingDate}T${booking.start_time}`);
+          const bookEnd = new Date(`${bookingDate}T${booking.end_time}`);
+          const bookEndWithBuffer = new Date(bookEnd.getTime() + 60 * 60 * 1000);
+          
+          return (startDateTime < bookEndWithBuffer && endDateTime > bookStart);
+        });
+
+        const hasReservationConflict = existingReservations?.some(reservation => {
+          const resStart = new Date(`${bookingDate}T${reservation.time_slot}`);
+          const resEnd = new Date(resStart.getTime() + reservation.duration * 60 * 60 * 1000);
+          const resEndWithBuffer = new Date(resEnd.getTime() + 60 * 60 * 1000);
+          
+          return (startDateTime < resEndWithBuffer && endDateTime > resStart);
+        });
+
+        if (hasBookingConflict || hasReservationConflict) {
+          toast({
+            title: 'Horário Indisponível',
+            description: 'Esse horário já está reservado. Escolhe outro, por favor.',
+            variant: 'destructive',
+          });
+          setLoading(false);
+          return;
+        }
+
         const reservationInsert = {
           date: bookingDate,
           time_slot: startTime,
@@ -141,7 +188,23 @@ const Payment = () => {
 
         if (reservationError) {
           console.error('Reservation error:', reservationError);
-          throw new Error(`Erro ao criar reserva: ${reservationError.message}`);
+          
+          // Check if it's a race condition
+          if (reservationError.message?.includes('conflict') || reservationError.code === '23505') {
+            toast({
+              title: 'Horário Indisponível',
+              description: 'Esse horário acabou de ser reservado por outra pessoa.',
+              variant: 'destructive',
+            });
+          } else {
+            toast({
+              title: 'Erro',
+              description: 'Não foi possível confirmar a reserva. Tenta novamente.',
+              variant: 'destructive',
+            });
+          }
+          setLoading(false);
+          return;
         }
 
         reservationId = reservationData?.id;
@@ -162,7 +225,13 @@ const Payment = () => {
 
       if (paymentError) {
         console.error('Payment error:', paymentError);
-        throw new Error(`Erro ao criar pedido de pagamento: ${paymentError.message}`);
+        toast({
+          title: 'Erro',
+          description: 'Não foi possível confirmar a reserva. Tenta novamente.',
+          variant: 'destructive',
+        });
+        setLoading(false);
+        return;
       }
 
       // 3. Update reservation with payment_request_id if we created a reservation
@@ -216,10 +285,9 @@ const Payment = () => {
       
     } catch (error) {
       console.error('Error registering payment:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro ao registar o pagamento';
       toast({
-        title: 'Erro no Pagamento',
-        description: errorMessage,
+        title: 'Erro',
+        description: 'Não foi possível confirmar a reserva. Tenta novamente.',
         variant: 'destructive',
       });
     } finally {
