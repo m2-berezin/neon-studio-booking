@@ -25,8 +25,25 @@ const Payment = () => {
   const price = searchParams.get('price');
   const notes = searchParams.get('notes');
   
-  const serviceTitle = service === 'mixmaster' ? 'Mix & Master' : service;
-  const optionTitle = option === '1project' ? '1 Projecto' : '2 Projectos';
+  // Determine service title based on service and option
+  let serviceTitle = '';
+  let optionTitle = '';
+  
+  if (service === 'booking') {
+    if (option === 'recording') {
+      serviceTitle = 'Captação (Gravação)';
+      optionTitle = ''; // Will use notes for details
+    } else if (option === 'mix-master') {
+      serviceTitle = 'Captação Mix & Master';
+      optionTitle = '';
+    }
+  } else if (service === 'mixmaster') {
+    serviceTitle = 'Mix & Master';
+    optionTitle = option === '1project' ? '1 Projecto' : '2 Projectos';
+  } else {
+    serviceTitle = service || '';
+    optionTitle = option || '';
+  }
 
   // Payment details
   const MBWAY_PHONE = '934941263';
@@ -169,15 +186,12 @@ const Payment = () => {
               <span>{serviceTitle}</span>
             </div>
             
-            <div className="flex items-center justify-between">
-              <span className="font-medium">Opção:</span>
-              <span>{optionTitle}</span>
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <span className="font-medium">Método de Entrega:</span>
-              <Badge variant="secondary">{delivery}</Badge>
-            </div>
+            {optionTitle && (
+              <div className="flex items-center justify-between">
+                <span className="font-medium">Opção:</span>
+                <span>{optionTitle}</span>
+              </div>
+            )}
             
             {notes && (
               <div className="pt-2">
@@ -274,10 +288,10 @@ const Payment = () => {
           <div className="space-y-2">
             <h3 className="font-semibold">Instruções:</h3>
             <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
-              <li>Faça o pagamento de €{price} usando MB Way ou Transferência Bancária</li>
+              <li>Faça o pagamento do sinal usando MB Way ou Transferência Bancária</li>
               <li>Use a referência do pedido nas notas de pagamento (se aplicável)</li>
               <li>Clique em "Já Paguei" após realizar o pagamento</li>
-              <li>Aguarde a confirmação do pagamento (normalmente 24-48h)</li>
+              <li>Aguarde a confirmação do pagamento (normalmente 3-8h)</li>
             </ol>
           </div>
 
