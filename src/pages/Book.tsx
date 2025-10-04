@@ -51,6 +51,8 @@ const Book = () => {
   
   // Check for reservation ID from offer application
   const [reservationFromOffer, setReservationFromOffer] = useState<any>(null);
+  const [timeLeft, setTimeLeft] = useState<number | null>(null); // Timer em segundos
+  const timerIntervalRef = React.useRef<NodeJS.Timeout | null>(null);
   
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -77,6 +79,9 @@ const Book = () => {
         setSelectedService('captacao');
         setSelectedBackendServiceId(data.service_id);
         setStep(2); // Go directly to calendar
+        
+        // Iniciar timer de 5min (300 segundos)
+        setTimeLeft(300);
         
         toast({
           title: 'Oferta aplicada',
@@ -378,6 +383,12 @@ const Book = () => {
     setTimeSlots([]);
     setBookingComplete(false);
     setWhatsAppLink('');
+    setReservationFromOffer(null);
+    setTimeLeft(null);
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current);
+      timerIntervalRef.current = null;
+    }
   };
 
   // Calculate end time based on start time and duration in minutes
@@ -410,6 +421,60 @@ const Book = () => {
     }
     
     return `${startTime} - ${selectedSlot.end_time.slice(0, 5)}`;
+  };
+
+  // Timer countdown para ofertas
+  useEffect(() => {
+    if (timeLeft === null || timeLeft <= 0) return;
+    
+    timerIntervalRef.current = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev === null || prev <= 1) {
+          // Timeout: chamar abandon_offer
+          if (reservationFromOffer) {
+            handleAbandonOffer(reservationFromOffer.id);
+          }
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    
+    return () => {
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+        timerIntervalRef.current = null;
+      }
+    };
+  }, [timeLeft]);
+  
+  const handleAbandonOffer = async (reservationId: string) => {
+    try {
+      const { data, error } = await supabase.rpc('abandon_offer', {
+        p_reservation_id: reservationId
+      });
+      
+      if (error) throw error;
+      
+      toast({
+        title: 'Tempo expirado',
+        description: 'A oferta foi libertada. Podes aplicar novamente.',
+        variant: 'destructive',
+      });
+      
+      // Reset e volta para home
+      setReservationFromOffer(null);
+      setTimeLeft(null);
+      navigate('/');
+    } catch (error) {
+      console.error('Error abandoning offer:', error);
+    }
+  };
+  
+  const formatTime = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   // Get selected service details with dynamic pricing
@@ -743,6 +808,13 @@ const Book = () => {
 
           <Card className="p-6">
             <h3 className="text-lg font-semibold mb-4">Resumo da Reserva</h3>
+            {reservationFromOffer && timeLeft !== null && timeLeft > 0 && (
+              <div className="mb-4 p-3 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
+                <p className="text-sm font-semibold text-orange-900 dark:text-orange-100">
+                  ⏱️ Tempo para concluir: {formatTime(timeLeft)}
+                </p>
+              </div>
+            )}
               <div className="space-y-3 text-sm mb-6">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Serviço:</span>
@@ -820,6 +892,13 @@ const Book = () => {
               onClick={() => {
                 if (!selectedService || !selectedDate || !selectedSlot || !selectedBackendServiceId) return;
 
+                // Se é oferta, parar o timer
+                if (reservationFromOffer && timerIntervalRef.current) {
+                  clearInterval(timerIntervalRef.current);
+                  timerIntervalRef.current = null;
+                  setTimeLeft(null);
+                }
+
                 const serviceName = services.find(s => s.id === selectedService)?.name || 'Serviço';
                 const bookingPrice = selectedService === 'captacao' ? getRecordingPrice() : selectedServiceDetails?.base_price || 0;
                 
@@ -835,13 +914,14 @@ const Book = () => {
                   end_time: selectedSlot.end_time,
                   service_id: selectedBackendServiceId, // Use backend service ID
                   hours: selectedService === 'captacao' ? selectedHours.toString() : undefined,
+                  reservation_id: reservationFromOffer?.id, // Incluir reservation_id se for oferta
                 });
                 navigate(`/payment?${queryParams.toString()}`);
               }}
               className="w-full"
               disabled={loading}
             >
-              Ir para Pagamento
+              {reservationFromOffer ? 'Já Paguei' : 'Ir para Pagamento'}
             </Button>
             <p className="text-xs text-muted-foreground text-center">
               Será redirecionado para a página de pagamento.

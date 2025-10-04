@@ -789,6 +789,10 @@ export type Database = {
       }
     }
     Functions: {
+      abandon_offer: {
+        Args: { p_reservation_id: string }
+        Returns: boolean
+      }
       admin_approve_payment: {
         Args: { p_payment_id: string }
         Returns: string
