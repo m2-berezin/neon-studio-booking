@@ -80,10 +80,10 @@ const Projects = () => {
                   <div className="flex items-start gap-2 text-sm">
                     <Folder className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
                     <a 
-                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(project.address)}`}
+                      href="https://maps.google.com/?q=Rua+Abade+Correia+da+Serra+20A,+2865-207+Fernão+Ferro"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-muted-foreground hover:text-primary transition-colors underline"
+                      className="text-muted-foreground hover:text-primary transition-colors underline cursor-pointer"
                     >
                       {project.address}
                     </a>
