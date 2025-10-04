@@ -212,6 +212,45 @@ export type Database = {
         }
         Relationships: []
       }
+      offers: {
+        Row: {
+          created_at: string
+          description: string | null
+          duration_free_min: number
+          duration_paid_min: number
+          id: string
+          is_active: boolean
+          limit_per_month: number
+          name: string
+          price_eur: number
+          total_duration_min: number | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          duration_free_min: number
+          duration_paid_min: number
+          id?: string
+          is_active?: boolean
+          limit_per_month?: number
+          name: string
+          price_eur: number
+          total_duration_min?: number | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          duration_free_min?: number
+          duration_paid_min?: number
+          id?: string
+          is_active?: boolean
+          limit_per_month?: number
+          name?: string
+          price_eur?: number
+          total_duration_min?: number | null
+        }
+        Relationships: []
+      }
       payment_requests: {
         Row: {
           amount_eur: number
@@ -355,6 +394,56 @@ export type Database = {
         }
         Relationships: []
       }
+      projects: {
+        Row: {
+          address: string
+          booking_id: string
+          created_at: string
+          date_day: string
+          description: string | null
+          end_time: string
+          id: string
+          start_time: string
+          status: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          address?: string
+          booking_id: string
+          created_at?: string
+          date_day: string
+          description?: string | null
+          end_time: string
+          id?: string
+          start_time: string
+          status?: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          address?: string
+          booking_id?: string
+          created_at?: string
+          date_day?: string
+          description?: string | null
+          end_time?: string
+          id?: string
+          start_time?: string
+          status?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projects_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reservations: {
         Row: {
           created_at: string
@@ -362,6 +451,7 @@ export type Database = {
           duration_minutes_snapshot: number | null
           ends_at: string
           id: string
+          offer_id: string | null
           price_eur_snapshot: number | null
           service_id: string
           service_name_snapshot: string | null
@@ -376,6 +466,7 @@ export type Database = {
           duration_minutes_snapshot?: number | null
           ends_at: string
           id?: string
+          offer_id?: string | null
           price_eur_snapshot?: number | null
           service_id: string
           service_name_snapshot?: string | null
@@ -390,6 +481,7 @@ export type Database = {
           duration_minutes_snapshot?: number | null
           ends_at?: string
           id?: string
+          offer_id?: string | null
           price_eur_snapshot?: number | null
           service_id?: string
           service_name_snapshot?: string | null
@@ -399,6 +491,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "reservations_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "offers"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "reservations_service_id_fkey"
             columns: ["service_id"]
@@ -570,6 +669,41 @@ export type Database = {
         }
         Relationships: []
       }
+      user_offers: {
+        Row: {
+          created_at: string
+          id: string
+          month_year: string
+          offer_id: string
+          used_count: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          month_year: string
+          offer_id: string
+          used_count?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          month_year?: string
+          offer_id?: string
+          used_count?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_offers_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "offers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string | null
@@ -662,6 +796,10 @@ export type Database = {
       admin_reject_payment: {
         Args: { p_payment_id: string; p_reason?: string }
         Returns: boolean
+      }
+      apply_offer: {
+        Args: { p_offer_id: string; p_starts_at?: string; p_user_id: string }
+        Returns: string
       }
       backfill_welcome_messages: {
         Args: Record<PropertyKey, never>
@@ -937,6 +1075,10 @@ export type Database = {
       gbtreekey8_out: {
         Args: { "": unknown }
         Returns: unknown
+      }
+      get_booking_min_datetime: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       get_unavailable_days: {
         Args: { p_month: number; p_year: number }

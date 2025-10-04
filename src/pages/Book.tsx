@@ -48,6 +48,50 @@ const Book = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
+  
+  // Check for reservation ID from offer application
+  const [reservationFromOffer, setReservationFromOffer] = useState<any>(null);
+  
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const reservationId = urlParams.get('reservation');
+    
+    if (reservationId) {
+      fetchReservationDetails(reservationId);
+    }
+  }, []);
+  
+  const fetchReservationDetails = async (reservationId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('reservations')
+        .select('*')
+        .eq('id', reservationId)
+        .single();
+      
+      if (error) throw error;
+      
+      if (data) {
+        setReservationFromOffer(data);
+        // Pre-select service as "captacao" since it's from offer
+        setSelectedService('captacao');
+        setSelectedBackendServiceId(data.service_id);
+        setStep(2); // Go directly to calendar
+        
+        toast({
+          title: 'Oferta aplicada',
+          description: `3h totais (2h pagas + 1h grátis) por €${data.price_eur_snapshot}`,
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching reservation:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível carregar a reserva',
+        variant: 'destructive',
+      });
+    }
+  };
 
   // Service IDs from backend (Supabase)
   const BACKEND_SERVICE_IDS = {
@@ -202,7 +246,10 @@ const Book = () => {
     const service = services.find(s => s.id === selectedService);
     let sessionDuration = 120; // default 2h
     
-    if (service?.id === 'captacao') {
+    // If from offer, use 180 minutes (3h total)
+    if (reservationFromOffer) {
+      sessionDuration = reservationFromOffer.duration_minutes_snapshot || 180;
+    } else if (service?.id === 'captacao') {
       sessionDuration = selectedHours * 60;
     } else if (service?.id === 'captacao_mixmaster') {
       sessionDuration = 180; // 3h puro
@@ -230,10 +277,35 @@ const Book = () => {
   };
 
   // Handle time slot selection
-  const handleSlotSelect = (slot: TimeSlot) => {
+  const handleSlotSelect = async (slot: TimeSlot) => {
     if (!slot.available) return;
     
     setSelectedSlot(slot);
+    
+    // If from offer, update the reservation with starts_at and ends_at
+    if (reservationFromOffer && selectedDate) {
+      try {
+        const startsAt = new Date(selectedDate);
+        const [hours, minutes] = slot.start_time.split(':');
+        startsAt.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+        
+        const duration = reservationFromOffer.duration_minutes_snapshot || 180;
+        const endsAt = new Date(startsAt.getTime() + duration * 60000);
+        
+        const { error } = await supabase
+          .from('reservations')
+          .update({
+            starts_at: startsAt.toISOString(),
+            ends_at: endsAt.toISOString()
+          })
+          .eq('id', reservationFromOffer.id);
+        
+        if (error) throw error;
+      } catch (error) {
+        console.error('Error updating reservation:', error);
+      }
+    }
+    
     setStep(4);
   };
 
@@ -601,6 +673,11 @@ const Book = () => {
                 Sessão de 3h (captação + mix&master) | Estúdio fecha às 22:00
               </p>
             )}
+            {reservationFromOffer && (
+              <p className="text-xs text-muted-foreground mt-2">
+                Oferta: 3h totais (2h pagas + 1h grátis) por €{reservationFromOffer.price_eur_snapshot} | Estúdio fecha às 22:00
+              </p>
+            )}
           </div>
 
           <TooltipProvider>
@@ -669,15 +746,28 @@ const Book = () => {
               <div className="space-y-3 text-sm mb-6">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Serviço:</span>
-                <span className="font-medium">{selectedServiceDetails?.name}</span>
+                <span className="font-medium">
+                  {reservationFromOffer 
+                    ? reservationFromOffer.service_name_snapshot 
+                    : selectedServiceDetails?.name
+                  }
+                </span>
               </div>
-              {selectedService === 'captacao' && (
+              {reservationFromOffer && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Duração:</span>
+                  <span className="font-medium">
+                    3h totais (2h pagas + 1h grátis)
+                  </span>
+                </div>
+              )}
+              {!reservationFromOffer && selectedService === 'captacao' && (
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Duração:</span>
                   <span className="font-medium">{selectedHours}h</span>
                 </div>
               )}
-              {selectedService === 'captacao_mixmaster' && (
+              {!reservationFromOffer && selectedService === 'captacao_mixmaster' && (
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Duração:</span>
                   <span className="font-medium">3h</span>
@@ -698,7 +788,9 @@ const Book = () => {
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Hora de Fim:</span>
                 <span className="font-medium">
-                  {selectedService === 'captacao' 
+                  {reservationFromOffer
+                    ? calculateEndTime(selectedSlot?.start_time || '', reservationFromOffer.duration_minutes_snapshot || 180).slice(0, 5)
+                    : selectedService === 'captacao' 
                     ? calculateEndTime(selectedSlot?.start_time || '', selectedHours * 60).slice(0, 5)
                     : selectedService === 'captacao_mixmaster'
                     ? calculateEndTime(selectedSlot?.start_time || '', 180).slice(0, 5)
@@ -706,6 +798,14 @@ const Book = () => {
                   }
                 </span>
               </div>
+              {reservationFromOffer && (
+                <div className="flex justify-between border-t pt-3 mt-3">
+                  <span className="text-muted-foreground font-semibold">Preço Total:</span>
+                  <span className="font-bold text-primary">
+                    €{reservationFromOffer.price_eur_snapshot}
+                  </span>
+                </div>
+              )}
             </div>
           </Card>
 
