@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Gift, Star, Crown, Zap, Clock, Percent, Package, Award, Ticket } from 'lucide-react';
+import { Gift, Star, Crown, Zap, Clock, Package, Award, Ticket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -45,9 +45,9 @@ const Rewards = () => {
   const [appliedRewards, setAppliedRewards] = useState<Record<string, boolean>>({});
   const [offers, setOffers] = useState<Offer[]>([]);
   const [offerUsage, setOfferUsage] = useState<Record<string, number>>({});
-  const [loadingOffers, setLoadingOffers] = useState(true);
+  const [applyingOffer, setApplyingOffer] = useState<string | null>(null);
 
-  // Fetch offers and usage on mount
+  // Fetch active offers and usage
   useEffect(() => {
     if (user) {
       fetchOffersAndUsage();
@@ -56,8 +56,6 @@ const Rewards = () => {
 
   const fetchOffersAndUsage = async () => {
     try {
-      setLoadingOffers(true);
-      
       // Fetch active offers
       const { data: offersData, error: offersError } = await supabase
         .from('offers')
@@ -65,41 +63,38 @@ const Rewards = () => {
         .eq('is_active', true);
 
       if (offersError) throw offersError;
-
       setOffers(offersData || []);
 
-      // Fetch usage for each offer
+      // Fetch usage for current month
       const currentMonth = new Date();
       currentMonth.setDate(1);
       currentMonth.setHours(0, 0, 0, 0);
 
+      const { data: usageData, error: usageError } = await supabase
+        .from('user_offers')
+        .select('offer_id, used_count')
+        .eq('user_id', user!.id)
+        .gte('month_year', currentMonth.toISOString().split('T')[0]);
+
+      if (usageError) throw usageError;
+
       const usageMap: Record<string, number> = {};
-      
-      for (const offer of offersData || []) {
-        const { data: usageData } = await supabase
-          .from('user_offers')
-          .select('used_count')
-          .eq('user_id', user!.id)
-          .eq('offer_id', offer.id)
-          .eq('month_year', currentMonth.toISOString().split('T')[0])
-          .single();
-
-        usageMap[offer.id] = usageData?.used_count || 0;
-      }
-
+      usageData?.forEach(item => {
+        usageMap[item.offer_id] = item.used_count;
+      });
       setOfferUsage(usageMap);
     } catch (error) {
       console.error('Error fetching offers:', error);
-    } finally {
-      setLoadingOffers(false);
     }
   };
 
   const handleApplyOffer = async (offerId: string) => {
     if (!user) return;
-
+    
+    setApplyingOffer(offerId);
     try {
-      const { data, error } = await supabase.rpc('apply_offer', {
+      // Call RPC to apply offer and create reservation
+      const { data: reservationId, error } = await supabase.rpc('apply_offer', {
         p_user_id: user.id,
         p_offer_id: offerId,
         p_starts_at: null
@@ -107,15 +102,15 @@ const Rewards = () => {
 
       if (error) throw error;
 
-      const reservationId = data;
-      
       toast({
         title: 'Oferta aplicada!',
-        description: 'Agora seleciona a data e hora da tua reserva.',
+        description: 'Redireccionando para o calendário...',
       });
 
-      // Redirect to calendar with reservation ID
-      navigate(`/book?reservation=${reservationId}`);
+      // Redirect to booking with reservation ID
+      setTimeout(() => {
+        navigate(`/book?reservation=${reservationId}`);
+      }, 500);
     } catch (error: any) {
       console.error('Error applying offer:', error);
       toast({
@@ -123,6 +118,9 @@ const Rewards = () => {
         description: error.message || 'Não foi possível aplicar a oferta',
         variant: 'destructive',
       });
+    } finally {
+      setApplyingOffer(null);
+      fetchOffersAndUsage(); // Refresh usage
     }
   };
 
@@ -136,9 +134,9 @@ const Rewards = () => {
   }
 
   const penaltyEndDate = getPenaltyEndDate();
-  
+
   // Find the "Compre 2h Gravação, Ganhe +1h Grátis" offer
-  const offer3h = offers.find(o => o.name.includes('Compre 2h') || o.total_duration_min === 180);
+  const recordingOffer = offers.find(o => o.name.includes('Compre 2h') || o.name.includes('Ganhe +1h'));
 
   const handleApplyReward = async (rewardCode: string) => {
     const success = await applyReward(rewardCode);
@@ -210,36 +208,40 @@ const Rewards = () => {
         
         <div className="grid gap-4">
           {/* Offer A: 3h for €20 - Dynamic from database */}
-          {offer3h && (
+          {recordingOffer && (
             <Card className="studio-card">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Star className="w-5 h-5 text-primary" />
-                  {offer3h.name}
+                  {recordingOffer.name}
                 </CardTitle>
                 <CardDescription>
-                  {offer3h.description || `${offer3h.total_duration_min / 60}h totais (${offer3h.duration_paid_min / 60}h pagas + ${offer3h.duration_free_min / 60}h grátis)`}
+                  {recordingOffer.description || `${recordingOffer.total_duration_min / 60}h totais de gravação por apenas €${recordingOffer.price_eur}`}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-2xl font-bold text-accent">€{offer3h.price_eur}</p>
+                    <p className="text-2xl font-bold text-accent">€{recordingOffer.price_eur}</p>
                     <p className="text-sm text-muted-foreground">
-                      Usado: {offerUsage[offer3h.id] || 0}/{offer3h.limit_per_month} este mês
+                      Usado: {offerUsage[recordingOffer.id] || 0}/{recordingOffer.limit_per_month} este mês
                     </p>
-                    {(offerUsage[offer3h.id] || 0) >= offer3h.limit_per_month && (
+                    {(offerUsage[recordingOffer.id] || 0) >= recordingOffer.limit_per_month && (
                       <Badge variant="outline" className="text-xs mt-1">
                         Limite mensal atingido
                       </Badge>
                     )}
                   </div>
                   <Button
-                    onClick={() => handleApplyOffer(offer3h.id)}
-                    disabled={(offerUsage[offer3h.id] || 0) >= offer3h.limit_per_month || loadingOffers}
+                    onClick={() => handleApplyOffer(recordingOffer.id)}
+                    disabled={
+                      (offerUsage[recordingOffer.id] || 0) >= recordingOffer.limit_per_month || 
+                      applyingOffer === recordingOffer.id ||
+                      hasActivePenalty()
+                    }
                     variant="default"
                   >
-                    {loadingOffers ? 'A carregar...' : 'Aplicar à Minha Próxima Reserva'}
+                    {applyingOffer === recordingOffer.id ? 'A aplicar...' : 'Aplicar à minha próxima reserva'}
                   </Button>
                 </div>
               </CardContent>
