@@ -975,7 +975,7 @@ const Book = () => {
               {reservationFromOffer ? 'Já Paguei' : 'Ir para Pagamento'}
             </Button>
             <p className="text-xs text-muted-foreground text-center">
-              Será redirecionado para a página de pagamento.
+              {reservationFromOffer ? 'Clica aqui após fazeres o pagamento.' : 'Será redirecionado para a página de pagamento.'}
             </p>
           </div>
         </div>
