@@ -63,6 +63,45 @@ const Book = () => {
     }
   }, []);
   
+  // Timer countdown
+  useEffect(() => {
+    if (timeLeft === null || timeLeft <= 0) {
+      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+      if (timeLeft === 0 && reservationFromOffer) {
+        handleOfferTimeout();
+      }
+      return;
+    }
+    
+    timerIntervalRef.current = setInterval(() => {
+      setTimeLeft(prev => (prev !== null ? prev - 1 : null));
+    }, 1000);
+    
+    return () => {
+      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    };
+  }, [timeLeft, reservationFromOffer]);
+  
+  const handleOfferTimeout = async () => {
+    if (!reservationFromOffer) return;
+    
+    try {
+      await supabase.rpc('abandon_offer', { p_reservation_id: reservationFromOffer.id });
+      
+      toast({
+        title: 'Tempo esgotado',
+        description: 'A oferta foi cancelada. Podes aplicá-la novamente.',
+        variant: 'destructive',
+      });
+      
+      setReservationFromOffer(null);
+      setTimeLeft(null);
+      navigate('/rewards');
+    } catch (error) {
+      console.error('Error abandoning offer:', error);
+    }
+  };
+  
   const fetchReservationDetails = async (reservationId: string) => {
     try {
       const { data, error } = await supabase
@@ -881,7 +920,19 @@ const Book = () => {
             </div>
           </Card>
 
-          <PriceSummary 
+          {/* Timer da oferta */}
+          {reservationFromOffer && timeLeft !== null && timeLeft > 0 && (
+            <Card className="p-4 bg-orange-50 dark:bg-orange-950/20 border-orange-200">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Tempo para concluir:</span>
+                <span className="text-lg font-bold text-orange-600">
+                  {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
+                </span>
+              </div>
+            </Card>
+          )}
+
+          <PriceSummary
             services={selectedServiceDetails ? [selectedServiceDetails] : []}
             bookingDate={selectedDate || undefined}
             showFriendCode={false}
