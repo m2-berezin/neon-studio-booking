@@ -54,8 +54,8 @@ export const useProjects = () => {
       const mappedProjects: Project[] = (data || []).map((booking: any) => ({
         id: booking.id,
         title: booking.service_name_snapshot || 'Sessão de Estúdio',
-        description: `Reserva confirmada - ${booking.currency_snapshot || 'EUR'} ${booking.price_eur_snapshot || ''}`,
-        address: 'Rua do Estúdio 123, Lisboa',
+        description: 'Reserva Confirmada',
+        address: 'Rua Abade Correia da Serra 20A, 2865-207 Fernão Ferro',
         date_day: booking.starts_at,
         start_time: booking.starts_at,
         end_time: booking.ends_at,

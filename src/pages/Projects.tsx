@@ -79,7 +79,14 @@ const Projects = () => {
                 <div className="space-y-3">
                   <div className="flex items-start gap-2 text-sm">
                     <Folder className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                    <span className="text-muted-foreground">{project.address}</span>
+                    <a 
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(project.address)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-muted-foreground hover:text-primary transition-colors underline"
+                    >
+                      {project.address}
+                    </a>
                   </div>
 
                   <div className="flex items-center gap-2 text-sm">
