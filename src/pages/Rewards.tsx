@@ -11,8 +11,6 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import PenaltyBanner from '@/components/PenaltyBanner';
 import ReferralSystem from '@/components/ReferralSystem';
-import { useFriendCode } from '@/hooks/useFriendCode';
-
 interface Offer {
   id: string;
   name: string;
@@ -24,16 +22,18 @@ interface Offer {
   limit_per_month: number;
   is_active: boolean;
 }
-
 const Rewards = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const { hasFriendCodeDiscount } = useFriendCode();
-  const { 
-    loading, 
-    hasActivePenalty, 
-    getPenaltyEndDate, 
+  const {
+    user
+  } = useAuth();
+  const {
+    toast
+  } = useToast();
+  const {
+    loading,
+    hasActivePenalty,
+    getPenaltyEndDate,
     getCurrentMonthUsage,
     applyReward,
     redeemLoyaltyReward,
@@ -43,7 +43,6 @@ const Rewards = () => {
     claimVoucher,
     projectStats
   } = useRewards();
-
   const [appliedRewards, setAppliedRewards] = useState<Record<string, boolean>>({});
   const [offers, setOffers] = useState<Offer[]>([]);
   const [offerUsage, setOfferUsage] = useState<Record<string, number>>({});
@@ -59,37 +58,26 @@ const Rewards = () => {
   // Realtime subscription for user_offers changes
   useEffect(() => {
     if (!user) return;
-
-    const channel = supabase
-      .channel('user_offers_changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'user_offers',
-          filter: `user_id=eq.${user.id}`,
-        },
-        (payload) => {
-          console.log('user_offers changed:', payload);
-          fetchOffersAndUsage();
-        }
-      )
-      .subscribe();
-
+    const channel = supabase.channel('user_offers_changes').on('postgres_changes', {
+      event: '*',
+      schema: 'public',
+      table: 'user_offers',
+      filter: `user_id=eq.${user.id}`
+    }, payload => {
+      console.log('user_offers changed:', payload);
+      fetchOffersAndUsage();
+    }).subscribe();
     return () => {
       supabase.removeChannel(channel);
     };
   }, [user]);
-
   const fetchOffersAndUsage = async () => {
     try {
       // Fetch active offers
-      const { data: offersData, error: offersError } = await supabase
-        .from('offers')
-        .select('*')
-        .eq('is_active', true);
-
+      const {
+        data: offersData,
+        error: offersError
+      } = await supabase.from('offers').select('*').eq('is_active', true);
       if (offersError) throw offersError;
       setOffers(offersData || []);
 
@@ -97,15 +85,11 @@ const Rewards = () => {
       const currentMonth = new Date();
       currentMonth.setDate(1);
       currentMonth.setHours(0, 0, 0, 0);
-
-      const { data: usageData, error: usageError } = await supabase
-        .from('user_offers')
-        .select('offer_id, used_count')
-        .eq('user_id', user!.id)
-        .gte('month_year', currentMonth.toISOString().split('T')[0]);
-
+      const {
+        data: usageData,
+        error: usageError
+      } = await supabase.from('user_offers').select('offer_id, used_count').eq('user_id', user!.id).gte('month_year', currentMonth.toISOString().split('T')[0]);
       if (usageError) throw usageError;
-
       const usageMap: Record<string, number> = {};
       usageData?.forEach(item => {
         usageMap[item.offer_id] = item.used_count;
@@ -115,24 +99,23 @@ const Rewards = () => {
       console.error('Error fetching offers:', error);
     }
   };
-
   const handleApplyOffer = async (offerId: string) => {
     if (!user) return;
-    
     setApplyingOffer(offerId);
     try {
       // Call RPC to apply offer and create reservation
-      const { data: reservationId, error } = await supabase.rpc('apply_offer', {
+      const {
+        data: reservationId,
+        error
+      } = await supabase.rpc('apply_offer', {
         p_user_id: user.id,
         p_offer_id: offerId,
         p_starts_at: null
       });
-
       if (error) throw error;
-
       toast({
         title: 'Oferta aplicada!',
-        description: 'Redireccionando para o calendário...',
+        description: 'Redireccionando para o calendário...'
       });
 
       // Redirect to booking with reservation ID
@@ -144,44 +127,39 @@ const Rewards = () => {
       toast({
         title: 'Erro',
         description: error.message || 'Não foi possível aplicar a oferta',
-        variant: 'destructive',
+        variant: 'destructive'
       });
     } finally {
       setApplyingOffer(null);
       fetchOffersAndUsage(); // Refresh usage
     }
   };
-
   if (!user) {
-    return (
-      <div className="text-center py-8">
+    return <div className="text-center py-8">
         <h2 className="text-2xl font-bold text-foreground mb-4">Sessão Requerida</h2>
         <p className="text-muted-foreground">Por favor faz login para ver recompensas e ofertas.</p>
-      </div>
-    );
+      </div>;
   }
-
   const penaltyEndDate = getPenaltyEndDate();
 
   // Find the "Compre 2h Gravação, Ganhe +1h Grátis" offer
   const recordingOffer = offers.find(o => o.name.includes('Compre 2h') || o.name.includes('Ganhe +1h'));
-
   const handleApplyReward = async (rewardCode: string) => {
     const success = await applyReward(rewardCode);
     if (success) {
-      setAppliedRewards(prev => ({ ...prev, [rewardCode]: true }));
+      setAppliedRewards(prev => ({
+        ...prev,
+        [rewardCode]: true
+      }));
     }
   };
-
   const handleLoyaltyRedeem = async (rewardType: string) => {
     const success = await redeemLoyaltyReward(rewardType);
     if (success) {
       // Loyalty reward redeemed successfully - component will update automatically
     }
   };
-
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold neon-title mb-2">
           Recompensas do Estúdio
@@ -192,16 +170,13 @@ const Rewards = () => {
       </div>
 
       {/* Penalty Banner */}
-      {hasActivePenalty() && penaltyEndDate && (
-        <PenaltyBanner penaltyEndDate={penaltyEndDate} className="mb-6" />
-      )}
+      {hasActivePenalty() && penaltyEndDate && <PenaltyBanner penaltyEndDate={penaltyEndDate} className="mb-6" />}
 
       {/* Referral System */}
       <ReferralSystem className="mb-6" />
 
       {/* Voucher Banner */}
-      {isVoucherAvailable() && (
-        <Alert className="border-primary bg-primary/10 mb-6">
+      {isVoucherAvailable() && <Alert className="border-primary bg-primary/10 mb-6">
           <Ticket className="h-4 w-4 text-primary" />
           <AlertDescription className="text-primary font-medium">
             <div className="flex items-center justify-between">
@@ -214,18 +189,12 @@ const Rewards = () => {
                   ⏰ Dias restantes para reivindicar: {Math.max(0, Math.ceil((new Date().getTime() + 90 * 24 * 60 * 60 * 1000 - new Date().getTime()) / (24 * 60 * 60 * 1000)))}
                 </div>
               </div>
-              <Button
-                onClick={claimVoucher}
-                disabled={loading}
-                size="sm"
-                className="ml-4"
-              >
+              <Button onClick={claimVoucher} disabled={loading} size="sm" className="ml-4">
                 {loading ? 'A reivindicar...' : 'Reivindicar Vale de €15'}
               </Button>
             </div>
           </AlertDescription>
-        </Alert>
-      )}
+        </Alert>}
 
       {/* Weekly Offers */}
       <section>
@@ -236,8 +205,7 @@ const Rewards = () => {
         
         <div className="grid gap-4">
           {/* Offer A: 3h for €20 - Dynamic from database */}
-          {recordingOffer && (
-            <Card className={`studio-card ${hasFriendCodeDiscount() ? 'opacity-50' : ''}`}>
+          {recordingOffer && <Card className="studio-card">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Star className="w-5 h-5 text-primary" />
@@ -248,41 +216,22 @@ const Rewards = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {hasFriendCodeDiscount() && (
-                  <Alert className="mb-4 border-orange-300 bg-orange-50">
-                    <AlertDescription className="text-orange-800 text-sm">
-                      Indisponível utilizar com o desconto 25% ativo.
-                    </AlertDescription>
-                  </Alert>
-                )}
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-2xl font-bold text-accent">€{recordingOffer.price_eur}</p>
                     <p className="text-sm text-muted-foreground">
                       Usado: {offerUsage[recordingOffer.id] || 0}/{recordingOffer.limit_per_month} este mês
                     </p>
-                    {(offerUsage[recordingOffer.id] || 0) >= recordingOffer.limit_per_month && (
-                      <Badge variant="outline" className="text-xs mt-1">
+                    {(offerUsage[recordingOffer.id] || 0) >= recordingOffer.limit_per_month && <Badge variant="outline" className="text-xs mt-1">
                         Limite mensal atingido
-                      </Badge>
-                    )}
+                      </Badge>}
                   </div>
-                  <Button
-                    onClick={() => handleApplyOffer(recordingOffer.id)}
-                    disabled={
-                      (offerUsage[recordingOffer.id] || 0) >= recordingOffer.limit_per_month || 
-                      applyingOffer === recordingOffer.id ||
-                      hasActivePenalty() ||
-                      hasFriendCodeDiscount()
-                    }
-                    variant="default"
-                  >
+                  <Button onClick={() => handleApplyOffer(recordingOffer.id)} disabled={(offerUsage[recordingOffer.id] || 0) >= recordingOffer.limit_per_month || applyingOffer === recordingOffer.id || hasActivePenalty()} variant="default">
                     {applyingOffer === recordingOffer.id ? 'A aplicar...' : 'Aplicar à minha próxima reserva'}
                   </Button>
                 </div>
               </CardContent>
-            </Card>
-          )}
+            </Card>}
 
           {/* Offer B: M&M €35 each for 2 tracks */}
           <Card className="studio-card">
@@ -295,26 +244,7 @@ const Rewards = () => {
                 €35 cada ao enviar 2 faixas juntas
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-2xl font-bold text-accent">€35 cada</p>
-                  <p className="text-sm text-muted-foreground">
-                    Usos ilimitados • Poupe ao agrupar
-                  </p>
-                </div>
-                <Button
-                  onClick={() => {
-                    handleApplyReward('W_MM_BUNDLE');
-                    window.location.href = '/mix-master?discount=W_MM_BUNDLE';
-                  }}
-                  disabled={hasActivePenalty() || appliedRewards['W_MM_BUNDLE'] || loading}
-                  variant={appliedRewards['W_MM_BUNDLE'] ? 'outline' : 'default'}
-                >
-                  {appliedRewards['W_MM_BUNDLE'] ? 'Oferta Aplicada' : 'Aplicar Oferta'}
-                </Button>
-              </div>
-            </CardContent>
+            
           </Card>
         </div>
       </section>
@@ -350,22 +280,10 @@ const Rewards = () => {
                 </div>
               </div>
               <div className="flex flex-col sm:flex-row gap-2">
-                <Button
-                  onClick={() => handleApplyReward('M_PACKAGE_70')}
-                  disabled={hasActivePenalty() || appliedRewards['M_PACKAGE_70'] || loading}
-                  variant={appliedRewards['M_PACKAGE_70'] ? 'outline' : 'secondary'}
-                  size="sm"
-                  className="w-full sm:w-auto"
-                  >
+                <Button onClick={() => handleApplyReward('M_PACKAGE_70')} disabled={hasActivePenalty() || appliedRewards['M_PACKAGE_70'] || loading} variant={appliedRewards['M_PACKAGE_70'] ? 'outline' : 'secondary'} size="sm" className="w-full sm:w-auto">
                     {appliedRewards['M_PACKAGE_70'] ? 'Aplicado ✓' : 'Aplicar €70'}
                   </Button>
-                  <Button
-                    onClick={() => handleApplyReward('M_PACKAGE_65')}
-                    disabled={hasActivePenalty() || appliedRewards['M_PACKAGE_65'] || loading}
-                    variant={appliedRewards['M_PACKAGE_65'] ? 'outline' : 'default'}
-                    size="sm"
-                    className="w-full sm:w-auto"
-                  >
+                  <Button onClick={() => handleApplyReward('M_PACKAGE_65')} disabled={hasActivePenalty() || appliedRewards['M_PACKAGE_65'] || loading} variant={appliedRewards['M_PACKAGE_65'] ? 'outline' : 'default'} size="sm" className="w-full sm:w-auto">
                     {appliedRewards['M_PACKAGE_65'] ? 'Aplicado ✓' : 'Aplicar €65'}
                   </Button>
               </div>
@@ -409,21 +327,13 @@ const Rewards = () => {
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="text-center sm:text-left">
                   <p className="font-medium text-foreground">
-                  {isLoyaltyRewardAvailable('mixingMastering') 
-                      ? 'Parabéns! Ganhou uma sessão M&M grátis' 
-                      : 'Continua a completar projetos para ganhar a tua sessão grátis'
-                    }
+                  {isLoyaltyRewardAvailable('mixingMastering') ? 'Parabéns! Ganhou uma sessão M&M grátis' : 'Continua a completar projetos para ganhar a tua sessão grátis'}
                   </p>
                   <p className="text-sm text-muted-foreground">
                     Complete 7 projetos de mistura/masterização OU 5 músicas completas (gravar+misturar+masterizar)
                   </p>
                 </div>
-                <Button
-                  onClick={() => handleLoyaltyRedeem('mixingMastering')}
-                  disabled={!isLoyaltyRewardAvailable('mixingMastering') || loading}
-                  variant={isLoyaltyRewardAvailable('mixingMastering') ? 'default' : 'outline'}
-                  className="w-full sm:w-auto"
-                >
+                <Button onClick={() => handleLoyaltyRedeem('mixingMastering')} disabled={!isLoyaltyRewardAvailable('mixingMastering') || loading} variant={isLoyaltyRewardAvailable('mixingMastering') ? 'default' : 'outline'} className="w-full sm:w-auto">
                   {loading ? 'A resgatar...' : isLoyaltyRewardAvailable('mixingMastering') ? 'Resgatar M&M Grátis' : 'Não Disponível'}
                 </Button>
               </div>
@@ -436,15 +346,11 @@ const Rewards = () => {
       <div className="text-center py-4">
         <p className="text-xs text-muted-foreground">
           As recompensas aplicadas serão automaticamente incluídas no preço da tua próxima reserva.
-          {hasActivePenalty() && (
-            <span className="block text-destructive mt-1">
+          {hasActivePenalty() && <span className="block text-destructive mt-1">
               Todas as aplicações de recompensas estão atualmente pausadas devido a uma penalização ativa.
-            </span>
-          )}
+            </span>}
         </p>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Rewards;
