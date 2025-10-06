@@ -140,9 +140,14 @@ const AdminDashboard = () => {
     if (!user) return;
 
     try {
+      // Get all messages involving this user
       const { data: messagesData, error } = await supabase
         .from('messages')
-        .select('*')
+        .select(`
+          *,
+          sender_profile:profiles!messages_sender_id_fkey(full_name),
+          receiver_profile:profiles!messages_receiver_id_fkey(full_name)
+        `)
         .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
         .order('timestamp', { ascending: false });
 
@@ -154,17 +159,14 @@ const AdminDashboard = () => {
         const otherUserId = msg.sender_id === user.id ? msg.receiver_id : msg.sender_id;
         
         if (!threadsMap.has(otherUserId)) {
-          const { data: profile, error: profileError } = await supabase
-            .from('profiles')
-            .select('full_name')
-            .eq('id', otherUserId)
-            .maybeSingle();
+          // Get the name from the JOIN
+          const otherUserName = msg.sender_id === user.id 
+            ? (msg.receiver_profile as any)?.full_name 
+            : (msg.sender_profile as any)?.full_name;
 
-          if (profileError) {
-            console.error('Error fetching profile for user', otherUserId, ':', profileError);
-          }
-
-          console.log('Profile loaded for', otherUserId, ':', profile);
+          const userName = otherUserName?.trim() || 'Sem Nome';
+          
+          console.log('Loaded sender_name:', userName, 'for user_id:', otherUserId);
 
           const { count } = await supabase
             .from('messages')
@@ -172,10 +174,6 @@ const AdminDashboard = () => {
             .eq('sender_id', otherUserId)
             .eq('receiver_id', user.id)
             .eq('is_read', false);
-
-          const userName = profile?.full_name?.trim() || 'Sem Nome';
-
-          console.log('userName for', otherUserId, ':', userName);
 
           threadsMap.set(otherUserId, {
             user_id: otherUserId,
@@ -202,29 +200,30 @@ const AdminDashboard = () => {
 
       const { data, error } = await supabase
         .from('messages')
-        .select('*')
+        .select(`
+          *,
+          sender_profile:profiles!messages_sender_id_fkey(full_name)
+        `)
         .eq('thread_id', threadId)
         .order('timestamp', { ascending: true });
 
       if (error) throw error;
 
-      // Fetch sender names separately
-      const messagesWithSender = await Promise.all((data || []).map(async (msg) => {
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('full_name')
-          .eq('id', msg.sender_id)
-          .maybeSingle();
-        
-        if (profileError) {
-          console.error('Error fetching sender profile:', profileError);
-        }
+      const messagesWithSender = (data || []).map((msg) => {
+        const senderName = (msg.sender_profile as any)?.full_name?.trim() || 'Sem Nome';
+        console.log('Loaded sender_name:', senderName, 'for message:', msg.id);
         
         return {
-          ...msg,
-          sender_name: profile?.full_name || 'Sem Nome'
+          id: msg.id,
+          sender_id: msg.sender_id,
+          receiver_id: msg.receiver_id,
+          thread_id: msg.thread_id,
+          message: msg.message,
+          timestamp: msg.timestamp,
+          is_read: msg.is_read,
+          sender_name: senderName
         };
-      }));
+      });
       
       setMessages(messagesWithSender);
 
@@ -595,7 +594,7 @@ const AdminDashboard = () => {
                 <>
                   <div className="p-4 border-b">
                     <h2 className="font-semibold">
-                      {threads.find((t) => t.user_id === selectedUserId)?.user_name || 'Cliente'}
+                      Chat com {threads.find((t) => t.user_id === selectedUserId)?.user_name || 'Cliente'}
                     </h2>
                   </div>
 
