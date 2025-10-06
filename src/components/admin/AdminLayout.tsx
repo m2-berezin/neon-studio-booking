@@ -11,7 +11,8 @@ import {
   LogOut,
   Menu,
   X,
-  Shield
+  Shield,
+  CreditCard
 } from 'lucide-react';
 import { useState } from 'react';
 import { NotificationBell } from '@/components/NotificationBell';
@@ -43,6 +44,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
     { path: '/admin/payments', icon: DollarSign, label: 'Pagamentos' },
     { path: '/admin/bookings', icon: Calendar, label: 'Reservas' },
     { path: '/admin/messages', icon: MessageSquare, label: 'Mensagens' },
+    { path: '/admin/subscriptions', icon: CreditCard, label: 'Subscrições' },
   ];
 
   return (

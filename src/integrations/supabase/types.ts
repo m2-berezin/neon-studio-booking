@@ -414,6 +414,70 @@ export type Database = {
           },
         ]
       }
+      plan_discounts: {
+        Row: {
+          created_at: string
+          discount_pct: number
+          id: string
+          month_num: number
+          subscription_id: string
+        }
+        Insert: {
+          created_at?: string
+          discount_pct: number
+          id?: string
+          month_num: number
+          subscription_id: string
+        }
+        Update: {
+          created_at?: string
+          discount_pct?: number
+          id?: string
+          month_num?: number
+          subscription_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_discounts_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plan_offers: {
+        Row: {
+          created_at: string
+          id: string
+          is_claimed: boolean
+          offer_type: string
+          subscription_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_claimed?: boolean
+          offer_type: string
+          subscription_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_claimed?: boolean
+          offer_type?: string
+          subscription_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_offers_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -701,6 +765,39 @@ export type Database = {
           },
         ]
       }
+      subscriptions: {
+        Row: {
+          created_at: string
+          end_date: string | null
+          id: string
+          is_active: boolean
+          payment_status: string
+          plan_type: string
+          start_date: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          payment_status?: string
+          plan_type: string
+          start_date?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          payment_status?: string
+          plan_type?: string
+          start_date?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       unavailable_slots: {
         Row: {
           created_at: string
@@ -857,6 +954,10 @@ export type Database = {
         Args: { p_payment_id: string; p_reason?: string }
         Returns: boolean
       }
+      admin_renew_subscription: {
+        Args: { p_action: string; p_subscription_id: string }
+        Returns: boolean
+      }
       apply_offer: {
         Args: { p_offer_id: string; p_starts_at?: string; p_user_id: string }
         Returns: string
@@ -900,6 +1001,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      claim_plan_offer: {
+        Args: { p_offer_type: string; p_user_id: string }
         Returns: boolean
       }
       create_booking_captacao: {
@@ -1136,6 +1241,18 @@ export type Database = {
         Args: { "": unknown }
         Returns: unknown
       }
+      get_admin_subscriptions: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          client_email: string
+          client_name: string
+          end_date: string
+          id: string
+          is_active: boolean
+          payment_status: string
+          plan_type: string
+        }[]
+      }
       get_booking_min_datetime: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -1216,6 +1333,10 @@ export type Database = {
       }
       slugify: {
         Args: { txt: string }
+        Returns: string
+      }
+      subscribe_plan: {
+        Args: { p_plan_type: string; p_user_id: string }
         Returns: string
       }
     }

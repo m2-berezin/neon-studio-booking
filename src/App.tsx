@@ -23,6 +23,7 @@ import AdminPayments from "@/pages/AdminPayments";
 import AdminBookings from "@/pages/AdminBookings";
 import AdminDashboard from "@/pages/AdminDashboard";
 import AdminMessages from "@/pages/AdminMessages";
+import AdminSubscriptions from "@/pages/AdminSubscriptions";
 import StudioInfo from "@/pages/StudioInfo";
 import MixMaster from "./pages/MixMaster";
 import Payment from "./pages/Payment";
