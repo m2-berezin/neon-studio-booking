@@ -320,6 +320,8 @@ export type Database = {
           proof_url: string | null
           reservation_id: string
           status: string
+          subscription_id: string | null
+          type: string | null
           updated_at: string
           user_id: string
         }
@@ -335,6 +337,8 @@ export type Database = {
           proof_url?: string | null
           reservation_id: string
           status?: string
+          subscription_id?: string | null
+          type?: string | null
           updated_at?: string
           user_id: string
         }
@@ -350,6 +354,8 @@ export type Database = {
           proof_url?: string | null
           reservation_id?: string
           status?: string
+          subscription_id?: string | null
+          type?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -359,6 +365,13 @@ export type Database = {
             columns: ["reservation_id"]
             isOneToOne: false
             referencedRelation: "reservations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_requests_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
             referencedColumns: ["id"]
           },
         ]
@@ -1333,6 +1346,10 @@ export type Database = {
       }
       slugify: {
         Args: { txt: string }
+        Returns: string
+      }
+      subscribe_payment_request: {
+        Args: { p_amount_eur: number; p_plan_type: string; p_user_id: string }
         Returns: string
       }
       subscribe_plan: {
