@@ -161,8 +161,10 @@ const AdminDashboard = () => {
             .maybeSingle();
 
           if (profileError) {
-            console.error('Error fetching profile:', profileError);
+            console.error('Error fetching profile for user', otherUserId, ':', profileError);
           }
+
+          console.log('Profile loaded for', otherUserId, ':', profile);
 
           const { count } = await supabase
             .from('messages')
@@ -171,7 +173,9 @@ const AdminDashboard = () => {
             .eq('receiver_id', user.id)
             .eq('is_read', false);
 
-          const userName = profile?.full_name || 'Sem Nome';
+          const userName = profile?.full_name?.trim() || 'Sem Nome';
+
+          console.log('userName for', otherUserId, ':', userName);
 
           threadsMap.set(otherUserId, {
             user_id: otherUserId,
