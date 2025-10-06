@@ -9,15 +9,17 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowLeft, CheckCircle, Copy, Smartphone, Building2 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
-
 const Payment = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const { user } = useAuth();
-  
+  const {
+    toast
+  } = useToast();
+  const {
+    user
+  } = useAuth();
   const [loading, setLoading] = useState(false);
-  
+
   // Get payment details from URL params
   const service = searchParams.get('service');
   const option = searchParams.get('option');
@@ -28,11 +30,10 @@ const Payment = () => {
   const startTime = searchParams.get('start_time');
   const endTime = searchParams.get('end_time');
   const serviceId = searchParams.get('service_id');
-  
+
   // Determine service title based on service and option
   let serviceTitle = '';
   let optionTitle = '';
-  
   if (service === 'booking') {
     if (option === 'recording') {
       serviceTitle = 'Captação (Gravação)';
@@ -53,32 +54,29 @@ const Payment = () => {
   const MBWAY_PHONE = '934941263';
   const IBAN = 'PT50 0193 0000 1050 4647 3479 5';
   const REVOLUT_REVTAG = '@Ghostwayne';
-
   useEffect(() => {
     if (!service || !option || !price) {
       toast({
         title: 'Erro',
         description: 'Dados de pagamento em falta. A redireccionar...',
-        variant: 'destructive',
+        variant: 'destructive'
       });
       navigate('/mix-master');
     }
   }, [service, option, price, navigate, toast]);
-
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
     toast({
       title: 'Copiado!',
-      description: `${label} copiado para a área de transferência`,
+      description: `${label} copiado para a área de transferência`
     });
   };
-
   const handlePaymentConfirmation = async () => {
     if (!user) {
       toast({
         title: 'Erro',
         description: 'Precisa de iniciar sessão para confirmar o pagamento',
-        variant: 'destructive',
+        variant: 'destructive'
       });
       return;
     }
@@ -88,7 +86,7 @@ const Payment = () => {
       toast({
         title: 'Erro',
         description: 'Dados de pagamento incompletos',
-        variant: 'destructive',
+        variant: 'destructive'
       });
       return;
     }
@@ -98,59 +96,54 @@ const Payment = () => {
       toast({
         title: 'Erro',
         description: 'Dados da reserva incompletos',
-        variant: 'destructive',
+        variant: 'destructive'
       });
       return;
     }
-
     setLoading(true);
-    
     try {
       // 1. Create reservation first
       const startDateTime = new Date(`${bookingDate}T${startTime}`);
       const endDateTime = new Date(`${bookingDate}T${endTime}`);
-      
-      const { data: reservationData, error: reservationError } = await supabase
-        .from('reservations')
-        .insert({
-          user_id: user.id,
-          service_id: serviceId,
-          starts_at: startDateTime.toISOString(),
-          ends_at: endDateTime.toISOString(),
-          status: 'pending'
-        })
-        .select()
-        .single();
-
+      const {
+        data: reservationData,
+        error: reservationError
+      } = await supabase.from('reservations').insert({
+        user_id: user.id,
+        service_id: serviceId,
+        starts_at: startDateTime.toISOString(),
+        ends_at: endDateTime.toISOString(),
+        status: 'pending'
+      }).select().single();
       if (reservationError) {
         console.error('Reservation error:', reservationError);
         toast({
           title: 'Erro',
           description: 'Não foi possível criar a reserva. Tenta novamente.',
-          variant: 'destructive',
+          variant: 'destructive'
         });
         setLoading(false);
         return;
       }
 
       // 2. Call RPC to create payment request
-      const { data: paymentId, error: paymentError } = await supabase
-        .rpc('request_payment', {
-          p_reservation_id: reservationData.id,
-          p_amount_eur: parseFloat(price),
-          p_currency: 'EUR',
-          p_note: notes || `${serviceTitle} - ${optionTitle}`
-        });
-
+      const {
+        data: paymentId,
+        error: paymentError
+      } = await supabase.rpc('request_payment', {
+        p_reservation_id: reservationData.id,
+        p_amount_eur: parseFloat(price),
+        p_currency: 'EUR',
+        p_note: notes || `${serviceTitle} - ${optionTitle}`
+      });
       if (paymentError) {
         console.error('Payment error:', paymentError);
         // Cleanup: delete the reservation if payment request failed
         await supabase.from('reservations').delete().eq('id', reservationData.id);
-        
         toast({
           title: 'Erro',
           description: 'Não foi possível criar o pedido de pagamento. Tenta novamente.',
-          variant: 'destructive',
+          variant: 'destructive'
         });
         setLoading(false);
         return;
@@ -160,39 +153,31 @@ const Payment = () => {
       toast({
         title: 'Pedido Enviado ✅',
         description: 'Reserva de sessão pendente de verificação de pagamento. Aguarde aprovação do administrador.',
-        duration: 5000,
+        duration: 5000
       });
-      
+
       // Navigate to projects page after a short delay
       setTimeout(() => {
         navigate('/projects');
       }, 1500);
-      
     } catch (error) {
       console.error('Error registering payment:', error);
       toast({
         title: 'Erro',
         description: 'Não foi possível confirmar a reserva. Tenta novamente.',
-        variant: 'destructive',
+        variant: 'destructive'
       });
     } finally {
       setLoading(false);
     }
   };
-
   if (!service || !option || !price) {
     return null;
   }
-
-  return (
-    <div className="container mx-auto p-4 max-w-2xl">
+  return <div className="container mx-auto p-4 max-w-2xl">
       {/* Header */}
       <div className="mb-6">
-        <Button 
-          variant="ghost" 
-          onClick={() => window.history.back()}
-          className="mb-4"
-        >
+        <Button variant="ghost" onClick={() => window.history.back()} className="mb-4">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Voltar
         </Button>
@@ -217,19 +202,15 @@ const Payment = () => {
               <span>{serviceTitle}</span>
             </div>
             
-            {optionTitle && (
-              <div className="flex items-center justify-between">
+            {optionTitle && <div className="flex items-center justify-between">
                 <span className="font-medium">Opção:</span>
                 <span>{optionTitle}</span>
-              </div>
-            )}
+              </div>}
             
-            {notes && (
-              <div className="pt-2">
+            {notes && <div className="pt-2">
                 <span className="font-medium block mb-1">Notas:</span>
                 <p className="text-sm text-muted-foreground">{notes}</p>
-              </div>
-            )}
+              </div>}
             
             <Separator />
             
@@ -257,23 +238,14 @@ const Payment = () => {
             <div className="bg-gradient-to-br from-primary/5 to-primary/10 p-6 rounded-xl border-2 border-primary/20">
               <div className="flex flex-col md:flex-row items-center gap-6">
                 <div className="bg-white p-4 rounded-lg shadow-lg">
-                  <QRCodeSVG 
-                    value={`MBWAY:${MBWAY_PHONE}:${price}`}
-                    size={160}
-                    level="H"
-                    includeMargin={true}
-                  />
+                  <QRCodeSVG value={`MBWAY:${MBWAY_PHONE}:${price}`} size={160} level="H" includeMargin={true} />
                 </div>
                 
                 <div className="flex-1 text-center md:text-left">
                   <p className="text-sm text-muted-foreground mb-2">Número de Telemóvel:</p>
                   <div className="flex items-center justify-center md:justify-start gap-2 mb-4">
                     <span className="text-2xl font-bold font-mono">{MBWAY_PHONE}</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => copyToClipboard(MBWAY_PHONE, 'Número MB Way')}
-                    >
+                    <Button variant="ghost" size="sm" onClick={() => copyToClipboard(MBWAY_PHONE, 'Número MB Way')}>
                       <Copy className="h-4 w-4" />
                     </Button>
                   </div>
@@ -298,12 +270,7 @@ const Payment = () => {
               <p className="text-sm text-muted-foreground mb-2">IBAN:</p>
               <div className="flex items-center justify-between gap-2 mb-2">
                 <span className="font-mono text-sm md:text-base font-semibold break-all">{IBAN}</span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => copyToClipboard(IBAN, 'IBAN')}
-                  className="flex-shrink-0"
-                >
+                <Button variant="ghost" size="sm" onClick={() => copyToClipboard(IBAN, 'IBAN')} className="flex-shrink-0">
                   <Copy className="h-4 w-4" />
                 </Button>
               </div>
@@ -326,18 +293,11 @@ const Payment = () => {
               <p className="text-sm text-muted-foreground mb-2">RevTag:</p>
               <div className="flex items-center justify-between gap-2 mb-2">
                 <span className="font-mono text-sm md:text-base font-semibold">{REVOLUT_REVTAG}</span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => copyToClipboard(REVOLUT_REVTAG, 'RevTag')}
-                  className="flex-shrink-0"
-                >
+                <Button variant="ghost" size="sm" onClick={() => copyToClipboard(REVOLUT_REVTAG, 'RevTag')} className="flex-shrink-0">
                   <Copy className="h-4 w-4" />
                 </Button>
               </div>
-              <p className="text-xs text-muted-foreground">
-                Utilize este RevTag para enviar dinheiro via Revolut
-              </p>
+              <p className="text-xs text-muted-foreground">Utiliza este RevTag para enviar dinheiro via Revolut</p>
             </div>
           </div>
 
@@ -354,23 +314,14 @@ const Payment = () => {
             </ol>
           </div>
 
-          <Button 
-            onClick={handlePaymentConfirmation}
-            disabled={loading}
-            className="w-full bg-green-600 hover:bg-green-700 text-white"
-            size="lg"
-          >
-            {loading ? (
-              <>
+          <Button onClick={handlePaymentConfirmation} disabled={loading} className="w-full bg-green-600 hover:bg-green-700 text-white" size="lg">
+            {loading ? <>
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
                 A processar...
-              </>
-            ) : (
-              <>
+              </> : <>
                 <CheckCircle className="h-5 w-5 mr-2" />
                 Já Paguei
-              </>
-            )}
+              </>}
           </Button>
         </CardContent>
       </Card>
@@ -387,8 +338,6 @@ const Payment = () => {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Payment;
