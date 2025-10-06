@@ -214,6 +214,7 @@ export type Database = {
       messages: {
         Row: {
           id: string
+          is_read: boolean
           message: string
           receiver_id: string
           sender_id: string
@@ -222,6 +223,7 @@ export type Database = {
         }
         Insert: {
           id?: string
+          is_read?: boolean
           message: string
           receiver_id: string
           sender_id: string
@@ -230,6 +232,7 @@ export type Database = {
         }
         Update: {
           id?: string
+          is_read?: boolean
           message?: string
           receiver_id?: string
           sender_id?: string
@@ -317,6 +320,7 @@ export type Database = {
           decided_by: string | null
           id: string
           note: string | null
+          plan_type: string | null
           proof_url: string | null
           reservation_id: string
           status: string
@@ -334,6 +338,7 @@ export type Database = {
           decided_by?: string | null
           id?: string
           note?: string | null
+          plan_type?: string | null
           proof_url?: string | null
           reservation_id: string
           status?: string
@@ -351,6 +356,7 @@ export type Database = {
           decided_by?: string | null
           id?: string
           note?: string | null
+          plan_type?: string | null
           proof_url?: string | null
           reservation_id?: string
           status?: string
@@ -784,8 +790,10 @@ export type Database = {
           end_date: string | null
           id: string
           is_active: boolean
+          monthly_free_hours: number | null
           payment_status: string
           plan_type: string
+          price_eur: number
           start_date: string
           user_id: string
         }
@@ -794,8 +802,10 @@ export type Database = {
           end_date?: string | null
           id?: string
           is_active?: boolean
+          monthly_free_hours?: number | null
           payment_status?: string
           plan_type: string
+          price_eur?: number
           start_date?: string
           user_id: string
         }
@@ -804,8 +814,10 @@ export type Database = {
           end_date?: string | null
           id?: string
           is_active?: boolean
+          monthly_free_hours?: number | null
           payment_status?: string
           plan_type?: string
+          price_eur?: number
           start_date?: string
           user_id?: string
         }
@@ -1354,6 +1366,10 @@ export type Database = {
       }
       subscribe_plan: {
         Args: { p_plan_type: string; p_user_id: string }
+        Returns: string
+      }
+      subscribe_request: {
+        Args: { p_amount_eur: number; p_plan_type: string; p_user_id: string }
         Returns: string
       }
     }
