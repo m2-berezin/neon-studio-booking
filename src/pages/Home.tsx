@@ -38,14 +38,7 @@ const Home = () => {
       <div className="flex-1 flex items-center justify-center px-4">
         <div className="text-center max-w-4xl mx-auto w-full">
           <div className="mb-12">
-            <h1 className="neon-heading mb-2">Bem-vindo ao Futuro.</h1>
-            {subscription?.is_active && (
-              <div className="flex justify-center mt-4">
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-gradient-to-r from-primary to-primary-glow text-primary-foreground shadow-lg">
-                  Premium
-                </span>
-              </div>
-            )}
+            <h1 className="neon-heading mb-8">Bem-vindo ao Futuro.</h1>
           </div>
 
           {/* Service Cards Grid - Symmetrical Layout */}

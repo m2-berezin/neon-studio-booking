@@ -12,7 +12,7 @@ import { NotificationHandler } from '@/components/NotificationHandler';
 const Layout = ({ children }: { children: ReactNode }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, loading, signOut, isAdmin } = useAuth();
+  const { user, loading, signOut, isAdmin, subscription } = useAuth();
   const { unreadCount } = useUnreadMessages();
 
   // Handle authentication redirect properly (non-blocking)
@@ -74,6 +74,13 @@ const Layout = ({ children }: { children: ReactNode }) => {
           <div className="text-center">
             <h1 className="text-2xl font-bold neon-logo">7T7</h1>
             <p className="text-xs text-muted-foreground -mt-1">Studios</p>
+            {subscription?.is_active && (
+              <div className="flex justify-center mt-1.5">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gradient-to-r from-primary to-primary-glow text-primary-foreground">
+                  Premium
+                </span>
+              </div>
+            )}
           </div>
         </div>
         
