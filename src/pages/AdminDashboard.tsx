@@ -154,11 +154,15 @@ const AdminDashboard = () => {
         const otherUserId = msg.sender_id === user.id ? msg.receiver_id : msg.sender_id;
         
         if (!threadsMap.has(otherUserId)) {
-          const { data: profile } = await supabase
+          const { data: profile, error: profileError } = await supabase
             .from('profiles')
             .select('full_name')
             .eq('id', otherUserId)
-            .single();
+            .maybeSingle();
+
+          if (profileError) {
+            console.error('Error fetching profile:', profileError);
+          }
 
           const { count } = await supabase
             .from('messages')
@@ -167,9 +171,11 @@ const AdminDashboard = () => {
             .eq('receiver_id', user.id)
             .eq('is_read', false);
 
+          const userName = profile?.full_name || 'Sem Nome';
+
           threadsMap.set(otherUserId, {
             user_id: otherUserId,
-            user_name: profile?.full_name || 'Cliente',
+            user_name: userName,
             last_message: msg.message,
             last_timestamp: msg.timestamp,
             unread_count: count || 0,
@@ -200,15 +206,19 @@ const AdminDashboard = () => {
 
       // Fetch sender names separately
       const messagesWithSender = await Promise.all((data || []).map(async (msg) => {
-        const { data: profile } = await supabase
+        const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('full_name')
           .eq('id', msg.sender_id)
-          .single();
+          .maybeSingle();
+        
+        if (profileError) {
+          console.error('Error fetching sender profile:', profileError);
+        }
         
         return {
           ...msg,
-          sender_name: profile?.full_name || null
+          sender_name: profile?.full_name || 'Sem Nome'
         };
       }));
       
