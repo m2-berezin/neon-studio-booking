@@ -3,88 +3,43 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { 
-  MapPin, 
-  Clock, 
-  Phone, 
-  MessageCircle, 
-  ExternalLink,
-  AlertTriangle,
-  CheckCircle,
-  Calendar,
-  Music,
-  Headphones,
-  Mic,
-  Settings
-} from 'lucide-react';
-
+import { MapPin, Clock, Phone, MessageCircle, ExternalLink, AlertTriangle, CheckCircle, Calendar, Music, Headphones, Mic, Settings } from 'lucide-react';
 const StudioInfo = () => {
   const whatsappNumber = "+351934941263";
   const studioLocation = "Pinhal do General, Seixal";
   const whatsappLink = `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}?text=Hi! I'd like to inquire about studio sessions.`;
-
-
-  const houseRules = [
-    {
-      icon: <Clock className="h-5 w-5" />,
-      title: "Pontualidade",
-      description: "Por favor chegue a horas. Atrasos podem resultar em sessões encurtadas."
-    },
-    {
-      icon: <Music className="h-5 w-5" />,
-      title: "Respeite o Equipamento",
-      description: "Manuseie todo o equipamento com cuidado. Reporte qualquer problema imediatamente."
-    },
-    {
-      icon: <Settings className="h-5 w-5" />,
-      title: "PROIBIDO COMER",
-      description: "Comida não é permitida no estúdio. É permitido fumar."
-    },
-    {
-      icon: <Phone className="h-5 w-5" />,
-      title: "Etiqueta do Telemóvel",
-      description: "Mantenha os telemóveis em modo silencioso durante as sessões de gravação."
-    },
-    {
-      icon: <Mic className="h-5 w-5" />,
-      title: "Conduta Profissional",
-      description: "Mantenha uma atmosfera profissional. Comportamento disruptivo não será tolerado."
-    }
-  ];
-
-  const prepChecklist = [
-    {
-      category: "Before You Arrive",
-      items: [
-        "Confirm your session time 24 hours in advance",
-        "Prepare your tracks/stems in the requested format",
-        "Bring reference tracks for mixing/mastering",
-        "Write down specific notes or feedback for the engineer"
-      ]
-    },
-    {
-      category: "What to Bring",
-      items: [
-        "Valid ID for entry",
-        "USB drive or external hard drive",
-        "Your own headphones (optional but recommended)",
-        "Lyric sheets or chord progressions",
-        "Any specific plugins or software requirements"
-      ]
-    },
-    {
-      category: "Technical Prep",
-      items: [
-        "Ensure all files are properly labeled",
-        "Audio files should be in 24-bit/48kHz or higher",
-        "Remove any limiting or heavy compression from stems",
-        "Organize tracks by instrument/element"
-      ]
-    }
-  ];
-
-  return (
-    <div className="container mx-auto p-6 max-w-4xl">
+  const houseRules = [{
+    icon: <Clock className="h-5 w-5" />,
+    title: "Pontualidade",
+    description: "Por favor chegue a horas. Atrasos podem resultar em sessões encurtadas."
+  }, {
+    icon: <Music className="h-5 w-5" />,
+    title: "Respeite o Equipamento",
+    description: "Manuseie todo o equipamento com cuidado. Reporte qualquer problema imediatamente."
+  }, {
+    icon: <Settings className="h-5 w-5" />,
+    title: "PROIBIDO COMER",
+    description: "Comida não é permitida no estúdio. É permitido fumar."
+  }, {
+    icon: <Phone className="h-5 w-5" />,
+    title: "Etiqueta do Telemóvel",
+    description: "Mantenha os telemóveis em modo silencioso durante as sessões de gravação."
+  }, {
+    icon: <Mic className="h-5 w-5" />,
+    title: "Conduta Profissional",
+    description: "Mantenha uma atmosfera profissional. Comportamento disruptivo não será tolerado."
+  }];
+  const prepChecklist = [{
+    category: "Before You Arrive",
+    items: ["Confirm your session time 24 hours in advance", "Prepare your tracks/stems in the requested format", "Bring reference tracks for mixing/mastering", "Write down specific notes or feedback for the engineer"]
+  }, {
+    category: "What to Bring",
+    items: ["Valid ID for entry", "USB drive or external hard drive", "Your own headphones (optional but recommended)", "Lyric sheets or chord progressions", "Any specific plugins or software requirements"]
+  }, {
+    category: "Technical Prep",
+    items: ["Ensure all files are properly labeled", "Audio files should be in 24-bit/48kHz or higher", "Remove any limiting or heavy compression from stems", "Organize tracks by instrument/element"]
+  }];
+  return <div className="container mx-auto p-6 max-w-4xl">
       {/* Header */}
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold neon-title mb-2">
@@ -159,7 +114,7 @@ const StudioInfo = () => {
               <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                 <h5 className="font-medium text-blue-800 text-sm mb-1">Política de Reservas</h5>
                 <p className="text-xs text-blue-700">
-                  Não subscritores: Sinal de €15 obrigatório para reserva de sessão.<br/>
+                  Não subscritores: Sinal de €15 obrigatório para reserva de sessão.<br />
                   Subscritores: Sem necessidade de sinal.
                 </p>
               </div>
@@ -169,9 +124,7 @@ const StudioInfo = () => {
             
             <div>
               <h4 className="font-medium mb-2">Política de Não Comparência</h4>
-              <p className="text-sm text-muted-foreground">
-                Faltar à sessão sem aviso resulta na perda total do pagamento e num período de penalização de 3 meses onde as recompensas não podem ser utilizadas.
-              </p>
+              <p className="text-sm text-muted-foreground">Faltar à sessão sem aviso resulta na perda do valor do sinal e num período de penalização de 3 meses onde as recompensas não podem ser utilizadas.</p>
             </div>
 
             <div>
@@ -194,8 +147,7 @@ const StudioInfo = () => {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {houseRules.map((rule, index) => (
-              <div key={index} className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+            {houseRules.map((rule, index) => <div key={index} className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
                 <div className="text-primary mt-1">
                   {rule.icon}
                 </div>
@@ -203,8 +155,7 @@ const StudioInfo = () => {
                   <h4 className="font-medium text-sm mb-1">{rule.title}</h4>
                   <p className="text-xs text-muted-foreground">{rule.description}</p>
                 </div>
-              </div>
-            ))}
+              </div>)}
           </div>
         </CardContent>
       </Card>
@@ -218,19 +169,13 @@ const StudioInfo = () => {
             Não encontrou o que procurava? Entre em contacto connosco directamente.
           </p>
           <div className="flex justify-center">
-            <Button
-              variant="outline"
-              onClick={() => window.open(whatsappLink, '_blank')}
-              className="border-green-600 text-green-600 hover:bg-green-50"
-            >
+            <Button variant="outline" onClick={() => window.open(whatsappLink, '_blank')} className="border-green-600 text-green-600 hover:bg-green-50">
               <MessageCircle className="h-4 w-4 mr-2" />
               WhatsApp
             </Button>
           </div>
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>;
 };
-
 export default StudioInfo;
