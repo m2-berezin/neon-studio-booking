@@ -52,6 +52,7 @@ const Payment = () => {
   // Payment details
   const MBWAY_PHONE = '934941263';
   const IBAN = 'PT50 0193 0000 1050 4647 3479 5';
+  const REVOLUT_REVTAG = '@Ghostwayne';
 
   useEffect(() => {
     if (!service || !option || !price) {
@@ -308,6 +309,34 @@ const Payment = () => {
               </div>
               <p className="text-xs text-muted-foreground">
                 Utilize este IBAN para transferência bancária nacional ou internacional
+              </p>
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Revolut */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Building2 className="h-5 w-5 text-primary" />
+              <h3 className="font-semibold text-lg">Revolut</h3>
+            </div>
+            
+            <div className="bg-gradient-to-br from-secondary/5 to-secondary/10 p-4 rounded-xl border-2 border-secondary/20">
+              <p className="text-sm text-muted-foreground mb-2">RevTag:</p>
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <span className="font-mono text-sm md:text-base font-semibold">{REVOLUT_REVTAG}</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => copyToClipboard(REVOLUT_REVTAG, 'RevTag')}
+                  className="flex-shrink-0"
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Utilize este RevTag para enviar dinheiro via Revolut
               </p>
             </div>
           </div>
