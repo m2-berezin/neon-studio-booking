@@ -23,6 +23,7 @@ interface Message {
   thread_id: string;
   message: string;
   timestamp: string;
+  is_read: boolean;
 }
 
 const AdminMessages = () => {

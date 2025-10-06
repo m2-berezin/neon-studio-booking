@@ -13,14 +13,14 @@ export const useUnreadMessages = () => {
     }
 
     try {
-      const { count, error } = await supabase
+      const { data, error } = await supabase
         .from('messages')
-        .select('*', { count: 'exact', head: true })
+        .select('id', { count: 'exact' })
         .eq('receiver_id', user.id)
         .eq('is_read', false);
 
       if (error) throw error;
-      setUnreadCount(count || 0);
+      setUnreadCount(data?.length || 0);
     } catch (error) {
       console.error('Error fetching unread count:', error);
     }

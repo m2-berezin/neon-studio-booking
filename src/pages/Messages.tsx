@@ -5,20 +5,103 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Send } from 'lucide-react';
-import { useMessaging } from '@/hooks/useMessaging';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+
+interface Message {
+  id: string;
+  sender_id: string;
+  receiver_id: string;
+  thread_id: string;
+  message: string;
+  timestamp: string;
+  is_read: boolean;
+}
+
+const ADMIN_ID = '6d9d1dc1-e16f-4f3d-a817-1591a1b27477';
 
 const Messages = () => {
   const { user } = useAuth();
-  const { messages, loading, loadMessages, sendMessage, subscribeToMessages, ADMIN_ID } = useMessaging();
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [loading, setLoading] = useState(false);
   const [newMessage, setNewMessage] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const loadMessages = async () => {
+    if (!user) return;
+    
+    setLoading(true);
+    try {
+      const ids = [user.id, ADMIN_ID].sort();
+      const threadId = `${ids[0]}-${ids[1]}`;
+      
+      const { data, error } = await supabase
+        .from('messages')
+        .select('*')
+        .eq('thread_id', threadId)
+        .order('timestamp', { ascending: true });
+
+      if (error) throw error;
+      setMessages(data || []);
+    } catch (error) {
+      console.error('Error loading messages:', error);
+      toast.error('Erro ao carregar mensagens');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const sendMessageFunc = async () => {
+    if (!user || !newMessage.trim()) return;
+
+    try {
+      const ids = [user.id, ADMIN_ID].sort();
+      const threadId = `${ids[0]}-${ids[1]}`;
+      
+      const { error } = await supabase
+        .from('messages')
+        .insert({
+          thread_id: threadId,
+          sender_id: user.id,
+          receiver_id: ADMIN_ID,
+          message: newMessage.trim(),
+          timestamp: new Date().toISOString(),
+        });
+
+      if (error) throw error;
+      toast.success('Mensagem enviada');
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast.error('Erro ao enviar mensagem');
+    }
+  };
+
   useEffect(() => {
     if (user) {
-      loadMessages(ADMIN_ID);
-      const unsubscribe = subscribeToMessages(ADMIN_ID);
-      return unsubscribe;
+      loadMessages();
+
+      const ids = [user.id, ADMIN_ID].sort();
+      const threadId = `${ids[0]}-${ids[1]}`;
+
+      const channel = supabase
+        .channel('messages-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'messages',
+            filter: `thread_id=eq.${threadId}`,
+          },
+          () => {
+            loadMessages();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
     }
   }, [user?.id]);
 
@@ -29,7 +112,7 @@ const Messages = () => {
   const handleSendMessage = async () => {
     if (!newMessage.trim()) return;
     
-    await sendMessage(ADMIN_ID, newMessage);
+    await sendMessageFunc();
     setNewMessage('');
 
     // Mark messages as read
