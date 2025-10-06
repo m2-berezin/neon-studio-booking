@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Calendar, Clock, Star, CheckCircle, MessageSquare, Settings, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,7 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 
 const Subscriptions = () => {
-  const { user } = useAuth();
+  const { user, subscription } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const {
@@ -28,6 +28,26 @@ const Subscriptions = () => {
 
   const [editingPreferences, setEditingPreferences] = useState(false);
   const [tempPreferences, setTempPreferences] = useState(preferences);
+  const [activePlanType, setActivePlanType] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchActivePlan = async () => {
+      if (!user) return;
+      
+      const { data, error } = await supabase
+        .from('subscriptions')
+        .select('plan_type')
+        .eq('user_id', user.id)
+        .eq('is_active', true)
+        .single();
+      
+      if (data && !error) {
+        setActivePlanType(data.plan_type);
+      }
+    };
+
+    fetchActivePlan();
+  }, [user]);
 
   if (!user) {
     return (
@@ -42,6 +62,7 @@ const Subscriptions = () => {
     {
       id: 'plan-s',
       name: 'Plano S',
+      planType: 'S',
       price: 4.99,
       duration: 'monthly',
       features: [
@@ -54,6 +75,7 @@ const Subscriptions = () => {
     {
       id: 'plan-x',
       name: 'Plano X',
+      planType: 'X',
       price: 9.99,
       duration: 'monthly',
       features: [
@@ -65,6 +87,16 @@ const Subscriptions = () => {
       popular: true
     }
   ];
+
+  const getButtonText = (plan: any) => {
+    if (activePlanType === plan.planType) {
+      return 'Plano Ativo';
+    }
+    if (activePlanType === 'S' && plan.planType === 'X') {
+      return 'Upgrade';
+    }
+    return 'Subscrever Agora';
+  };
 
   const daysOfWeek = [
     { value: '0', label: 'Domingo' },
@@ -204,10 +236,10 @@ const Subscriptions = () => {
                     <Button
                       className="w-full"
                       onClick={() => handleSubscribe(plan)}
-                      disabled={loading}
+                      disabled={loading || activePlanType === plan.planType}
                       variant={plan.popular ? 'default' : 'outline'}
                     >
-                      Subscrever Agora
+                      {getButtonText(plan)}
                     </Button>
                   </div>
                 </CardContent>
