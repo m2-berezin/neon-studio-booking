@@ -7,7 +7,6 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import { useSubscriptions } from '@/hooks/useSubscriptions';
 import { useFriendCode as useFriendCodeHook } from '@/hooks/useFriendCode';
 
 interface Service {
@@ -53,9 +52,8 @@ interface PriceBreakdown {
 }
 
 export const PriceSummary = ({ services, bookingDate, className, onPriceChange, showFriendCode = true }: PriceSummaryProps) => {
-  const { user } = useAuth();
+  const { user, subscription, subscriptionDiscountPercent } = useAuth();
   const { toast } = useToast();
-  const { userSubscription } = useSubscriptions();
   const { appliedFriendCode, hasFriendCodeDiscount } = useFriendCodeHook();
   
   const [rewardCode, setRewardCode] = useState('');
@@ -98,21 +96,9 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
 
   const subtotal = lineItems.reduce((total, item) => total + (item.price * item.quantity), 0);
 
-  // Check if booking is within active subscription period
-  const isSubscriptionBooking = () => {
-    if (!userSubscription || !userSubscription.active || !bookingDate) return false;
-    
-    const startDate = new Date(userSubscription.start_date);
-    
-    // Check if booking is after start date and subscription is active
-    if (bookingDate < startDate) return false;
-    
-    return true;
-  };
-
-  // Calculate subscription discount
-  const subscriptionDiscount = isSubscriptionBooking() && userSubscription?.discounted_price 
-    ? Math.max(0, subtotal - userSubscription.discounted_price) 
+  // Calculate subscription discount automatically if user has active subscription
+  const subscriptionDiscount = subscription?.is_active 
+    ? (subtotal * subscriptionDiscountPercent) / 100
     : 0;
 
   // Apply reward code (not friend codes - those are managed in Rewards page)
@@ -294,7 +280,7 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
         {subscriptionDiscount > 0 && (
           <div className="space-y-2">
             <div className="flex justify-between text-sm text-green-600">
-              <span>Desconto de Subscrição ({userSubscription?.plan})</span>
+              <span>Desconto de Subscrição ({subscriptionDiscountPercent}% - Plano {subscription?.plan_type})</span>
               <span>-€{subscriptionDiscount.toFixed(2)}</span>
             </div>
           </div>

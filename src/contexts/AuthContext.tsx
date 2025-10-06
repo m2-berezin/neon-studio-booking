@@ -14,10 +14,22 @@ interface Profile {
   last_voucher_at?: string | null;
 }
 
+interface Subscription {
+  id: string;
+  user_id: string;
+  plan_type: string;
+  is_active: boolean;
+  start_date: string;
+  end_date: string | null;
+  payment_status: string;
+}
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   profile: Profile | null;
+  subscription: Subscription | null;
+  subscriptionDiscountPercent: number;
   loading: boolean;
   signUp: (email: string, password: string, fullName: string, phone: string) => Promise<{ error: any }>;
   signIn: (emailOrPhone: string, password: string) => Promise<{ error: any }>;
@@ -41,6 +53,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const [subscriptionDiscountPercent, setSubscriptionDiscountPercent] = useState(0);
   const [loading, setLoading] = useState(false); // Start as false for instant loading
 
   // Send welcome messages on first login
@@ -56,6 +70,44 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
     } catch (error) {
       console.error('Error sending welcome messages:', error);
+    }
+  };
+
+  // Fetch user subscription info (non-blocking)
+  const fetchSubscription = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('subscriptions')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('is_active', true)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching subscription:', error);
+        setSubscription(null);
+        setSubscriptionDiscountPercent(0);
+        return;
+      }
+
+      setSubscription(data);
+
+      // Calculate discount based on subscription age
+      if (data) {
+        const startDate = new Date(data.start_date);
+        const now = new Date();
+        const monthsActive = (now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 30);
+        
+        // Less than 1 month = 10%, 1 month or more = 15%
+        const discount = monthsActive < 1 ? 10 : 15;
+        setSubscriptionDiscountPercent(discount);
+      } else {
+        setSubscriptionDiscountPercent(0);
+      }
+    } catch (error) {
+      console.error('Unexpected error fetching subscription:', error);
+      setSubscription(null);
+      setSubscriptionDiscountPercent(0);
     }
   };
 
@@ -88,15 +140,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+    const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user) {
           fetchProfile(session.user.id); // Non-blocking
+          fetchSubscription(session.user.id); // Non-blocking
         } else {
           setProfile(null);
+          setSubscription(null);
+          setSubscriptionDiscountPercent(0);
         }
       }
     );
@@ -110,19 +165,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         
         if (session?.user) {
           fetchProfile(session.user.id); // Non-blocking
+          fetchSubscription(session.user.id); // Non-blocking
         }
       } catch (error) {
         console.error('Error checking session:', error);
         setSession(null);
         setUser(null);
         setProfile(null);
+        setSubscription(null);
+        setSubscriptionDiscountPercent(0);
       }
     };
 
     // Run in background without blocking UI
     checkSession();
 
-    return () => subscription.unsubscribe();
+    return () => authSubscription.unsubscribe();
   }, []);
 
   const signUp = async (email: string, password: string, fullName: string, phone: string) => {
@@ -199,6 +257,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     user,
     session,
     profile,
+    subscription,
+    subscriptionDiscountPercent,
     loading,
     signUp,
     signIn,
