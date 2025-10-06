@@ -10,82 +10,77 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useNotificationSettings } from '@/hooks/useNotificationSettings';
-
 const ProfileSettings = () => {
   const navigate = useNavigate();
-  const { user, profile, updateProfile } = useAuth();
-  const { toast } = useToast();
-  
+  const {
+    user,
+    profile,
+    updateProfile
+  } = useAuth();
+  const {
+    toast
+  } = useToast();
   const [loading, setLoading] = useState(false);
   const [editingProfile, setEditingProfile] = useState(false);
   const [formData, setFormData] = useState({
     full_name: profile?.full_name || '',
-    phone: profile?.phone || '',
+    phone: profile?.phone || ''
   });
-  
-  const { settings: notificationSettings, toggleSetting } = useNotificationSettings();
-  
+  const {
+    settings: notificationSettings,
+    toggleSetting
+  } = useNotificationSettings();
   const [appSettings, setAppSettings] = useState({
     darkMode: false,
-    language: 'pt',
+    language: 'pt'
   });
-
   const handleProfileUpdate = async () => {
     if (!profile) return;
-    
     setLoading(true);
     try {
-      const { error } = await updateProfile({
+      const {
+        error
+      } = await updateProfile({
         full_name: formData.full_name,
-        phone: formData.phone,
+        phone: formData.phone
       });
-
       if (error) {
         throw error;
       }
-
       setEditingProfile(false);
       toast({
         title: 'Perfil Atualizado',
-        description: 'As tuas informações foram atualizadas com sucesso.',
+        description: 'As tuas informações foram atualizadas com sucesso.'
       });
     } catch (error: any) {
       toast({
         title: 'Erro',
         description: error.message || 'Falha ao atualizar o perfil',
-        variant: 'destructive',
+        variant: 'destructive'
       });
     } finally {
       setLoading(false);
     }
   };
-
   const handleAppSettingChange = (key: string, value: boolean | string) => {
-    setAppSettings(prev => ({ ...prev, [key]: value }));
-    
+    setAppSettings(prev => ({
+      ...prev,
+      [key]: value
+    }));
     toast({
       title: 'Definição Atualizada',
-      description: `${key} foi atualizada.`,
+      description: `${key} foi atualizada.`
     });
   };
-
   if (!user || !profile) {
-    return (
-      <div className="flex items-center justify-center min-h-64">
+    return <div className="flex items-center justify-center min-h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="container mx-auto p-4 max-w-2xl">
+  return <div className="container mx-auto p-4 max-w-2xl">
       {/* Header */}
       <div className="mb-6">
-        <Button 
-          variant="ghost" 
-          onClick={() => navigate('/profile')}
-          className="mb-4"
-        >
+        <Button variant="ghost" onClick={() => navigate('/profile')} className="mb-4">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Voltar ao Perfil
         </Button>
@@ -109,12 +104,7 @@ const ProfileSettings = () => {
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              value={user.email}
-              disabled
-              className="bg-muted"
-            />
+            <Input id="email" value={user.email} disabled className="bg-muted" />
             <p className="text-xs text-muted-foreground">
               O email não pode ser alterado. Contacta o suporte se necessário.
             </p>
@@ -123,63 +113,41 @@ const ProfileSettings = () => {
           <div className="space-y-2">
             <Label htmlFor="full_name">Nome Completo</Label>
             <div className="flex gap-2">
-              <Input
-                id="full_name"
-                value={formData.full_name}
-                onChange={(e) => setFormData(prev => ({ ...prev, full_name: e.target.value }))}
-                disabled={!editingProfile}
-                placeholder="O teu nome completo"
-              />
-              {!editingProfile && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setEditingProfile(true)}
-                >
+              <Input id="full_name" value={formData.full_name} onChange={e => setFormData(prev => ({
+              ...prev,
+              full_name: e.target.value
+            }))} disabled={!editingProfile} placeholder="O teu nome completo" />
+              {!editingProfile && <Button variant="outline" size="sm" onClick={() => setEditingProfile(true)}>
                   <Edit3 className="h-4 w-4" />
-                </Button>
-              )}
+                </Button>}
             </div>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="phone">Telefone</Label>
             <div className="flex gap-2">
-              <Input
-                id="phone"
-                value={formData.phone}
-                onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                disabled={!editingProfile}
-                placeholder="+351 9XX XXX XXX"
-              />
+              <Input id="phone" value={formData.phone} onChange={e => setFormData(prev => ({
+              ...prev,
+              phone: e.target.value
+            }))} disabled={!editingProfile} placeholder="+351 9XX XXX XXX" />
             </div>
           </div>
 
-          {editingProfile && (
-            <div className="flex gap-2 pt-2">
-              <Button
-                onClick={handleProfileUpdate}
-                disabled={loading}
-                size="sm"
-              >
+          {editingProfile && <div className="flex gap-2 pt-2">
+              <Button onClick={handleProfileUpdate} disabled={loading} size="sm">
                 <Save className="h-4 w-4 mr-2" />
                 {loading ? 'A guardar...' : 'Guardar'}
               </Button>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setEditingProfile(false);
-                  setFormData({
-                    full_name: profile?.full_name || '',
-                    phone: profile?.phone || '',
-                  });
-                }}
-                size="sm"
-              >
+              <Button variant="outline" onClick={() => {
+            setEditingProfile(false);
+            setFormData({
+              full_name: profile?.full_name || '',
+              phone: profile?.phone || ''
+            });
+          }} size="sm">
                 Cancelar
               </Button>
-            </div>
-          )}
+            </div>}
         </CardContent>
       </Card>
 
@@ -199,10 +167,7 @@ const ProfileSettings = () => {
                 Notificações quando recebes mensagens novas
               </p>
             </div>
-            <Switch
-              checked={notificationSettings.newMessages}
-              onCheckedChange={() => toggleSetting('newMessages')}
-            />
+            <Switch checked={notificationSettings.newMessages} onCheckedChange={() => toggleSetting('newMessages')} />
           </div>
 
           <div className="flex items-center justify-between">
@@ -212,10 +177,7 @@ const ProfileSettings = () => {
                 Notificação quando o voucher de €15 fica disponível
               </p>
             </div>
-            <Switch
-              checked={notificationSettings.voucherAvailable}
-              onCheckedChange={() => toggleSetting('voucherAvailable')}
-            />
+            <Switch checked={notificationSettings.voucherAvailable} onCheckedChange={() => toggleSetting('voucherAvailable')} />
           </div>
 
           <div className="flex items-center justify-between">
@@ -225,10 +187,7 @@ const ProfileSettings = () => {
                 Notificação uma semana antes da tua reserva
               </p>
             </div>
-            <Switch
-              checked={notificationSettings.bookingReminders}
-              onCheckedChange={() => toggleSetting('bookingReminders')}
-            />
+            <Switch checked={notificationSettings.bookingReminders} onCheckedChange={() => toggleSetting('bookingReminders')} />
           </div>
 
           <div className="bg-red-50 border border-red-200 rounded-lg p-3">
@@ -240,45 +199,7 @@ const ProfileSettings = () => {
       </Card>
 
       {/* App Preferences */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Globe className="h-5 w-5" />
-            Preferências da App
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <Label>Modo Escuro</Label>
-              <p className="text-sm text-muted-foreground">
-                Alterna entre tema claro e escuro
-              </p>
-            </div>
-            <Switch
-              checked={appSettings.darkMode}
-              onCheckedChange={(checked) => handleAppSettingChange('darkMode', checked)}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Idioma</Label>
-            <Select
-              value={appSettings.language}
-              onValueChange={(value) => handleAppSettingChange('language', value)}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="pt">Português</SelectItem>
-                <SelectItem value="en">English</SelectItem>
-                <SelectItem value="es">Español</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
+      
 
       {/* Security */}
       <Card className="mb-6">
@@ -289,25 +210,17 @@ const ProfileSettings = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Button
-            variant="outline"
-            onClick={() => toast({
-              title: 'Funcionalidade em Desenvolvimento',
-              description: 'A alteração de password estará disponível em breve.',
-            })}
-            className="w-full"
-          >
+          <Button variant="outline" onClick={() => toast({
+          title: 'Funcionalidade em Desenvolvimento',
+          description: 'A alteração de password estará disponível em breve.'
+        })} className="w-full">
             Alterar Password
           </Button>
           
-          <Button
-            variant="outline"
-            onClick={() => toast({
-              title: 'Autenticação de Dois Fatores',
-              description: 'Esta funcionalidade estará disponível numa atualização futura.',
-            })}
-            className="w-full"
-          >
+          <Button variant="outline" onClick={() => toast({
+          title: 'Autenticação de Dois Fatores',
+          description: 'Esta funcionalidade estará disponível numa atualização futura.'
+        })} className="w-full">
             Configurar 2FA
           </Button>
         </CardContent>
@@ -319,14 +232,10 @@ const ProfileSettings = () => {
           <CardTitle className="text-destructive">Zona de Perigo</CardTitle>
         </CardHeader>
         <CardContent>
-          <Button
-            variant="destructive"
-            onClick={() => toast({
-              title: 'Funcionalidade em Desenvolvimento',
-              description: 'Para apagar a conta, contacta o suporte.',
-            })}
-            className="w-full"
-          >
+          <Button variant="destructive" onClick={() => toast({
+          title: 'Funcionalidade em Desenvolvimento',
+          description: 'Para apagar a conta, contacta o suporte.'
+        })} className="w-full">
             Apagar Conta
           </Button>
           <p className="text-xs text-muted-foreground mt-2">
@@ -334,8 +243,6 @@ const ProfileSettings = () => {
           </p>
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>;
 };
-
 export default ProfileSettings;
