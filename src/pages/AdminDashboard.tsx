@@ -139,6 +139,9 @@ const AdminDashboard = () => {
   const loadThreads = async () => {
     if (!user) return;
 
+    console.log('=== LOADING THREADS ===');
+    console.log('Admin user ID:', user.id);
+
     try {
       // Get all messages involving this user
       const { data: messagesData, error } = await supabase
@@ -151,12 +154,26 @@ const AdminDashboard = () => {
         .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
         .order('timestamp', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error loading messages:', error);
+        throw error;
+      }
+
+      console.log('Messages data loaded:', messagesData);
 
       const threadsMap = new Map<string, Thread>();
       
       for (const msg of messagesData || []) {
         const otherUserId = msg.sender_id === user.id ? msg.receiver_id : msg.sender_id;
+        
+        console.log('Processing message:', {
+          msg_id: msg.id,
+          sender_id: msg.sender_id,
+          receiver_id: msg.receiver_id,
+          otherUserId,
+          sender_profile: msg.sender_profile,
+          receiver_profile: msg.receiver_profile
+        });
         
         if (!threadsMap.has(otherUserId)) {
           // Get the name from the JOIN
@@ -166,7 +183,7 @@ const AdminDashboard = () => {
 
           const userName = otherUserName?.trim() || 'Sem Nome';
           
-          console.log('Loaded sender_name:', userName, 'for user_id:', otherUserId);
+          console.log('✅ Loaded sender_name:', userName, 'for user_id:', otherUserId);
 
           const { count } = await supabase
             .from('messages')
@@ -185,7 +202,9 @@ const AdminDashboard = () => {
         }
       }
 
-      setThreads(Array.from(threadsMap.values()));
+      const threadsArray = Array.from(threadsMap.values());
+      console.log('Final threads array:', threadsArray);
+      setThreads(threadsArray);
     } catch (error) {
       console.error('Error loading threads:', error);
     }
