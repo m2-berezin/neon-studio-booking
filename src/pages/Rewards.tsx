@@ -54,6 +54,32 @@ const Rewards = () => {
     }
   }, [user]);
 
+  // Realtime subscription for user_offers changes
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('user_offers_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'user_offers',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          console.log('user_offers changed:', payload);
+          fetchOffersAndUsage();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
+
   const fetchOffersAndUsage = async () => {
     try {
       // Fetch active offers
