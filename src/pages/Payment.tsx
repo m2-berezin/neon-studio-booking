@@ -30,11 +30,15 @@ const Payment = () => {
   const startTime = searchParams.get('start_time');
   const endTime = searchParams.get('end_time');
   const serviceId = searchParams.get('service_id');
+  const plan = searchParams.get('plan'); // For subscriptions
 
   // Determine service title based on service and option
   let serviceTitle = '';
   let optionTitle = '';
-  if (service === 'booking') {
+  if (service === 'subscription') {
+    serviceTitle = plan === 'plan-s' ? 'Plano S' : 'Plano X';
+    optionTitle = 'Subscrição Mensal';
+  } else if (service === 'booking') {
     if (option === 'recording') {
       serviceTitle = 'Captação (Gravação)';
       optionTitle = ''; // Will use notes for details
@@ -81,27 +85,91 @@ const Payment = () => {
       return;
     }
 
-    // Validate required fields
-    if (!price || !service || !serviceId) {
-      toast({
-        title: 'Erro',
-        description: 'Dados de pagamento incompletos',
-        variant: 'destructive'
-      });
-      return;
-    }
-
-    // Additional validation for booking service
-    if (service === 'booking' && (!bookingDate || !startTime || !endTime)) {
-      toast({
-        title: 'Erro',
-        description: 'Dados da reserva incompletos',
-        variant: 'destructive'
-      });
-      return;
-    }
     setLoading(true);
     try {
+      // Handle subscription payment
+      if (service === 'subscription') {
+        if (!price || !plan) {
+          toast({
+            title: 'Erro',
+            description: 'Dados de subscrição incompletos',
+            variant: 'destructive'
+          });
+          setLoading(false);
+          return;
+        }
+
+        // 1. Create subscription using RPC
+        const planType = plan === 'plan-s' ? 'S' : 'X';
+        const { data: subscriptionId, error: subscriptionError } = await supabase.rpc('subscribe_plan', {
+          p_user_id: user.id,
+          p_plan_type: planType
+        });
+
+        if (subscriptionError) {
+          console.error('Subscription error:', subscriptionError);
+          toast({
+            title: 'Erro',
+            description: 'Não foi possível criar a subscrição. Tenta novamente.',
+            variant: 'destructive'
+          });
+          setLoading(false);
+          return;
+        }
+
+        // 2. Create payment request for subscription
+        const { data: paymentId, error: paymentError } = await supabase.rpc('subscribe_payment_request', {
+          p_user_id: user.id,
+          p_plan_type: planType,
+          p_amount_eur: parseFloat(price)
+        });
+
+        if (paymentError) {
+          console.error('Payment request error:', paymentError);
+          toast({
+            title: 'Erro',
+            description: 'Não foi possível criar o pedido de pagamento. Tenta novamente.',
+            variant: 'destructive'
+          });
+          setLoading(false);
+          return;
+        }
+
+        toast({
+          title: 'Pedido Enviado ✅',
+          description: 'Subscrição pendente de verificação de pagamento. Aguarde aprovação do administrador.',
+          duration: 5000
+        });
+
+        setTimeout(() => {
+          navigate('/subscriptions');
+        }, 1500);
+        return;
+      }
+
+      // Handle booking payment (existing code)
+      // Validate required fields
+      if (!price || !service || !serviceId) {
+        toast({
+          title: 'Erro',
+          description: 'Dados de pagamento incompletos',
+          variant: 'destructive'
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Additional validation for booking service
+      if (service === 'booking' && (!bookingDate || !startTime || !endTime)) {
+        toast({
+          title: 'Erro',
+          description: 'Dados da reserva incompletos',
+          variant: 'destructive'
+        });
+        setLoading(false);
+        return;
+      }
+
       // 1. Create reservation first
       const startDateTime = new Date(`${bookingDate}T${startTime}`);
       const endDateTime = new Date(`${bookingDate}T${endTime}`);
@@ -206,6 +274,15 @@ const Payment = () => {
                 <span className="font-medium">Opção:</span>
                 <span>{optionTitle}</span>
               </div>}
+            
+            {service === 'subscription' && plan && (
+              <div className="pt-2">
+                <span className="font-medium block mb-1">Plano:</span>
+                <p className="text-sm text-muted-foreground">
+                  {plan === 'plan-s' ? 'Plano S - 10% desconto no primeiro mês, 15% nos seguintes' : 'Plano X - 10% desconto no primeiro mês, 15% nos seguintes + Oferta de 2h captação'}
+                </p>
+              </div>
+            )}
             
             {notes && <div className="pt-2">
                 <span className="font-medium block mb-1">Notas:</span>
