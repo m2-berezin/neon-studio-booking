@@ -274,9 +274,7 @@ const Payment = () => {
                   <Copy className="h-4 w-4" />
                 </Button>
               </div>
-              <p className="text-xs text-muted-foreground">
-                Utilize este IBAN para transferência bancária nacional ou internacional
-              </p>
+              <p className="text-xs text-muted-foreground">Utiliza este IBAN para transferência bancária nacional ou internacional</p>
             </div>
           </div>
 
