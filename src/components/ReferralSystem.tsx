@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Copy, Users, Gift, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { generateFriendCode, saveFriendCode } from '@/utils/friendCodes';
+import { useFriendCode } from '@/hooks/useFriendCode';
 
 interface ReferralSystemProps {
   className?: string;
@@ -15,40 +15,15 @@ interface ReferralSystemProps {
 const ReferralSystem = ({ className }: ReferralSystemProps) => {
   const { user, profile } = useAuth();
   const { toast } = useToast();
+  const { myFriendCode, appliedFriendCode, loading, applyFriendCode } = useFriendCode();
   const [copied, setCopied] = useState(false);
+  const [inputCode, setInputCode] = useState('');
 
   if (!user || !profile) return null;
 
-  // Generate random referral code and save it
-  const [referralCode, setReferralCode] = useState('');
-
-  useEffect(() => {
-    if (user && profile) {
-      // Check if user already has a friend code
-      const existingCodes = JSON.parse(localStorage.getItem('friend_codes') || '[]');
-      const userCode = existingCodes.find((c: any) => c.createdBy === user.id);
-      
-      if (userCode) {
-        setReferralCode(userCode.code);
-      } else {
-        // Generate new code
-        const newCode = generateFriendCode();
-        setReferralCode(newCode);
-        
-        // Save the friend code
-        saveFriendCode({
-          code: newCode,
-          discount: 25,
-          createdBy: user.id,
-          expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year
-        });
-      }
-    }
-  }, [user, profile]);
-
   const handleCopyCode = async () => {
     try {
-      await navigator.clipboard.writeText(referralCode);
+      await navigator.clipboard.writeText(myFriendCode);
       setCopied(true);
       
       toast({
@@ -66,6 +41,22 @@ const ReferralSystem = ({ className }: ReferralSystemProps) => {
     }
   };
 
+  const handleApplyCode = async () => {
+    if (!inputCode.trim()) {
+      toast({
+        title: 'Código Vazio',
+        description: 'Por favor insere um código de amigo',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    const success = await applyFriendCode(inputCode.toUpperCase());
+    if (success) {
+      setInputCode('');
+    }
+  };
+
   const shareLinks = [
     // Removed WhatsApp and Telegram as requested
   ];
@@ -79,6 +70,7 @@ const ReferralSystem = ({ className }: ReferralSystemProps) => {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Share your code section */}
         <div className="text-center">
           <div className="flex items-center gap-2 mb-3">
             <Gift className="h-5 w-5 text-accent" />
@@ -94,7 +86,7 @@ const ReferralSystem = ({ className }: ReferralSystemProps) => {
             <div className="flex gap-2 mt-2">
               <Input
                 id="referral-code"
-                value={referralCode}
+                value={myFriendCode}
                 readOnly
                 className="text-center font-mono text-lg font-bold"
               />
@@ -113,9 +105,7 @@ const ReferralSystem = ({ className }: ReferralSystemProps) => {
             </div>
           </div>
 
-          {/* Removed share buttons as requested */}
-
-          <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 mt-4">
+          <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
             <p className="text-xs text-orange-800 font-medium">
               ℹ️ O desconto só fica disponível após o amigo fazer a sua primeira reserva
             </p>
@@ -124,6 +114,47 @@ const ReferralSystem = ({ className }: ReferralSystemProps) => {
             </p>
           </div>
         </div>
+
+        {/* Apply friend code section */}
+        {!appliedFriendCode && (
+          <div className="border-t pt-4">
+            <Label htmlFor="input-code" className="text-sm font-medium mb-2 block">
+              Tens um código de amigo?
+            </Label>
+            <div className="flex gap-2">
+              <Input
+                id="input-code"
+                placeholder="Insere o código aqui"
+                value={inputCode}
+                onChange={(e) => setInputCode(e.target.value.toUpperCase())}
+                maxLength={8}
+                className="font-mono text-center"
+              />
+              <Button
+                onClick={handleApplyCode}
+                disabled={loading || !inputCode.trim()}
+                variant="default"
+              >
+                {loading ? 'A aplicar...' : 'Aplicar'}
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Active discount badge */}
+        {appliedFriendCode && (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+            <div className="flex items-center gap-2 justify-center">
+              <Check className="h-4 w-4 text-green-600" />
+              <p className="text-sm text-green-800 font-medium">
+                Desconto de 25% ativo! (Código: {appliedFriendCode})
+              </p>
+            </div>
+            <p className="text-xs text-green-700 mt-1 text-center">
+              Válido por 30 dias desde a aplicação
+            </p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

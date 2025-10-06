@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import PenaltyBanner from '@/components/PenaltyBanner';
 import ReferralSystem from '@/components/ReferralSystem';
+import { useFriendCode } from '@/hooks/useFriendCode';
 
 interface Offer {
   id: string;
@@ -28,6 +29,7 @@ const Rewards = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
+  const { hasFriendCodeDiscount } = useFriendCode();
   const { 
     loading, 
     hasActivePenalty, 
@@ -235,7 +237,7 @@ const Rewards = () => {
         <div className="grid gap-4">
           {/* Offer A: 3h for €20 - Dynamic from database */}
           {recordingOffer && (
-            <Card className="studio-card">
+            <Card className={`studio-card ${hasFriendCodeDiscount() ? 'opacity-50' : ''}`}>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Star className="w-5 h-5 text-primary" />
@@ -246,6 +248,13 @@ const Rewards = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
+                {hasFriendCodeDiscount() && (
+                  <Alert className="mb-4 border-orange-300 bg-orange-50">
+                    <AlertDescription className="text-orange-800 text-sm">
+                      Indisponível utilizar com o desconto 25% ativo.
+                    </AlertDescription>
+                  </Alert>
+                )}
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-2xl font-bold text-accent">€{recordingOffer.price_eur}</p>
@@ -263,7 +272,8 @@ const Rewards = () => {
                     disabled={
                       (offerUsage[recordingOffer.id] || 0) >= recordingOffer.limit_per_month || 
                       applyingOffer === recordingOffer.id ||
-                      hasActivePenalty()
+                      hasActivePenalty() ||
+                      hasFriendCodeDiscount()
                     }
                     variant="default"
                   >

@@ -6,10 +6,9 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubscriptions } from '@/hooks/useSubscriptions';
-import { validateFriendCode, useFriendCode } from '@/utils/friendCodes';
+import { useFriendCode as useFriendCodeHook } from '@/hooks/useFriendCode';
 
 interface Service {
   id: string;
@@ -57,6 +56,7 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
   const { user } = useAuth();
   const { toast } = useToast();
   const { userSubscription } = useSubscriptions();
+  const { appliedFriendCode, hasFriendCodeDiscount } = useFriendCodeHook();
   
   const [rewardCode, setRewardCode] = useState('');
   const [voucherCode, setVoucherCode] = useState('');
@@ -115,12 +115,12 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
     ? Math.max(0, subtotal - userSubscription.discounted_price) 
     : 0;
 
-  // Apply friend/reward code
+  // Apply reward code (not friend codes - those are managed in Rewards page)
   const applyReward = async () => {
     if (!rewardCode.trim()) {
       toast({
         title: 'Código Inválido',
-        description: 'Por favor introduza um código de amigo',
+        description: 'Por favor introduza um código de recompensa',
         variant: 'destructive',
       });
       return;
@@ -132,19 +132,7 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
       setVoucherCode('');
     }
 
-    // First check if it's a friend code
-    const friendCodeValidation = validateFriendCode(rewardCode.toUpperCase(), user?.id || '');
-    if (friendCodeValidation.valid) {
-      setAppliedReward(rewardCode.toUpperCase());
-      useFriendCode(rewardCode.toUpperCase(), user?.id || '');
-      toast({
-        title: 'Código de Amigo Aplicado',
-        description: `25% de desconto aplicado - €${(subtotal * 0.25).toFixed(2)} de desconto`,
-      });
-      return;
-    }
-
-    // Fallback to other reward codes
+    // Check other reward codes
     const rewardDiscounts: Record<string, { discount: number; description: string }> = {
       'BUY2GET1': { discount: subtotal * 0.33, description: 'Buy 2h Get 1h Free' },
       'MIXING50': { discount: subtotal * 0.5, description: '50% Off Mixing & Mastering' },
@@ -161,7 +149,7 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
     } else {
       toast({
         title: 'Código Inválido',
-        description: friendCodeValidation.error || 'Código não encontrado ou expirado',
+        description: 'Código não encontrado ou expirado',
         variant: 'destructive',
       });
     }
@@ -222,12 +210,12 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
 
   // Calculate reward discount
   const getRewardDiscount = () => {
-    if (!appliedReward) return 0;
-    
-    // Check if it's a friend code (8 character alphanumeric)
-    if (/^[A-Z0-9]{8}$/.test(appliedReward)) {
+    // Friend code discount takes priority and is automatically applied
+    if (hasFriendCodeDiscount()) {
       return subtotal * 0.25; // 25% discount for friend codes
     }
+    
+    if (!appliedReward) return 0;
     
     const rewardDiscounts: Record<string, number> = {
       'BUY2GET1': subtotal * 0.33,
@@ -312,28 +300,22 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
           </div>
         )}
 
-        {/* Friend Code Input */}
-        {showFriendCode && !appliedVoucher && (
-          <div className="space-y-2">
-            <Label htmlFor="friend-code">Código de Amigo</Label>
-            {appliedReward ? (
-              <div className="flex items-center justify-between">
-                <Badge variant="secondary">{appliedReward} Applied</Badge>
-                <Button variant="outline" size="sm" onClick={removeReward}>
-                  Remover
-                </Button>
+        {/* Friend Code Discount Display */}
+        {hasFriendCodeDiscount() && (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <Label className="text-sm font-medium text-green-800">
+                  Desconto de Código de Amigo Ativo
+                </Label>
+                <p className="text-xs text-green-700 mt-1">
+                  Código: {appliedFriendCode} - 25% de desconto aplicado
+                </p>
               </div>
-            ) : (
-              <div className="flex gap-2">
-                <Input
-                  id="friend-code"
-                  placeholder="Introduza código de amigo"
-                  value={rewardCode}
-                  onChange={(e) => setRewardCode(e.target.value)}
-                />
-                <Button onClick={applyReward}>Aplicar</Button>
-              </div>
-            )}
+              <Badge variant="secondary" className="bg-green-100 text-green-800">
+                -25%
+              </Badge>
+            </div>
           </div>
         )}
 

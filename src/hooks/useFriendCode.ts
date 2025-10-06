@@ -1,0 +1,215 @@
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
+
+export const useFriendCode = () => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [myFriendCode, setMyFriendCode] = useState<string>('');
+  const [appliedFriendCode, setAppliedFriendCode] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  // Generate a random 8-character code
+  const generateCode = (): string => {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = '';
+    for (let i = 0; i < 8; i++) {
+      result += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return result;
+  };
+
+  // Load or create user's friend code
+  useEffect(() => {
+    if (user) {
+      loadMyFriendCode();
+      loadAppliedFriendCode();
+    }
+  }, [user]);
+
+  const loadMyFriendCode = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('friend_codes')
+        .select('code')
+        .eq('created_by', user.id)
+        .maybeSingle();
+
+      if (error) throw error;
+
+      if (data) {
+        setMyFriendCode(data.code);
+      } else {
+        // Create a new friend code
+        const newCode = generateCode();
+        const { error: insertError } = await supabase
+          .from('friend_codes')
+          .insert({
+            code: newCode,
+            created_by: user.id,
+            discount_percent: 25,
+          });
+
+        if (insertError) throw insertError;
+        setMyFriendCode(newCode);
+      }
+    } catch (error) {
+      console.error('Error loading friend code:', error);
+    }
+  };
+
+  const loadAppliedFriendCode = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('friend_code_uses')
+        .select('code, used_at')
+        .eq('used_by', user.id)
+        .order('used_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (error) throw error;
+
+      if (data) {
+        // Check if code is still valid (within 30 days)
+        const usedDate = new Date(data.used_at);
+        const expiryDate = new Date(usedDate);
+        expiryDate.setDate(expiryDate.getDate() + 30);
+
+        if (expiryDate > new Date()) {
+          setAppliedFriendCode(data.code);
+        } else {
+          setAppliedFriendCode(null);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading applied friend code:', error);
+    }
+  };
+
+  const applyFriendCode = async (code: string): Promise<boolean> => {
+    if (!user) {
+      toast({
+        title: 'Erro',
+        description: 'Deves estar autenticado para usar um código',
+        variant: 'destructive',
+      });
+      return false;
+    }
+
+    setLoading(true);
+    try {
+      // Validate code format
+      if (!/^[A-Z0-9]{8}$/.test(code)) {
+        toast({
+          title: 'Código Inválido',
+          description: 'O código deve ter 8 caracteres alfanuméricos',
+          variant: 'destructive',
+        });
+        return false;
+      }
+
+      // Check if code exists
+      const { data: codeData, error: codeError } = await supabase
+        .from('friend_codes')
+        .select('code, created_by, expires_at')
+        .eq('code', code)
+        .maybeSingle();
+
+      if (codeError) throw codeError;
+
+      if (!codeData) {
+        toast({
+          title: 'Código Não Encontrado',
+          description: 'Este código de amigo não existe',
+          variant: 'destructive',
+        });
+        return false;
+      }
+
+      // Check if code is expired
+      if (new Date(codeData.expires_at) < new Date()) {
+        toast({
+          title: 'Código Expirado',
+          description: 'Este código já expirou',
+          variant: 'destructive',
+        });
+        return false;
+      }
+
+      // Check if user is trying to use their own code
+      if (codeData.created_by === user.id) {
+        toast({
+          title: 'Código Inválido',
+          description: 'Não podes usar o teu próprio código',
+          variant: 'destructive',
+        });
+        return false;
+      }
+
+      // Check if user already used any friend code
+      const { data: existingUse, error: useError } = await supabase
+        .from('friend_code_uses')
+        .select('code')
+        .eq('used_by', user.id)
+        .maybeSingle();
+
+      if (useError) throw useError;
+
+      if (existingUse) {
+        toast({
+          title: 'Código Já Usado',
+          description: 'Já usaste um código de amigo anteriormente',
+          variant: 'destructive',
+        });
+        return false;
+      }
+
+      // Apply the friend code
+      const { error: insertError } = await supabase
+        .from('friend_code_uses')
+        .insert({
+          code: code,
+          used_by: user.id,
+        });
+
+      if (insertError) throw insertError;
+
+      setAppliedFriendCode(code);
+      toast({
+        title: 'Código Aplicado!',
+        description: '25% de desconto ativo nas tuas reservas por 30 dias',
+      });
+
+      return true;
+    } catch (error: any) {
+      console.error('Error applying friend code:', error);
+      toast({
+        title: 'Erro',
+        description: error.message || 'Não foi possível aplicar o código',
+        variant: 'destructive',
+      });
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const hasFriendCodeDiscount = (): boolean => {
+    return appliedFriendCode !== null;
+  };
+
+  return {
+    myFriendCode,
+    appliedFriendCode,
+    loading,
+    applyFriendCode,
+    hasFriendCodeDiscount,
+    refreshAppliedCode: loadAppliedFriendCode,
+  };
+};

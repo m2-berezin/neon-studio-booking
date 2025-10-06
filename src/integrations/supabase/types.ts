@@ -128,6 +128,62 @@ export type Database = {
           },
         ]
       }
+      friend_code_uses: {
+        Row: {
+          code: string
+          id: string
+          used_at: string
+          used_by: string
+        }
+        Insert: {
+          code: string
+          id?: string
+          used_at?: string
+          used_by: string
+        }
+        Update: {
+          code?: string
+          id?: string
+          used_at?: string
+          used_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "friend_code_uses_code_fkey"
+            columns: ["code"]
+            isOneToOne: false
+            referencedRelation: "friend_codes"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
+      friend_codes: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string
+          discount_percent: number
+          expires_at: string
+          id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by: string
+          discount_percent?: number
+          expires_at?: string
+          id?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string
+          discount_percent?: number
+          expires_at?: string
+          id?: string
+        }
+        Relationships: []
+      }
       info: {
         Row: {
           body: string
