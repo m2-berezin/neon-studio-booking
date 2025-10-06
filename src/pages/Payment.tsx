@@ -303,7 +303,7 @@ const Payment = () => {
           <div className="space-y-2">
             <h3 className="font-semibold">Instruções:</h3>
             <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
-              <li>Faça o pagamento do sinal usando MB Way ou Transferência Bancária</li>
+              <li>Faz o pagamento do sinal usando um método de pagamento à tua escolha</li>
               <li>Use a referência do pedido nas notas de pagamento (se aplicável)</li>
               <li>Clique em "Já Paguei" após realizar o pagamento</li>
               <li>Aguarde a confirmação do pagamento (normalmente 3-8h)</li>
