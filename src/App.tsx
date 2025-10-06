@@ -76,9 +76,10 @@ const App = () => {
                 
                 {/* Admin Routes - AdminLayout is already inside each page */}
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                <Route path="/admin/bookings" element={<AdminBookings />} />
-                <Route path="/admin/payments" element={<AdminPayments />} />
-                <Route path="/admin/messages" element={<AdminMessages />} />
+            <Route path="/admin/bookings" element={<AdminBookings />} />
+            <Route path="/admin/payments" element={<AdminPayments />} />
+            <Route path="/admin/messages" element={<AdminMessages />} />
+            <Route path="/admin/subscriptions" element={<AdminSubscriptions />} />
                 
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
