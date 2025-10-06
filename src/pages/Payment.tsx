@@ -105,34 +105,17 @@ const Payment = () => {
           return;
         }
 
-        // 1. Create subscription using RPC
+        // Create payment request for subscription using subscribe_request RPC
         const planType = plan === 'plan-s' ? 'S' : 'X';
-        const { data: subscriptionId, error: subscriptionError } = await supabase.rpc('subscribe_plan', {
-          p_user_id: user.id,
-          p_plan_type: planType
-        });
-
-        if (subscriptionError) {
-          console.error('Subscription error:', subscriptionError);
-          toast({
-            title: 'Erro',
-            description: 'Não foi possível criar a subscrição. Tenta novamente.',
-            variant: 'destructive'
-          });
-          setLoading(false);
-          return;
-        }
-
-        // 2. Create payment request for subscription
-        // @ts-ignore - Function exists in DB but types not yet regenerated
-        const { data: paymentId, error: paymentError } = await supabase.rpc('subscribe_payment_request', {
+        // @ts-ignore - RPC exists in DB but types not yet regenerated
+        const { data: requestId, error: requestError } = await supabase.rpc('subscribe_request', {
           p_user_id: user.id,
           p_plan_type: planType,
           p_amount_eur: parseFloat(price)
         });
 
-        if (paymentError) {
-          console.error('Payment request error:', paymentError);
+        if (requestError) {
+          console.error('Payment request error:', requestError);
           toast({
             title: 'Erro',
             description: 'Não foi possível criar o pedido de pagamento. Tenta novamente.',

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Calendar, Clock, Star, CheckCircle, MessageSquare, Settings, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,6 +15,7 @@ import { format } from 'date-fns';
 const Subscriptions = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const {
     loading,
     userSubscription,
@@ -84,29 +86,8 @@ const Subscriptions = () => {
   const handleSubscribe = async (plan: any) => {
     if (!user) return;
     
-    try {
-      // Call subscribe_plan RPC to create subscription
-      const planType = plan.id === 'plan-s' ? 'S' : 'X';
-      const { data: subscriptionId, error } = await supabase.rpc('subscribe_plan', {
-        p_user_id: user.id,
-        p_plan_type: planType
-      });
-
-      if (error) {
-        console.error('Error creating subscription:', error);
-        toast({
-          title: 'Erro',
-          description: 'Não foi possível criar a subscrição',
-          variant: 'destructive'
-        });
-        return;
-      }
-
-      // Redirect to payment page
-      window.open(`/payment?service=subscription&plan=${plan.id}&price=${plan.price}`, '_blank');
-    } catch (error) {
-      console.error('Error:', error);
-    }
+    // Simply redirect to payment page with plan details
+    navigate(`/payment?service=subscription&plan=${plan.id}&price=${plan.price}`);
   };
 
   const handleSavePreferences = async () => {
