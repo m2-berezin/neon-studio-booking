@@ -1,6 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+
+const ADMIN_ID = '6d9d1dc1-e16f-4f3d-a817-1591a1b27477';
 
 export interface Message {
   id: string;
@@ -9,74 +12,99 @@ export interface Message {
   thread_id: string;
   message: string;
   timestamp: string;
-  is_read: boolean;
-  sender_display_name: string;
-  receiver_display_name: string;
-}
-
-export interface Thread {
-  thread_id: string;
-  other_user_id: string;
-  other_user_name: string;
-  other_user_email: string;
-  last_message: string;
-  last_message_time: string;
-  unread_count: number;
 }
 
 export const useMessaging = () => {
   const { user } = useAuth();
-  const [threads, setThreads] = useState<Thread[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Messages table doesn't exist - all functions disabled
-  const loadThreads = async () => {
-    setThreads([]);
+  const getThreadId = (userId: string, otherUserId: string) => {
+    const ids = [userId, otherUserId].sort();
+    return `${ids[0]}-${ids[1]}`;
   };
 
-  const loadMessages = async (threadId: string) => {
-    setMessages([]);
-    setSelectedThreadId(threadId);
+  const loadMessages = async (otherUserId?: string) => {
+    if (!user) return;
+    
+    setLoading(true);
+    try {
+      const targetUserId = otherUserId || ADMIN_ID;
+      const threadId = getThreadId(user.id, targetUserId);
+      
+      const { data, error } = await supabase
+        .from('messages')
+        .select('*')
+        .eq('thread_id', threadId)
+        .order('timestamp', { ascending: true });
+
+      if (error) throw error;
+      setMessages(data || []);
+    } catch (error) {
+      console.error('Error loading messages:', error);
+      toast.error('Erro ao carregar mensagens');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const sendMessage = async (threadId: string, receiverId: string, messageText: string) => {
-    toast.error('Messaging system not implemented');
+  const sendMessage = async (receiverId: string, messageText: string) => {
+    if (!user || !messageText.trim()) return;
+
+    try {
+      const threadId = getThreadId(user.id, receiverId);
+      
+      const { error } = await supabase
+        .from('messages')
+        .insert({
+          thread_id: threadId,
+          sender_id: user.id,
+          receiver_id: receiverId,
+          message: messageText.trim(),
+          timestamp: new Date().toISOString(),
+        });
+
+      if (error) throw error;
+      toast.success('Mensagem enviada');
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast.error('Erro ao enviar mensagem');
+    }
   };
 
-  const createThread = async (receiverId: string, messageText: string) => {
-    toast.error('Messaging system not implemented');
-    return null;
-  };
+  const subscribeToMessages = (otherUserId?: string) => {
+    if (!user) return;
 
-  const deleteMessage = async (messageId: string) => {
-    toast.error('Messaging system not implemented');
-    return false;
-  };
+    const targetUserId = otherUserId || ADMIN_ID;
+    const threadId = getThreadId(user.id, targetUserId);
 
-  const deleteThread = async (threadId: string) => {
-    toast.error('Messaging system not implemented');
-    return false;
-  };
+    const channel = supabase
+      .channel('messages-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `thread_id=eq.${threadId}`,
+        },
+        () => {
+          loadMessages(targetUserId);
+        }
+      )
+      .subscribe();
 
-  const startAdminThread = async (messageText: string) => {
-    toast.error('Messaging system not implemented');
-    return null;
+    return () => {
+      supabase.removeChannel(channel);
+    };
   };
 
   return {
-    threads,
     messages,
-    selectedThreadId,
     loading,
-    loadThreads,
     loadMessages,
     sendMessage,
-    createThread,
-    deleteMessage,
-    deleteThread,
-    startAdminThread,
-    setSelectedThreadId,
+    subscribeToMessages,
+    ADMIN_ID,
   };
 };
