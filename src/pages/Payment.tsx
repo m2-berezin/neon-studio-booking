@@ -59,7 +59,13 @@ const Payment = () => {
   const IBAN = 'PT50 0193 0000 1050 4647 3479 5';
   const REVOLUT_REVTAG = '@Ghostwayne';
   useEffect(() => {
-    if (!service || !option || !price) {
+    // For subscriptions, we don't need 'option', just 'plan'
+    const isSubscription = service === 'subscription';
+    const hasRequiredParams = isSubscription 
+      ? (service && plan && price)
+      : (service && option && price);
+    
+    if (!hasRequiredParams) {
       toast({
         title: 'Erro',
         description: 'Dados de pagamento em falta. A redireccionar...',
@@ -67,7 +73,7 @@ const Payment = () => {
       });
       navigate('/mix-master');
     }
-  }, [service, option, price, navigate, toast]);
+  }, [service, option, plan, price, navigate, toast]);
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
     toast({
@@ -240,7 +246,12 @@ const Payment = () => {
       setLoading(false);
     }
   };
-  if (!service || !option || !price) {
+  const isSubscription = service === 'subscription';
+  const hasRequiredParams = isSubscription 
+    ? (service && plan && price)
+    : (service && option && price);
+    
+  if (!hasRequiredParams) {
     return null;
   }
   return <div className="container mx-auto p-4 max-w-2xl">
