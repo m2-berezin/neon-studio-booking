@@ -118,7 +118,8 @@ const Payment = () => {
         }
 
         // 2. Create payment request for subscription
-        const { data: paymentId, error: paymentError } = await supabase.rpc('subscribe_payment_request' as any, {
+        // @ts-ignore - Function exists in DB but types not yet regenerated
+        const { data: paymentId, error: paymentError } = await supabase.rpc('subscribe_payment_request', {
           p_user_id: user.id,
           p_plan_type: planType,
           p_amount_eur: parseFloat(price)
