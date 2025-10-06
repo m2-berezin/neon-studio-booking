@@ -12,7 +12,8 @@ import {
   TrendingUp, 
   CheckCircle,
   Clock,
-  Bell
+  Bell,
+  CreditCard
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -258,7 +259,7 @@ const AdminDashboard = () => {
           <CardTitle>Ações Rápidas</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Button 
               variant="outline" 
               className="h-24 flex flex-col gap-2"
@@ -282,6 +283,14 @@ const AdminDashboard = () => {
             >
               <Users className="h-6 w-6" />
               <span>Mensagens</span>
+            </Button>
+            <Button 
+              variant="outline" 
+              className="h-24 flex flex-col gap-2"
+              onClick={() => navigate('/admin/subscriptions')}
+            >
+              <CreditCard className="h-6 w-6" />
+              <span>Subscrições</span>
             </Button>
           </div>
         </CardContent>
