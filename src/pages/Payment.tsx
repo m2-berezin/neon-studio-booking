@@ -249,9 +249,7 @@ const Payment = () => {
                       <Copy className="h-4 w-4" />
                     </Button>
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    Digitalize o QR code com a app MB Way ou use o número manualmente
-                  </p>
+                  <p className="text-sm text-muted-foreground">Digitaliza o QR code com a app MB Way ou usa o número manualmente</p>
                 </div>
               </div>
             </div>
