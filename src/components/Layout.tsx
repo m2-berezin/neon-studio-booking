@@ -76,7 +76,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
             <p className="text-xs text-muted-foreground -mt-1">Studios</p>
             {subscription?.is_active && (
               <div className="flex justify-center mt-1.5">
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-zinc-600 text-white">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-white text-black">
                   Premium
                 </span>
               </div>
