@@ -305,7 +305,7 @@ const Payment = () => {
             <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
               <li>Faz o pagamento do sinal usando um método de pagamento à tua escolha</li>
               <li>Use a referência do pedido nas notas de pagamento (se aplicável)</li>
-              <li>Clica em "Já Paguei" após realizar o pagamento e aguarda a confirmação</li>
+              <li>Clica em "Já Paguei" após realizar o pagamento</li>
               <li>Aguarde a confirmação do pagamento (normalmente 3-8h)</li>
             </ol>
           </div>
