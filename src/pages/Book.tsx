@@ -779,7 +779,7 @@ const Book = () => {
             )}
             {reservationFromOffer && (
               <p className="text-xs text-muted-foreground mt-2">
-                Oferta: 3h totais (2h pagas + 1h grátis) por €{reservationFromOffer.price_eur_snapshot} | Estúdio fecha às 22:00
+                Oferta: 3h totais (2h pagas + 1h grátis) por €{reservationFromOffer.price_eur_snapshot}
               </p>
             )}
           </div>
