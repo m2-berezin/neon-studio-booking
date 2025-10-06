@@ -7,10 +7,13 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { useSubscriptions } from '@/hooks/useSubscriptions';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 
 const Subscriptions = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
   const {
     loading,
     userSubscription,
@@ -78,15 +81,31 @@ const Subscriptions = () => {
     { start: '18:00', end: '21:00', label: 'Noite (18h-21h)' }
   ];
 
-  const handleCreateSubscription = async (plan: any) => {
-    const success = await createSubscription(
-      plan.name,
-      plan.hours,
-      plan.listPrice,
-      plan.discountedPrice
-    );
-    if (success) {
-      // Subscription created successfully
+  const handleSubscribe = async (plan: any) => {
+    if (!user) return;
+    
+    try {
+      // Call subscribe_plan RPC to create subscription
+      const planType = plan.id === 'plan-s' ? 'S' : 'X';
+      const { data: subscriptionId, error } = await supabase.rpc('subscribe_plan', {
+        p_user_id: user.id,
+        p_plan_type: planType
+      });
+
+      if (error) {
+        console.error('Error creating subscription:', error);
+        toast({
+          title: 'Erro',
+          description: 'Não foi possível criar a subscrição',
+          variant: 'destructive'
+        });
+        return;
+      }
+
+      // Redirect to payment page
+      window.open(`/payment?service=subscription&plan=${plan.id}&price=${plan.price}`, '_blank');
+    } catch (error) {
+      console.error('Error:', error);
     }
   };
 
@@ -203,9 +222,7 @@ const Subscriptions = () => {
                     
                     <Button
                       className="w-full"
-                      onClick={() => {
-                        window.open(`/payment?service=subscription&plan=${plan.id}&price=${plan.price}`, '_blank');
-                      }}
+                      onClick={() => handleSubscribe(plan)}
                       disabled={loading}
                       variant={plan.popular ? 'default' : 'outline'}
                     >

@@ -273,7 +273,9 @@ const Payment = () => {
       {/* Order Summary */}
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle>Resumo do Pedido</CardTitle>
+          <CardTitle>
+            {service === 'subscription' ? `Detalhes do ${serviceTitle}` : 'Resumo do Pedido'}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
@@ -288,12 +290,22 @@ const Payment = () => {
               </div>}
             
             {service === 'subscription' && plan && (
-              <div className="pt-2">
-                <span className="font-medium block mb-1">Plano:</span>
-                <p className="text-sm text-muted-foreground">
-                  {plan === 'plan-s' ? 'Plano S - 10% desconto no primeiro mês, 15% nos seguintes' : 'Plano X - 10% desconto no primeiro mês, 15% nos seguintes + Oferta de 2h captação'}
-                </p>
-              </div>
+              <>
+                <div className="pt-2">
+                  <span className="font-medium block mb-1">Plano:</span>
+                  <p className="text-sm text-muted-foreground">
+                    {plan === 'plan-s' ? 'Plano S - 10% desconto no primeiro mês, 15% nos seguintes' : 'Plano X - 10% desconto no primeiro mês, 15% nos seguintes + Oferta de 2h captação'}
+                  </p>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="font-medium">Valor:</span>
+                  <span className="text-lg font-semibold text-primary">€{price}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="font-medium">Renovação:</span>
+                  <span>{new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
+                </div>
+              </>
             )}
             
             {notes && <div className="pt-2">
@@ -301,12 +313,16 @@ const Payment = () => {
                 <p className="text-sm text-muted-foreground">{notes}</p>
               </div>}
             
-            <Separator />
-            
-            <div className="flex items-center justify-between text-xl font-bold">
-              <span>Total:</span>
-              <span className="text-primary">€{price}</span>
-            </div>
+            {service !== 'subscription' && (
+              <>
+                <Separator />
+                
+                <div className="flex items-center justify-between text-xl font-bold">
+                  <span>Total:</span>
+                  <span className="text-primary">€{price}</span>
+                </div>
+              </>
+            )}
           </div>
         </CardContent>
       </Card>
