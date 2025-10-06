@@ -868,7 +868,7 @@ const Book = () => {
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Duração:</span>
                   <span className="font-medium">
-                    3h totais (2h pagas + 1h grátis), {selectedSlot?.start_time.slice(0, 5)} - {calculateEndTime(selectedSlot?.start_time || '', reservationFromOffer.duration_minutes_snapshot || 180).slice(0, 5)}
+                    3h totais (2h pagas + 1h grátis), {selectedSlot?.start_time.slice(0, 5)} - {calculateEndTime(selectedSlot?.start_time || '', 180).slice(0, 5)}
                   </span>
                 </div>
               )}
@@ -900,7 +900,7 @@ const Book = () => {
                 <span className="text-muted-foreground">Hora de Fim:</span>
                 <span className="font-medium">
                   {reservationFromOffer
-                    ? calculateEndTime(selectedSlot?.start_time || '', reservationFromOffer.duration_minutes_snapshot || 180).slice(0, 5)
+                    ? calculateEndTime(selectedSlot?.start_time || '', 180).slice(0, 5)
                     : selectedService === 'captacao' 
                     ? calculateEndTime(selectedSlot?.start_time || '', selectedHours * 60).slice(0, 5)
                     : selectedService === 'captacao_mixmaster'
