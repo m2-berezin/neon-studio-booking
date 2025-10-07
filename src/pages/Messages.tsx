@@ -174,21 +174,24 @@ const Messages = () => {
   if (!user) return null;
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-6">Mensagens</h1>
+    <div className="h-[calc(100vh-8rem)] flex flex-col">
+      <h1 className="text-2xl font-bold mb-4">Mensagens</h1>
       
-      <Card className="flex flex-col h-[600px]">
-        <div className="p-4 border-b">
-          <h2 className="font-semibold">Chat com 7T7 Studios</h2>
+      <Card className="flex flex-col flex-1 overflow-hidden">
+        <div className="p-3 border-b bg-card">
+          <h2 className="font-semibold text-sm">Chat com 7T7 Studios</h2>
         </div>
 
-        <ScrollArea className="flex-1 p-4">
+        <ScrollArea className="flex-1 p-3">
           {loading ? (
-            <div className="text-center text-muted-foreground">A carregar...</div>
+            <div className="text-center text-muted-foreground py-8">A carregar...</div>
           ) : messages.length === 0 ? (
-            <div className="text-center text-muted-foreground">Sem mensagens</div>
+            <div className="text-center text-muted-foreground py-8">
+              <p className="text-sm">Sem mensagens</p>
+              <p className="text-xs mt-1">Envia a primeira mensagem!</p>
+            </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {messages.map((msg) => {
                 const isSender = msg.sender_id === user.id;
                 return (
@@ -197,14 +200,14 @@ const Messages = () => {
                     className={`flex ${isSender ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
-                      className={`max-w-[70%] rounded-lg px-4 py-2 ${
+                      className={`max-w-[85%] rounded-2xl px-3 py-2 ${
                         isSender
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted text-foreground'
+                          ? 'bg-primary text-primary-foreground rounded-br-sm'
+                          : 'bg-muted text-foreground rounded-bl-sm'
                       }`}
                     >
-                      <p className="text-sm">{msg.message}</p>
-                      <p className="text-xs opacity-70 mt-1">
+                      <p className="text-sm leading-relaxed break-words">{msg.message}</p>
+                      <p className="text-[10px] opacity-70 mt-0.5">
                         {new Date(msg.timestamp).toLocaleTimeString('pt-PT', {
                           hour: '2-digit',
                           minute: '2-digit',
@@ -219,16 +222,21 @@ const Messages = () => {
           )}
         </ScrollArea>
 
-        <div className="p-4 border-t">
+        <div className="p-3 border-t bg-card">
           <div className="flex gap-2">
             <Input
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Escreve a tua mensagem..."
-              className="flex-1"
+              placeholder="Mensagem..."
+              className="flex-1 text-sm"
             />
-            <Button onClick={handleSendMessage} size="icon">
+            <Button 
+              onClick={handleSendMessage} 
+              size="icon"
+              disabled={!newMessage.trim()}
+              className="shrink-0"
+            >
               <Send className="h-4 w-4" />
             </Button>
           </div>

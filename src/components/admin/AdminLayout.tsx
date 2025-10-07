@@ -43,7 +43,6 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
     { path: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { path: '/admin/payments', icon: DollarSign, label: 'Pagamentos' },
     { path: '/admin/bookings', icon: Calendar, label: 'Reservas' },
-    { path: '/admin/messages', icon: MessageSquare, label: 'Mensagens' },
     { path: '/admin/subscriptions', icon: CreditCard, label: 'Subscrições' },
   ];
 
