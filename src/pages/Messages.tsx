@@ -119,6 +119,19 @@ const Messages = () => {
             loadMessages();
           }
         )
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'messages',
+            filter: `thread_id=eq.${threadId}`,
+          },
+          () => {
+            // Reload to reflect read status changes
+            loadMessages();
+          }
+        )
         .subscribe();
 
       return () => {
