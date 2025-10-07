@@ -2,7 +2,7 @@ import { ReactNode, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Home, MessageCircle, User, LogOut, Settings, Folder, Info } from 'lucide-react';
+import { Home, User, LogOut, Settings, Folder, Info } from 'lucide-react';
 import { NotificationBell } from '@/components/NotificationBell';
 import { Logo } from '@/components/Logo';
 import { NotificationHandler } from '@/components/NotificationHandler';
@@ -36,14 +36,12 @@ const Layout = ({ children }: { children: ReactNode }) => {
   // Different navigation items based on role
   const userNavItems: NavItem[] = [
     { path: '/projects', icon: Folder, label: 'Projectos' },
-    { path: '/messages', icon: MessageCircle, label: 'Mensagens' },
     { path: '/', icon: Home, label: '7', isLogo: true },
     { path: '/studio-info', icon: Info, label: 'Info' },
   ];
 
   const adminNavItems: NavItem[] = [
     { path: '/projects', icon: Folder, label: 'Projectos' },
-    { path: '/messages', icon: MessageCircle, label: 'Mensagens' },
     { path: '/admin/dashboard', icon: Settings, label: '🦇', isLogo: true },
   ];
 
