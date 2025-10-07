@@ -487,7 +487,7 @@ const AdminDashboard = () => {
           <CardTitle>Ações Rápidas</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Button
               variant="outline"
               className="h-20 flex flex-col gap-2 hover:bg-primary/10"
@@ -511,6 +511,14 @@ const AdminDashboard = () => {
             >
               <Calendar className="h-6 w-6" />
               <span className="text-sm font-medium">Ver Reservas</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="h-20 flex flex-col gap-2 hover:bg-primary/10"
+              onClick={() => navigate('/admin/subscriptions')}
+            >
+              <CreditCard className="h-6 w-6" />
+              <span className="text-sm font-medium">Subscrições</span>
             </Button>
           </div>
         </CardContent>
