@@ -34,10 +34,6 @@ const Profile = () => {
     label: 'Definições',
     icon: Settings,
     path: '/profile/settings'
-  }, {
-    label: 'Facturação e Subscrições',
-    icon: Calendar,
-    path: '/subscriptions'
   }];
   const handleSignOut = async () => {
     setLoading(true);
@@ -145,7 +141,13 @@ const Profile = () => {
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3">
-        {userStats.map(stat => {})}
+        {userStats.map(stat => (
+          <div key={stat.label} className="studio-card text-center">
+            <stat.icon className="mx-auto mb-2 text-accent" size={24} />
+            <p className="text-2xl font-bold text-foreground">{stat.value}</p>
+            <p className="text-xs text-muted-foreground">{stat.label}</p>
+          </div>
+        ))}
       </div>
 
       {/* Menu Items */}
