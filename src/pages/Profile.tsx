@@ -4,7 +4,6 @@ import { Calendar, Music, Award, User, Settings, LogOut, Shield, Mail, Phone } f
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -26,14 +25,11 @@ const Profile = () => {
   const handleSignOut = async () => {
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      
+      await signOut();
       toast({
         title: 'Sessão terminada com sucesso',
         description: 'A sessão foi terminada.',
       });
-      navigate('/auth');
     } catch (error) {
       toast({
         title: 'Erro',

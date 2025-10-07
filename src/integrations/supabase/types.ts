@@ -1295,10 +1295,6 @@ export type Database = {
           starts_at: string
         }[]
       }
-      get_unread_count: {
-        Args: { p_user_id: string }
-        Returns: number
-      }
       insert_booking_buffer: {
         Args: { p_ends_at: string; p_starts_at: string }
         Returns: undefined
@@ -1349,10 +1345,6 @@ export type Database = {
           starts_at: string
           status: string
         }[]
-      }
-      mark_notifications_as_read: {
-        Args: { p_thread_id: string }
-        Returns: boolean
       }
       request_payment: {
         Args: {

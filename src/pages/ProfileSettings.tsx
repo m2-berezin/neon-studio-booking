@@ -10,7 +10,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useNotificationSettings } from '@/hooks/useNotificationSettings';
-import { supabase } from '@/integrations/supabase/client';
 const ProfileSettings = () => {
   const navigate = useNavigate();
   const {
@@ -36,28 +35,18 @@ const ProfileSettings = () => {
     language: 'pt'
   });
   const handleProfileUpdate = async () => {
-    if (!profile || !user) return;
+    if (!profile) return;
     setLoading(true);
     try {
-      // Update directly via Supabase
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          full_name: formData.full_name,
-          phone: formData.phone
-        })
-        .eq('id', user.id);
-
-      if (error) {
-        throw error;
-      }
-
-      // Also update via context to refresh the state
-      await updateProfile({
+      const {
+        error
+      } = await updateProfile({
         full_name: formData.full_name,
         phone: formData.phone
       });
-      
+      if (error) {
+        throw error;
+      }
       setEditingProfile(false);
       toast({
         title: 'Perfil Atualizado',
