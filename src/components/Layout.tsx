@@ -19,6 +19,13 @@ const Layout = ({ children }: { children: ReactNode }) => {
     }
   }, [user, navigate, location.pathname]);
 
+  // Redirect admins to dashboard when they try to access home
+  useEffect(() => {
+    if (user && isAdmin() && location.pathname === '/') {
+      navigate('/admin/dashboard');
+    }
+  }, [user, isAdmin, location.pathname, navigate]);
+
   type NavItem = {
     path: string;
     icon: any;
@@ -35,8 +42,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
 
   const adminNavItems: NavItem[] = [
     { path: '/projects', icon: Folder, label: 'Projectos' },
-    { path: '/', icon: Home, label: '🦇', isLogo: true },
-    { path: '/admin/dashboard', icon: Settings, label: 'Admin' },
+    { path: '/admin/dashboard', icon: Settings, label: '🦇', isLogo: true },
   ];
 
   const allNavItems = isAdmin() ? adminNavItems : userNavItems;
