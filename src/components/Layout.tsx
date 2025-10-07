@@ -40,7 +40,6 @@ const Layout = ({ children }: { children: ReactNode }) => {
   ];
 
   const adminNavItems: NavItem[] = [
-    { path: '/projects', icon: Folder, label: 'Projectos' },
     { path: '/admin/dashboard', icon: Settings, label: '🦇', isLogo: true },
   ];
 
