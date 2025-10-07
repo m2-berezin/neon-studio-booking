@@ -31,6 +31,7 @@ interface AuthContextType {
   subscription: Subscription | null;
   subscriptionDiscountPercent: number;
   loading: boolean;
+  isAdminUser: boolean;
   signUp: (email: string, password: string, fullName: string, phone: string) => Promise<{ error: any }>;
   signIn: (emailOrPhone: string, password: string) => Promise<{ error: any }>;
   signInWithMagicLink: (email: string) => Promise<{ error: any }>;
@@ -55,7 +56,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [subscriptionDiscountPercent, setSubscriptionDiscountPercent] = useState(0);
-  const [loading, setLoading] = useState(false); // Start as false for instant loading
+  const [loading, setLoading] = useState(false);
+  const [isAdminUser, setIsAdminUser] = useState(false);
 
   // Send welcome messages on first login
   const sendWelcomeMessages = async () => {
@@ -111,6 +113,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  // Check if user is admin using user_roles table (non-blocking)
+  const checkAdminStatus = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .eq('role', 'admin')
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error checking admin status:', error);
+        setIsAdminUser(false);
+        return;
+      }
+
+      setIsAdminUser(!!data);
+    } catch (error) {
+      console.error('Unexpected error checking admin status:', error);
+      setIsAdminUser(false);
+    }
+  };
+
   // Fetch user profile (non-blocking)
   const fetchProfile = async (userId: string) => {
     try {
@@ -126,13 +151,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       setProfile(data);
-
-      // Welcome messages functionality removed (column doesn't exist)
-      // if (data && !data.welcome_messages_sent) {
-      //   setTimeout(() => {
-      //     sendWelcomeMessages();
-      //   }, 1000);
-      // }
     } catch (error) {
       console.error('Unexpected error fetching profile:', error);
     }
@@ -146,9 +164,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(session?.user ?? null);
         
         if (session?.user) {
+          checkAdminStatus(session.user.id); // Non-blocking
           fetchProfile(session.user.id); // Non-blocking
           fetchSubscription(session.user.id); // Non-blocking
         } else {
+          setIsAdminUser(false);
           setProfile(null);
           setSubscription(null);
           setSubscriptionDiscountPercent(0);
@@ -164,6 +184,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(session?.user ?? null);
         
         if (session?.user) {
+          checkAdminStatus(session.user.id); // Non-blocking
           fetchProfile(session.user.id); // Non-blocking
           fetchSubscription(session.user.id); // Non-blocking
         }
@@ -171,6 +192,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         console.error('Error checking session:', error);
         setSession(null);
         setUser(null);
+        setIsAdminUser(false);
         setProfile(null);
         setSubscription(null);
         setSubscriptionDiscountPercent(0);
@@ -250,7 +272,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const isAdmin = () => {
-    return profile?.role === 'admin';
+    return isAdminUser;
   };
 
   const value = {
@@ -260,6 +282,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     subscription,
     subscriptionDiscountPercent,
     loading,
+    isAdminUser,
     signUp,
     signIn,
     signInWithMagicLink,
