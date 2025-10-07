@@ -146,11 +146,7 @@ const AdminDashboard = () => {
       // Get all messages involving this user
       const { data: messagesData, error } = await supabase
         .from('messages')
-        .select(`
-          *,
-          sender_profile:profiles!messages_sender_id_fkey(full_name),
-          receiver_profile:profiles!messages_receiver_id_fkey(full_name)
-        `)
+        .select('*')
         .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
         .order('timestamp', { ascending: false });
 
@@ -170,18 +166,22 @@ const AdminDashboard = () => {
           msg_id: msg.id,
           sender_id: msg.sender_id,
           receiver_id: msg.receiver_id,
-          otherUserId,
-          sender_profile: msg.sender_profile,
-          receiver_profile: msg.receiver_profile
+          otherUserId
         });
         
         if (!threadsMap.has(otherUserId)) {
-          // Get the name from the JOIN
-          const otherUserName = msg.sender_id === user.id 
-            ? (msg.receiver_profile as any)?.full_name 
-            : (msg.sender_profile as any)?.full_name;
+          // Fetch profile directly
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('full_name')
+            .eq('id', otherUserId)
+            .single();
 
-          const userName = otherUserName?.trim() || 'Sem Nome';
+          if (profileError) {
+            console.error('Error fetching profile for', otherUserId, ':', profileError);
+          }
+
+          const userName = profile?.full_name?.trim() || 'Sem Nome';
           
           console.log('✅ Loaded sender_name:', userName, 'for user_id:', otherUserId);
 
@@ -219,17 +219,21 @@ const AdminDashboard = () => {
 
       const { data, error } = await supabase
         .from('messages')
-        .select(`
-          *,
-          sender_profile:profiles!messages_sender_id_fkey(full_name)
-        `)
+        .select('*')
         .eq('thread_id', threadId)
         .order('timestamp', { ascending: true });
 
       if (error) throw error;
 
-      const messagesWithSender = (data || []).map((msg) => {
-        const senderName = (msg.sender_profile as any)?.full_name?.trim() || 'Sem Nome';
+      // Fetch sender names for all messages
+      const messagesWithSender = await Promise.all((data || []).map(async (msg) => {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('id', msg.sender_id)
+          .single();
+
+        const senderName = profile?.full_name?.trim() || 'Sem Nome';
         console.log('Loaded sender_name:', senderName, 'for message:', msg.id);
         
         return {
@@ -242,7 +246,7 @@ const AdminDashboard = () => {
           is_read: msg.is_read,
           sender_name: senderName
         };
-      });
+      }));
       
       setMessages(messagesWithSender);
 
@@ -613,7 +617,7 @@ const AdminDashboard = () => {
                 <>
                   <div className="p-4 border-b">
                     <h2 className="font-semibold">
-                      Chat com {threads.find((t) => t.user_id === selectedUserId)?.user_name || 'Cliente'}
+                      Chat com {threads.find((t) => t.user_id === selectedUserId)?.user_name || 'Sem Nome'}
                     </h2>
                   </div>
 
@@ -626,28 +630,30 @@ const AdminDashboard = () => {
                           const isSender = msg.sender_id === user?.id;
                           return (
                             <div key={msg.id}>
-                              {!isSender && msg.sender_name && (
-                                <p className="text-xs text-muted-foreground mb-1">
-                                  {msg.sender_name}
-                                </p>
-                              )}
                               <div
                                 className={`flex ${isSender ? 'justify-end' : 'justify-start'}`}
                               >
-                                <div
-                                  className={`max-w-[70%] rounded-lg px-4 py-2 ${
-                                    isSender
-                                      ? 'bg-primary text-primary-foreground'
-                                      : 'bg-muted text-foreground'
-                                  }`}
-                                >
-                                  <p className="text-sm">{msg.message}</p>
-                                  <p className="text-xs opacity-70 mt-1">
-                                    {new Date(msg.timestamp).toLocaleTimeString('pt-PT', {
-                                      hour: '2-digit',
-                                      minute: '2-digit',
-                                    })}
-                                  </p>
+                                <div className="flex flex-col">
+                                  {!isSender && msg.sender_name && (
+                                    <p className="text-xs text-muted-foreground mb-1 px-1">
+                                      {msg.sender_name}
+                                    </p>
+                                  )}
+                                  <div
+                                    className={`max-w-[70%] rounded-lg px-4 py-2 ${
+                                      isSender
+                                        ? 'bg-primary text-primary-foreground'
+                                        : 'bg-muted text-foreground'
+                                    }`}
+                                  >
+                                    <p className="text-sm">{msg.message}</p>
+                                    <p className="text-xs opacity-70 mt-1">
+                                      {new Date(msg.timestamp).toLocaleTimeString('pt-PT', {
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                      })}
+                                    </p>
+                                  </div>
                                 </div>
                               </div>
                             </div>
