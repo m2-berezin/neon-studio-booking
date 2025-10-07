@@ -90,6 +90,45 @@ export const useNotifications = () => {
   useEffect(() => {
     if (user) {
       loadNotifications();
+
+      // Subscribe to realtime changes for notifications
+      const notificationsChannel = supabase
+        .channel('notifications-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'notifications',
+            filter: `user_id=eq.${user.id}`,
+          },
+          () => {
+            loadNotifications();
+          }
+        )
+        .subscribe();
+
+      // Subscribe to realtime changes for messages
+      const messagesChannel = supabase
+        .channel('messages-badge-updates')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'messages',
+            filter: `receiver_id=eq.${user.id}`,
+          },
+          () => {
+            loadNotifications();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(notificationsChannel);
+        supabase.removeChannel(messagesChannel);
+      };
     }
   }, [user]);
 
