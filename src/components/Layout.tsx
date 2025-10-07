@@ -35,7 +35,6 @@ const Layout = ({ children }: { children: ReactNode }) => {
 
   // Different navigation items based on role
   const userNavItems: NavItem[] = [
-    { path: '/projects', icon: Folder, label: 'Projectos' },
     { path: '/', icon: Home, label: '7', isLogo: true },
     { path: '/studio-info', icon: Info, label: 'Info' },
   ];
