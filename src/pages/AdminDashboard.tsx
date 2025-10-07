@@ -481,49 +481,6 @@ const AdminDashboard = () => {
         ))}
       </div>
 
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Ações Rápidas</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Button
-              variant="outline"
-              className="h-20 flex flex-col gap-2 hover:bg-primary/10"
-              onClick={() => navigate('/projects')}
-            >
-              <Folder className="h-6 w-6" />
-              <span className="text-sm font-medium">Ver Projectos</span>
-            </Button>
-            <Button
-              variant="outline"
-              className="h-20 flex flex-col gap-2 hover:bg-primary/10"
-              onClick={() => navigate('/admin/payments')}
-            >
-              <DollarSign className="h-6 w-6" />
-              <span className="text-sm font-medium">Gerir Pagamentos</span>
-            </Button>
-            <Button
-              variant="outline"
-              className="h-20 flex flex-col gap-2 hover:bg-primary/10"
-              onClick={() => navigate('/admin/bookings')}
-            >
-              <Calendar className="h-6 w-6" />
-              <span className="text-sm font-medium">Ver Reservas</span>
-            </Button>
-            <Button
-              variant="outline"
-              className="h-20 flex flex-col gap-2 hover:bg-primary/10"
-              onClick={() => navigate('/admin/subscriptions')}
-            >
-              <CreditCard className="h-6 w-6" />
-              <span className="text-sm font-medium">Subscrições</span>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Recent Payment Requests */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
@@ -578,38 +535,38 @@ const AdminDashboard = () => {
           <CardTitle>Ações Rápidas</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Button 
-              variant="outline" 
-              className="h-24 flex flex-col gap-2"
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Button
+              variant="outline"
+              className="h-20 flex flex-col gap-2 hover:bg-primary/10"
+              onClick={() => navigate('/projects')}
+            >
+              <Folder className="h-6 w-6" />
+              <span className="text-sm font-medium">Ver Projectos</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="h-20 flex flex-col gap-2 hover:bg-primary/10"
               onClick={() => navigate('/admin/payments')}
             >
               <DollarSign className="h-6 w-6" />
-              <span>Gerir Pagamentos</span>
+              <span className="text-sm font-medium">Gerir Pagamentos</span>
             </Button>
-            <Button 
-              variant="outline" 
-              className="h-24 flex flex-col gap-2"
+            <Button
+              variant="outline"
+              className="h-20 flex flex-col gap-2 hover:bg-primary/10"
               onClick={() => navigate('/admin/bookings')}
             >
               <Calendar className="h-6 w-6" />
-              <span>Ver Reservas</span>
+              <span className="text-sm font-medium">Ver Reservas</span>
             </Button>
-            <Button 
-              variant="outline" 
-              className="h-24 flex flex-col gap-2"
-              onClick={() => navigate('/admin/messages')}
-            >
-              <Users className="h-6 w-6" />
-              <span>Mensagens</span>
-            </Button>
-            <Button 
-              variant="outline" 
-              className="h-24 flex flex-col gap-2"
+            <Button
+              variant="outline"
+              className="h-20 flex flex-col gap-2 hover:bg-primary/10"
               onClick={() => navigate('/admin/subscriptions')}
             >
               <CreditCard className="h-6 w-6" />
-              <span>Subscrições</span>
+              <span className="text-sm font-medium">Subscrições</span>
             </Button>
           </div>
         </CardContent>
