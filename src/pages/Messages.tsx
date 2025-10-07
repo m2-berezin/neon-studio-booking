@@ -7,6 +7,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Send } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { refetchUnreadMessages } from '@/hooks/useUnreadMessages';
 
 interface Message {
   id: string;
@@ -46,6 +47,11 @@ const Messages = () => {
         console.error('Error marking thread as read:', error);
       } else {
         console.log('Messages marked as read');
+        
+        // Force immediate refetch of unread count
+        setTimeout(() => {
+          refetchUnreadMessages();
+        }, 100);
       }
     } catch (error) {
       console.error('Error marking thread as read:', error);
