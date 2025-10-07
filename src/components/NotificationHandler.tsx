@@ -36,7 +36,7 @@ export const NotificationHandler = () => {
         toast.error(notification.title, {
           description: notification.body,
           icon: <XCircle className="h-5 w-5" />,
-          duration: 8000,
+          duration: isMessage ? 2000 : 8000,
           ...(!isMessage && {
             action: {
               label: 'Nova reserva',
@@ -99,7 +99,7 @@ export const NotificationHandler = () => {
             toast.error(notification.title, {
               description: notification.body,
               icon: <XCircle className="h-5 w-5" />,
-              duration: 8000,
+              duration: isMessage ? 2000 : 8000,
               ...(!isMessage && {
                 action: {
                   label: 'Nova reserva',
