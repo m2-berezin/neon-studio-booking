@@ -15,6 +15,7 @@ export const NotificationHandler = () => {
   useEffect(() => {
     notifications.forEach((notification) => {
       const isApproved = notification.title.toLowerCase().includes('aprovad');
+      const isMessage = notification.title === 'Nova mensagem';
       
       if (isApproved) {
         toast.success(notification.title, {
@@ -36,13 +37,15 @@ export const NotificationHandler = () => {
           description: notification.body,
           icon: <XCircle className="h-5 w-5" />,
           duration: 8000,
-          action: {
-            label: 'Nova reserva',
-            onClick: () => {
-              markAsRead(notification.id);
-              navigate('/book');
+          ...(!isMessage && {
+            action: {
+              label: 'Nova reserva',
+              onClick: () => {
+                markAsRead(notification.id);
+                navigate('/book');
+              },
             },
-          },
+          }),
           onDismiss: () => markAsRead(notification.id),
           onAutoClose: () => markAsRead(notification.id),
         });
@@ -75,6 +78,7 @@ export const NotificationHandler = () => {
           };
 
           const isApproved = notification.title.toLowerCase().includes('aprovad');
+          const isMessage = notification.title === 'Nova mensagem';
 
           if (isApproved) {
             toast.success(notification.title, {
@@ -96,13 +100,15 @@ export const NotificationHandler = () => {
               description: notification.body,
               icon: <XCircle className="h-5 w-5" />,
               duration: 8000,
-              action: {
-                label: 'Nova reserva',
-                onClick: () => {
-                  markAsRead(notification.id);
-                  navigate('/book');
+              ...(!isMessage && {
+                action: {
+                  label: 'Nova reserva',
+                  onClick: () => {
+                    markAsRead(notification.id);
+                    navigate('/book');
+                  },
                 },
-              },
+              }),
               onDismiss: () => markAsRead(notification.id),
               onAutoClose: () => markAsRead(notification.id),
             });
