@@ -34,6 +34,10 @@ const Profile = () => {
     label: 'Definições',
     icon: Settings,
     path: '/profile/settings'
+  }, {
+    label: 'Facturação e Subscrições',
+    icon: Calendar,
+    path: '/subscriptions'
   }];
   const handleSignOut = async () => {
     setLoading(true);
@@ -93,9 +97,7 @@ const Profile = () => {
       {/* Profile Header */}
       <div className="studio-card bg-gradient-to-br from-primary/10 to-accent/10">
         <div className="flex items-center space-x-4">
-          <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center">
-            <User className="text-primary" size={28} />
-          </div>
+          
           <div className="flex-1">
             <h2 className="text-xl font-bold text-foreground">
               {profile.full_name || 'No name provided'}
@@ -141,13 +143,7 @@ const Profile = () => {
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3">
-        {userStats.map(stat => (
-          <div key={stat.label} className="studio-card text-center">
-            <stat.icon className="mx-auto mb-2 text-accent" size={24} />
-            <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-            <p className="text-xs text-muted-foreground">{stat.label}</p>
-          </div>
-        ))}
+        {userStats.map(stat => {})}
       </div>
 
       {/* Menu Items */}
