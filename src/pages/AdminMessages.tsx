@@ -37,9 +37,6 @@ const AdminMessages = () => {
   const loadThreads = async () => {
     if (!user) return;
 
-    console.log('=== LOADING THREADS (AdminMessages) ===');
-    console.log('Admin user ID:', user.id);
-
     try {
       const { data: messagesData, error } = await supabase
         .from('messages')
@@ -47,12 +44,7 @@ const AdminMessages = () => {
         .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
         .order('timestamp', { ascending: false });
 
-      if (error) {
-        console.error('Error loading messages:', error);
-        throw error;
-      }
-
-      console.log('Messages data loaded:', messagesData?.length, 'messages');
+      if (error) throw error;
 
       const threadsMap = new Map<string, Thread>();
       
@@ -60,20 +52,11 @@ const AdminMessages = () => {
         const otherUserId = msg.sender_id === user.id ? msg.receiver_id : msg.sender_id;
         
         if (!threadsMap.has(otherUserId)) {
-          // Fetch profile directly
-          const { data: profile, error: profileError } = await supabase
+          const { data: profile } = await supabase
             .from('profiles')
             .select('full_name')
             .eq('id', otherUserId)
             .single();
-
-          if (profileError) {
-            console.error('Error fetching profile for', otherUserId, ':', profileError);
-          }
-
-          const userName = profile?.full_name?.trim() || 'Sem Nome';
-          
-          console.log('✅ Loaded user:', userName, 'for user_id:', otherUserId);
 
           const { count } = await supabase
             .from('messages')
@@ -84,7 +67,7 @@ const AdminMessages = () => {
 
           threadsMap.set(otherUserId, {
             user_id: otherUserId,
-            user_name: userName,
+            user_name: profile?.full_name || 'Cliente',
             last_message: msg.message,
             last_timestamp: msg.timestamp,
             unread_count: count || 0,
@@ -92,9 +75,7 @@ const AdminMessages = () => {
         }
       }
 
-      const threadsArray = Array.from(threadsMap.values());
-      console.log('Final threads:', threadsArray);
-      setThreads(threadsArray);
+      setThreads(Array.from(threadsMap.values()));
     } catch (error) {
       console.error('Error loading threads:', error);
     }
@@ -236,7 +217,7 @@ const AdminMessages = () => {
               <>
                 <div className="p-4 border-b">
                   <h2 className="font-semibold">
-                    Chat com {threads.find((t) => t.user_id === selectedUserId)?.user_name || 'Sem Nome'}
+                    {threads.find((t) => t.user_id === selectedUserId)?.user_name || 'Cliente'}
                   </h2>
                 </div>
 
