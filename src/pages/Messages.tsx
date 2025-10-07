@@ -35,12 +35,18 @@ const Messages = () => {
       const threadId = `${ids[0]}-${ids[1]}`;
       
       // Mark all messages in this thread as read
-      await supabase
+      const { error } = await supabase
         .from('messages')
         .update({ is_read: true })
         .eq('thread_id', threadId)
         .eq('receiver_id', user.id)
         .eq('is_read', false);
+
+      if (error) {
+        console.error('Error marking thread as read:', error);
+      } else {
+        console.log('Messages marked as read');
+      }
     } catch (error) {
       console.error('Error marking thread as read:', error);
     }
@@ -63,7 +69,7 @@ const Messages = () => {
       if (error) throw error;
       setMessages(data || []);
 
-      // Mark messages as read when loading
+      // Mark messages as read immediately after loading
       await markThreadAsRead();
     } catch (error) {
       console.error('Error loading messages:', error);
