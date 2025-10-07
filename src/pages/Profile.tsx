@@ -17,19 +17,6 @@ const Profile = () => {
     toast
   } = useToast();
   const [loading, setLoading] = useState(false);
-  const userStats = [{
-    label: 'Sessões Reservadas',
-    value: '0',
-    icon: Calendar
-  }, {
-    label: 'Projectos Concluídos',
-    value: '0',
-    icon: Music
-  }, {
-    label: 'Recompensas Ganhas',
-    value: '0',
-    icon: Award
-  }];
   const menuItems = [{
     label: 'Definições',
     icon: Settings,
@@ -135,17 +122,6 @@ const Profile = () => {
               </Button>
             </div>
           </div>}
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-3">
-        {userStats.map(stat => (
-          <div key={stat.label} className="studio-card text-center">
-            <stat.icon className="mx-auto mb-2 text-primary" size={20} />
-            <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-            <p className="text-xs text-muted-foreground">{stat.label}</p>
-          </div>
-        ))}
       </div>
 
       {/* Menu Items */}
