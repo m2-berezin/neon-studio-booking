@@ -60,6 +60,7 @@ const App = () => {
             <Layout>
               <Routes>
                 <Route path="/" element={<Home />} />
+                <Route path="/admin/dashboard" element={<AdminDashboard />} />
                 <Route path="/book" element={<Book />} />
                 <Route path="/mix-master" element={<MixMaster />} />
                 <Route path="/payment" element={<Payment />} />
@@ -76,7 +77,6 @@ const App = () => {
                 <Route path="/studio-info" element={<StudioInfo />} />
                 
                 {/* Admin Routes - AdminLayout is already inside each page */}
-                <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/bookings" element={<AdminBookings />} />
             <Route path="/admin/payments" element={<AdminPayments />} />
             <Route path="/admin/messages" element={<AdminMessages />} />

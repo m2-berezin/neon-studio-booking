@@ -2,7 +2,7 @@ import { ReactNode, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Home, Calendar, Gift, MessageCircle, User, LogOut, Settings, Star, Music, Folder, Info } from 'lucide-react';
+import { Home, Gift, MessageCircle, User, LogOut, Settings, Folder, Info } from 'lucide-react';
 import { NotificationBell } from '@/components/NotificationBell';
 import { Logo } from '@/components/Logo';
 import { NotificationHandler } from '@/components/NotificationHandler';
@@ -19,6 +19,13 @@ const Layout = ({ children }: { children: ReactNode }) => {
     }
   }, [user, navigate, location.pathname]);
 
+  // Redirect admins to dashboard when they try to access home
+  useEffect(() => {
+    if (user && isAdmin() && location.pathname === '/') {
+      navigate('/admin/dashboard');
+    }
+  }, [user, isAdmin, location.pathname, navigate]);
+
   type NavItem = {
     path: string;
     icon: any;
@@ -26,7 +33,8 @@ const Layout = ({ children }: { children: ReactNode }) => {
     isLogo?: boolean;
   };
 
-  const navItems: NavItem[] = [
+  // Different navigation items based on role
+  const userNavItems: NavItem[] = [
     { path: '/projects', icon: Folder, label: 'Projectos' },
     { path: '/rewards', icon: Gift, label: 'Recompensas' },
     { path: '/', icon: Home, label: '7', isLogo: true },
@@ -34,12 +42,13 @@ const Layout = ({ children }: { children: ReactNode }) => {
     { path: '/studio-info', icon: Info, label: 'Info' },
   ];
 
-  // Add admin navigation items if user is admin
   const adminNavItems: NavItem[] = [
-    { path: '/admin', icon: Settings, label: 'Admin' },
+    { path: '/projects', icon: Folder, label: 'Projectos' },
+    { path: '/rewards', icon: Gift, label: 'Recompensas' },
+    { path: '/admin/dashboard', icon: Settings, label: '🦇', isLogo: true },
   ];
 
-  const allNavItems = isAdmin() ? [...navItems, ...adminNavItems] : navItems;
+  const allNavItems = isAdmin() ? adminNavItems : userNavItems;
 
   // Don't show layout for auth page - show immediately
   if (location.pathname === '/auth') {
@@ -107,7 +116,9 @@ const Layout = ({ children }: { children: ReactNode }) => {
         <nav className="fixed bottom-0 left-0 right-0 bg-card/80 backdrop-blur-md border-t border-border">
           <div className="flex justify-around py-3">
             {allNavItems.map((item) => {
-              const isActive = location.pathname === item.path;
+              const isActive = item.path === '/admin/dashboard' 
+                ? location.pathname.startsWith('/admin')
+                : location.pathname === item.path;
               return (
                 <button
                   key={item.path}
@@ -120,7 +131,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
                 >
                   {item.isLogo ? (
                     <span className={`text-2xl font-bold ${isActive ? 'neon-title' : 'neon-title'}`}>
-                      7
+                      {item.label}
                     </span>
                   ) : (
                     <>
