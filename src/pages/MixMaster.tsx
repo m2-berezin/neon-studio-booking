@@ -66,22 +66,10 @@ const MixMaster = () => {
 
   const deliveryOptions = [
     {
-      id: 'upload',
-      title: 'Carregar Ficheiros',
-      description: 'Faz upload directo dos teus ficheiros',
-      icon: <Upload className="h-5 w-5" />
-    },
-    {
       id: 'link',
       title: 'Link de Transferência',
       description: 'SwissTransfer, WeTransfer, etc.',
       icon: <LinkIcon className="h-5 w-5" />
-    },
-    {
-      id: 'whatsapp',
-      title: 'WhatsApp',
-      description: 'Enviar ficheiros via WhatsApp',
-      icon: <MessageCircle className="h-5 w-5" />
     }
   ];
 
@@ -283,18 +271,6 @@ const MixMaster = () => {
             </div>
 
             {/* Delivery Method Content */}
-            {deliveryMethod === 'upload' && (
-              <div className="mt-6 space-y-4">
-                <Button 
-                  onClick={() => window.open('/file-upload', '_blank')}
-                  className="w-full"
-                >
-                  <Upload className="h-4 w-4 mr-2" />
-                  Enviar Ficheiros
-                </Button>
-              </div>
-            )}
-
             {deliveryMethod === 'link' && (
               <div className="mt-6 space-y-4">
                 <Label htmlFor="transfer-link">Link de Transferência</Label>
@@ -305,28 +281,6 @@ const MixMaster = () => {
                   onChange={(e) => setTransferLink(e.target.value)}
                   className="mt-2"
                 />
-                <Button 
-                  onClick={() => window.open('/file-transfer', '_blank')}
-                  className="w-full"
-                >
-                  <LinkIcon className="h-4 w-4 mr-2" />
-                  Continuar com Link
-                </Button>
-              </div>
-            )}
-
-            {deliveryMethod === 'whatsapp' && (
-              <div className="mt-6">
-                <Button 
-                  onClick={() => {
-                    handleWhatsAppSend();
-                    window.open('/whatsapp-upload', '_blank');
-                  }}
-                  className="w-full bg-green-600 hover:bg-green-700"
-                >
-                  <MessageCircle className="h-4 w-4 mr-2" />
-                  Continuar via WhatsApp
-                </Button>
               </div>
             )}
 
