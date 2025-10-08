@@ -11,6 +11,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
+import { toast as sonnerToast } from 'sonner';
 const Subscriptions = () => {
   const {
     user,
@@ -32,6 +33,31 @@ const Subscriptions = () => {
   const [editingPreferences, setEditingPreferences] = useState(false);
   const [tempPreferences, setTempPreferences] = useState(preferences);
   const [activePlanType, setActivePlanType] = useState<string | null>(null);
+  
+  // Check for unread renewal notifications on load
+  useEffect(() => {
+    const checkRenewalNotifications = async () => {
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('notifications')
+        .select('body')
+        .eq('user_id', user.id)
+        .eq('title', 'Renovação da Subscrição')
+        .eq('read', false)
+        .limit(1)
+        .single();
+
+      if (data && !error) {
+        sonnerToast.warning(data.body, {
+          duration: 8000,
+        });
+      }
+    };
+
+    checkRenewalNotifications();
+  }, [user]);
+
   useEffect(() => {
     const fetchActivePlan = async () => {
       if (!user) return;

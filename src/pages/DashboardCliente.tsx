@@ -30,6 +30,7 @@ const DashboardCliente = () => {
   const [messages, setMessages] = useState<MessageWithSender[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [unreadCount, setUnreadCount] = useState(0);
+  const [renewalCount, setRenewalCount] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const loadMessages = async () => {
@@ -84,6 +85,24 @@ const DashboardCliente = () => {
     }
   };
 
+  const loadRenewalCount = async () => {
+    if (!user) return;
+
+    try {
+      const { count, error } = await supabase
+        .from('notifications')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('title', 'Renovação da Subscrição')
+        .eq('read', false);
+
+      if (error) throw error;
+      setRenewalCount(count || 0);
+    } catch (error) {
+      console.error('Error loading renewal count:', error);
+    }
+  };
+
   const sendMessageFunc = async () => {
     if (!user || !newMessage.trim()) return;
 
@@ -130,6 +149,7 @@ const DashboardCliente = () => {
     if (user) {
       loadMessages();
       loadUnreadCount();
+      loadRenewalCount();
 
       const ids = [user.id, ADMIN_ID].sort();
       const threadId = `${ids[0]}-${ids[1]}`;
@@ -162,6 +182,7 @@ const DashboardCliente = () => {
           },
           () => {
             loadUnreadCount();
+            loadRenewalCount();
           }
         )
         .subscribe();
@@ -187,9 +208,29 @@ const DashboardCliente = () => {
         if (value === 'messages') {
           markNotificationsRead();
         }
+        if (value === 'subscriptions') {
+          // Mark renewal notifications as read
+          if (user && renewalCount > 0) {
+            supabase
+              .from('notifications')
+              .update({ read: true })
+              .eq('user_id', user.id)
+              .eq('title', 'Renovação da Subscrição')
+              .eq('read', false)
+              .then(() => setRenewalCount(0));
+          }
+        }
       }}>
-        <TabsList className="grid w-full grid-cols-2 max-w-md">
+        <TabsList className="grid w-full grid-cols-3 max-w-3xl">
           <TabsTrigger value="overview">Visão Geral</TabsTrigger>
+          <TabsTrigger value="subscriptions" className="relative">
+            Subscrições
+            {renewalCount > 0 && (
+              <Badge className="ml-2 h-5 w-5 p-0 flex items-center justify-center">
+                {renewalCount}
+              </Badge>
+            )}
+          </TabsTrigger>
           <TabsTrigger value="messages" className="relative">
             Mensagens
             {unreadCount > 0 && (
@@ -238,6 +279,16 @@ const DashboardCliente = () => {
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        <TabsContent value="subscriptions" className="mt-6">
+          <Card>
+            <CardContent className="p-6">
+              <p className="text-center text-muted-foreground">
+                Funcionalidade de subscrições em breve...
+              </p>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="messages" className="mt-6">
