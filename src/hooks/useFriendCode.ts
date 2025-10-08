@@ -10,16 +10,6 @@ export const useFriendCode = () => {
   const [appliedFriendCode, setAppliedFriendCode] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Generate a random 8-character code
-  const generateCode = (): string => {
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let result = '';
-    for (let i = 0; i < 8; i++) {
-      result += characters.charAt(Math.floor(Math.random() * characters.length));
-    }
-    return result;
-  };
-
   // Load or create user's friend code
   useEffect(() => {
     if (user) {
@@ -32,10 +22,11 @@ export const useFriendCode = () => {
     if (!user) return;
 
     try {
+      // Check if user already has a referral code
       const { data, error } = await supabase
-        .from('friend_codes')
+        .from('referral_codes')
         .select('code')
-        .eq('created_by', user.id)
+        .eq('user_id', user.id)
         .maybeSingle();
 
       if (error) throw error;
@@ -43,21 +34,23 @@ export const useFriendCode = () => {
       if (data) {
         setMyFriendCode(data.code);
       } else {
-        // Create a new friend code
-        const newCode = generateCode();
-        const { error: insertError } = await supabase
-          .from('friend_codes')
-          .insert({
-            code: newCode,
-            created_by: user.id,
-            discount_percent: 25,
-          });
+        // Generate a new referral code using RPC function
+        const { data: newCode, error: rpcError } = await supabase
+          .rpc('generate_referral_code', { p_user_id: user.id });
 
-        if (insertError) throw insertError;
-        setMyFriendCode(newCode);
+        if (rpcError) throw rpcError;
+        
+        if (newCode) {
+          setMyFriendCode(newCode);
+        }
       }
     } catch (error) {
       console.error('Error loading friend code:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível carregar o código de convite',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -104,11 +97,11 @@ export const useFriendCode = () => {
 
     setLoading(true);
     try {
-      // Validate code format
-      if (!/^[A-Z0-9]{8}$/.test(code)) {
+      // Validate code format (alphanumeric ending with 7T7)
+      if (!/^[A-Z0-9]+7T7\d*$/.test(code)) {
         toast({
           title: 'Código Inválido',
-          description: 'O código deve ter 8 caracteres alfanuméricos',
+          description: 'Formato de código inválido',
           variant: 'destructive',
         });
         return false;
@@ -116,9 +109,10 @@ export const useFriendCode = () => {
 
       // Check if code exists
       const { data: codeData, error: codeError } = await supabase
-        .from('friend_codes')
-        .select('code, created_by, expires_at')
+        .from('referral_codes')
+        .select('code, user_id')
         .eq('code', code)
+        .eq('is_active', true)
         .maybeSingle();
 
       if (codeError) throw codeError;
@@ -132,18 +126,8 @@ export const useFriendCode = () => {
         return false;
       }
 
-      // Check if code is expired
-      if (new Date(codeData.expires_at) < new Date()) {
-        toast({
-          title: 'Código Expirado',
-          description: 'Este código já expirou',
-          variant: 'destructive',
-        });
-        return false;
-      }
-
       // Check if user is trying to use their own code
-      if (codeData.created_by === user.id) {
+      if (codeData.user_id === user.id) {
         toast({
           title: 'Código Inválido',
           description: 'Não podes usar o teu próprio código',
