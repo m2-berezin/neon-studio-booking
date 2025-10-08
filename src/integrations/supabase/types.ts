@@ -1416,6 +1416,10 @@ export type Database = {
         Args: { p_amount_eur: number; p_plan_type: string; p_user_id: string }
         Returns: string
       }
+      validate_referral_on_signup: {
+        Args: { p_code: string; p_friend_user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "user"
