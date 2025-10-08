@@ -335,7 +335,7 @@ const MixMaster = () => {
                 <Label htmlFor="project-notes">Notas do Projecto (Opcional)</Label>
                 <Textarea
                   id="project-notes"
-                  placeholder="Cola aqui 1/2 links de youtube/spotify como referências para a mix que estás á procura."
+                  placeholder="Cola aqui 1/2 links de youtube/spotify como referências para a mix que estás à procura."
                   value={projectNotes}
                   onChange={(e) => setProjectNotes(e.target.value)}
                   className="mt-2"
