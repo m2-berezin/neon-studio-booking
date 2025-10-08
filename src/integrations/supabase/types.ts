@@ -1282,6 +1282,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_subscription_renewal_date: {
+        Args: { p_user_id: string }
+        Returns: string
+      }
       get_unavailable_days: {
         Args: { p_month: number; p_year: number }
         Returns: {
@@ -1363,6 +1367,10 @@ export type Database = {
           p_reservation_id: string
         }
         Returns: string
+      }
+      send_renewal_alerts: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       slugify: {
         Args: { txt: string }

@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Calendar, Music, Award, User, Settings, LogOut, Shield, Mail, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { format } from 'date-fns';
 const Profile = () => {
   const navigate = useNavigate();
   const {
@@ -17,6 +19,28 @@ const Profile = () => {
     toast
   } = useToast();
   const [loading, setLoading] = useState(false);
+  const [renewalDate, setRenewalDate] = useState<string | null>(null);
+
+  // Fetch subscription renewal date
+  useEffect(() => {
+    const fetchRenewalDate = async () => {
+      if (!user) return;
+
+      try {
+        const { data, error } = await supabase.rpc('get_subscription_renewal_date', {
+          p_user_id: user.id
+        });
+
+        if (!error && data) {
+          setRenewalDate(data);
+        }
+      } catch (error) {
+        console.error('Error fetching renewal date:', error);
+      }
+    };
+
+    fetchRenewalDate();
+  }, [user]);
   const menuItems = [{
     label: 'Definições',
     icon: Settings,
@@ -108,6 +132,16 @@ const Profile = () => {
               <Phone className="h-4 w-4 text-muted-foreground" />
               <span className="text-muted-foreground">{profile.phone}</span>
             </div>}
+        </div>
+
+        {/* Subscription Renewal */}
+        <div className="mt-4 pt-4 border-t border-border/20">
+          <div className="flex items-center gap-2 text-sm">
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <span className="text-muted-foreground">
+              Renovação de subscrição a dia {renewalDate ? format(new Date(renewalDate), 'dd/MM/yyyy') : 'N/A'}
+            </span>
+          </div>
         </div>
 
         {/* Admin Toggle - Only visible for admin users */}
