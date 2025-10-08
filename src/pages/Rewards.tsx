@@ -47,11 +47,14 @@ const Rewards = () => {
   const [offers, setOffers] = useState<Offer[]>([]);
   const [offerUsage, setOfferUsage] = useState<Record<string, number>>({});
   const [applyingOffer, setApplyingOffer] = useState<string | null>(null);
+  const [loyaltyPoints, setLoyaltyPoints] = useState<number>(0);
+  const [redeeming, setRedeeming] = useState(false);
 
   // Fetch active offers and usage
   useEffect(() => {
     if (user) {
       fetchOffersAndUsage();
+      fetchLoyaltyPoints();
     }
   }, [user]);
 
@@ -66,6 +69,14 @@ const Rewards = () => {
     }, payload => {
       console.log('user_offers changed:', payload);
       fetchOffersAndUsage();
+    }).on('postgres_changes', {
+      event: '*',
+      schema: 'public',
+      table: 'loyalty_points',
+      filter: `user_id=eq.${user.id}`
+    }, payload => {
+      console.log('loyalty_points changed:', payload);
+      fetchLoyaltyPoints();
     }).subscribe();
     return () => {
       supabase.removeChannel(channel);
@@ -97,6 +108,19 @@ const Rewards = () => {
       setOfferUsage(usageMap);
     } catch (error) {
       console.error('Error fetching offers:', error);
+    }
+  };
+
+  const fetchLoyaltyPoints = async () => {
+    if (!user) return;
+    try {
+      const { data, error } = await supabase.rpc('get_loyalty_points' as any, {
+        p_user_id: user.id
+      });
+      if (error) throw error;
+      setLoyaltyPoints((data as number) || 0);
+    } catch (error) {
+      console.error('Error fetching loyalty points:', error);
     }
   };
   const handleApplyOffer = async (offerId: string) => {
@@ -153,10 +177,33 @@ const Rewards = () => {
       }));
     }
   };
-  const handleLoyaltyRedeem = async (rewardType: string) => {
-    const success = await redeemLoyaltyReward(rewardType);
-    if (success) {
-      // Loyalty reward redeemed successfully - component will update automatically
+  const handleLoyaltyRedeem = async () => {
+    if (!user || loyaltyPoints < 7) return;
+    
+    setRedeeming(true);
+    try {
+      const { data, error } = await supabase.rpc('redeem_loyalty_offer' as any, {
+        p_user_id: user.id
+      });
+      
+      if (error) throw error;
+      
+      toast({
+        title: 'Oferta reclamada!',
+        description: 'A tua Mix&Master grátis foi adicionada. Vai ao calendário para agendar.',
+      });
+      
+      // Refresh loyalty points
+      await fetchLoyaltyPoints();
+    } catch (error: any) {
+      console.error('Error redeeming loyalty offer:', error);
+      toast({
+        title: 'Erro',
+        description: error.message || 'Não foi possível reclamar a oferta',
+        variant: 'destructive',
+      });
+    } finally {
+      setRedeeming(false);
     }
   };
   return <div className="space-y-6">
@@ -303,38 +350,37 @@ const Rewards = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Gift className="w-5 h-5 text-primary" />
-              Ganha uma Mix&Master
+              Mix&Master Grátis
             </CardTitle>
             <CardDescription>
-              Através da acumulação de pontos
+              Acumula pontos e ganha uma Mix&Master grátis
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="text-center p-4 bg-secondary/50 rounded-lg">
-                  <p className="text-2xl font-bold text-primary">{projectStats.mixingMasteringCount}</p>
-                  <p className="text-sm text-muted-foreground">Projetos M&M</p>
-                  <p className="text-xs text-muted-foreground">Precisas de 7 no total</p>
-                </div>
-                <div className="text-center p-4 bg-secondary/50 rounded-lg">
-                  <p className="text-2xl font-bold text-primary">{projectStats.fullSongCount}</p>
-                  <p className="text-sm text-muted-foreground">Músicas Completas</p>
-                  <p className="text-xs text-muted-foreground">Precisas de 5 no total</p>
-                </div>
+              <div className="text-center p-6 bg-secondary/50 rounded-lg">
+                <p className="text-4xl font-bold text-primary mb-2">
+                  Pontos: {loyaltyPoints}/7
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {loyaltyPoints >= 7 
+                    ? 'Parabéns! Podes reclamar a tua Mix&Master grátis!' 
+                    : `Faltam ${7 - loyaltyPoints} pontos para a oferta Mix&Master`}
+                </p>
               </div>
               
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div className="text-center sm:text-left">
-                  <p className="font-medium text-foreground">
-                  {isLoyaltyRewardAvailable('mixingMastering') ? 'Parabéns! Ganhou uma sessão M&M grátis' : 'Continua a completar projetos para ganhar a tua sessão grátis'}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Complete 7 projetos de mistura/masterização OU 5 músicas completas (gravar+misturar+masterizar)
-                  </p>
-                </div>
-                <Button onClick={() => handleLoyaltyRedeem('mixingMastering')} disabled={!isLoyaltyRewardAvailable('mixingMastering') || loading} variant={isLoyaltyRewardAvailable('mixingMastering') ? 'default' : 'outline'} className="w-full sm:w-auto">
-                  {loading ? 'A resgatar...' : isLoyaltyRewardAvailable('mixingMastering') ? 'Resgatar M&M Grátis' : 'Não Disponível'}
+              <div className="flex flex-col items-center gap-4">
+                <p className="text-sm text-muted-foreground text-center">
+                  Ganha 1 ponto por cada serviço 'Captação 3h Mix & Master' ou 'Mix & Master' completado
+                </p>
+                <Button 
+                  onClick={handleLoyaltyRedeem}
+                  disabled={loyaltyPoints < 7 || redeeming || hasActivePenalty()} 
+                  variant={loyaltyPoints >= 7 ? 'default' : 'outline'}
+                  size="lg"
+                  className="w-full sm:w-auto"
+                >
+                  {redeeming ? 'A reclamar...' : loyaltyPoints >= 7 ? 'Reclamar Oferta Mix&Master' : 'Não Disponível'}
                 </Button>
               </div>
             </div>
