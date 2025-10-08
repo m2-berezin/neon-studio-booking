@@ -128,6 +128,30 @@ export type Database = {
           },
         ]
       }
+      emails_log: {
+        Row: {
+          body: string
+          id: string
+          sent_at: string
+          subject: string
+          to_email: string
+        }
+        Insert: {
+          body: string
+          id?: string
+          sent_at?: string
+          subject: string
+          to_email: string
+        }
+        Update: {
+          body?: string
+          id?: string
+          sent_at?: string
+          subject?: string
+          to_email?: string
+        }
+        Relationships: []
+      }
       friend_code_uses: {
         Row: {
           code: string
@@ -210,6 +234,38 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      loyalty_points: {
+        Row: {
+          booking_id: string
+          earned_at: string
+          id: string
+          points_earned: number
+          user_id: string
+        }
+        Insert: {
+          booking_id: string
+          earned_at?: string
+          id?: string
+          points_earned?: number
+          user_id: string
+        }
+        Update: {
+          booking_id?: string
+          earned_at?: string
+          id?: string
+          points_earned?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loyalty_points_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       messages: {
         Row: {
@@ -325,6 +381,7 @@ export type Database = {
           reservation_id: string
           status: string
           subscription_id: string | null
+          transfer_link: string | null
           type: string | null
           updated_at: string
           user_id: string
@@ -343,6 +400,7 @@ export type Database = {
           reservation_id: string
           status?: string
           subscription_id?: string | null
+          transfer_link?: string | null
           type?: string | null
           updated_at?: string
           user_id: string
@@ -361,6 +419,7 @@ export type Database = {
           reservation_id?: string
           status?: string
           subscription_id?: string | null
+          transfer_link?: string | null
           type?: string | null
           updated_at?: string
           user_id?: string
@@ -1310,6 +1369,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_loyalty_points: {
+        Args: { p_user_id: string }
+        Returns: number
+      }
       get_subscription_renewal_date: {
         Args: { p_user_id: string }
         Returns: string
@@ -1386,6 +1449,10 @@ export type Database = {
         Args: { p_thread_id: string }
         Returns: boolean
       }
+      redeem_loyalty_offer: {
+        Args: { p_user_id: string }
+        Returns: boolean
+      }
       request_payment: {
         Args: {
           p_amount_eur: number
@@ -1399,6 +1466,14 @@ export type Database = {
       send_renewal_alerts: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      send_transfer_email: {
+        Args: {
+          p_client_name: string
+          p_payment_id: string
+          p_transfer_link: string
+        }
+        Returns: boolean
       }
       slugify: {
         Args: { txt: string }
