@@ -61,20 +61,13 @@ const MixMaster = () => {
       originalPrice: 40,
       hasSubscription,
       isFirstMonth
-    },
-    {
-      id: '2projects',
-      title: '2 Projectos', 
-      description: 'Mix & Master de 2 músicas',
-      price: 70,
-      note: 'Mesmo preço com e sem subscrição'
     }
   ];
 
   const deliveryOptions = [
     {
       id: 'upload',
-      title: 'Enviar Ficheiros',
+      title: 'Carregar Ficheiros',
       description: 'Faz upload directo dos teus ficheiros',
       icon: <Upload className="h-5 w-5" />
     },
@@ -185,7 +178,7 @@ const MixMaster = () => {
           <CardTitle>Escolhe a Tua Opção</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             {pricingOptions.map((option) => (
               <div
                 key={option.id}
@@ -214,38 +207,14 @@ const MixMaster = () => {
                 <p className="text-sm text-muted-foreground mb-3">{option.description}</p>
                 
                 <div className="space-y-2">
-                  {option.id === '1project' ? (
-                    <div>
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-1">
-                          <div className="text-lg font-semibold">€{option.price}</div>
-                          {option.hasSubscription && (
-                            <div className="text-xs text-muted-foreground">
-                              {option.isFirstMonth ? (
-                                <>€40 <span className="line-through">→</span> €36 (10% desconto primeiro mês)</>
-                              ) : (
-                                <>€40 <span className="line-through">→</span> €34 (com subscrição)</>
-                              )}
-                            </div>
-                          )}
-                          {!option.hasSubscription && (
-                            <div className="text-xs text-muted-foreground">€40 sem subscrição</div>
-                          )}
-                        </div>
-                        {option.hasSubscription && (
-                          <Badge variant="secondary" className="text-xs">
-                            {option.isFirstMonth ? 'Primeiro Mês' : 'Com Subscrição'}
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-between">
-                      <span className="text-lg font-semibold">€{option.price}</span>
-                    </div>
-                  )}
-                  {option.note && (
-                    <p className="text-xs text-muted-foreground">{option.note}</p>
+                  <div className="space-y-1">
+                    <div className="text-base font-medium text-muted-foreground">€40 sem subscrição</div>
+                    <div className="text-2xl font-bold text-primary">€34 com subscrição</div>
+                  </div>
+                  {option.hasSubscription && (
+                    <Badge variant="secondary" className="text-xs">
+                      Com Subscrição
+                    </Badge>
                   )}
                 </div>
               </div>
@@ -366,7 +335,7 @@ const MixMaster = () => {
                 <Label htmlFor="project-notes">Notas do Projecto (Opcional)</Label>
                 <Textarea
                   id="project-notes"
-                  placeholder="Descreve o que pretendes para o teu projecto, referências, estilo, etc."
+                  placeholder="Cola aqui 1/2 links de youtube/spotify como referências para a mix que estás á procura."
                   value={projectNotes}
                   onChange={(e) => setProjectNotes(e.target.value)}
                   className="mt-2"
