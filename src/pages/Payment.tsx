@@ -31,6 +31,7 @@ const Payment = () => {
   const endTime = searchParams.get('end_time');
   const serviceId = searchParams.get('service_id');
   const plan = searchParams.get('plan'); // For subscriptions
+  const transferLink = searchParams.get('transferLink'); // For mixmaster
 
   // Determine service title based on service and option
   let serviceTitle = '';
@@ -133,6 +134,105 @@ const Payment = () => {
 
         setTimeout(() => {
           navigate('/subscriptions');
+        }, 1500);
+        return;
+      }
+
+      // Handle mixmaster payment
+      if (service === 'mixmaster') {
+        if (!price) {
+          toast({
+            title: 'Erro',
+            description: 'Dados de pagamento incompletos',
+            variant: 'destructive'
+          });
+          setLoading(false);
+          return;
+        }
+
+        // Get client name from profiles
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('id', user.id)
+          .single();
+
+        const clientName = profileData?.full_name || 'Cliente';
+
+        // Get Mix&Master service ID
+        const { data: serviceData } = await supabase
+          .from('services')
+          .select('id')
+          .ilike('name', '%Mix&Master%')
+          .limit(1)
+          .single();
+
+        if (!serviceData) {
+          toast({
+            title: 'Erro',
+            description: 'Serviço Mix&Master não encontrado',
+            variant: 'destructive'
+          });
+          setLoading(false);
+          return;
+        }
+
+        // Create reservation for mixmaster
+        const { data: reservationData, error: reservationError } = await supabase
+          .from('reservations')
+          .insert({
+            user_id: user.id,
+            service_id: serviceData.id,
+            status: 'pending'
+          })
+          .select()
+          .single();
+
+        if (reservationError) {
+          console.error('Reservation error:', reservationError);
+          toast({
+            title: 'Erro',
+            description: 'Não foi possível criar a reserva',
+            variant: 'destructive'
+          });
+          setLoading(false);
+          return;
+        }
+
+        // Create payment request with transfer_link
+        const { error: paymentError } = await supabase
+          .from('payment_requests')
+          .insert({
+            user_id: user.id,
+            reservation_id: reservationData.id,
+            amount_eur: parseFloat(price),
+            currency: 'EUR',
+            type: 'reservation',
+            status: 'pending',
+            transfer_link: transferLink || null,
+            note: `Mix&Master - ${clientName}`
+          });
+
+        if (paymentError) {
+          console.error('Payment error:', paymentError);
+          await supabase.from('reservations').delete().eq('id', reservationData.id);
+          toast({
+            title: 'Erro',
+            description: 'Não foi possível criar o pedido de pagamento',
+            variant: 'destructive'
+          });
+          setLoading(false);
+          return;
+        }
+
+        toast({
+          title: 'Pedido Enviado ✅',
+          description: 'Mix&Master pendente de verificação de pagamento. Aguarde aprovação.',
+          duration: 5000
+        });
+
+        setTimeout(() => {
+          navigate('/projects');
         }, 1500);
         return;
       }
