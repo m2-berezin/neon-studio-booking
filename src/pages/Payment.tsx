@@ -163,9 +163,9 @@ const Payment = () => {
         const { data: serviceData } = await supabase
           .from('services')
           .select('id')
-          .ilike('name', '%Mix&Master%')
+          .or('name.ilike.%Mix&Master%,name.ilike.%Mix & Master%,name.ilike.%MixMaster%')
           .limit(1)
-          .single();
+          .maybeSingle();
 
         if (!serviceData) {
           toast({
