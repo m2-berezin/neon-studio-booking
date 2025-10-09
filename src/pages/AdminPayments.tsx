@@ -22,9 +22,7 @@ interface PaymentRequest {
   reservations?: {
     starts_at: string;
     ends_at: string;
-    services?: {
-      name: string;
-    };
+    service_name_snapshot?: string;
   };
 }
 
@@ -43,9 +41,7 @@ const AdminPayments = () => {
           reservations (
             starts_at,
             ends_at,
-            services (
-              name
-            )
+            service_name_snapshot
           )
         `)
         .order('created_at', { ascending: false });
@@ -298,8 +294,8 @@ const AdminPayments = () => {
                     </div>
                     <div className="text-sm space-y-1">
                       <p><span className="font-medium">Cliente:</span> {request.profiles.full_name}</p>
-                      {request.reservations?.services?.name && (
-                        <p><span className="font-medium">Serviço:</span> {request.reservations.services.name}</p>
+                      {request.reservations?.service_name_snapshot && (
+                        <p><span className="font-medium">Serviço:</span> {request.reservations.service_name_snapshot}</p>
                       )}
                       {request.reservations?.starts_at && (
                         <p>
@@ -315,7 +311,7 @@ const AdminPayments = () => {
                   </div>
                   
                   <div className="flex gap-2 ml-4">
-                    {request.reservations?.services?.name?.toLowerCase().includes('mix') && (
+                    {request.reservations?.service_name_snapshot?.toLowerCase().includes('mix') && (
                       <Button
                         size="sm"
                         className="bg-blue-600 hover:bg-blue-700"
