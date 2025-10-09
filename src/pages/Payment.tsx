@@ -159,10 +159,10 @@ const Payment = () => {
 
         const clientName = profileData?.full_name || 'Cliente';
 
-        // Get Mix&Master service ID
+        // Get Mix&Master service with full details
         const { data: serviceData } = await supabase
           .from('services')
-          .select('id')
+          .select('id, name, price_eur, duration_minutes, currency')
           .or('name.ilike.%Mix&Master%,name.ilike.%Mix & Master%,name.ilike.%MixMaster%')
           .limit(1)
           .maybeSingle();
@@ -177,12 +177,16 @@ const Payment = () => {
           return;
         }
 
-        // Create reservation for mixmaster
+        // Create reservation for mixmaster with snapshot data
         const { data: reservationData, error: reservationError } = await supabase
           .from('reservations')
           .insert({
             user_id: user.id,
             service_id: serviceData.id,
+            service_name_snapshot: serviceData.name,
+            price_eur_snapshot: serviceData.price_eur,
+            duration_minutes_snapshot: serviceData.duration_minutes,
+            currency_snapshot: serviceData.currency || 'EUR',
             status: 'pending'
           })
           .select()
