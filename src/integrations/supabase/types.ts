@@ -73,12 +73,12 @@ export type Database = {
           created_at: string
           currency_snapshot: string | null
           duration_minutes_snapshot: number | null
-          ends_at: string
+          ends_at: string | null
           id: string
           price_eur_snapshot: number | null
           service_id: string
           service_name_snapshot: string | null
-          starts_at: string
+          starts_at: string | null
           status: string
           updated_at: string
           user_id: string
@@ -87,12 +87,12 @@ export type Database = {
           created_at?: string
           currency_snapshot?: string | null
           duration_minutes_snapshot?: number | null
-          ends_at: string
+          ends_at?: string | null
           id?: string
           price_eur_snapshot?: number | null
           service_id: string
           service_name_snapshot?: string | null
-          starts_at: string
+          starts_at?: string | null
           status?: string
           updated_at?: string
           user_id: string
@@ -101,12 +101,12 @@ export type Database = {
           created_at?: string
           currency_snapshot?: string | null
           duration_minutes_snapshot?: number | null
-          ends_at?: string
+          ends_at?: string | null
           id?: string
           price_eur_snapshot?: number | null
           service_id?: string
           service_name_snapshot?: string | null
-          starts_at?: string
+          starts_at?: string | null
           status?: string
           updated_at?: string
           user_id?: string
