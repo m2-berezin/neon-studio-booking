@@ -43,7 +43,7 @@ const handler = async (req: Request): Promise<Response> => {
       <p><strong>Serviço:</strong> ${service_name}</p>
       <p><strong>Link de Transferência:</strong></p>
       <p><a href="${transfer_link}" target="_blank">${transfer_link}</a></p>
-      ${notes ? `<p><strong>Notas do Projeto:</strong></p><p>${notes}</p>` : ''}
+      ${notes ? `<p><strong>Notas do Projeto:</strong></p><p style="white-space: pre-wrap;">${notes}</p>` : ''}
       <hr />
       <p><small>Email enviado automaticamente pelo sistema 7T7Studios</small></p>
     `;
