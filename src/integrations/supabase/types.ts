@@ -1058,6 +1058,10 @@ export type Database = {
         Args: { p_payment_id: string }
         Returns: string
       }
+      admin_receive_payment: {
+        Args: { p_payment_id: string }
+        Returns: boolean
+      }
       admin_reject_payment: {
         Args: { p_payment_id: string; p_reason?: string }
         Returns: boolean
