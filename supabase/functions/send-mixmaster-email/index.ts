@@ -10,6 +10,7 @@ interface EmailRequest {
   client_name: string;
   transfer_link: string;
   service_name: string;
+  notes?: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -31,7 +32,7 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    const { client_name, transfer_link, service_name }: EmailRequest = await req.json();
+    const { client_name, transfer_link, service_name, notes }: EmailRequest = await req.json();
 
     const resend = new Resend(resendApiKey);
 
@@ -42,6 +43,7 @@ const handler = async (req: Request): Promise<Response> => {
       <p><strong>Serviço:</strong> ${service_name}</p>
       <p><strong>Link de Transferência:</strong></p>
       <p><a href="${transfer_link}" target="_blank">${transfer_link}</a></p>
+      ${notes ? `<p><strong>Notas do Projeto:</strong></p><p>${notes}</p>` : ''}
       <hr />
       <p><small>Email enviado automaticamente pelo sistema 7T7Studios</small></p>
     `;
