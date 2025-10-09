@@ -7,6 +7,8 @@ const Home = () => {
   const navigate = useNavigate();
   const { subscription } = useAuth();
   
+  // Trigger fresh rebuild
+  
   const services = [{
     title: 'Reservar Sessão',
     description: 'Agenda a tua sessão de estúdio',
