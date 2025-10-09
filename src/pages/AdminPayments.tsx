@@ -115,36 +115,58 @@ const AdminPayments = () => {
   const handleUpdateStatus = async (id: string, newStatus: 'approved' | 'rejected', request: PaymentRequest) => {
     try {
       if (newStatus === 'approved') {
-        const { error } = await supabase.rpc('admin_approve_payment', {
+        console.log('Approving payment:', id);
+        const { data, error } = await supabase.rpc('admin_approve_payment', {
           p_payment_id: id
         });
 
-        if (error) throw error;
+        if (error) {
+          console.error('Error approving payment:', error);
+          throw error;
+        }
 
+        console.log('Payment approved successfully:', data);
         toast({
           title: 'Reserva Aprovada',
-          description: 'A reserva foi aprovada e confirmada com sucesso.',
+          description: 'A reserva foi aprovada e confirmada com sucesso. Email enviado para o admin.',
         });
       } else {
+        console.log('Rejecting payment:', id);
         const { error } = await supabase.rpc('admin_reject_payment', {
           p_payment_id: id,
           p_reason: 'Pagamento recusado pelo administrador'
         });
 
-        if (error) throw error;
+        if (error) {
+          console.error('Error rejecting payment:', error);
+          throw error;
+        }
 
+        console.log('Payment rejected successfully');
         toast({
           title: 'Reserva Rejeitada',
           description: 'A reserva foi rejeitada.',
         });
       }
 
-      loadPaymentRequests();
+      await loadPaymentRequests();
     } catch (error: any) {
       console.error('Error updating payment status:', error);
+      
+      // Extract more specific error message
+      let errorMessage = 'Não foi possível atualizar o status do pagamento';
+      
+      if (error.message) {
+        errorMessage = error.message;
+      } else if (error.details) {
+        errorMessage = error.details;
+      } else if (error.hint) {
+        errorMessage = error.hint;
+      }
+      
       toast({
-        title: 'Erro',
-        description: error.message || 'Não foi possível atualizar o status do pagamento',
+        title: 'Erro ao processar',
+        description: errorMessage,
         variant: 'destructive',
       });
     }
