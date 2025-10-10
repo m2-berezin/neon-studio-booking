@@ -124,7 +124,7 @@ const AdminPayments = () => {
         console.log('Payment approved successfully:', data);
         toast({
           title: 'Reserva Aprovada',
-          description: 'A reserva foi aprovada e confirmada com sucesso. Email enviado para o admin.',
+          description: 'A reserva foi aprovada e confirmada com sucesso.',
         });
       } else {
         console.log('Rejecting payment:', id);
@@ -168,45 +168,6 @@ const AdminPayments = () => {
     }
   };
 
-  const handleReceivePayment = async (id: string) => {
-    try {
-      console.log('Receiving payment:', id);
-      const { error } = await supabase.rpc('admin_receive_payment' as any, {
-        p_payment_id: id
-      });
-
-      if (error) {
-        console.error('Error receiving payment:', error);
-        throw error;
-      }
-
-      console.log('Payment received successfully');
-      toast({
-        title: 'Pagamento Recebido',
-        description: 'Pagamento recebido, email enviado.',
-      });
-
-      await loadPaymentRequests();
-    } catch (error: any) {
-      console.error('Error receiving payment:', error);
-      
-      let errorMessage = 'Não foi possível processar o recebimento';
-      
-      if (error.message) {
-        errorMessage = error.message;
-      } else if (error.details) {
-        errorMessage = error.details;
-      } else if (error.hint) {
-        errorMessage = error.hint;
-      }
-      
-      toast({
-        title: 'Erro ao processar',
-        description: errorMessage,
-        variant: 'destructive',
-      });
-    }
-  };
 
   if (!isAdmin) {
     return (
@@ -311,16 +272,6 @@ const AdminPayments = () => {
                   </div>
                   
                   <div className="flex gap-2 ml-4">
-                    {request.reservations?.service_name_snapshot?.toLowerCase().includes('mix') && (
-                      <Button
-                        size="sm"
-                        className="bg-blue-600 hover:bg-blue-700"
-                        onClick={() => handleReceivePayment(request.id)}
-                      >
-                        <DollarSign className="w-4 h-4 mr-1" />
-                        Receber
-                      </Button>
-                    )}
                     <Button
                       size="sm"
                       className="bg-green-600 hover:bg-green-700"
