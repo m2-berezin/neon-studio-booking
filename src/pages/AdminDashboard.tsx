@@ -379,6 +379,18 @@ const AdminDashboard = () => {
             loadDashboardData();
           }
         )
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'payments'
+          },
+          () => {
+            console.log('Novo pagamento aprovado, atualizando receita mensal');
+            loadDashboardData();
+          }
+        )
         .subscribe();
 
       const messagesChannel = supabase
