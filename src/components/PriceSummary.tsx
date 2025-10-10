@@ -72,6 +72,7 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
         .from('vouchers')
         .select('*')
         .eq('client_id', user.id)
+        .eq('is_used', false)
         .gte('expires_at', new Date().toISOString());
       
       if (error) throw error;
