@@ -100,11 +100,12 @@ const Payment = () => {
           setSubscriptionDiscount(discount);
         }
         
-        // Load voucher discount
+        // Load voucher discount (only unused and not expired)
         const { data: voucherData, error } = await supabase
           .from('vouchers')
           .select('amount_eur')
           .eq('client_id', user.id)
+          .eq('is_used', false)
           .gte('expires_at', new Date().toISOString())
           .limit(1)
           .maybeSingle();

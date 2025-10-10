@@ -994,6 +994,7 @@ export type Database = {
           created_at: string
           expires_at: string | null
           id: string
+          is_used: boolean
         }
         Insert: {
           amount_eur: number
@@ -1002,6 +1003,7 @@ export type Database = {
           created_at?: string
           expires_at?: string | null
           id?: string
+          is_used?: boolean
         }
         Update: {
           amount_eur?: number
@@ -1010,6 +1012,7 @@ export type Database = {
           created_at?: string
           expires_at?: string | null
           id?: string
+          is_used?: boolean
         }
         Relationships: []
       }

@@ -44,7 +44,7 @@ const MixMaster = () => {
 
   const hasSubscription = subscription?.is_active;
 
-  // Load user's available vouchers
+  // Load user's available vouchers (not used and not expired)
   useEffect(() => {
     const loadVouchers = async () => {
       if (!user) return;
@@ -53,6 +53,7 @@ const MixMaster = () => {
           .from('vouchers')
           .select('*')
           .eq('client_id', user.id)
+          .eq('is_used', false)
           .gte('expires_at', new Date().toISOString());
         
         if (error) throw error;
