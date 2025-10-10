@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_days_off: {
+        Row: {
+          created_at: string
+          end_date: string
+          id: string
+          is_active: boolean
+          reason: string | null
+          start_date: string
+        }
+        Insert: {
+          created_at?: string
+          end_date: string
+          id?: string
+          is_active?: boolean
+          reason?: string | null
+          start_date: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string
+          id?: string
+          is_active?: boolean
+          reason?: string | null
+          start_date?: string
+        }
+        Relationships: []
+      }
       availability_rules: {
         Row: {
           created_at: string
@@ -1071,6 +1098,10 @@ export type Database = {
         Args: { p_payment_id: string }
         Returns: string
       }
+      admin_mark_day_off: {
+        Args: { p_end_date: string; p_reason?: string; p_start_date: string }
+        Returns: string
+      }
       admin_receive_payment: {
         Args: { p_payment_id: string }
         Returns: boolean
@@ -1081,6 +1112,10 @@ export type Database = {
       }
       admin_renew_subscription: {
         Args: { p_action: string; p_subscription_id: string }
+        Returns: boolean
+      }
+      admin_revert_day_off: {
+        Args: { p_id: string }
         Returns: boolean
       }
       apply_offer: {
@@ -1377,6 +1412,24 @@ export type Database = {
       generate_referral_code: {
         Args: { p_user_id: string }
         Returns: string
+      }
+      get_active_bookings_count: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      get_active_reservations: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          booking_id: string
+          client_name: string
+          end_time: string
+          service_name: string
+          start_time: string
+        }[]
+      }
+      get_active_users_count: {
+        Args: Record<PropertyKey, never>
+        Returns: number
       }
       get_admin_subscriptions: {
         Args: Record<PropertyKey, never>
