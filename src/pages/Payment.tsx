@@ -170,7 +170,8 @@ const Payment = () => {
 
         // Create payment request for subscription using subscribe_request RPC
         const planType = plan === 'plan-s' ? 'S' : 'X';
-        const finalPrice = Math.max(0, parseFloat(price) - subscriptionDiscount - voucherDiscount);
+        // Note: voucher discount is applied automatically by the database trigger
+        const finalPrice = Math.max(0, parseFloat(price) - subscriptionDiscount);
         
         // @ts-ignore - RPC exists in DB but types not yet regenerated
         const { data: requestId, error: requestError } = await supabase.rpc('subscribe_request', {
@@ -268,7 +269,8 @@ const Payment = () => {
         }
 
         // Create payment request with transfer_link
-        const finalPrice = Math.max(0, parseFloat(price) - subscriptionDiscount - voucherDiscount);
+        // Note: voucher discount is applied automatically by the database trigger
+        const finalPrice = Math.max(0, parseFloat(price) - subscriptionDiscount);
         
         const { error: paymentError } = await supabase
           .from('payment_requests')
@@ -355,7 +357,8 @@ const Payment = () => {
       }
 
       // 2. Call RPC to create payment request
-      const finalPrice = Math.max(0, parseFloat(price) - subscriptionDiscount - voucherDiscount);
+      // Note: voucher discount is applied automatically by the database trigger
+      const finalPrice = Math.max(0, parseFloat(price) - subscriptionDiscount);
       
       const {
         data: paymentId,
@@ -487,20 +490,20 @@ const Payment = () => {
                 )}
                 
                 {hasVoucher && voucherDiscount > 0 && (
-                  <div className="flex items-center justify-between text-sm text-green-600">
+                  <div className="flex items-center justify-between text-sm text-blue-600">
                     <span className="flex items-center gap-1">
                       <Tag className="h-4 w-4" />
-                      Desconto 15€ Voucher:
+                      Voucher 15€ (aplicado automaticamente):
                     </span>
-                    <span>-€{voucherDiscount.toFixed(2)}</span>
+                    <span className="text-xs">Será descontado</span>
                   </div>
                 )}
                 
                 {(subscriptionDiscount > 0 || hasVoucher) && <Separator />}
                 
                 <div className="flex items-center justify-between text-xl font-bold">
-                  <span>Total:</span>
-                  <span className="text-primary">€{Math.max(0, parseFloat(price || '0') - subscriptionDiscount - voucherDiscount).toFixed(2)}</span>
+                  <span>Total a Pagar:</span>
+                  <span className="text-primary">€{Math.max(0, parseFloat(price || '0') - subscriptionDiscount).toFixed(2)}</span>
                 </div>
               </>
             )}
