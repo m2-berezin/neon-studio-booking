@@ -1451,6 +1451,20 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: number
       }
+      get_mixmaster_projects: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          amount_eur: number
+          client_id: string
+          client_name: string
+          created_at: string
+          id: string
+          note: string
+          service_name: string
+          status: string
+          transfer_link: string
+        }[]
+      }
       get_monthly_revenue: {
         Args: Record<PropertyKey, never>
         Returns: number

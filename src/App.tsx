@@ -24,6 +24,7 @@ import AdminBookings from "@/pages/AdminBookings";
 import AdminDashboard from "@/pages/AdminDashboard";
 import AdminMessages from "@/pages/AdminMessages";
 import AdminSubscriptions from "@/pages/AdminSubscriptions";
+import AdminProjects from "@/pages/AdminProjects";
 import StudioInfo from "@/pages/StudioInfo";
 import MixMaster from "./pages/MixMaster";
 import Payment from "./pages/Payment";
@@ -81,6 +82,7 @@ const App = () => {
             <Route path="/admin/payments" element={<AdminPayments />} />
             <Route path="/admin/messages" element={<AdminMessages />} />
             <Route path="/admin/subscriptions" element={<AdminSubscriptions />} />
+            <Route path="/admin/projects" element={<AdminProjects />} />
                 
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />

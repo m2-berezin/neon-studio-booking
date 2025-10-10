@@ -19,7 +19,8 @@ import {
   Bell,
   CreditCard,
   MessageSquare,
-  Send
+  Send,
+  FolderOpen
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -580,7 +581,7 @@ const AdminDashboard = () => {
           <CardTitle>Ações Rápidas</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Button
               variant="outline"
               className="h-20 flex flex-col gap-2 hover:bg-primary/10"
@@ -604,6 +605,14 @@ const AdminDashboard = () => {
             >
               <CreditCard className="h-6 w-6" />
               <span className="text-sm font-medium">Subscrições</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="h-20 flex flex-col gap-2 hover:bg-primary/10"
+              onClick={() => navigate('/admin/projects')}
+            >
+              <FolderOpen className="h-6 w-6" />
+              <span className="text-sm font-medium">Projetos</span>
             </Button>
           </div>
 
