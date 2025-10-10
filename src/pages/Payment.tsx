@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { useMessaging } from '@/hooks/useMessaging';
 import { ArrowLeft, CheckCircle, Copy, Smartphone, Building2, Tag } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 const Payment = () => {
@@ -18,6 +19,7 @@ const Payment = () => {
   const {
     user
   } = useAuth();
+  const { sendMessage, ADMIN_ID } = useMessaging();
   const [loading, setLoading] = useState(false);
   const [voucherDiscount, setVoucherDiscount] = useState(0);
   const [hasVoucher, setHasVoucher] = useState(false);
@@ -319,6 +321,22 @@ const Payment = () => {
           setLoading(false);
           return;
         }
+
+        // Send message to admin with transfer link and notes
+        let messageContent = `🎵 Novo pedido de Mix & Master\n\n`;
+        messageContent += `Cliente: ${clientName}\n`;
+        messageContent += `Opção: ${optionTitle}\n`;
+        messageContent += `Valor: €${finalPrice.toFixed(2)}\n\n`;
+        
+        if (transferLink) {
+          messageContent += `📎 Link de Transferência:\n${transferLink}\n\n`;
+        }
+        
+        if (notes) {
+          messageContent += `📝 Notas do Projeto:\n${notes}`;
+        }
+        
+        await sendMessage(ADMIN_ID, messageContent);
 
         toast({
           title: 'Pedido Enviado ✅',
