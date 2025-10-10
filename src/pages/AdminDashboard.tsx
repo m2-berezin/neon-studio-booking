@@ -99,11 +99,15 @@ const AdminDashboard = () => {
         profiles: { full_name: 'Cliente' }
       }));
 
-      // Load active clients (profiles with role 'client')
-      const { count: clientsCount } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true })
-        .eq('role', 'client');
+      // Load active clients using RPC function
+      const { data: activeUsersCount, error: countError } = await supabase
+        .rpc('get_active_users_count' as any);
+
+      if (countError) {
+        console.error('Error loading active users count:', countError);
+      }
+
+      const clientsCount = (activeUsersCount as number) || 0;
 
       // Calculate monthly revenue from approved payments
       const startOfMonth = new Date();
