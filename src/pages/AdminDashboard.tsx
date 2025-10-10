@@ -24,6 +24,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { toast as sonnerToast } from 'sonner';
+import { DaysOffManager } from '@/components/admin/DaysOffManager';
 
 interface DashboardStats {
   totalBookings: number;
@@ -448,7 +449,7 @@ const AdminDashboard = () => {
           markNotificationsRead();
         }
       }}>
-        <TabsList className="grid w-full grid-cols-2 max-w-md">
+        <TabsList className="grid w-full grid-cols-3 max-w-2xl">
           <TabsTrigger value="overview">Visão Geral</TabsTrigger>
           <TabsTrigger value="messages" className="relative">
             Mensagens
@@ -458,6 +459,7 @@ const AdminDashboard = () => {
               </Badge>
             )}
           </TabsTrigger>
+          <TabsTrigger value="daysoff">Days Off</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6 mt-6">
@@ -692,6 +694,10 @@ const AdminDashboard = () => {
               )}
             </Card>
           </div>
+        </TabsContent>
+
+        <TabsContent value="daysoff" className="space-y-6 mt-6">
+          <DaysOffManager />
         </TabsContent>
       </Tabs>
     </div>
