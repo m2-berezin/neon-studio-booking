@@ -119,18 +119,15 @@ const AdminDashboard = () => {
 
       const clientsCount = (activeUsersCount as number) || 0;
 
-      // Calculate monthly revenue from approved payments
-      const startOfMonth = new Date();
-      startOfMonth.setDate(1);
-      startOfMonth.setHours(0, 0, 0, 0);
+      // Load monthly revenue using RPC function
+      const { data: monthlyRevenueData, error: revenueError } = await supabase
+        .rpc('get_monthly_revenue' as any);
 
-      const { data: approvedPayments } = await supabase
-        .from('payment_requests')
-        .select('amount_eur')
-        .eq('status', 'approved')
-        .gte('created_at', startOfMonth.toISOString());
+      if (revenueError) {
+        console.error('Error loading monthly revenue:', revenueError);
+      }
 
-      const monthlyRevenue = approvedPayments?.reduce((sum, p) => sum + Number(p.amount_eur), 0) || 0;
+      const monthlyRevenue = Number(monthlyRevenueData) || 0;
 
       setStats({
         totalBookings: bookingsCount || 0,

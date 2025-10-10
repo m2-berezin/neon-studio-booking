@@ -1451,6 +1451,10 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: number
       }
+      get_monthly_revenue: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       get_subscription_renewal_date: {
         Args: { p_user_id: string }
         Returns: string
