@@ -36,6 +36,7 @@ const Payment = () => {
   const serviceId = searchParams.get('service_id');
   const plan = searchParams.get('plan'); // For subscriptions
   const transferLink = searchParams.get('transferLink'); // For mixmaster
+  const voucherId = searchParams.get('voucherId'); // Voucher ID if applied
 
   // Determine service title based on service and option
   let serviceTitle = '';
@@ -268,7 +269,7 @@ const Payment = () => {
           return;
         }
 
-        // Create payment request with transfer_link
+        // Create payment request with transfer_link and voucher_id
         const finalPrice = Math.max(0, parseFloat(price) - subscriptionDiscount - voucherDiscount);
         
         const { error: paymentError } = await supabase
@@ -281,7 +282,8 @@ const Payment = () => {
             type: 'reservation',
             status: 'pending',
             transfer_link: transferLink || null,
-            note: `Mix&Master - ${clientName}`
+            note: `Mix&Master - ${clientName}`,
+            voucher_id: voucherId || null
           });
 
         if (paymentError) {

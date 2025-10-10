@@ -385,6 +385,7 @@ export type Database = {
           type: string | null
           updated_at: string
           user_id: string
+          voucher_id: string | null
         }
         Insert: {
           amount_eur: number
@@ -404,6 +405,7 @@ export type Database = {
           type?: string | null
           updated_at?: string
           user_id: string
+          voucher_id?: string | null
         }
         Update: {
           amount_eur?: number
@@ -423,6 +425,7 @@ export type Database = {
           type?: string | null
           updated_at?: string
           user_id?: string
+          voucher_id?: string | null
         }
         Relationships: [
           {
@@ -437,6 +440,13 @@ export type Database = {
             columns: ["subscription_id"]
             isOneToOne: false
             referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_requests_voucher_id_fkey"
+            columns: ["voucher_id"]
+            isOneToOne: false
+            referencedRelation: "vouchers"
             referencedColumns: ["id"]
           },
         ]
