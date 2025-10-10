@@ -23,6 +23,7 @@ const Payment = () => {
   const [hasVoucher, setHasVoucher] = useState(false);
   const [subscriptionDiscount, setSubscriptionDiscount] = useState(0);
   const [subscriptionDiscountPercent, setSubscriptionDiscountPercent] = useState(0);
+  const [activeVoucherId, setActiveVoucherId] = useState<string | null>(null);
 
   // Get payment details from URL params
   const service = searchParams.get('service');
@@ -102,18 +103,36 @@ const Payment = () => {
         }
         
         // Load voucher discount (only unused and not expired)
-        const { data: voucherData, error } = await supabase
-          .from('vouchers')
-          .select('amount_eur')
-          .eq('client_id', user.id)
-          .eq('is_used', false)
-          .gte('expires_at', new Date().toISOString())
-          .limit(1)
-          .maybeSingle();
-        
-        if (voucherData && !error) {
-          setVoucherDiscount(voucherData.amount_eur);
-          setHasVoucher(true);
+        // Use voucherId from params if available, otherwise load from DB
+        if (voucherId) {
+          const { data: voucherData, error } = await supabase
+            .from('vouchers')
+            .select('id, amount_eur, is_used')
+            .eq('id', voucherId)
+            .eq('is_used', false)
+            .gte('expires_at', new Date().toISOString())
+            .maybeSingle();
+          
+          if (voucherData && !error) {
+            setVoucherDiscount(voucherData.amount_eur);
+            setActiveVoucherId(voucherData.id);
+            setHasVoucher(true);
+          }
+        } else {
+          const { data: voucherData, error } = await supabase
+            .from('vouchers')
+            .select('id, amount_eur')
+            .eq('client_id', user.id)
+            .eq('is_used', false)
+            .gte('expires_at', new Date().toISOString())
+            .limit(1)
+            .maybeSingle();
+          
+          if (voucherData && !error) {
+            setVoucherDiscount(voucherData.amount_eur);
+            setActiveVoucherId(voucherData.id);
+            setHasVoucher(true);
+          }
         }
       } catch (error) {
         console.error('Error loading discounts:', error);
@@ -283,7 +302,7 @@ const Payment = () => {
             status: 'pending',
             transfer_link: transferLink || null,
             note: `Mix&Master - ${clientName}`,
-            voucher_id: voucherId || null
+            voucher_id: activeVoucherId
           });
 
         if (paymentError) {
@@ -368,7 +387,7 @@ const Payment = () => {
         p_amount_eur: finalPrice,
         p_currency: 'EUR',
         p_note: notes || `${serviceTitle} - ${optionTitle}`,
-        p_voucher_id: voucherId || null
+        p_voucher_id: activeVoucherId
       });
       if (paymentError) {
         console.error('Payment error:', paymentError);
