@@ -82,8 +82,15 @@ const AdminDashboard = () => {
 
   const loadDashboardData = async () => {
     try {
-      // Bookings table exists - load count
-      const bookingsCount = 0; // Bookings disabled for now
+      // Load active bookings using RPC function
+      const { data: activeBookingsCount, error: bookingsError } = await supabase
+        .rpc('get_active_bookings_count' as any);
+
+      if (bookingsError) {
+        console.error('Error loading active bookings count:', bookingsError);
+      }
+
+      const bookingsCount = (activeBookingsCount as number) || 0;
 
       // Load pending payments - no relation with profiles exists
       const { data: pendingPaymentsData, count: pendingCount } = await supabase
