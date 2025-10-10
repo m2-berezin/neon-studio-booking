@@ -33,6 +33,7 @@ interface PriceSummaryProps {
   className?: string;
   onPriceChange?: (finalPrice: number, breakdown: PriceBreakdown) => void;
   showFriendCode?: boolean;
+  excludeVouchers?: boolean;
 }
 
 interface LineItem {
@@ -52,7 +53,7 @@ interface PriceBreakdown {
   appliedVoucher?: Voucher;
 }
 
-export const PriceSummary = ({ services, bookingDate, className, onPriceChange, showFriendCode = true }: PriceSummaryProps) => {
+export const PriceSummary = ({ services, bookingDate, className, onPriceChange, showFriendCode = true, excludeVouchers = false }: PriceSummaryProps) => {
   const { user, subscription, subscriptionDiscountPercent } = useAuth();
   const { toast } = useToast();
   const { appliedFriendCode, hasFriendCodeDiscount } = useFriendCodeHook();
@@ -66,7 +67,7 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
 
   // Load user's available vouchers
   const loadVouchers = async () => {
-    if (!user) return;
+    if (!user || excludeVouchers) return;
     try {
       const { data, error } = await supabase
         .from('vouchers')
@@ -101,7 +102,7 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
 
   useEffect(() => {
     loadVouchers();
-  }, [user]);
+  }, [user, excludeVouchers]);
 
   // Calculate line items from services
   const lineItems: LineItem[] = services.map(service => ({
@@ -179,7 +180,7 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
   };
 
   const rewardDiscount = getRewardDiscount();
-  const voucherDiscount = appliedVoucher ? appliedVoucher.amount : 0;
+  const voucherDiscount = excludeVouchers ? 0 : (appliedVoucher ? appliedVoucher.amount : 0);
   
   // Calculate final price
   const priceAfterSubscription = subtotal - subscriptionDiscount;
@@ -272,7 +273,7 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
         )}
 
         {/* Available Vouchers - No Code Input */}
-        {!appliedReward && (
+        {!appliedReward && !excludeVouchers && (
           <div className="space-y-2">
             {availableVouchers.length > 0 && (
               <div className="space-y-2">

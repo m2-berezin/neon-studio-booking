@@ -102,36 +102,38 @@ const Payment = () => {
           setSubscriptionDiscount(discount);
         }
         
-        // Load voucher discount (only unused and not expired)
-        // Use voucherId from params if available, otherwise load from DB
-        if (voucherId) {
-          const { data: voucherData, error } = await supabase
-            .from('vouchers')
-            .select('id, amount_eur, is_used')
-            .eq('id', voucherId)
-            .eq('is_used', false)
-            .gte('expires_at', new Date().toISOString())
-            .maybeSingle();
-          
-          if (voucherData && !error) {
-            setVoucherDiscount(voucherData.amount_eur);
-            setActiveVoucherId(voucherData.id);
-            setHasVoucher(true);
-          }
-        } else {
-          const { data: voucherData, error } = await supabase
-            .from('vouchers')
-            .select('id, amount_eur')
-            .eq('client_id', user.id)
-            .eq('is_used', false)
-            .gte('expires_at', new Date().toISOString())
-            .limit(1)
-            .maybeSingle();
-          
-          if (voucherData && !error) {
-            setVoucherDiscount(voucherData.amount_eur);
-            setActiveVoucherId(voucherData.id);
-            setHasVoucher(true);
+        // Load voucher discount ONLY for non-subscription services
+        if (service !== 'subscription') {
+          // Use voucherId from params if available, otherwise load from DB
+          if (voucherId) {
+            const { data: voucherData, error } = await supabase
+              .from('vouchers')
+              .select('id, amount_eur, is_used')
+              .eq('id', voucherId)
+              .eq('is_used', false)
+              .gte('expires_at', new Date().toISOString())
+              .maybeSingle();
+            
+            if (voucherData && !error) {
+              setVoucherDiscount(voucherData.amount_eur);
+              setActiveVoucherId(voucherData.id);
+              setHasVoucher(true);
+            }
+          } else {
+            const { data: voucherData, error } = await supabase
+              .from('vouchers')
+              .select('id, amount_eur')
+              .eq('client_id', user.id)
+              .eq('is_used', false)
+              .gte('expires_at', new Date().toISOString())
+              .limit(1)
+              .maybeSingle();
+            
+            if (voucherData && !error) {
+              setVoucherDiscount(voucherData.amount_eur);
+              setActiveVoucherId(voucherData.id);
+              setHasVoucher(true);
+            }
           }
         }
       } catch (error) {
@@ -140,7 +142,7 @@ const Payment = () => {
     };
     
     loadDiscounts();
-  }, [user, price]);
+  }, [user, price, service]);
   
   useEffect(() => {
     // For subscriptions, we don't need 'option', just 'plan'
@@ -191,7 +193,8 @@ const Payment = () => {
 
         // Create payment request for subscription using subscribe_request RPC
         const planType = plan === 'plan-s' ? 'S' : 'X';
-        const finalPrice = Math.max(0, parseFloat(price) - subscriptionDiscount - voucherDiscount);
+        // Subscriptions don't use vouchers
+        const finalPrice = parseFloat(price);
         
         // @ts-ignore - RPC exists in DB but types not yet regenerated
         const { data: requestId, error: requestError } = await supabase.rpc('subscribe_request', {
