@@ -306,7 +306,7 @@ const Payment = () => {
             type: 'reservation',
             status: 'pending',
             transfer_link: transferLink || null,
-            note: `Mix&Master - ${clientName}`,
+            note: notes || null,
             voucher_id: activeVoucherId
           });
 
