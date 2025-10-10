@@ -21,6 +21,8 @@ const Payment = () => {
   const [loading, setLoading] = useState(false);
   const [voucherDiscount, setVoucherDiscount] = useState(0);
   const [hasVoucher, setHasVoucher] = useState(false);
+  const [subscriptionDiscount, setSubscriptionDiscount] = useState(0);
+  const [subscriptionDiscountPercent, setSubscriptionDiscountPercent] = useState(0);
 
   // Get payment details from URL params
   const service = searchParams.get('service');
@@ -62,13 +64,44 @@ const Payment = () => {
   const IBAN = 'PT50 0193 0000 1050 4647 3479 5';
   const REVOLUT_REVTAG = '@Ghostwayne';
   
-  // Load voucher discount on mount
+  // Load subscription and voucher discounts on mount
   useEffect(() => {
-    const loadVoucher = async () => {
-      if (!user) return;
+    const loadDiscounts = async () => {
+      if (!user || !price) return;
       
       try {
-        const { data, error } = await supabase
+        // Load subscription discount
+        const { data: subscriptionData } = await supabase
+          .from('subscriptions')
+          .select('id, plan_type, is_active, start_date')
+          .eq('user_id', user.id)
+          .eq('is_active', true)
+          .maybeSingle();
+        
+        if (subscriptionData) {
+          // Calculate month number since subscription started
+          const startDate = new Date(subscriptionData.start_date);
+          const now = new Date();
+          const monthsSinceStart = Math.floor((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 30)) + 1;
+          
+          // Get discount percentage for current month
+          const { data: discountData } = await supabase
+            .from('plan_discounts')
+            .select('discount_pct')
+            .eq('subscription_id', subscriptionData.id)
+            .eq('month_num', monthsSinceStart)
+            .maybeSingle();
+          
+          const discountPercent = discountData?.discount_pct || 0;
+          const basePrice = parseFloat(price);
+          const discount = (basePrice * discountPercent) / 100;
+          
+          setSubscriptionDiscountPercent(discountPercent);
+          setSubscriptionDiscount(discount);
+        }
+        
+        // Load voucher discount
+        const { data: voucherData, error } = await supabase
           .from('vouchers')
           .select('amount_eur')
           .eq('client_id', user.id)
@@ -76,17 +109,17 @@ const Payment = () => {
           .limit(1)
           .maybeSingle();
         
-        if (data && !error) {
-          setVoucherDiscount(data.amount_eur);
+        if (voucherData && !error) {
+          setVoucherDiscount(voucherData.amount_eur);
           setHasVoucher(true);
         }
       } catch (error) {
-        console.error('Error loading voucher:', error);
+        console.error('Error loading discounts:', error);
       }
     };
     
-    loadVoucher();
-  }, [user]);
+    loadDiscounts();
+  }, [user, price]);
   
   useEffect(() => {
     // For subscriptions, we don't need 'option', just 'plan'
@@ -137,7 +170,7 @@ const Payment = () => {
 
         // Create payment request for subscription using subscribe_request RPC
         const planType = plan === 'plan-s' ? 'S' : 'X';
-        const finalPrice = Math.max(0, parseFloat(price) - voucherDiscount);
+        const finalPrice = Math.max(0, parseFloat(price) - subscriptionDiscount - voucherDiscount);
         
         // @ts-ignore - RPC exists in DB but types not yet regenerated
         const { data: requestId, error: requestError } = await supabase.rpc('subscribe_request', {
@@ -235,7 +268,7 @@ const Payment = () => {
         }
 
         // Create payment request with transfer_link
-        const finalPrice = Math.max(0, parseFloat(price) - voucherDiscount);
+        const finalPrice = Math.max(0, parseFloat(price) - subscriptionDiscount - voucherDiscount);
         
         const { error: paymentError } = await supabase
           .from('payment_requests')
@@ -322,7 +355,7 @@ const Payment = () => {
       }
 
       // 2. Call RPC to create payment request
-      const finalPrice = Math.max(0, parseFloat(price) - voucherDiscount);
+      const finalPrice = Math.max(0, parseFloat(price) - subscriptionDiscount - voucherDiscount);
       
       const {
         data: paymentId,
@@ -439,26 +472,35 @@ const Payment = () => {
               <>
                 <Separator />
                 
-                {hasVoucher && voucherDiscount > 0 && (
-                  <>
-                    <div className="flex items-center justify-between text-sm">
-                      <span>Subtotal:</span>
-                      <span>€{price}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm text-green-600">
-                      <span className="flex items-center gap-1">
-                        <Tag className="h-4 w-4" />
-                        Desconto 15€ Voucher:
-                      </span>
-                      <span>-€{voucherDiscount.toFixed(2)}</span>
-                    </div>
-                    <Separator />
-                  </>
+                {(subscriptionDiscount > 0 || hasVoucher) && (
+                  <div className="flex items-center justify-between text-sm">
+                    <span>Subtotal:</span>
+                    <span>€{price}</span>
+                  </div>
                 )}
+                
+                {subscriptionDiscount > 0 && (
+                  <div className="flex items-center justify-between text-sm text-green-600">
+                    <span>Desconto de Subscrição ({subscriptionDiscountPercent}%):</span>
+                    <span>-€{subscriptionDiscount.toFixed(2)}</span>
+                  </div>
+                )}
+                
+                {hasVoucher && voucherDiscount > 0 && (
+                  <div className="flex items-center justify-between text-sm text-green-600">
+                    <span className="flex items-center gap-1">
+                      <Tag className="h-4 w-4" />
+                      Desconto 15€ Voucher:
+                    </span>
+                    <span>-€{voucherDiscount.toFixed(2)}</span>
+                  </div>
+                )}
+                
+                {(subscriptionDiscount > 0 || hasVoucher) && <Separator />}
                 
                 <div className="flex items-center justify-between text-xl font-bold">
                   <span>Total:</span>
-                  <span className="text-primary">€{Math.max(0, parseFloat(price || '0') - voucherDiscount).toFixed(2)}</span>
+                  <span className="text-primary">€{Math.max(0, parseFloat(price || '0') - subscriptionDiscount - voucherDiscount).toFixed(2)}</span>
                 </div>
               </>
             )}
