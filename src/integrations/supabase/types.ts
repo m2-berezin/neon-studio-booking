@@ -1185,6 +1185,10 @@ export type Database = {
           | { p_starts_at: string; p_user_id: string }
         Returns: string
       }
+      delete_mixmaster_project: {
+        Args: { p_payment_id: string }
+        Returns: boolean
+      }
       gbt_bit_compress: {
         Args: { "": unknown }
         Returns: unknown

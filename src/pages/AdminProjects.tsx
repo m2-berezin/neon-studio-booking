@@ -6,9 +6,19 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
-import { ArrowLeft, FileAudio, ExternalLink, StickyNote } from 'lucide-react';
+import { ArrowLeft, FileAudio, ExternalLink, StickyNote, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface MixMasterProject {
   id: string;
@@ -28,6 +38,8 @@ const AdminProjects = () => {
   const { toast } = useToast();
   const [projects, setProjects] = useState<MixMasterProject[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isAdmin()) {
@@ -83,11 +95,42 @@ const AdminProjects = () => {
     const statusConfig = {
       pending: { label: 'Pendente', variant: 'secondary' as const },
       confirmed: { label: 'Confirmado', variant: 'default' as const },
+      approved: { label: 'Aprovado', variant: 'default' as const },
       rejected: { label: 'Rejeitado', variant: 'destructive' as const },
     };
 
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.pending;
     return <Badge variant={config.variant}>{config.label}</Badge>;
+  };
+
+  const handleDeleteProject = async () => {
+    if (!projectToDelete) return;
+
+    try {
+      // @ts-ignore - RPC exists in DB
+      const { error } = await supabase.rpc('delete_mixmaster_project', {
+        p_payment_id: projectToDelete
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: 'Projeto Eliminado',
+        description: 'O projeto foi eliminado com sucesso.',
+      });
+
+      loadProjects();
+    } catch (error) {
+      console.error('Error deleting project:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível eliminar o projeto',
+        variant: 'destructive',
+      });
+    } finally {
+      setDeleteDialogOpen(false);
+      setProjectToDelete(null);
+    }
   };
 
   if (loading) {
@@ -141,6 +184,7 @@ const AdminProjects = () => {
                     <TableHead>Status</TableHead>
                     <TableHead>Link de Transferência</TableHead>
                     <TableHead>Notas</TableHead>
+                    <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -180,6 +224,18 @@ const AdminProjects = () => {
                           <span className="text-muted-foreground">Sem notas</span>
                         )}
                       </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            setProjectToDelete(project.id);
+                            setDeleteDialogOpen(true);
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -188,6 +244,23 @@ const AdminProjects = () => {
           )}
         </CardContent>
       </Card>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Eliminar Projeto?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tens a certeza que queres eliminar este projeto Mix & Master? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteProject} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
