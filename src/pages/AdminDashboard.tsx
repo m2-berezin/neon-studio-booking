@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
@@ -78,6 +79,8 @@ const AdminDashboard = () => {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState('');
   const [unreadCount, setUnreadCount] = useState(0);
+  const [activeReservations, setActiveReservations] = useState<any[]>([]);
+  const [showReservations, setShowReservations] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const loadDashboardData = async () => {
@@ -334,6 +337,27 @@ const AdminDashboard = () => {
     }
   };
 
+  const loadActiveReservations = async () => {
+    try {
+      const { data, error } = await supabase.rpc('get_active_reservations' as any);
+      
+      if (error) {
+        console.error('Error loading active reservations:', error);
+        toast({
+          title: 'Erro',
+          description: 'Não foi possível carregar as reservas ativas.',
+          variant: 'destructive',
+        });
+        return;
+      }
+      
+      setActiveReservations(data || []);
+      setShowReservations(true);
+    } catch (error) {
+      console.error('Error loading active reservations:', error);
+    }
+  };
+
   useEffect(() => {
     if (isAdmin()) {
       loadDashboardData();
@@ -547,7 +571,7 @@ const AdminDashboard = () => {
         <CardHeader>
           <CardTitle>Ações Rápidas</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Button
               variant="outline"
@@ -568,7 +592,7 @@ const AdminDashboard = () => {
             <Button
               variant="outline"
               className="h-20 flex flex-col gap-2 hover:bg-primary/10"
-              onClick={() => navigate('/admin/bookings')}
+              onClick={loadActiveReservations}
             >
               <Calendar className="h-6 w-6" />
               <span className="text-sm font-medium">Ver Reservas</span>
@@ -582,6 +606,63 @@ const AdminDashboard = () => {
               <span className="text-sm font-medium">Subscrições</span>
             </Button>
           </div>
+
+          {showReservations && activeReservations.length > 0 && (
+            <div className="border rounded-lg overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Cliente</TableHead>
+                    <TableHead>Serviço</TableHead>
+                    <TableHead>Início</TableHead>
+                    <TableHead>Fim</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {activeReservations.map((reservation) => {
+                    const clientId = reservation.booking_id?.split('-')[0] || '';
+                    const threadId = `${clientId}-6d9d1dc1-e16f-4f3d-a817-1591a1b27477`;
+                    
+                    return (
+                      <TableRow key={reservation.booking_id}>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <span>{reservation.client_name || 'Sem Nome'}</span>
+                            <button
+                              onClick={() => {
+                                navigate('/admin');
+                                setTimeout(() => {
+                                  document.querySelector('[value="messages"]')?.dispatchEvent(new Event('click', { bubbles: true }));
+                                }, 100);
+                              }}
+                              className="hover:opacity-70 transition-opacity text-lg"
+                              title="Ver mensagens"
+                            >
+                              💭
+                            </button>
+                          </div>
+                        </TableCell>
+                        <TableCell>{reservation.service_name}</TableCell>
+                        <TableCell>
+                          {format(new Date(reservation.start_time), 'dd/MM/yyyy HH:mm')}
+                        </TableCell>
+                        <TableCell>
+                          {format(new Date(reservation.end_time), 'HH:mm')}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+
+          {showReservations && activeReservations.length === 0 && (
+            <div className="text-center py-8 text-muted-foreground">
+              <Calendar className="h-12 w-12 mx-auto mb-2 opacity-50" />
+              <p>Sem reservas ativas no momento</p>
+            </div>
+          )}
         </CardContent>
       </Card>
         </TabsContent>
