@@ -9,7 +9,6 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import { useSubscriptions } from '@/hooks/useSubscriptions';
 import { supabase } from '@/integrations/supabase/client';
 import { 
   Upload, 
@@ -23,10 +22,16 @@ import {
   FileAudio
 } from 'lucide-react';
 
+interface Voucher {
+  id: string;
+  code: string;
+  amount_eur: number;
+  expires_at: string;
+}
+
 const MixMaster = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const { userSubscription } = useSubscriptions();
+  const { user, subscription } = useAuth();
   const { toast } = useToast();
   
   const [selectedOption, setSelectedOption] = useState<'1project' | '2projects' | null>(null);
@@ -34,22 +39,70 @@ const MixMaster = () => {
   const [transferLink, setTransferLink] = useState('');
   const [projectNotes, setProjectNotes] = useState('');
   const [files, setFiles] = useState<FileList | null>(null);
-  const [serviceId, setServiceId] = useState<string | null>(null);
+  const [availableVouchers, setAvailableVouchers] = useState<Voucher[]>([]);
+  const [selectedVoucher, setSelectedVoucher] = useState<Voucher | null>(null);
 
-  const hasSubscription = userSubscription?.active;
+  const hasSubscription = subscription?.is_active;
 
-  // Service ID is handled in the payment flow
+  // Load user's available vouchers
   useEffect(() => {
-    // Service ID fetch disabled - handled in backend
-  }, []);
+    const loadVouchers = async () => {
+      if (!user) return;
+      try {
+        const { data, error } = await supabase
+          .from('vouchers')
+          .select('*')
+          .eq('client_id', user.id)
+          .gte('expires_at', new Date().toISOString());
+        
+        if (error) throw error;
+        setAvailableVouchers(data || []);
+        
+        // Auto-apply first voucher
+        if (data && data.length > 0) {
+          setSelectedVoucher(data[0]);
+        }
+      } catch (error) {
+        console.error('Error loading vouchers:', error);
+      }
+    };
+    
+    loadVouchers();
+  }, [user]);
 
   // Check if it's first month of subscription (simplified check)
   const isFirstMonth = false; // TODO: Implement proper first month detection
   
   const getProjectPrice = () => {
-    if (!hasSubscription) return 40; // No subscription
-    if (isFirstMonth) return 36; // First month: 10% discount (40 * 0.9)
-    return 34; // Regular subscription: 15% discount
+    const basePrice = 40;
+    let finalPrice = basePrice;
+    
+    // Apply subscription discount
+    if (hasSubscription) {
+      if (isFirstMonth) {
+        finalPrice = basePrice * 0.9; // 10% discount
+      } else {
+        finalPrice = basePrice * 0.85; // 15% discount
+      }
+    }
+    
+    // Apply voucher discount
+    if (selectedVoucher) {
+      finalPrice = Math.max(0, finalPrice - selectedVoucher.amount_eur);
+    }
+    
+    return finalPrice;
+  };
+  
+  const getSubscriptionDiscount = () => {
+    if (!hasSubscription) return 0;
+    const basePrice = 40;
+    if (isFirstMonth) return basePrice * 0.1; // 10%
+    return basePrice * 0.15; // 15%
+  };
+  
+  const getVoucherDiscount = () => {
+    return selectedVoucher ? selectedVoucher.amount_eur : 0;
   };
 
   const pricingOptions = [
@@ -135,7 +188,9 @@ const MixMaster = () => {
       delivery: deliveryMethod,
       price: getSelectedPrice().toString(),
       notes: projectNotes,
-      transferLink: transferLink
+      transferLink: transferLink,
+      voucherId: selectedVoucher?.id || '',
+      voucherCode: selectedVoucher?.code || ''
     });
     
     navigate(`/payment?${queryParams.toString()}`);
@@ -318,6 +373,50 @@ const MixMaster = () => {
                 <Badge variant={hasSubscription ? "default" : "secondary"}>
                   {hasSubscription ? "Activa" : "Sem Subscrição"}
                 </Badge>
+              </div>
+              
+              {/* Vouchers */}
+              {availableVouchers.length > 0 && (
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Vales Disponíveis:</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {availableVouchers.map(voucher => (
+                      <Button
+                        key={voucher.id}
+                        variant={selectedVoucher?.id === voucher.id ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setSelectedVoucher(voucher)}
+                        className="text-xs"
+                      >
+                        {voucher.code} (€{voucher.amount_eur})
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              <Separator />
+              
+              {/* Price Breakdown */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span>Preço Base:</span>
+                  <span>€40</span>
+                </div>
+                
+                {getSubscriptionDiscount() > 0 && (
+                  <div className="flex items-center justify-between text-sm text-green-600">
+                    <span>Desconto Subscrição ({isFirstMonth ? '10' : '15'}%):</span>
+                    <span>-€{getSubscriptionDiscount().toFixed(2)}</span>
+                  </div>
+                )}
+                
+                {getVoucherDiscount() > 0 && (
+                  <div className="flex items-center justify-between text-sm text-green-600">
+                    <span>Desconto Voucher:</span>
+                    <span>-€{getVoucherDiscount().toFixed(2)}</span>
+                  </div>
+                )}
               </div>
               
               <Separator />
