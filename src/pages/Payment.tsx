@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { ArrowLeft, CheckCircle, Copy, Smartphone, Building2 } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Copy, Smartphone, Building2, Tag } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 const Payment = () => {
   const [searchParams] = useSearchParams();
@@ -19,6 +19,8 @@ const Payment = () => {
     user
   } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [voucherDiscount, setVoucherDiscount] = useState(0);
+  const [hasVoucher, setHasVoucher] = useState(false);
 
   // Get payment details from URL params
   const service = searchParams.get('service');
@@ -59,6 +61,33 @@ const Payment = () => {
   const MBWAY_PHONE = '934941263';
   const IBAN = 'PT50 0193 0000 1050 4647 3479 5';
   const REVOLUT_REVTAG = '@Ghostwayne';
+  
+  // Load voucher discount on mount
+  useEffect(() => {
+    const loadVoucher = async () => {
+      if (!user) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('vouchers')
+          .select('amount_eur')
+          .eq('client_id', user.id)
+          .gte('expires_at', new Date().toISOString())
+          .limit(1)
+          .maybeSingle();
+        
+        if (data && !error) {
+          setVoucherDiscount(data.amount_eur);
+          setHasVoucher(true);
+        }
+      } catch (error) {
+        console.error('Error loading voucher:', error);
+      }
+    };
+    
+    loadVoucher();
+  }, [user]);
+  
   useEffect(() => {
     // For subscriptions, we don't need 'option', just 'plan'
     const isSubscription = service === 'subscription';
@@ -108,11 +137,13 @@ const Payment = () => {
 
         // Create payment request for subscription using subscribe_request RPC
         const planType = plan === 'plan-s' ? 'S' : 'X';
+        const finalPrice = Math.max(0, parseFloat(price) - voucherDiscount);
+        
         // @ts-ignore - RPC exists in DB but types not yet regenerated
         const { data: requestId, error: requestError } = await supabase.rpc('subscribe_request', {
           p_user_id: user.id,
           p_plan_type: planType,
-          p_amount_eur: parseFloat(price)
+          p_amount_eur: finalPrice
         });
 
         if (requestError) {
@@ -204,12 +235,14 @@ const Payment = () => {
         }
 
         // Create payment request with transfer_link
+        const finalPrice = Math.max(0, parseFloat(price) - voucherDiscount);
+        
         const { error: paymentError } = await supabase
           .from('payment_requests')
           .insert({
             user_id: user.id,
             reservation_id: reservationData.id,
-            amount_eur: parseFloat(price),
+            amount_eur: finalPrice,
             currency: 'EUR',
             type: 'reservation',
             status: 'pending',
@@ -289,12 +322,14 @@ const Payment = () => {
       }
 
       // 2. Call RPC to create payment request
+      const finalPrice = Math.max(0, parseFloat(price) - voucherDiscount);
+      
       const {
         data: paymentId,
         error: paymentError
       } = await supabase.rpc('request_payment', {
         p_reservation_id: reservationData.id,
-        p_amount_eur: parseFloat(price),
+        p_amount_eur: finalPrice,
         p_currency: 'EUR',
         p_note: notes || `${serviceTitle} - ${optionTitle}`
       });
@@ -404,9 +439,26 @@ const Payment = () => {
               <>
                 <Separator />
                 
+                {hasVoucher && voucherDiscount > 0 && (
+                  <>
+                    <div className="flex items-center justify-between text-sm">
+                      <span>Subtotal:</span>
+                      <span>€{price}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm text-green-600">
+                      <span className="flex items-center gap-1">
+                        <Tag className="h-4 w-4" />
+                        Desconto 15€ Voucher:
+                      </span>
+                      <span>-€{voucherDiscount.toFixed(2)}</span>
+                    </div>
+                    <Separator />
+                  </>
+                )}
+                
                 <div className="flex items-center justify-between text-xl font-bold">
                   <span>Total:</span>
-                  <span className="text-primary">€{price}</span>
+                  <span className="text-primary">€{Math.max(0, parseFloat(price || '0') - voucherDiscount).toFixed(2)}</span>
                 </div>
               </>
             )}
