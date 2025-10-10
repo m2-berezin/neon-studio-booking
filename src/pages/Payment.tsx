@@ -357,7 +357,7 @@ const Payment = () => {
         return;
       }
 
-      // 2. Call RPC to create payment request
+      // 2. Call RPC to create payment request with voucher_id
       const finalPrice = Math.max(0, parseFloat(price) - subscriptionDiscount - voucherDiscount);
       
       const {
@@ -367,7 +367,8 @@ const Payment = () => {
         p_reservation_id: reservationData.id,
         p_amount_eur: finalPrice,
         p_currency: 'EUR',
-        p_note: notes || `${serviceTitle} - ${optionTitle}`
+        p_note: notes || `${serviceTitle} - ${optionTitle}`,
+        p_voucher_id: voucherId || null
       });
       if (paymentError) {
         console.error('Payment error:', paymentError);

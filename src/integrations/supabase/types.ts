@@ -1534,13 +1534,22 @@ export type Database = {
         Returns: boolean
       }
       request_payment: {
-        Args: {
-          p_amount_eur: number
-          p_currency?: string
-          p_note?: string
-          p_proof_url?: string
-          p_reservation_id: string
-        }
+        Args:
+          | {
+              p_amount_eur: number
+              p_currency?: string
+              p_note?: string
+              p_proof_url?: string
+              p_reservation_id: string
+            }
+          | {
+              p_amount_eur: number
+              p_currency?: string
+              p_note?: string
+              p_proof_url?: string
+              p_reservation_id: string
+              p_voucher_id?: string
+            }
         Returns: string
       }
       send_renewal_alerts: {
