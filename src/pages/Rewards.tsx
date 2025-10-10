@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Gift, Star, Crown, Zap, Clock, Package, Award, Ticket } from 'lucide-react';
+import { Gift, Star, Clock, Award, Ticket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -49,12 +49,15 @@ const Rewards = () => {
   const [applyingOffer, setApplyingOffer] = useState<string | null>(null);
   const [loyaltyPoints, setLoyaltyPoints] = useState<number>(0);
   const [redeeming, setRedeeming] = useState(false);
+  const [voucherStatus, setVoucherStatus] = useState<{ available: boolean; days_left: number } | null>(null);
+  const [claimingVoucher, setClaimingVoucher] = useState(false);
 
   // Fetch active offers and usage
   useEffect(() => {
     if (user) {
       fetchOffersAndUsage();
       fetchLoyaltyPoints();
+      fetchVoucherStatus();
     }
   }, [user]);
 
@@ -121,6 +124,19 @@ const Rewards = () => {
       setLoyaltyPoints((data as number) || 0);
     } catch (error) {
       console.error('Error fetching loyalty points:', error);
+    }
+  };
+
+  const fetchVoucherStatus = async () => {
+    if (!user) return;
+    try {
+      const { data, error } = await supabase.rpc('get_voucher_status' as any, {
+        p_user_id: user.id
+      });
+      if (error) throw error;
+      setVoucherStatus(data as { available: boolean; days_left: number });
+    } catch (error) {
+      console.error('Error fetching voucher status:', error);
     }
   };
   const handleApplyOffer = async (offerId: string) => {
@@ -206,6 +222,36 @@ const Rewards = () => {
       setRedeeming(false);
     }
   };
+
+  const handleClaimVoucher = async () => {
+    if (!user || !voucherStatus?.available) return;
+    
+    setClaimingVoucher(true);
+    try {
+      const { data, error } = await supabase.rpc('claim_voucher' as any, {
+        p_user_id: user.id
+      });
+      
+      if (error) throw error;
+      
+      toast({
+        title: 'Voucher reclamado!',
+        description: 'Use na próxima reserva.',
+      });
+      
+      // Refresh voucher status
+      await fetchVoucherStatus();
+    } catch (error: any) {
+      console.error('Error claiming voucher:', error);
+      toast({
+        title: 'Erro',
+        description: error.message || 'Não foi possível reclamar o voucher',
+        variant: 'destructive',
+      });
+    } finally {
+      setClaimingVoucher(false);
+    }
+  };
   return <div className="space-y-6">
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold neon-title mb-2">
@@ -221,6 +267,42 @@ const Rewards = () => {
 
       {/* Referral System */}
       <ReferralSystem className="mb-6" />
+
+      {/* Voucher 15€ Section */}
+      {voucherStatus && (
+        <Alert className="border-primary bg-primary/10 mb-6">
+          <Ticket className="h-4 w-4 text-primary" />
+          <AlertDescription className="text-primary font-medium">
+            <div className="flex items-center justify-between">
+              <div>
+                {voucherStatus.available ? (
+                  <>
+                    <span className="font-semibold">Voucher 15€ disponível!</span>
+                    <p className="text-sm text-primary/80 mt-1">
+                      Reclama o teu voucher e usa na próxima reserva.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <span className="font-semibold">Voucher 15€</span>
+                    <p className="text-sm text-primary/80 mt-1">
+                      Faltam {voucherStatus.days_left} dias para reivindicar
+                    </p>
+                  </>
+                )}
+              </div>
+              <Button 
+                onClick={handleClaimVoucher} 
+                disabled={!voucherStatus.available || claimingVoucher || hasActivePenalty()} 
+                size="sm" 
+                className="ml-4"
+              >
+                {claimingVoucher ? 'A reivindicar...' : 'Reivindicar Voucher 15€'}
+              </Button>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Voucher Banner */}
       {isVoucherAvailable() && <Alert className="border-primary bg-primary/10 mb-6">
@@ -256,7 +338,7 @@ const Rewards = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Star className="w-5 h-5 text-primary" />
-                  {recordingOffer.name}
+                  Compra 2h de gravação, ganha +1h grátis
                 </CardTitle>
                 <CardDescription>
                   {recordingOffer.description || `${recordingOffer.total_duration_min / 60}h totais de gravação por apenas €${recordingOffer.price_eur}`}
@@ -279,64 +361,7 @@ const Rewards = () => {
                 </div>
               </CardContent>
             </Card>}
-
-          {/* Offer B: M&M €35 each for 2 tracks */}
-          <Card className="studio-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Zap className="w-5 h-5 text-primary" />
-                Bundle Mistura & Masterização
-              </CardTitle>
-              <CardDescription>
-                €35 cada ao enviar 2 faixas juntas
-              </CardDescription>
-            </CardHeader>
-            
-          </Card>
         </div>
-      </section>
-
-      {/* Monthly Offers */}
-      <section>
-        <h2 className="text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
-          <Package className="w-6 h-6 text-primary" />
-          Pacote Mensal
-        </h2>
-        
-        <Card className="studio-card">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base md:text-lg">
-              <Crown className="w-5 h-5 text-primary" />
-              Pacote Produção Completa
-            </CardTitle>
-            <CardDescription className="text-sm">
-              Pacote completo Gravação + Mistura + Masterização
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-4 text-center sm:text-left">
-                <div>
-                  <p className="text-2xl font-bold text-accent">€70</p>
-                  <p className="text-sm text-muted-foreground">Taxa padrão</p>
-                </div>
-                <div className="text-muted-foreground hidden sm:block">ou</div>
-                <div>
-                  <p className="text-2xl font-bold text-primary">€65</p>
-                  <p className="text-sm text-muted-foreground">Taxa premium</p>
-                </div>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-2">
-                <Button onClick={() => handleApplyReward('M_PACKAGE_70')} disabled={hasActivePenalty() || appliedRewards['M_PACKAGE_70'] || loading} variant={appliedRewards['M_PACKAGE_70'] ? 'outline' : 'secondary'} size="sm" className="w-full sm:w-auto">
-                    {appliedRewards['M_PACKAGE_70'] ? 'Aplicado ✓' : 'Aplicar €70'}
-                  </Button>
-                  <Button onClick={() => handleApplyReward('M_PACKAGE_65')} disabled={hasActivePenalty() || appliedRewards['M_PACKAGE_65'] || loading} variant={appliedRewards['M_PACKAGE_65'] ? 'outline' : 'default'} size="sm" className="w-full sm:w-auto">
-                    {appliedRewards['M_PACKAGE_65'] ? 'Aplicado ✓' : 'Aplicar €65'}
-                  </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </section>
 
       {/* Loyalty Rewards */}

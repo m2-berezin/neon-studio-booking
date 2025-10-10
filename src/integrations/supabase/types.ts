@@ -1123,6 +1123,10 @@ export type Database = {
         Args: { p_offer_type: string; p_user_id: string }
         Returns: boolean
       }
+      claim_voucher: {
+        Args: { p_user_id: string }
+        Returns: string
+      }
       create_booking_captacao: {
         Args: { p_hours: number; p_starts_at: string; p_user_id: string }
         Returns: string
@@ -1401,6 +1405,10 @@ export type Database = {
       get_unread_count: {
         Args: { p_user_id: string }
         Returns: number
+      }
+      get_voucher_status: {
+        Args: { p_user_id: string }
+        Returns: Json
       }
       http: {
         Args: { request: Database["public"]["CompositeTypes"]["http_request"] }
