@@ -31,7 +31,7 @@ interface Voucher {
 
 const MixMaster = () => {
   const navigate = useNavigate();
-  const { user, subscription } = useAuth();
+  const { user, subscription, subscriptionDiscountPercent } = useAuth();
   const { toast } = useToast();
   
   const [selectedOption, setSelectedOption] = useState<'1project' | '2projects' | null>(null);
@@ -69,21 +69,14 @@ const MixMaster = () => {
     
     loadVouchers();
   }, [user]);
-
-  // Check if it's first month of subscription (simplified check)
-  const isFirstMonth = false; // TODO: Implement proper first month detection
   
   const getProjectPrice = () => {
     const basePrice = 40;
     let finalPrice = basePrice;
     
-    // Apply subscription discount
-    if (hasSubscription) {
-      if (isFirstMonth) {
-        finalPrice = basePrice * 0.9; // 10% discount
-      } else {
-        finalPrice = basePrice * 0.85; // 15% discount
-      }
+    // Apply subscription discount using AuthContext value
+    if (hasSubscription && subscriptionDiscountPercent > 0) {
+      finalPrice = basePrice * (1 - subscriptionDiscountPercent / 100);
     }
     
     // Apply voucher discount
@@ -97,8 +90,7 @@ const MixMaster = () => {
   const getSubscriptionDiscount = () => {
     if (!hasSubscription) return 0;
     const basePrice = 40;
-    if (isFirstMonth) return basePrice * 0.1; // 10%
-    return basePrice * 0.15; // 15%
+    return basePrice * (subscriptionDiscountPercent / 100);
   };
   
   const getVoucherDiscount = () => {
@@ -112,8 +104,7 @@ const MixMaster = () => {
       description: 'Mix & Master de 1 música',
       price: getProjectPrice(),
       originalPrice: 40,
-      hasSubscription,
-      isFirstMonth
+      hasSubscription
     }
   ];
 
@@ -264,11 +255,13 @@ const MixMaster = () => {
             ))}
           </div>
           
-          {/* First Month Disclaimer */}
-          {hasSubscription && isFirstMonth && (
+          {/* Subscription Discount Info */}
+          {hasSubscription && subscriptionDiscountPercent > 0 && (
             <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
               <p className="text-xs text-blue-800 font-medium">
-                ℹ️ O primeiro mês apenas tem 10% de desconto nos serviços
+                ℹ️ {subscriptionDiscountPercent === 10 
+                  ? 'O primeiro mês tem 10% de desconto nos serviços' 
+                  : 'Desconto de 15% aplicado pela subscrição ativa'}
               </p>
             </div>
           )}
@@ -406,7 +399,7 @@ const MixMaster = () => {
                 
                 {getSubscriptionDiscount() > 0 && (
                   <div className="flex items-center justify-between text-sm text-green-600">
-                    <span>Desconto Subscrição ({isFirstMonth ? '10' : '15'}%):</span>
+                    <span>Desconto Subscrição ({subscriptionDiscountPercent}%):</span>
                     <span>-€{getSubscriptionDiscount().toFixed(2)}</span>
                   </div>
                 )}
