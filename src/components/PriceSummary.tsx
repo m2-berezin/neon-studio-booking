@@ -8,6 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFriendCode as useFriendCodeHook } from '@/hooks/useFriendCode';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Service {
   id: string;
@@ -65,21 +66,36 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
 
   // Load user's available vouchers
   const loadVouchers = async () => {
-    // Vouchers table not yet implemented
-    setAvailableVouchers([]);
-    // if (!user) return;
-    // try {
-    //   const { data, error } = await supabase
-    //     .from('vouchers')
-    //     .select('*')
-    //     .eq('client_id', user.id)
-    //     .eq('redeemed', false)
-    //     .gte('expires_at', new Date().toISOString().split('T')[0]);
-    //   if (error) throw error;
-    //   setAvailableVouchers(data || []);
-    // } catch (error) {
-    //   console.error('Error loading vouchers:', error);
-    // }
+    if (!user) return;
+    try {
+      const { data, error } = await supabase
+        .from('vouchers')
+        .select('*')
+        .eq('client_id', user.id)
+        .gte('expires_at', new Date().toISOString());
+      
+      if (error) throw error;
+      
+      // Map database vouchers to component format
+      const mappedVouchers = (data || []).map(v => ({
+        id: v.id,
+        code: v.code,
+        amount: v.amount_eur,
+        expires_at: v.expires_at,
+        redeemed: false, // If it's in the list, it's not redeemed yet
+        combinable: false
+      }));
+      
+      setAvailableVouchers(mappedVouchers);
+      
+      // Auto-apply the first voucher if available and no reward is active
+      if (mappedVouchers.length > 0 && !appliedReward && !appliedVoucher) {
+        setAppliedVoucher(mappedVouchers[0]);
+        setVoucherCode(mappedVouchers[0].code);
+      }
+    } catch (error) {
+      console.error('Error loading vouchers:', error);
+    }
   };
 
   useEffect(() => {
@@ -141,58 +157,7 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
     }
   };
 
-  // Apply voucher code
-  const applyVoucher = async () => {
-    if (!voucherCode.trim()) {
-      toast({
-        title: 'Invalid Code',
-        description: 'Please enter a voucher code',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    setLoading(true);
-    try {
-      // Vouchers not yet implemented
-      toast({
-        title: 'Erro',
-        description: 'Sistema de vouchers ainda não disponível',
-        variant: 'destructive',
-      });
-      // const { data, error } = await supabase
-      //   .from('vouchers')
-      //   .select('*')
-      //   .eq('code', voucherCode)
-      //   .eq('client_id', user?.id)
-      //   .eq('redeemed', false)
-      //   .gte('expires_at', new Date().toISOString().split('T')[0])
-      //   .maybeSingle();
-      // if (error) throw error;
-      // if (data) {
-      //   if (appliedReward) {
-      //     setAppliedReward('');
-      //     setRewardCode('');
-      //   }
-      //   setAppliedVoucher(data);
-      //   toast({ title: 'Voucher Applied', description: `€${data.amount} discount applied` });
-      // } else {
-      //   toast({
-      //     title: 'Invalid Voucher',
-      //     description: 'Voucher code not found, expired, or already used',
-      //     variant: 'destructive',
-      //   });
-      // }
-    } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: error.message || 'Failed to apply voucher',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Apply voucher code (not needed anymore as it's auto-applied)
 
   // Calculate reward discount
   const getRewardDiscount = () => {
@@ -353,7 +318,7 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
             )}
             {voucherDiscount > 0 && (
               <div className="flex justify-between text-sm text-green-600">
-                <span>Desconto de Vale</span>
+                <span>Desconto 15€ Voucher</span>
                 <span>-€{voucherDiscount.toFixed(2)}</span>
               </div>
             )}
