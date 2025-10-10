@@ -19,8 +19,7 @@ import {
   Bell,
   CreditCard,
   MessageSquare,
-  Send,
-  Folder
+  Send
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -569,15 +568,7 @@ const AdminDashboard = () => {
           <CardTitle>Ações Rápidas</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Button
-              variant="outline"
-              className="h-20 flex flex-col gap-2 hover:bg-primary/10"
-              onClick={() => navigate('/projects')}
-            >
-              <Folder className="h-6 w-6" />
-              <span className="text-sm font-medium">Ver Projectos</span>
-            </Button>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Button
               variant="outline"
               className="h-20 flex flex-col gap-2 hover:bg-primary/10"
@@ -623,21 +614,7 @@ const AdminDashboard = () => {
                     return (
                       <TableRow key={reservation.booking_id}>
                         <TableCell>
-                          <div className="flex items-center gap-2">
-                            <span>{reservation.client_name || 'Sem Nome'}</span>
-                            <button
-                              onClick={() => {
-                                navigate('/admin');
-                                setTimeout(() => {
-                                  document.querySelector('[value="messages"]')?.dispatchEvent(new Event('click', { bubbles: true }));
-                                }, 100);
-                              }}
-                              className="hover:opacity-70 transition-opacity text-lg"
-                              title="Ver mensagens"
-                            >
-                              💭
-                            </button>
-                          </div>
+                          {reservation.client_name || 'Sem Nome'}
                         </TableCell>
                         <TableCell>{reservation.service_name}</TableCell>
                         <TableCell>
