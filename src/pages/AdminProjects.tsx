@@ -35,6 +35,28 @@ const AdminProjects = () => {
       return;
     }
     loadProjects();
+
+    // Subscribe to real-time updates for payment_requests
+    const channel = supabase
+      .channel('mixmaster-projects-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'payment_requests',
+          filter: 'type=eq.reservation'
+        },
+        () => {
+          console.log('Novo projeto Mix & Master, atualizando lista');
+          loadProjects();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [isAdmin, navigate]);
 
   const loadProjects = async () => {
