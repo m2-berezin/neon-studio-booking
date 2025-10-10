@@ -612,7 +612,7 @@ const AdminDashboard = () => {
               onClick={() => navigate('/admin/projects')}
             >
               <FolderOpen className="h-6 w-6" />
-              <span className="text-sm font-medium">Projetos</span>
+              <span className="text-sm font-medium">Projetos Mix & Master</span>
             </Button>
           </div>
 

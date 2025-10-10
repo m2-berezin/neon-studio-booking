@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ExternalLink, FileText } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Badge } from '@/components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
+import { ArrowLeft, FileAudio, ExternalLink, StickyNote } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 
 interface MixMasterProject {
@@ -24,8 +24,8 @@ interface MixMasterProject {
 
 const AdminProjects = () => {
   const { isAdmin } = useAuth();
-  const { toast } = useToast();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [projects, setProjects] = useState<MixMasterProject[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -40,7 +40,7 @@ const AdminProjects = () => {
   const loadProjects = async () => {
     try {
       setLoading(true);
-      // @ts-ignore - RPC exists in DB but types not yet regenerated
+      // @ts-ignore - RPC exists in DB
       const { data, error } = await supabase.rpc('get_mixmaster_projects');
 
       if (error) throw error;
@@ -63,6 +63,7 @@ const AdminProjects = () => {
       confirmed: { label: 'Confirmado', variant: 'default' as const },
       rejected: { label: 'Rejeitado', variant: 'destructive' as const },
     };
+
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.pending;
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
@@ -76,34 +77,35 @@ const AdminProjects = () => {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center gap-4 mb-6">
+    <div className="space-y-6">
+      <div className="flex items-center gap-4">
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate('/admin/dashboard')}
+          onClick={() => navigate('/admin')}
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div>
           <h1 className="text-3xl font-bold">Projetos Mix & Master</h1>
-          <p className="text-muted-foreground">Todas as reservas de Mix & Master dos clientes</p>
+          <p className="text-muted-foreground">
+            Todas as reservas de Mix & Master dos clientes
+          </p>
         </div>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            Reservas ({projects.length})
+            <FileAudio className="h-5 w-5" />
+            Reservas de Mix & Master
           </CardTitle>
         </CardHeader>
         <CardContent>
           {projects.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
-              <FileText className="h-16 w-16 mx-auto mb-4 opacity-50" />
-              <p className="text-lg font-medium">Sem projetos Mix & Master</p>
-              <p className="text-sm">Quando os clientes fizerem reservas, aparecerão aqui</p>
+              <FileAudio className="h-16 w-16 mx-auto mb-4 opacity-50" />
+              <p className="text-lg">Sem projetos de Mix & Master</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -112,10 +114,10 @@ const AdminProjects = () => {
                   <TableRow>
                     <TableHead>Cliente</TableHead>
                     <TableHead>Serviço</TableHead>
-                    <TableHead>Data Criação</TableHead>
+                    <TableHead>Data de Criação</TableHead>
                     <TableHead>Valor</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Link Transferência</TableHead>
+                    <TableHead>Link de Transferência</TableHead>
                     <TableHead>Notas</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -133,26 +135,27 @@ const AdminProjects = () => {
                       <TableCell>{getStatusBadge(project.status)}</TableCell>
                       <TableCell>
                         {project.transfer_link ? (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => window.open(project.transfer_link!, '_blank')}
-                            className="gap-2"
+                          <a
+                            href={project.transfer_link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 text-primary hover:underline"
                           >
                             <ExternalLink className="h-4 w-4" />
                             Ver Link
-                          </Button>
+                          </a>
                         ) : (
-                          <span className="text-muted-foreground text-sm">Sem link</span>
+                          <span className="text-muted-foreground">Sem link</span>
                         )}
                       </TableCell>
                       <TableCell className="max-w-xs">
                         {project.note ? (
-                          <div className="text-sm truncate" title={project.note}>
-                            {project.note}
+                          <div className="flex items-start gap-2">
+                            <StickyNote className="h-4 w-4 mt-0.5 flex-shrink-0 text-muted-foreground" />
+                            <span className="text-sm">{project.note}</span>
                           </div>
                         ) : (
-                          <span className="text-muted-foreground text-sm">Sem notas</span>
+                          <span className="text-muted-foreground">Sem notas</span>
                         )}
                       </TableCell>
                     </TableRow>
