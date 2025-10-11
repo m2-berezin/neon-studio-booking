@@ -97,11 +97,23 @@ export const useFriendCode = () => {
 
     setLoading(true);
     try {
+      // Trim and validate code
+      const trimmedCode = code.trim().toUpperCase();
+      
+      if (!trimmedCode) {
+        toast({
+          title: 'Código Vazio',
+          description: 'Por favor insere um código válido',
+          variant: 'destructive',
+        });
+        return false;
+      }
+
       // Validate code format (alphanumeric ending with 7T7)
-      if (!/^[A-Z0-9]+7T7\d*$/.test(code)) {
+      if (!/^[A-Z0-9]+7T7\d*$/.test(trimmedCode)) {
         toast({
           title: 'Código Inválido',
-          description: 'Formato de código inválido',
+          description: 'O código deve terminar com 7T7',
           variant: 'destructive',
         });
         return false;
@@ -111,7 +123,7 @@ export const useFriendCode = () => {
       const { data: codeData, error: codeError } = await supabase
         .from('referral_codes')
         .select('code, user_id')
-        .eq('code', code)
+        .eq('code', trimmedCode)
         .eq('is_active', true)
         .maybeSingle();
 
@@ -158,13 +170,13 @@ export const useFriendCode = () => {
       const { error: insertError } = await supabase
         .from('friend_code_uses')
         .insert({
-          code: code,
+          code: trimmedCode,
           used_by: user.id,
         });
 
       if (insertError) throw insertError;
 
-      setAppliedFriendCode(code);
+      setAppliedFriendCode(trimmedCode);
       toast({
         title: 'Código Aplicado!',
         description: '25% de desconto ativo nas tuas reservas por 30 dias',

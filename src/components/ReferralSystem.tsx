@@ -126,9 +126,9 @@ const ReferralSystem = ({ className }: ReferralSystemProps) => {
                 id="input-code"
                 placeholder="Insere o código aqui"
                 value={inputCode}
-                onChange={(e) => setInputCode(e.target.value.toUpperCase())}
-                maxLength={8}
+                onChange={(e) => setInputCode(e.target.value.toUpperCase().trim())}
                 className="font-mono text-center"
+                maxLength={100}
               />
               <Button
                 onClick={handleApplyCode}
