@@ -111,11 +111,11 @@ export const useFriendCode = () => {
         return false;
       }
 
-      // Check if code exists (case-insensitive search)
+      // Check if code exists (exact match, case-insensitive via uppercase)
       const { data: codeData, error: codeError } = await supabase
         .from('referral_codes')
         .select('code, user_id')
-        .ilike('code', trimmedCode)
+        .eq('code', trimmedCode)
         .eq('is_active', true)
         .maybeSingle();
 
