@@ -274,12 +274,15 @@ const Rewards = () => {
           <Ticket className="h-4 w-4 text-primary" />
           <AlertDescription className="text-primary font-medium">
             <div className="flex items-center justify-between">
-              <div>
+              <div className="flex-1">
                 {voucherStatus.available ? (
                   <>
                     <span className="font-semibold">Voucher 15€ disponível!</span>
                     <p className="text-sm text-primary/80 mt-1">
                       Reclama o teu voucher e usa na próxima reserva.
+                    </p>
+                    <p className="text-xs text-orange-600 font-medium mt-2">
+                      ⚠️ Ao reivindicar o voucher tens 15€ para usar um serviço ou o voucher ficará inativo.
                     </p>
                   </>
                 ) : (
@@ -303,27 +306,6 @@ const Rewards = () => {
           </AlertDescription>
         </Alert>
       )}
-
-      {/* Voucher Banner */}
-      {isVoucherAvailable() && <Alert className="border-primary bg-primary/10 mb-6">
-          <Ticket className="h-4 w-4 text-primary" />
-          <AlertDescription className="text-primary font-medium">
-            <div className="flex items-center justify-between">
-              <div>
-                <span className="font-semibold">Vale de €15 disponível!</span>
-                <p className="text-sm text-primary/80 mt-1">
-                  Disponível a cada 90 dias.
-                </p>
-                <div className="text-xs text-orange-600 font-medium mt-2">
-                  ⏰ Dias restantes para reivindicar: {Math.max(0, Math.ceil((new Date().getTime() + 90 * 24 * 60 * 60 * 1000 - new Date().getTime()) / (24 * 60 * 60 * 1000)))}
-                </div>
-              </div>
-              <Button onClick={claimVoucher} disabled={loading} size="sm" className="ml-4">
-                {loading ? 'A reivindicar...' : 'Reivindicar Vale de €15'}
-              </Button>
-            </div>
-          </AlertDescription>
-        </Alert>}
 
       {/* Weekly Offers */}
       <section>

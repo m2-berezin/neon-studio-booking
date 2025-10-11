@@ -377,6 +377,14 @@ const Payment = () => {
           }
         }
 
+        // Mark voucher as used if applicable
+        if (activeVoucherId) {
+          await supabase
+            .from('vouchers')
+            .update({ is_used: true })
+            .eq('id', activeVoucherId);
+        }
+
         // Send message to admin with transfer link and notes
         let messageContent = `🎵 Novo pedido de Mix & Master\n\n`;
         messageContent += `Cliente: ${clientName}\n`;
@@ -486,6 +494,14 @@ const Payment = () => {
           console.log('[PAYMENT] Friend code marked successfully');
           await refreshAppliedCode(); // Refresh to ensure UI is cleared
         }
+      }
+
+      // Mark voucher as used if applicable
+      if (activeVoucherId) {
+        await supabase
+          .from('vouchers')
+          .update({ is_used: true })
+          .eq('id', activeVoucherId);
       }
 
       // Success notification with clear instructions
