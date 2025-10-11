@@ -101,6 +101,8 @@ export type Database = {
           currency_snapshot: string | null
           duration_minutes_snapshot: number | null
           ends_at: string | null
+          hidden_from_admin: boolean | null
+          hidden_from_client: boolean | null
           id: string
           price_eur_snapshot: number | null
           service_id: string
@@ -115,6 +117,8 @@ export type Database = {
           currency_snapshot?: string | null
           duration_minutes_snapshot?: number | null
           ends_at?: string | null
+          hidden_from_admin?: boolean | null
+          hidden_from_client?: boolean | null
           id?: string
           price_eur_snapshot?: number | null
           service_id: string
@@ -129,6 +133,8 @@ export type Database = {
           currency_snapshot?: string | null
           duration_minutes_snapshot?: number | null
           ends_at?: string | null
+          hidden_from_admin?: boolean | null
+          hidden_from_client?: boolean | null
           id?: string
           price_eur_snapshot?: number | null
           service_id?: string
@@ -401,6 +407,8 @@ export type Database = {
           currency: string
           decided_at: string | null
           decided_by: string | null
+          hidden_from_admin: boolean | null
+          hidden_from_client: boolean | null
           id: string
           note: string | null
           plan_type: string | null
@@ -421,6 +429,8 @@ export type Database = {
           currency?: string
           decided_at?: string | null
           decided_by?: string | null
+          hidden_from_admin?: boolean | null
+          hidden_from_client?: boolean | null
           id?: string
           note?: string | null
           plan_type?: string | null
@@ -441,6 +451,8 @@ export type Database = {
           currency?: string
           decided_at?: string | null
           decided_by?: string | null
+          hidden_from_admin?: boolean | null
+          hidden_from_client?: boolean | null
           id?: string
           note?: string | null
           plan_type?: string | null
@@ -1097,6 +1109,10 @@ export type Database = {
       admin_approve_payment: {
         Args: { p_payment_id: string }
         Returns: string
+      }
+      admin_hide_project: {
+        Args: { p_project_id: string; p_project_type: string }
+        Returns: boolean
       }
       admin_mark_day_off: {
         Args: { p_end_date: string; p_reason?: string; p_start_date: string }

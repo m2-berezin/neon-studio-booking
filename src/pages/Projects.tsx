@@ -184,9 +184,9 @@ const Projects = () => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Eliminar Projeto?</AlertDialogTitle>
+            <AlertDialogTitle>Remover Projeto?</AlertDialogTitle>
             <AlertDialogDescription>
-              Tens a certeza que queres eliminar este projeto? Esta ação não pode ser desfeita.
+              Tens a certeza que queres remover este projeto da tua lista? O projeto continuará visível no dashboard do admin.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -195,7 +195,7 @@ const Projects = () => {
               onClick={handleDeleteProject}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Eliminar
+              Remover
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

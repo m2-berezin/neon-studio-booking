@@ -46,12 +46,13 @@ export const useProjects = () => {
     try {
       setLoading(true);
       
-      // Load regular bookings (excluding Mix & Master)
+      // Load regular bookings (excluding Mix & Master and hidden from client)
       const { data: bookingsData, error: bookingsError } = await supabase
         .from('bookings')
         .select('*')
         .eq('user_id', user.id)
         .eq('status', 'confirmed')
+        .eq('hidden_from_client', false)
         .order('created_at', { ascending: false });
 
       if (bookingsError) throw bookingsError;
@@ -128,8 +129,8 @@ export const useProjects = () => {
       if (error) throw error;
 
       toast({
-        title: 'Projeto Eliminado',
-        description: 'O projeto foi eliminado com sucesso.',
+        title: 'Projeto Removido',
+        description: 'O projeto foi removido da tua lista.',
       });
 
       // Reload projects
