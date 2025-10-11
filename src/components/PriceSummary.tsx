@@ -164,7 +164,8 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
   // Calculate reward discount
   const getRewardDiscount = () => {
     // Friend code discount takes priority and is automatically applied
-    if (hasFriendCodeDiscount()) {
+    if (hasFriendCodeDiscount() && appliedFriendCode) {
+      console.log('[PRICE SUMMARY] Applying friend code discount:', appliedFriendCode);
       return subtotal * 0.25; // 25% discount for friend codes
     }
     
@@ -254,7 +255,7 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
         )}
 
         {/* Friend Code Discount Display */}
-        {hasFriendCodeDiscount() && (
+        {hasFriendCodeDiscount() && appliedFriendCode && (
           <div className="bg-green-50 border border-green-200 rounded-lg p-3">
             <div className="flex items-center justify-between">
               <div>
@@ -263,6 +264,9 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
                 </Label>
                 <p className="text-xs text-green-700 mt-1">
                   Código: {appliedFriendCode} - 25% de desconto aplicado
+                </p>
+                <p className="text-xs text-green-600 mt-1">
+                  ⚠️ Este desconto será usado ao confirmar o pagamento
                 </p>
               </div>
               <Badge variant="secondary" className="bg-green-100 text-green-800">

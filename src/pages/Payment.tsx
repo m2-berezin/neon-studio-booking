@@ -235,8 +235,12 @@ const Payment = () => {
 
         // Mark friend code as used if applicable
         if (hasFriendCodeDiscount() && requestId) {
-          await markCodeAsUsed(requestId);
-          await refreshAppliedCode(); // Refresh to clear the discount from UI
+          console.log('[PAYMENT] Marking friend code as used for subscription:', requestId);
+          const marked = await markCodeAsUsed(requestId);
+          if (marked) {
+            console.log('[PAYMENT] Friend code marked successfully');
+            await refreshAppliedCode(); // Refresh to ensure UI is cleared
+          }
         }
 
         toast({
@@ -349,8 +353,12 @@ const Payment = () => {
 
         // Mark friend code as used if applicable
         if (hasFriendCodeDiscount() && paymentData) {
-          await markCodeAsUsed(paymentData.id);
-          await refreshAppliedCode(); // Refresh to clear the discount from UI
+          console.log('[PAYMENT] Marking friend code as used for mixmaster:', paymentData.id);
+          const marked = await markCodeAsUsed(paymentData.id);
+          if (marked) {
+            console.log('[PAYMENT] Friend code marked successfully');
+            await refreshAppliedCode(); // Refresh to ensure UI is cleared
+          }
         }
 
         // Send message to admin with transfer link and notes
@@ -456,8 +464,12 @@ const Payment = () => {
 
       // Mark friend code as used if applicable
       if (hasFriendCodeDiscount() && paymentId) {
-        await markCodeAsUsed(paymentId);
-        await refreshAppliedCode(); // Refresh to clear the discount from UI
+        console.log('[PAYMENT] Marking friend code as used for booking:', paymentId);
+        const marked = await markCodeAsUsed(paymentId);
+        if (marked) {
+          console.log('[PAYMENT] Friend code marked successfully');
+          await refreshAppliedCode(); // Refresh to ensure UI is cleared
+        }
       }
 
       // Success notification with clear instructions

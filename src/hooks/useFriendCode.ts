@@ -69,8 +69,11 @@ export const useFriendCode = () => {
       if (error) throw error;
 
       if (data) {
+        console.log('[FRIEND CODE] Loaded code data:', data);
+        
         // Check if code was already used in a payment
         if (data.used_in_payment) {
+          console.log('[FRIEND CODE] Code already used in payment, clearing...');
           setAppliedFriendCode(null);
           return;
         }
@@ -81,13 +84,19 @@ export const useFriendCode = () => {
         expiryDate.setDate(expiryDate.getDate() + 30);
 
         if (expiryDate > new Date()) {
+          console.log('[FRIEND CODE] Code still valid:', data.code);
           setAppliedFriendCode(data.code);
         } else {
+          console.log('[FRIEND CODE] Code expired, clearing...');
           setAppliedFriendCode(null);
         }
+      } else {
+        console.log('[FRIEND CODE] No code found for user');
+        setAppliedFriendCode(null);
       }
     } catch (error) {
       console.error('Error loading applied friend code:', error);
+      setAppliedFriendCode(null);
     }
   };
 
@@ -204,9 +213,14 @@ export const useFriendCode = () => {
   };
 
   const markCodeAsUsed = async (paymentRequestId: string): Promise<boolean> => {
-    if (!user || !appliedFriendCode) return false;
+    if (!user || !appliedFriendCode) {
+      console.log('[FRIEND CODE] Cannot mark as used - no user or code:', { user: !!user, code: appliedFriendCode });
+      return false;
+    }
 
     try {
+      console.log('[FRIEND CODE] Marking code as used:', { code: appliedFriendCode, paymentRequestId });
+      
       const { error } = await supabase
         .from('friend_code_uses')
         .update({ 
@@ -216,9 +230,14 @@ export const useFriendCode = () => {
         .eq('used_by', user.id)
         .eq('code', appliedFriendCode);
 
-      if (error) throw error;
+      if (error) {
+        console.error('[FRIEND CODE] Error marking code as used:', error);
+        throw error;
+      }
 
-      // Clear the applied code from state
+      console.log('[FRIEND CODE] Code marked as used successfully');
+      
+      // Clear the applied code from state immediately
       setAppliedFriendCode(null);
       return true;
     } catch (error) {
