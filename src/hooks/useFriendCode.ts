@@ -109,21 +109,11 @@ export const useFriendCode = () => {
         return false;
       }
 
-      // Validate code format (alphanumeric ending with 7T7)
-      if (!/^[A-Z0-9]+7T7\d*$/.test(trimmedCode)) {
-        toast({
-          title: 'Código Inválido',
-          description: 'O código deve terminar com 7T7',
-          variant: 'destructive',
-        });
-        return false;
-      }
-
-      // Check if code exists
+      // Check if code exists (case-insensitive search)
       const { data: codeData, error: codeError } = await supabase
         .from('referral_codes')
         .select('code, user_id')
-        .eq('code', trimmedCode)
+        .ilike('code', trimmedCode)
         .eq('is_active', true)
         .maybeSingle();
 
