@@ -97,21 +97,23 @@ export default function AdminSubscriptions() {
   };
 
   const getStatusBadge = (status: string, isActive: boolean) => {
-    if (!isActive) {
+    // Se não está ativa OU se o status é cancelled, mostra Cancelada
+    if (!isActive || status === "cancelled") {
       return <Badge variant="destructive">Cancelada</Badge>;
     }
     
-    const colors = {
-      pending: "bg-yellow-500",
-      confirmed: "bg-green-500",
-      cancelled: "bg-red-500",
-    };
+    // Se está ativa e confirmada, mostra Confirmada
+    if (status === "confirmed") {
+      return <Badge className="bg-green-500">Confirmada</Badge>;
+    }
     
-    return (
-      <Badge className={colors[status as keyof typeof colors] || "bg-gray-500"}>
-        {status === "pending" ? "Pendente" : status === "confirmed" ? "Confirmada" : "Cancelada"}
-      </Badge>
-    );
+    // Se está ativa e pendente, mostra Pendente
+    if (status === "pending") {
+      return <Badge className="bg-yellow-500">Pendente</Badge>;
+    }
+    
+    // Fallback
+    return <Badge className="bg-gray-500">{status}</Badge>;
   };
 
   if (loading) {
