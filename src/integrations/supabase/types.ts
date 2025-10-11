@@ -209,7 +209,7 @@ export type Database = {
             foreignKeyName: "friend_code_uses_code_fkey"
             columns: ["code"]
             isOneToOne: false
-            referencedRelation: "friend_codes"
+            referencedRelation: "referral_codes"
             referencedColumns: ["code"]
           },
         ]
