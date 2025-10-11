@@ -60,7 +60,7 @@ export const useFriendCode = () => {
     try {
       const { data, error } = await supabase
         .from('friend_code_uses')
-        .select('code, used_at')
+        .select('code, used_at, used_in_payment')
         .eq('used_by', user.id)
         .order('used_at', { ascending: false })
         .limit(1)
@@ -69,6 +69,12 @@ export const useFriendCode = () => {
       if (error) throw error;
 
       if (data) {
+        // Check if code was already used in a payment
+        if (data.used_in_payment) {
+          setAppliedFriendCode(null);
+          return;
+        }
+
         // Check if code is still valid (within 30 days)
         const usedDate = new Date(data.used_at);
         const expiryDate = new Date(usedDate);
@@ -197,12 +203,37 @@ export const useFriendCode = () => {
     return appliedFriendCode !== null;
   };
 
+  const markCodeAsUsed = async (paymentRequestId: string): Promise<boolean> => {
+    if (!user || !appliedFriendCode) return false;
+
+    try {
+      const { error } = await supabase
+        .from('friend_code_uses')
+        .update({ 
+          used_in_payment: true,
+          payment_request_id: paymentRequestId
+        })
+        .eq('used_by', user.id)
+        .eq('code', appliedFriendCode);
+
+      if (error) throw error;
+
+      // Clear the applied code from state
+      setAppliedFriendCode(null);
+      return true;
+    } catch (error) {
+      console.error('Error marking code as used:', error);
+      return false;
+    }
+  };
+
   return {
     myFriendCode,
     appliedFriendCode,
     loading,
     applyFriendCode,
     hasFriendCodeDiscount,
+    markCodeAsUsed,
     refreshAppliedCode: loadAppliedFriendCode,
   };
 };

@@ -21,7 +21,7 @@ const Payment = () => {
     user
   } = useAuth();
   const { sendMessage, ADMIN_ID } = useMessaging();
-  const { appliedFriendCode, hasFriendCodeDiscount } = useFriendCode();
+  const { appliedFriendCode, hasFriendCodeDiscount, markCodeAsUsed } = useFriendCode();
   const [loading, setLoading] = useState(false);
   const [voucherDiscount, setVoucherDiscount] = useState(0);
   const [hasVoucher, setHasVoucher] = useState(false);
@@ -229,6 +229,11 @@ const Payment = () => {
           return;
         }
 
+        // Mark friend code as used if applicable
+        if (hasFriendCodeDiscount() && requestId) {
+          await markCodeAsUsed(requestId);
+        }
+
         toast({
           title: 'Pedido Enviado ✅',
           description: 'Subscrição pendente de verificação de pagamento. Aguarde aprovação do administrador.',
@@ -309,7 +314,7 @@ const Payment = () => {
         // Create payment request with transfer_link and voucher_id
         const finalPrice = Math.max(0, parseFloat(price) - subscriptionDiscount - friendCodeDiscount - voucherDiscount);
         
-        const { error: paymentError } = await supabase
+        const { data: paymentData, error: paymentError } = await supabase
           .from('payment_requests')
           .insert({
             user_id: user.id,
@@ -321,7 +326,9 @@ const Payment = () => {
             transfer_link: transferLink || null,
             note: notes || null,
             voucher_id: activeVoucherId
-          });
+          })
+          .select()
+          .single();
 
         if (paymentError) {
           console.error('Payment error:', paymentError);
@@ -333,6 +340,11 @@ const Payment = () => {
           });
           setLoading(false);
           return;
+        }
+
+        // Mark friend code as used if applicable
+        if (hasFriendCodeDiscount() && paymentData) {
+          await markCodeAsUsed(paymentData.id);
         }
 
         // Send message to admin with transfer link and notes
@@ -434,6 +446,11 @@ const Payment = () => {
         });
         setLoading(false);
         return;
+      }
+
+      // Mark friend code as used if applicable
+      if (hasFriendCodeDiscount() && paymentId) {
+        await markCodeAsUsed(paymentId);
       }
 
       // Success notification with clear instructions

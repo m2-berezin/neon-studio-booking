@@ -189,20 +189,26 @@ export type Database = {
         Row: {
           code: string
           id: string
+          payment_request_id: string | null
           used_at: string
           used_by: string
+          used_in_payment: boolean | null
         }
         Insert: {
           code: string
           id?: string
+          payment_request_id?: string | null
           used_at?: string
           used_by: string
+          used_in_payment?: boolean | null
         }
         Update: {
           code?: string
           id?: string
+          payment_request_id?: string | null
           used_at?: string
           used_by?: string
+          used_in_payment?: boolean | null
         }
         Relationships: [
           {
@@ -211,6 +217,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "referral_codes"
             referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "friend_code_uses_payment_request_id_fkey"
+            columns: ["payment_request_id"]
+            isOneToOne: false
+            referencedRelation: "payment_requests"
+            referencedColumns: ["id"]
           },
         ]
       }
