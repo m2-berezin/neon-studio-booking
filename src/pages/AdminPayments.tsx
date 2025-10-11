@@ -5,7 +5,17 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
-import { DollarSign, CheckCircle, XCircle, Clock, Shield } from 'lucide-react';
+import { DollarSign, CheckCircle, XCircle, Clock, Shield, Trash2 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 
 interface PaymentRequest {
@@ -31,6 +41,8 @@ const AdminPayments = () => {
   const { toast } = useToast();
   const [paymentRequests, setPaymentRequests] = useState<PaymentRequest[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [paymentToHide, setPaymentToHide] = useState<string | null>(null);
 
   const loadPaymentRequests = async () => {
     try {
@@ -44,6 +56,7 @@ const AdminPayments = () => {
             service_name_snapshot
           )
         `)
+        .eq('hidden_from_admin', false)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -168,6 +181,35 @@ const AdminPayments = () => {
     }
   };
 
+  const handleHidePayment = async () => {
+    if (!paymentToHide) return;
+
+    try {
+      const { error } = await supabase
+        .from('payment_requests')
+        .update({ hidden_from_admin: true })
+        .eq('id', paymentToHide);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Pagamento Removido',
+        description: 'O pagamento foi removido do teu dashboard.',
+      });
+
+      await loadPaymentRequests();
+    } catch (error) {
+      console.error('Error hiding payment:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível remover o pagamento',
+        variant: 'destructive',
+      });
+    } finally {
+      setDeleteDialogOpen(false);
+      setPaymentToHide(null);
+    }
+  };
 
   if (!isAdmin) {
     return (
@@ -326,12 +368,40 @@ const AdminPayments = () => {
                       </p>
                     </div>
                   </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => {
+                      setPaymentToHide(request.id);
+                      setDeleteDialogOpen(true);
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  </Button>
                 </div>
               </CardContent>
             </Card>
           ))
         )}
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remover Pagamento do Dashboard?</AlertDialogTitle>
+            <AlertDialogDescription>
+              O pagamento será removido apenas do teu dashboard. O cliente continuará a vê-lo e a receita mensal não será afetada.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleHidePayment} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Remover
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

@@ -7,8 +7,19 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useAdmin } from '@/hooks/useAdmin';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { format, parse } from 'date-fns';
-import { Calendar, Clock, User, AlertTriangle, Edit, Shield } from 'lucide-react';
+import { Calendar, Clock, User, AlertTriangle, Edit, Shield, Trash2 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 
 interface Booking {
@@ -39,6 +50,8 @@ const AdminBookings = () => {
   const [newStatus, setNewStatus] = useState('');
   const [notes, setNotes] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [bookingToHide, setBookingToHide] = useState<string | null>(null);
 
   const statusColors = {
     pending: 'bg-yellow-500',
@@ -80,6 +93,36 @@ const AdminBookings = () => {
     setNewStatus(booking.status);
     setNotes(booking.notes || '');
     setDialogOpen(true);
+  };
+
+  const handleHideBooking = async () => {
+    if (!bookingToHide) return;
+
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .update({ hidden_from_admin: true })
+        .eq('id', bookingToHide);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Reserva Removida',
+        description: 'A reserva foi removida do teu dashboard.',
+      });
+
+      await loadAllBookings();
+    } catch (error) {
+      console.error('Error hiding booking:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível remover a reserva',
+        variant: 'destructive',
+      });
+    } finally {
+      setDeleteDialogOpen(false);
+      setBookingToHide(null);
+    }
   };
 
   useEffect(() => {
@@ -210,7 +253,7 @@ const AdminBookings = () => {
                   </div>
                 </div>
 
-                <div className="ml-4">
+                <div className="ml-4 flex gap-2">
                   <Button
                     variant="outline"
                     size="sm"
@@ -218,6 +261,16 @@ const AdminBookings = () => {
                   >
                     <Edit className="w-4 h-4 mr-2" />
                     Edit
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => {
+                      setBookingToHide(booking.id);
+                      setDeleteDialogOpen(true);
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4 text-destructive" />
                   </Button>
                 </div>
               </div>
@@ -300,6 +353,24 @@ const AdminBookings = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remover Reserva do Dashboard?</AlertDialogTitle>
+            <AlertDialogDescription>
+              A reserva será removida apenas do teu dashboard. O cliente continuará a vê-la e a receita mensal não será afetada.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleHideBooking} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Remover
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

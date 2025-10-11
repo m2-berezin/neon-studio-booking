@@ -125,26 +125,67 @@ export const useAdmin = () => {
 
   // Load bookings with filters
   const loadBookings = async () => {
-    // Table schema mismatch - temporarily disabled
-    setBookings([]);
-    // try {
-    //   let query = supabase
-    //     .from('bookings')
-    //     .select(`
-    //       *,
-    //       profiles:user_id(full_name),
-    //       services:service_id(name)
-    //     `)
-    //     .order('created_at', { ascending: false });
-    //   if (bookingFilter.status) {
-    //     query = query.eq('status', bookingFilter.status);
-    //   }
-    //   const { data, error } = await query;
-    //   if (error) throw error;
-    //   setBookings(data || []);
-    // } catch (error) {
-    //   console.error('Error loading bookings:', error);
-    // }
+    try {
+      let query = supabase
+        .from('bookings')
+        .select('*')
+        .eq('hidden_from_admin', false)
+        .order('created_at', { ascending: false });
+      
+      if (bookingFilter.status) {
+        query = query.eq('status', bookingFilter.status);
+      }
+      
+      const { data, error } = await query;
+      if (error) throw error;
+      
+      // Fetch user profiles and services separately
+      const userIds = [...new Set(data?.map(b => b.user_id) || [])];
+      const serviceIds = [...new Set(data?.map(b => b.service_id) || [])];
+      
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('id, full_name, phone')
+        .in('id', userIds);
+      
+      const { data: servicesData } = await supabase
+        .from('services')
+        .select('id, name, price_eur')
+        .in('id', serviceIds);
+      
+      const profilesMap = new Map(profilesData?.map(p => [p.id, p]) || []);
+      const servicesMap = new Map(servicesData?.map(s => [s.id, s]) || []);
+      
+      // Map to expected format with date/time fields
+      const mappedData = (data || []).map(b => ({
+        id: b.id,
+        client_id: b.user_id,
+        service_id: b.service_id,
+        date: b.starts_at ? format(new Date(b.starts_at), 'yyyy-MM-dd') : '',
+        start_time: b.starts_at ? format(new Date(b.starts_at), 'HH:mm:ss') : '',
+        end_time: b.ends_at ? format(new Date(b.ends_at), 'HH:mm:ss') : '',
+        status: b.status,
+        notes: b.service_name_snapshot || '',
+        created_at: b.created_at,
+        profiles: {
+          full_name: profilesMap.get(b.user_id)?.full_name || null,
+          phone: profilesMap.get(b.user_id)?.phone || null
+        },
+        services: {
+          name: servicesMap.get(b.service_id)?.name || b.service_name_snapshot || '',
+          base_price: servicesMap.get(b.service_id)?.price_eur || b.price_eur_snapshot || 0
+        }
+      }));
+      
+      setBookings(mappedData);
+    } catch (error) {
+      console.error('Error loading bookings:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível carregar as reservas',
+        variant: 'destructive',
+      });
+    }
   };
 
   // Load clients
