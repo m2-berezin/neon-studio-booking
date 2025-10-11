@@ -1138,6 +1138,10 @@ export type Database = {
         Args: { p_offer_id: string; p_starts_at?: string; p_user_id: string }
         Returns: string
       }
+      backfill_referral_codes: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       backfill_welcome_messages: {
         Args: Record<PropertyKey, never>
         Returns: undefined

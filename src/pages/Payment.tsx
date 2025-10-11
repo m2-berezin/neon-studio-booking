@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useMessaging } from '@/hooks/useMessaging';
+import { useFriendCode } from '@/hooks/useFriendCode';
 import { ArrowLeft, CheckCircle, Copy, Smartphone, Building2, Tag } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 const Payment = () => {
@@ -20,11 +21,13 @@ const Payment = () => {
     user
   } = useAuth();
   const { sendMessage, ADMIN_ID } = useMessaging();
+  const { appliedFriendCode, hasFriendCodeDiscount } = useFriendCode();
   const [loading, setLoading] = useState(false);
   const [voucherDiscount, setVoucherDiscount] = useState(0);
   const [hasVoucher, setHasVoucher] = useState(false);
   const [subscriptionDiscount, setSubscriptionDiscount] = useState(0);
   const [subscriptionDiscountPercent, setSubscriptionDiscountPercent] = useState(0);
+  const [friendCodeDiscount, setFriendCodeDiscount] = useState(0);
   const [activeVoucherId, setActiveVoucherId] = useState<string | null>(null);
 
   // Get payment details from URL params
@@ -68,12 +71,22 @@ const Payment = () => {
   const IBAN = 'PT50 0193 0000 1050 4647 3479 5';
   const REVOLUT_REVTAG = '@Ghostwayne';
   
-  // Load subscription and voucher discounts on mount
+  // Load subscription, friend code, and voucher discounts on mount
   useEffect(() => {
     const loadDiscounts = async () => {
       if (!user || !price) return;
       
       try {
+        const basePrice = parseFloat(price);
+        
+        // Calculate friend code discount (25%)
+        if (hasFriendCodeDiscount()) {
+          const friendDiscount = basePrice * 0.25;
+          setFriendCodeDiscount(friendDiscount);
+        } else {
+          setFriendCodeDiscount(0);
+        }
+        
         // Load subscription discount
         const { data: subscriptionData } = await supabase
           .from('subscriptions')
@@ -144,7 +157,7 @@ const Payment = () => {
     };
     
     loadDiscounts();
-  }, [user, price, service]);
+  }, [user, price, service, hasFriendCodeDiscount]);
   
   useEffect(() => {
     // For subscriptions, we don't need 'option', just 'plan'
@@ -294,7 +307,7 @@ const Payment = () => {
         }
 
         // Create payment request with transfer_link and voucher_id
-        const finalPrice = Math.max(0, parseFloat(price) - subscriptionDiscount - voucherDiscount);
+        const finalPrice = Math.max(0, parseFloat(price) - subscriptionDiscount - friendCodeDiscount - voucherDiscount);
         
         const { error: paymentError } = await supabase
           .from('payment_requests')
@@ -398,7 +411,7 @@ const Payment = () => {
       }
 
       // 2. Call RPC to create payment request with voucher_id
-      const finalPrice = Math.max(0, parseFloat(price) - subscriptionDiscount - voucherDiscount);
+      const finalPrice = Math.max(0, parseFloat(price) - subscriptionDiscount - friendCodeDiscount - voucherDiscount);
       
       const {
         data: paymentId,
@@ -516,7 +529,7 @@ const Payment = () => {
               <>
                 <Separator />
                 
-                {(subscriptionDiscount > 0 || hasVoucher) && (
+                {(subscriptionDiscount > 0 || friendCodeDiscount > 0 || hasVoucher) && (
                   <div className="flex items-center justify-between text-sm">
                     <span>Subtotal:</span>
                     <span>€{price}</span>
@@ -530,6 +543,13 @@ const Payment = () => {
                   </div>
                 )}
                 
+                {friendCodeDiscount > 0 && (
+                  <div className="flex items-center justify-between text-sm text-green-600">
+                    <span>Código de Amigo ({appliedFriendCode}) - 25%:</span>
+                    <span>-€{friendCodeDiscount.toFixed(2)}</span>
+                  </div>
+                )}
+                
                 {hasVoucher && voucherDiscount > 0 && (
                   <div className="flex items-center justify-between text-sm text-green-600">
                     <span className="flex items-center gap-1">
@@ -540,11 +560,11 @@ const Payment = () => {
                   </div>
                 )}
                 
-                {(subscriptionDiscount > 0 || hasVoucher) && <Separator />}
+                {(subscriptionDiscount > 0 || friendCodeDiscount > 0 || hasVoucher) && <Separator />}
                 
                 <div className="flex items-center justify-between text-xl font-bold">
                   <span>Total:</span>
-                  <span className="text-primary">€{Math.max(0, parseFloat(price || '0') - subscriptionDiscount - voucherDiscount).toFixed(2)}</span>
+                  <span className="text-primary">€{Math.max(0, parseFloat(price || '0') - subscriptionDiscount - friendCodeDiscount - voucherDiscount).toFixed(2)}</span>
                 </div>
               </>
             )}
