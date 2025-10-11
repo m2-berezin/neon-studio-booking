@@ -121,38 +121,20 @@ const Payment = () => {
           setSubscriptionDiscount(discount);
         }
         
-        // Load voucher discount ONLY for non-subscription services
-        if (service !== 'subscription') {
-          // Use voucherId from params if available, otherwise load from DB
-          if (voucherId) {
-            const { data: voucherData, error } = await supabase
-              .from('vouchers')
-              .select('id, amount_eur, is_used')
-              .eq('id', voucherId)
-              .eq('is_used', false)
-              .gte('expires_at', new Date().toISOString())
-              .maybeSingle();
-            
-            if (voucherData && !error) {
-              setVoucherDiscount(voucherData.amount_eur);
-              setActiveVoucherId(voucherData.id);
-              setHasVoucher(true);
-            }
-          } else {
-            const { data: voucherData, error } = await supabase
-              .from('vouchers')
-              .select('id, amount_eur')
-              .eq('client_id', user.id)
-              .eq('is_used', false)
-              .gte('expires_at', new Date().toISOString())
-              .limit(1)
-              .maybeSingle();
-            
-            if (voucherData && !error) {
-              setVoucherDiscount(voucherData.amount_eur);
-              setActiveVoucherId(voucherData.id);
-              setHasVoucher(true);
-            }
+        // Load voucher discount ONLY if voucherId is explicitly provided in URL params
+        if (service !== 'subscription' && voucherId) {
+          const { data: voucherData, error } = await supabase
+            .from('vouchers')
+            .select('id, amount_eur, is_used')
+            .eq('id', voucherId)
+            .eq('is_used', false)
+            .gte('expires_at', new Date().toISOString())
+            .maybeSingle();
+          
+          if (voucherData && !error) {
+            setVoucherDiscount(voucherData.amount_eur);
+            setActiveVoucherId(voucherData.id);
+            setHasVoucher(true);
           }
         }
       } catch (error) {
