@@ -56,7 +56,7 @@ interface PriceBreakdown {
 export const PriceSummary = ({ services, bookingDate, className, onPriceChange, showFriendCode = true, excludeVouchers = false }: PriceSummaryProps) => {
   const { user, subscription, subscriptionDiscountPercent } = useAuth();
   const { toast } = useToast();
-  const { appliedFriendCode, hasFriendCodeDiscount } = useFriendCodeHook();
+  const { appliedFriendCode, hasFriendCodeDiscount, applyFriendCode, loading: friendCodeLoading } = useFriendCodeHook();
   
   const [rewardCode, setRewardCode] = useState('');
   const [voucherCode, setVoucherCode] = useState('');
@@ -64,6 +64,7 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
   const [appliedVoucher, setAppliedVoucher] = useState<Voucher | null>(null);
   const [availableVouchers, setAvailableVouchers] = useState<Voucher[]>([]);
   const [loading, setLoading] = useState(false);
+  const [friendCodeInput, setFriendCodeInput] = useState('');
 
   // Load user's available vouchers
   const loadVouchers = async () => {
@@ -222,6 +223,24 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
     }
   };
 
+  const handleApplyFriendCode = async () => {
+    if (!friendCodeInput.trim()) {
+      toast({
+        title: 'Código Vazio',
+        description: 'Por favor insere um código de amigo',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    const success = await applyFriendCode(friendCodeInput.toUpperCase());
+    if (success) {
+      setFriendCodeInput('');
+      setAppliedReward(''); // Clear any active reward
+      setAppliedVoucher(null); // Clear any active voucher
+    }
+  };
+
   return (
     <Card className={className}>
       <CardHeader>
@@ -254,24 +273,46 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
           </div>
         )}
 
+        {/* Apply Friend Code Section */}
+        {!appliedFriendCode && showFriendCode && (
+          <div className="border-t pt-4 space-y-2">
+            <Label htmlFor="friend-code-input" className="text-sm font-medium">
+              Tens um código de amigo?
+            </Label>
+            <div className="flex gap-2">
+              <Input
+                id="friend-code-input"
+                placeholder="Insere o código aqui"
+                value={friendCodeInput}
+                onChange={(e) => setFriendCodeInput(e.target.value.toUpperCase().trim())}
+                className="font-mono text-center"
+                maxLength={100}
+              />
+              <Button
+                onClick={handleApplyFriendCode}
+                disabled={friendCodeLoading || !friendCodeInput.trim()}
+                size="sm"
+                variant="default"
+              >
+                {friendCodeLoading ? 'A aplicar...' : 'Aplicar'}
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Friend Code Discount Display */}
         {hasFriendCodeDiscount() && appliedFriendCode && (
           <div className="bg-green-50 border border-green-200 rounded-lg p-3">
             <div className="flex items-center justify-between">
               <div>
                 <Label className="text-sm font-medium text-green-800">
-                  Desconto de Código de Amigo Ativo
+                  Desconto de 25% ativo! (Código: {appliedFriendCode})
                 </Label>
                 <p className="text-xs text-green-700 mt-1">
-                  Código: {appliedFriendCode} - 25% de desconto aplicado
-                </p>
-                <p className="text-xs text-green-600 mt-1">
-                  ⚠️ Este desconto será usado ao confirmar o pagamento
+                  Reserva um serviço em 30 dias ou o desconto ficará inativo.
                 </p>
               </div>
-              <Badge variant="secondary" className="bg-green-100 text-green-800">
-                -25%
-              </Badge>
+              <span className="text-green-600 font-bold">-€{rewardDiscount.toFixed(2)}</span>
             </div>
           </div>
         )}
