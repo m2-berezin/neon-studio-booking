@@ -1530,9 +1530,17 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: number
       }
+      get_user_role: {
+        Args: { p_user_id: string }
+        Returns: string
+      }
       get_voucher_status: {
         Args: { p_user_id: string }
         Returns: Json
+      }
+      has_role: {
+        Args: { p_role: string; p_user_id: string }
+        Returns: boolean
       }
       http: {
         Args: { request: Database["public"]["CompositeTypes"]["http_request"] }
