@@ -23,6 +23,9 @@ interface Project {
   status: string;
   user_id: string;
   created_at: string;
+  is_mixmaster?: boolean;
+  transfer_link?: string;
+  note?: string;
 }
 
 export const useProjects = () => {
@@ -42,17 +45,26 @@ export const useProjects = () => {
     
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      
+      // Load regular bookings
+      const { data: bookingsData, error: bookingsError } = await supabase
         .from('bookings')
         .select('*')
         .eq('user_id', user.id)
         .eq('status', 'confirmed')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (bookingsError) throw bookingsError;
+      
+      // Load Mix & Master projects
+      // @ts-ignore - RPC exists in DB
+      const { data: mixmasterData, error: mixmasterError } = await supabase
+        .rpc('get_client_mixmaster_projects', { p_user_id: user.id });
+
+      if (mixmasterError) throw mixmasterError;
       
       // Map bookings to projects format
-      const mappedProjects: Project[] = (data || []).map((booking: any) => ({
+      const bookingProjects: Project[] = (bookingsData || []).map((booking: any) => ({
         id: booking.id,
         title: booking.service_name_snapshot || 'Sessão de Estúdio',
         description: 'Reserva Confirmada',
@@ -63,9 +75,32 @@ export const useProjects = () => {
         status: booking.status,
         user_id: booking.user_id,
         created_at: booking.created_at,
+        is_mixmaster: false,
       }));
       
-      setProjects(mappedProjects);
+      // Map mixmaster projects
+      const mixProjects: Project[] = (mixmasterData || []).map((mix: any) => ({
+        id: mix.id,
+        title: mix.service_name || 'Mix & Master',
+        description: mix.note || '',
+        address: '',
+        date_day: mix.created_at,
+        start_time: mix.created_at,
+        end_time: mix.created_at,
+        status: mix.status,
+        user_id: user.id,
+        created_at: mix.created_at,
+        is_mixmaster: true,
+        transfer_link: mix.transfer_link,
+        note: mix.note,
+      }));
+      
+      // Combine and sort by created_at
+      const allProjects = [...bookingProjects, ...mixProjects].sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+      
+      setProjects(allProjects);
     } catch (error: any) {
       console.error('Error loading projects:', error);
       toast({
@@ -75,6 +110,34 @@ export const useProjects = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const deleteProject = async (projectId: string) => {
+    try {
+      // @ts-ignore - RPC exists in DB
+      const { error } = await supabase.rpc('client_delete_project', {
+        p_booking_id: projectId
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: 'Projeto Eliminado',
+        description: 'O projeto foi eliminado com sucesso.',
+      });
+
+      // Reload projects
+      await loadProjects();
+      return true;
+    } catch (error: any) {
+      console.error('Error deleting project:', error);
+      toast({
+        title: 'Erro',
+        description: error.message || 'Não foi possível eliminar o projeto',
+        variant: 'destructive',
+      });
+      return false;
     }
   };
 
@@ -94,5 +157,6 @@ export const useProjects = () => {
     loadProject,
     uploadProjectFile,
     markAsDelivered,
+    deleteProject,
   };
 };

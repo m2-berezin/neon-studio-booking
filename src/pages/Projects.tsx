@@ -1,5 +1,5 @@
-import React from 'react';
-import { Folder, Clock, CheckCircle, FileText, Music, Zap } from 'lucide-react';
+import React, { useState } from 'react';
+import { Folder, Clock, CheckCircle, FileText, Music, Zap, Trash2, FileAudio } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -8,10 +8,22 @@ import { useProjects } from '@/hooks/useProjects';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 const Projects = () => {
   const { user } = useAuth();
-  const { loading, projects } = useProjects();
+  const { loading, projects, deleteProject } = useProjects();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
 
   if (!user) {
     return (
@@ -30,6 +42,31 @@ const Projects = () => {
   const formatTime = (timeString: string) => {
     const date = new Date(timeString);
     return format(date, 'HH:mm');
+  };
+
+  const formatDateTime = (dateString: string) => {
+    const date = new Date(dateString);
+    return format(date, 'dd/MM/yyyy HH:mm');
+  };
+
+  const handleDeleteProject = async () => {
+    if (!projectToDelete) return;
+    
+    const success = await deleteProject(projectToDelete);
+    if (success) {
+      setDeleteDialogOpen(false);
+      setProjectToDelete(null);
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    const statusMap: Record<string, string> = {
+      confirmed: 'Confirmada',
+      pending: 'Pendente',
+      approved: 'Aprovada',
+      rejected: 'Rejeitada',
+    };
+    return statusMap[status] || status;
   };
 
   return (
@@ -61,11 +98,15 @@ const Projects = () => {
           {projects.map((project) => (
             <Card
               key={project.id}
-              className="studio-card hover:shadow-lg transition-all"
+              className="studio-card hover:shadow-lg transition-all relative"
             >
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg">
-                  <CheckCircle className="w-5 h-5 text-primary" />
+                  {project.is_mixmaster ? (
+                    <FileAudio className="w-5 h-5 text-primary" />
+                  ) : (
+                    <CheckCircle className="w-5 h-5 text-primary" />
+                  )}
                   {project.title}
                 </CardTitle>
                 {project.description && (
@@ -77,41 +118,88 @@ const Projects = () => {
 
               <CardContent>
                 <div className="space-y-3">
-                  <div className="flex items-start gap-2 text-sm">
-                    <Folder className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                    <a 
-                      href="https://maps.google.com/?q=Rua+Abade+Correia+da+Serra+20A,+2865-207+Fernão+Ferro"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-muted-foreground hover:text-primary transition-colors underline cursor-pointer"
+                  {!project.is_mixmaster && project.address && (
+                    <div className="flex items-start gap-2 text-sm">
+                      <Folder className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                      <a 
+                        href="https://maps.google.com/?q=Rua+Abade+Correia+da+Serra+20A,+2865-207+Fernão+Ferro"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-muted-foreground hover:text-primary transition-colors underline cursor-pointer"
+                      >
+                        {project.address}
+                      </a>
+                    </div>
+                  )}
+
+                  {project.is_mixmaster ? (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Clock className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                      <span className="text-foreground">
+                        Enviado: {formatDateTime(project.created_at)}
+                      </span>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex items-center gap-2 text-sm">
+                        <Clock className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                        <span className="font-medium text-foreground">
+                          {formatDate(project.date_day)}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-2 text-sm">
+                        <Clock className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                        <span className="text-foreground">
+                          {formatTime(project.start_time)} - {formatTime(project.end_time)}
+                        </span>
+                      </div>
+                    </>
+                  )}
+
+                  <div className="flex items-center justify-between">
+                    <Badge variant="outline" className="text-xs">
+                      {getStatusLabel(project.status)}
+                    </Badge>
+                    
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        setProjectToDelete(project.id);
+                        setDeleteDialogOpen(true);
+                      }}
+                      className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                     >
-                      {project.address}
-                    </a>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
-
-                  <div className="flex items-center gap-2 text-sm">
-                    <Clock className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                    <span className="font-medium text-foreground">
-                      {formatDate(project.date_day)}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-2 text-sm">
-                    <Clock className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                    <span className="text-foreground">
-                      {formatTime(project.start_time)} - {formatTime(project.end_time)}
-                    </span>
-                  </div>
-
-                  <Badge variant="outline" className="text-xs mt-2">
-                    {project.status === 'confirmed' ? 'Confirmada' : project.status}
-                  </Badge>
                 </div>
               </CardContent>
             </Card>
           ))}
         </div>
       )}
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Eliminar Projeto?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tens a certeza que queres eliminar este projeto? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteProject}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

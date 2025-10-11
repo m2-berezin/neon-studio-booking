@@ -1175,6 +1175,10 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: string
       }
+      client_delete_project: {
+        Args: { p_booking_id: string }
+        Returns: boolean
+      }
       create_booking_captacao: {
         Args: { p_hours: number; p_starts_at: string; p_user_id: string }
         Returns: string
@@ -1450,6 +1454,18 @@ export type Database = {
       get_booking_min_datetime: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_client_mixmaster_projects: {
+        Args: { p_user_id: string }
+        Returns: {
+          amount_eur: number
+          created_at: string
+          id: string
+          note: string
+          service_name: string
+          status: string
+          transfer_link: string
+        }[]
       }
       get_loyalty_points: {
         Args: { p_user_id: string }
