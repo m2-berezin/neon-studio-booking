@@ -1121,7 +1121,7 @@ export type Database = {
       }
       admin_approve_payment: {
         Args: { p_payment_id: string }
-        Returns: string
+        Returns: boolean
       }
       admin_hide_project: {
         Args: { p_project_id: string; p_project_type: string }
@@ -1687,14 +1687,6 @@ export type Database = {
       send_renewal_alerts: {
         Args: Record<PropertyKey, never>
         Returns: undefined
-      }
-      send_transfer_email: {
-        Args: {
-          p_client_name: string
-          p_payment_id: string
-          p_transfer_link: string
-        }
-        Returns: boolean
       }
       slugify: {
         Args: { txt: string }
