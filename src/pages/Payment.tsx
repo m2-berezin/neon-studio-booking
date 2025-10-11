@@ -337,7 +337,10 @@ const Payment = () => {
         }
 
         // Create payment request with transfer_link and voucher_id
-        const finalPrice = Math.max(0, parseFloat(price) - subscriptionDiscount - friendCodeDiscount - voucherDiscount);
+        // Apply subscription discount first, then apply the HIGHEST of friend code or voucher (not both)
+        const priceAfterSubscription = parseFloat(price) - subscriptionDiscount;
+        const priceAfterRewardOrVoucher = priceAfterSubscription - Math.max(friendCodeDiscount, voucherDiscount);
+        const finalPrice = Math.max(0, priceAfterRewardOrVoucher);
         
         const { data: paymentData, error: paymentError } = await supabase
           .from('payment_requests')
@@ -461,7 +464,10 @@ const Payment = () => {
       }
 
       // 2. Call RPC to create payment request with voucher_id
-      const finalPrice = Math.max(0, parseFloat(price) - subscriptionDiscount - friendCodeDiscount - voucherDiscount);
+      // Apply subscription discount first, then apply the HIGHEST of friend code or voucher (not both)
+      const priceAfterSubscription = parseFloat(price) - subscriptionDiscount;
+      const priceAfterRewardOrVoucher = priceAfterSubscription - Math.max(friendCodeDiscount, voucherDiscount);
+      const finalPrice = Math.max(0, priceAfterRewardOrVoucher);
       
       const {
         data: paymentId,
