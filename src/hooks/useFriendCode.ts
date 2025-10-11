@@ -100,6 +100,8 @@ export const useFriendCode = () => {
       // Trim and validate code
       const trimmedCode = code.trim().toUpperCase();
       
+      console.log('Attempting to apply friend code:', trimmedCode);
+      
       if (!trimmedCode) {
         toast({
           title: 'Código Vazio',
@@ -117,9 +119,12 @@ export const useFriendCode = () => {
         .eq('is_active', true)
         .maybeSingle();
 
+      console.log('Code lookup result:', { codeData, codeError });
+
       if (codeError) throw codeError;
 
       if (!codeData) {
+        console.log('Code not found in database');
         toast({
           title: 'Código Não Encontrado',
           description: 'Este código de amigo não existe',
@@ -127,6 +132,8 @@ export const useFriendCode = () => {
         });
         return false;
       }
+
+      console.log('Code found, checking ownership...');
 
       // Check if user is trying to use their own code
       if (codeData.user_id === user.id) {
