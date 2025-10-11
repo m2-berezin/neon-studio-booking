@@ -179,7 +179,7 @@ const MixMaster = () => {
       service: 'mixmaster',
       option: selectedOption,
       delivery: deliveryMethod,
-      price: getSelectedPrice().toString(),
+      price: '40', // Always send base price - discounts are calculated in Payment.tsx
       notes: projectNotes,
       transferLink: transferLink,
       voucherId: selectedVoucher?.id || '',
