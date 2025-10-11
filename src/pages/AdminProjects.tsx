@@ -108,23 +108,24 @@ const AdminProjects = () => {
 
     try {
       // @ts-ignore - RPC exists in DB
-      const { error } = await supabase.rpc('delete_mixmaster_project', {
-        p_payment_id: projectToDelete
+      const { error } = await supabase.rpc('admin_hide_project', {
+        p_project_id: projectToDelete,
+        p_project_type: 'mixmaster'
       });
 
       if (error) throw error;
 
       toast({
-        title: 'Projeto Eliminado',
-        description: 'O projeto foi eliminado com sucesso.',
+        title: 'Projeto Removido',
+        description: 'O projeto foi removido do teu dashboard.',
       });
 
       loadProjects();
     } catch (error) {
-      console.error('Error deleting project:', error);
+      console.error('Error hiding project:', error);
       toast({
         title: 'Erro',
-        description: 'Não foi possível eliminar o projeto',
+        description: 'Não foi possível remover o projeto',
         variant: 'destructive',
       });
     } finally {
@@ -248,15 +249,15 @@ const AdminProjects = () => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Eliminar Projeto?</AlertDialogTitle>
+            <AlertDialogTitle>Remover Projeto do Dashboard?</AlertDialogTitle>
             <AlertDialogDescription>
-              Tens a certeza que queres eliminar este projeto Mix & Master? Esta ação não pode ser desfeita.
+              O projeto será removido apenas do teu dashboard. O cliente continuará a vê-lo e a receita mensal não será afetada.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteProject} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Eliminar
+              Remover
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
