@@ -426,7 +426,7 @@ export type Database = {
           note: string | null
           plan_type: string | null
           proof_url: string | null
-          reservation_id: string
+          reservation_id: string | null
           status: string
           subscription_id: string | null
           transfer_link: string | null
@@ -448,7 +448,7 @@ export type Database = {
           note?: string | null
           plan_type?: string | null
           proof_url?: string | null
-          reservation_id: string
+          reservation_id?: string | null
           status?: string
           subscription_id?: string | null
           transfer_link?: string | null
@@ -470,7 +470,7 @@ export type Database = {
           note?: string | null
           plan_type?: string | null
           proof_url?: string | null
-          reservation_id?: string
+          reservation_id?: string | null
           status?: string
           subscription_id?: string | null
           transfer_link?: string | null
