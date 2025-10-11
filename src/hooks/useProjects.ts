@@ -46,7 +46,7 @@ export const useProjects = () => {
     try {
       setLoading(true);
       
-      // Load regular bookings
+      // Load regular bookings (excluding Mix & Master)
       const { data: bookingsData, error: bookingsError } = await supabase
         .from('bookings')
         .select('*')
@@ -63,8 +63,13 @@ export const useProjects = () => {
 
       if (mixmasterError) throw mixmasterError;
       
-      // Map bookings to projects format
-      const bookingProjects: Project[] = (bookingsData || []).map((booking: any) => ({
+      // Map bookings to projects format, filtering out Mix & Master bookings
+      const bookingProjects: Project[] = (bookingsData || [])
+        .filter((booking: any) => {
+          const serviceName = booking.service_name_snapshot || '';
+          return !serviceName.toLowerCase().includes('mix') && !serviceName.toLowerCase().includes('master');
+        })
+        .map((booking: any) => ({
         id: booking.id,
         title: booking.service_name_snapshot || 'Sessão de Estúdio',
         description: 'Reserva Confirmada',
