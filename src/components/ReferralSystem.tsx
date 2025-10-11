@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Copy, Users, Gift, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,9 +15,29 @@ interface ReferralSystemProps {
 const ReferralSystem = ({ className }: ReferralSystemProps) => {
   const { user, profile } = useAuth();
   const { toast } = useToast();
-  const { myFriendCode, appliedFriendCode, loading, applyFriendCode } = useFriendCode();
+  const { myFriendCode, appliedFriendCode, loading, applyFriendCode, refreshAppliedCode } = useFriendCode();
   const [copied, setCopied] = useState(false);
   const [inputCode, setInputCode] = useState('');
+
+  // Refresh applied code on mount and when page becomes visible
+  useEffect(() => {
+    if (user) {
+      refreshAppliedCode();
+    }
+
+    // Refresh when page becomes visible again
+    const handleVisibilityChange = () => {
+      if (!document.hidden && user) {
+        refreshAppliedCode();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [user]);
 
   if (!user || !profile) return null;
 

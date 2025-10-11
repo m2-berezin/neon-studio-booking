@@ -21,7 +21,7 @@ const Payment = () => {
     user
   } = useAuth();
   const { sendMessage, ADMIN_ID } = useMessaging();
-  const { appliedFriendCode, hasFriendCodeDiscount, markCodeAsUsed } = useFriendCode();
+  const { appliedFriendCode, hasFriendCodeDiscount, markCodeAsUsed, refreshAppliedCode } = useFriendCode();
   const [loading, setLoading] = useState(false);
   const [voucherDiscount, setVoucherDiscount] = useState(0);
   const [hasVoucher, setHasVoucher] = useState(false);
@@ -232,6 +232,7 @@ const Payment = () => {
         // Mark friend code as used if applicable
         if (hasFriendCodeDiscount() && requestId) {
           await markCodeAsUsed(requestId);
+          await refreshAppliedCode(); // Refresh to clear the discount from UI
         }
 
         toast({
@@ -345,6 +346,7 @@ const Payment = () => {
         // Mark friend code as used if applicable
         if (hasFriendCodeDiscount() && paymentData) {
           await markCodeAsUsed(paymentData.id);
+          await refreshAppliedCode(); // Refresh to clear the discount from UI
         }
 
         // Send message to admin with transfer link and notes
@@ -451,6 +453,7 @@ const Payment = () => {
       // Mark friend code as used if applicable
       if (hasFriendCodeDiscount() && paymentId) {
         await markCodeAsUsed(paymentId);
+        await refreshAppliedCode(); // Refresh to clear the discount from UI
       }
 
       // Success notification with clear instructions
