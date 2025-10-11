@@ -38,6 +38,7 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<Profile>) => Promise<{ error: any }>;
   isAdmin: () => boolean;
+  refreshUserData: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -275,6 +276,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return isAdminUser;
   };
 
+  const refreshUserData = async () => {
+    if (!user) return;
+    
+    await Promise.all([
+      fetchProfile(user.id),
+      fetchSubscription(user.id),
+      checkAdminStatus(user.id),
+    ]);
+  };
+
   const value = {
     user,
     session,
@@ -289,6 +300,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     signOut,
     updateProfile,
     isAdmin,
+    refreshUserData,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

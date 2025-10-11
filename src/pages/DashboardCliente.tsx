@@ -10,6 +10,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Calendar, Gift, Music, MessageSquare, Send } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { useRealtimeSync } from '@/hooks/useRealtimeSync';
+import { DebugPanel } from '@/components/DebugPanel';
 
 const ADMIN_ID = '6d9d1dc1-e16f-4f3d-a817-1591a1b27477';
 
@@ -32,6 +34,9 @@ const DashboardCliente = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [renewalCount, setRenewalCount] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  // Enable realtime sync for all user data
+  useRealtimeSync();
 
   const loadMessages = async () => {
     if (!user) return;
@@ -201,8 +206,10 @@ const DashboardCliente = () => {
   if (!user) return null;
 
   return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
+    <>
+      <DebugPanel />
+      <div className="container mx-auto p-6">
+        <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
 
       <Tabs defaultValue="overview" onValueChange={(value) => {
         if (value === 'messages') {
@@ -363,7 +370,8 @@ const DashboardCliente = () => {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
+      </div>
+    </>
   );
 };
 

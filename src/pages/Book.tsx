@@ -14,6 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { format, parse } from 'date-fns';
 import { pt } from 'date-fns/locale';
 import PriceSummary from '@/components/PriceSummary';
+import { RealtimeSyncProvider } from '@/components/RealtimeSyncProvider';
 import { 
   Calendar as CalendarIcon, 
   Clock, 
@@ -984,4 +985,10 @@ const Book = () => {
   );
 };
 
-export default Book;
+const BookWithSync = () => (
+  <RealtimeSyncProvider>
+    <Book />
+  </RealtimeSyncProvider>
+);
+
+export default BookWithSync;

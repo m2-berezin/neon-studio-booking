@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useFriendCode } from '@/hooks/useFriendCode';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ReferralSystemProps {
   className?: string;
@@ -34,8 +35,26 @@ const ReferralSystem = ({ className }: ReferralSystemProps) => {
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
     
+    // Set up realtime subscription for friend_code_uses changes
+    const channel = supabase
+      .channel('friend-code-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'friend_code_uses',
+          filter: `used_by=eq.${user.id}`,
+        },
+        () => {
+          refreshAppliedCode();
+        }
+      )
+      .subscribe();
+    
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      supabase.removeChannel(channel);
     };
   }, [user]);
 

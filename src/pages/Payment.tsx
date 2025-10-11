@@ -11,6 +11,7 @@ import { useMessaging } from '@/hooks/useMessaging';
 import { useFriendCode } from '@/hooks/useFriendCode';
 import { ArrowLeft, CheckCircle, Copy, Smartphone, Building2, Tag } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
+import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 const Payment = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -29,6 +30,9 @@ const Payment = () => {
   const [subscriptionDiscountPercent, setSubscriptionDiscountPercent] = useState(0);
   const [friendCodeDiscount, setFriendCodeDiscount] = useState(0);
   const [activeVoucherId, setActiveVoucherId] = useState<string | null>(null);
+  
+  // Enable realtime sync
+  useRealtimeSync();
 
   // Get payment details from URL params
   const service = searchParams.get('service');
