@@ -210,12 +210,28 @@ const Payment = () => {
           return;
         }
 
+        // Check if user already has a pending subscription
+        const { data: existingPendingSub } = await supabase
+          .from('subscriptions')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('payment_status', 'pending')
+          .maybeSingle();
+
+        if (existingPendingSub) {
+          toast({
+            title: 'Pedido Pendente',
+            description: 'Já tens um pedido de subscrição pendente. Aguarda aprovação do administrador.',
+            variant: 'destructive'
+          });
+          setLoading(false);
+          return;
+        }
+
         // Create payment request for subscription using subscribe_request RPC
         const planType = plan === 'plan-s' ? 'S' : 'X';
-        // Subscriptions don't use vouchers
         const finalPrice = parseFloat(price);
         
-        // @ts-ignore - RPC exists in DB but types not yet regenerated
         const { data: requestId, error: requestError } = await supabase.rpc('subscribe_request', {
           p_user_id: user.id,
           p_plan_type: planType,
@@ -226,7 +242,7 @@ const Payment = () => {
           console.error('Payment request error:', requestError);
           toast({
             title: 'Erro',
-            description: 'Não foi possível criar o pedido de pagamento. Tenta novamente.',
+            description: requestError.message || 'Não foi possível criar o pedido de pagamento. Tenta novamente.',
             variant: 'destructive'
           });
           setLoading(false);
@@ -239,13 +255,13 @@ const Payment = () => {
           const marked = await markCodeAsUsed(requestId);
           if (marked) {
             console.log('[PAYMENT] Friend code marked successfully');
-            await refreshAppliedCode(); // Refresh to ensure UI is cleared
+            await refreshAppliedCode();
           }
         }
 
         toast({
           title: 'Pedido Enviado ✅',
-          description: 'Subscrição pendente de verificação de pagamento. Aguarde aprovação do administrador.',
+          description: 'Subscrição pendente de verificação de pagamento. Aguarda aprovação do administrador.',
           duration: 5000
         });
 
