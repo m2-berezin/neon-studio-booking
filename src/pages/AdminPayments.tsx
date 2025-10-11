@@ -17,6 +17,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
+import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 
 interface PaymentRequest {
   id: string;
@@ -43,6 +44,9 @@ const AdminPayments = () => {
   const [loading, setLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [paymentToHide, setPaymentToHide] = useState<string | null>(null);
+  
+  // Enable realtime sync for admin
+  useRealtimeSync(true);
 
   const loadPaymentRequests = async () => {
     try {

@@ -19,6 +19,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 
 interface MixMasterProject {
   id: string;
@@ -40,6 +41,9 @@ const AdminProjects = () => {
   const [loading, setLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
+  
+  // Enable realtime sync for admin
+  useRealtimeSync(true);
 
   useEffect(() => {
     if (!isAdmin()) {

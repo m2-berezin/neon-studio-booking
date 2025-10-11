@@ -21,6 +21,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
+import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 
 interface Booking {
   id: string;
@@ -45,6 +46,9 @@ const AdminBookings = () => {
   const { isAdmin } = useAuth();
   const { toast } = useToast();
   const { loading, updateBookingStatus, loadBookings, bookings } = useAdmin();
+  
+  // Enable realtime sync for admin
+  useRealtimeSync(true);
   const [localBookings, setLocalBookings] = useState<Booking[]>([]);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [newStatus, setNewStatus] = useState('');

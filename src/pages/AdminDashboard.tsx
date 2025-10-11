@@ -26,6 +26,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { toast as sonnerToast } from 'sonner';
 import { DaysOffManager } from '@/components/admin/DaysOffManager';
+import { useRealtimeSync } from '@/hooks/useRealtimeSync';
+import { DebugPanel } from '@/components/DebugPanel';
 
 interface DashboardStats {
   totalBookings: number;
@@ -66,6 +68,9 @@ const AdminDashboard = () => {
   const { isAdmin, user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  
+  // Enable realtime sync for admin (all users)
+  useRealtimeSync(true);
   const [stats, setStats] = useState<DashboardStats>({
     totalBookings: 0,
     pendingPayments: 0,
@@ -481,6 +486,9 @@ const AdminDashboard = () => {
 
   return (
     <div className="space-y-6">
+      {/* Debug Panel - Only visible in dev */}
+      <DebugPanel />
+      
       <div>
         <h1 className="text-3xl font-bold mb-2">Bem-vindo ao Dashboard</h1>
         <p className="text-muted-foreground">

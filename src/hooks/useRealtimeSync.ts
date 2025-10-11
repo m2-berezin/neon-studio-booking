@@ -2,76 +2,77 @@ import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
-export const useRealtimeSync = () => {
-  const { user, refreshUserData } = useAuth();
+export const useRealtimeSync = (forAdmin = false) => {
+  const { user, refreshUserData, isAdminUser } = useAuth();
 
   useEffect(() => {
     if (!user) return;
 
     // Set up realtime subscriptions for all relevant tables
+    // Admin listens to ALL changes, regular users only their own
     const subscriptionsChannel = supabase
-      .channel('subscriptions-changes')
+      .channel(forAdmin ? 'admin-subscriptions-changes' : 'subscriptions-changes')
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
           table: 'subscriptions',
-          filter: `user_id=eq.${user.id}`,
+          ...(forAdmin ? {} : { filter: `user_id=eq.${user.id}` }),
         },
         () => {
-          console.log('Subscription changed, refreshing user data...');
+          console.log('[REALTIME] Subscription changed, refreshing data...');
           refreshUserData();
         }
       )
       .subscribe();
 
     const paymentRequestsChannel = supabase
-      .channel('payment-requests-changes')
+      .channel(forAdmin ? 'admin-payment-requests-changes' : 'payment-requests-changes')
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
           table: 'payment_requests',
-          filter: `user_id=eq.${user.id}`,
+          ...(forAdmin ? {} : { filter: `user_id=eq.${user.id}` }),
         },
         () => {
-          console.log('Payment request changed, refreshing...');
+          console.log('[REALTIME] Payment request changed, refreshing...');
           refreshUserData();
         }
       )
       .subscribe();
 
     const bookingsChannel = supabase
-      .channel('bookings-changes')
+      .channel(forAdmin ? 'admin-bookings-changes' : 'bookings-changes')
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
           table: 'bookings',
-          filter: `user_id=eq.${user.id}`,
+          ...(forAdmin ? {} : { filter: `user_id=eq.${user.id}` }),
         },
         () => {
-          console.log('Booking changed, refreshing...');
+          console.log('[REALTIME] Booking changed, refreshing...');
           refreshUserData();
         }
       )
       .subscribe();
 
     const reservationsChannel = supabase
-      .channel('reservations-changes')
+      .channel(forAdmin ? 'admin-reservations-changes' : 'reservations-changes')
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
           table: 'reservations',
-          filter: `user_id=eq.${user.id}`,
+          ...(forAdmin ? {} : { filter: `user_id=eq.${user.id}` }),
         },
         () => {
-          console.log('Reservation changed, refreshing...');
+          console.log('[REALTIME] Reservation changed, refreshing...');
           refreshUserData();
         }
       )
@@ -83,7 +84,7 @@ export const useRealtimeSync = () => {
       supabase.removeChannel(bookingsChannel);
       supabase.removeChannel(reservationsChannel);
     };
-  }, [user?.id]);
+  }, [user?.id, forAdmin, isAdminUser]);
 
   return null;
 };

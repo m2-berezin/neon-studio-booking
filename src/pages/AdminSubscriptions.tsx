@@ -14,6 +14,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { Loader2, Check, RefreshCw, X } from "lucide-react";
+import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 
 interface Subscription {
   id: string;
@@ -30,6 +31,9 @@ export default function AdminSubscriptions() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const { toast } = useToast();
+  
+  // Enable realtime sync for admin
+  useRealtimeSync(true);
 
   const loadSubscriptions = async () => {
     try {
