@@ -34,6 +34,8 @@ interface PriceSummaryProps {
   onPriceChange?: (finalPrice: number, breakdown: PriceBreakdown) => void;
   showFriendCode?: boolean;
   excludeVouchers?: boolean;
+  isPremiumOffer?: boolean; // Indica se é oferta PREMIUM+ (2h captação grátis)
+  premiumOfferOriginalPrice?: number; // Preço original antes do desconto PREMIUM+
 }
 
 interface LineItem {
@@ -53,7 +55,7 @@ interface PriceBreakdown {
   appliedVoucher?: Voucher;
 }
 
-export const PriceSummary = ({ services, bookingDate, className, onPriceChange, showFriendCode = true, excludeVouchers = false }: PriceSummaryProps) => {
+export const PriceSummary = ({ services, bookingDate, className, onPriceChange, showFriendCode = true, excludeVouchers = false, isPremiumOffer = false, premiumOfferOriginalPrice = 0 }: PriceSummaryProps) => {
   const { user, subscription, subscriptionDiscountPercent } = useAuth();
   const { toast } = useToast();
   const { appliedFriendCode, hasFriendCodeDiscount, applyFriendCode, loading: friendCodeLoading } = useFriendCodeHook();
@@ -109,11 +111,12 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
   const lineItems: LineItem[] = services.map(service => ({
     id: service.id,
     name: service.name,
-    price: service.base_price,
+    price: isPremiumOffer ? premiumOfferOriginalPrice : service.base_price,
     quantity: 1
   }));
 
   const subtotal = lineItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+  const premiumOfferDiscount = isPremiumOffer ? premiumOfferOriginalPrice : 0;
 
   // Calculate subscription discount automatically if user has active subscription
   const subscriptionDiscount = subscription?.is_active 
@@ -184,9 +187,10 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
   const rewardDiscount = getRewardDiscount();
   const voucherDiscount = excludeVouchers ? 0 : (appliedVoucher ? appliedVoucher.amount : 0);
   
-  // Calculate final price
+  // Calculate final price with PREMIUM+ discount
   const priceAfterSubscription = subtotal - subscriptionDiscount;
-  const priceAfterRewardOrVoucher = priceAfterSubscription - Math.max(rewardDiscount, voucherDiscount);
+  const priceAfterPremiumOffer = priceAfterSubscription - premiumOfferDiscount;
+  const priceAfterRewardOrVoucher = priceAfterPremiumOffer - Math.max(rewardDiscount, voucherDiscount);
   const finalPrice = Math.max(0, priceAfterRewardOrVoucher);
 
   // Notify parent component of price changes
@@ -354,9 +358,15 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
         )}
 
         {/* Discount Summary */}
-        {(rewardDiscount > 0 || voucherDiscount > 0) && (
+        {(premiumOfferDiscount > 0 || rewardDiscount > 0 || voucherDiscount > 0) && (
           <div className="space-y-2">
             <Separator />
+            {premiumOfferDiscount > 0 && (
+              <div className="flex justify-between text-sm text-primary font-semibold">
+                <span>Desconto PREMIUM+ (Plano X)</span>
+                <span>-€{premiumOfferDiscount.toFixed(2)}</span>
+              </div>
+            )}
             {rewardDiscount > 0 && (
               <div className="flex justify-between text-sm text-green-600">
                 <span>Desconto de Recompensa</span>

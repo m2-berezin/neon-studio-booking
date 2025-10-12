@@ -918,6 +918,8 @@ const Book = () => {
             services={selectedServiceDetails ? [selectedServiceDetails] : []}
             bookingDate={selectedDate || undefined}
             showFriendCode={false}
+            isPremiumOffer={reservationFromOffer && reservationFromOffer.price_eur_snapshot === 0}
+            premiumOfferOriginalPrice={20} // Preço original de 2h captação
           />
 
           <div className="space-y-3">

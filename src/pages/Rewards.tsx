@@ -50,6 +50,7 @@ const Rewards = () => {
   const [loyaltyPoints, setLoyaltyPoints] = useState<number>(0);
   const [voucherStatus, setVoucherStatus] = useState<{ available: boolean; days_left: number } | null>(null);
   const [claimingVoucher, setClaimingVoucher] = useState(false);
+  const [activePlanType, setActivePlanType] = useState<string | null>(null);
 
   // Fetch active offers and usage
   useEffect(() => {
@@ -57,6 +58,7 @@ const Rewards = () => {
       fetchOffersAndUsage();
       fetchLoyaltyPoints();
       fetchVoucherStatus();
+      fetchActivePlan();
     }
   }, [user]);
 
@@ -155,6 +157,23 @@ const Rewards = () => {
       console.error('Error fetching voucher status:', error);
     }
   };
+
+  const fetchActivePlan = async () => {
+    if (!user) return;
+    try {
+      const { data, error } = await supabase
+        .from('subscriptions')
+        .select('plan_type')
+        .eq('user_id', user.id)
+        .eq('is_active', true)
+        .single();
+      
+      if (error && error.code !== 'PGRST116') throw error; // Ignore "not found" errors
+      setActivePlanType(data?.plan_type || null);
+    } catch (error) {
+      console.error('Error fetching active plan:', error);
+    }
+  };
   const handleApplyOffer = async (offerId: string) => {
     if (!user) return;
     setApplyingOffer(offerId);
@@ -206,6 +225,9 @@ const Rewards = () => {
 
   // Find the "Compre 2h Gravação, Ganhe +1h Grátis" offer
   const recordingOffer = offers.find(o => o.name.includes('Compre 2h') || o.name.includes('Ganhe +1h'));
+  
+  // Find the PREMIUM+ offer (2h captação grátis)
+  const premiumOffer = offers.find(o => o.name.includes('PREMIUM+'));
   const handleApplyReward = async (rewardCode: string) => {
     const success = await applyReward(rewardCode);
     if (success) {
@@ -345,6 +367,35 @@ const Rewards = () => {
                   </div>
                   <Button onClick={() => handleApplyOffer(recordingOffer.id)} disabled={(offerUsage[recordingOffer.id] || 0) >= recordingOffer.limit_per_month || applyingOffer === recordingOffer.id || hasActivePenalty()} variant="default">
                     {applyingOffer === recordingOffer.id ? 'A aplicar...' : 'Aplicar à minha próxima reserva'}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>}
+          
+          {/* PREMIUM+ Offer: 2h captação grátis - Only for Plan X subscribers */}
+          {premiumOffer && activePlanType === 'X' && <Card className="studio-card border-primary bg-primary/5">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Award className="w-5 h-5 text-primary" />
+                  Oferta 2h de Captação por Mês PREMIUM+
+                </CardTitle>
+                <CardDescription>
+                  {premiumOffer.description || 'Exclusivo para assinantes Plano X - 2h de captação totalmente grátis'}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-2xl font-bold text-primary">GRÁTIS</p>
+                    <p className="text-sm text-muted-foreground">
+                      Usado: {offerUsage[premiumOffer.id] || 0}/{premiumOffer.limit_per_month} este mês
+                    </p>
+                    {(offerUsage[premiumOffer.id] || 0) >= premiumOffer.limit_per_month && <Badge variant="outline" className="text-xs mt-1">
+                        Limite mensal atingido
+                      </Badge>}
+                  </div>
+                  <Button onClick={() => handleApplyOffer(premiumOffer.id)} disabled={(offerUsage[premiumOffer.id] || 0) >= premiumOffer.limit_per_month || applyingOffer === premiumOffer.id || hasActivePenalty()} variant="default" className="bg-primary hover:bg-primary/90">
+                    {applyingOffer === premiumOffer.id ? 'A aplicar...' : 'Aplicar Esta Oferta'}
                   </Button>
                 </div>
               </CardContent>
