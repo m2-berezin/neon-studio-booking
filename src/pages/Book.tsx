@@ -52,6 +52,7 @@ const Book = () => {
   
   // Check for reservation ID from offer application
   const [reservationFromOffer, setReservationFromOffer] = useState<any>(null);
+  const [isPremiumOffer, setIsPremiumOffer] = useState<boolean>(false);
   const [timeLeft, setTimeLeft] = useState<number | null>(null); // Timer em segundos
   const timerIntervalRef = React.useRef<NodeJS.Timeout | null>(null);
   
@@ -115,6 +116,10 @@ const Book = () => {
       
       if (data) {
         setReservationFromOffer(data);
+        // Check if it's a PREMIUM+ offer and store it in state
+        const isPremium = data.offers && data.offers.name?.includes('PREMIUM+');
+        setIsPremiumOffer(isPremium);
+        
         // Pre-select service as "captacao" since it's from offer
         setSelectedService('captacao');
         setSelectedBackendServiceId(data.service_id);
@@ -123,13 +128,10 @@ const Book = () => {
         // Iniciar timer de 5min (300 segundos)
         setTimeLeft(300);
         
-        // Check if it's a PREMIUM+ offer
-        const isPremiumOffer = data.offers && data.offers.name?.includes('PREMIUM+');
-        
         toast({
-          title: isPremiumOffer ? 'Oferta 2h captação plano PREMIUM+ ativada' : 'Oferta aplicada',
-          description: isPremiumOffer 
-            ? 'Tens 5 minutos para escolher uma data'
+          title: isPremium ? 'Oferta 2h captação plano PREMIUM+ ativada' : 'Oferta aplicada',
+          description: isPremium 
+            ? 'Captação 2h PREMIUM+ - Tens 5 minutos para escolher uma data'
             : `3h totais (2h pagas + 1h grátis) por €${data.price_eur_snapshot}`,
         });
       }
@@ -296,9 +298,9 @@ const Book = () => {
     const service = services.find(s => s.id === selectedService);
     let sessionDuration = 120; // default 2h
     
-    // If from offer, use 180 minutes (3h total)
+    // If from offer, check if it's PREMIUM+ (2h) or regular offer (3h)
     if (reservationFromOffer) {
-      sessionDuration = reservationFromOffer.duration_minutes_snapshot || 180;
+      sessionDuration = isPremiumOffer ? 120 : 180; // 2h for PREMIUM+, 3h for regular offer
     } else if (service?.id === 'captacao') {
       sessionDuration = selectedHours * 60;
     } else if (service?.id === 'captacao_mixmaster') {
@@ -339,7 +341,8 @@ const Book = () => {
         const [hours, minutes] = slot.start_time.split(':');
         startsAt.setHours(parseInt(hours), parseInt(minutes), 0, 0);
         
-        const duration = reservationFromOffer.duration_minutes_snapshot || 180;
+        // Check if it's PREMIUM+ offer (2h) or regular offer (3h)
+        const duration = isPremiumOffer ? 120 : 180; // 2h for PREMIUM+, 3h for regular offer
         const endsAt = new Date(startsAt.getTime() + duration * 60000);
         
         const { error } = await supabase
@@ -429,6 +432,7 @@ const Book = () => {
     setBookingComplete(false);
     setWhatsAppLink('');
     setReservationFromOffer(null);
+    setIsPremiumOffer(false);
     setTimeLeft(null);
     if (timerIntervalRef.current) {
       clearInterval(timerIntervalRef.current);
@@ -785,7 +789,10 @@ const Book = () => {
             )}
             {reservationFromOffer && (
               <p className="text-xs text-muted-foreground mt-2">
-                Oferta: 3h totais (2h pagas + 1h grátis) por €{reservationFromOffer.price_eur_snapshot}
+                {isPremiumOffer 
+                  ? 'Captação 2h PREMIUM+'
+                  : `Oferta: 3h totais (2h pagas + 1h grátis) por €${reservationFromOffer.price_eur_snapshot}`
+                }
               </p>
             )}
           </div>
@@ -867,7 +874,10 @@ const Book = () => {
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Duração:</span>
                   <span className="font-medium">
-                    3h totais (2h pagas + 1h grátis), {selectedSlot?.start_time.slice(0, 5)} - {calculateEndTime(selectedSlot?.start_time || '', 180).slice(0, 5)}
+                    {isPremiumOffer 
+                      ? `Captação 2h PREMIUM+, ${selectedSlot?.start_time.slice(0, 5)} - ${calculateEndTime(selectedSlot?.start_time || '', 120).slice(0, 5)}`
+                      : `3h totais (2h pagas + 1h grátis), ${selectedSlot?.start_time.slice(0, 5)} - ${calculateEndTime(selectedSlot?.start_time || '', 180).slice(0, 5)}`
+                    }
                   </span>
                 </div>
               )}
@@ -923,7 +933,7 @@ const Book = () => {
             services={selectedServiceDetails ? [selectedServiceDetails] : []}
             bookingDate={selectedDate || undefined}
             showFriendCode={false}
-            isPremiumOffer={reservationFromOffer?.offers?.name?.includes('PREMIUM+')}
+            isPremiumOffer={isPremiumOffer}
             premiumOfferOriginalPrice={20} // Preço original de 2h captação
           />
 

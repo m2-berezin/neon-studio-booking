@@ -110,7 +110,7 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
   // Calculate line items from services
   const lineItems: LineItem[] = services.map(service => ({
     id: service.id,
-    name: service.name,
+    name: isPremiumOffer ? 'Captação 2h PREMIUM+' : service.name,
     price: isPremiumOffer ? premiumOfferOriginalPrice : service.base_price,
     quantity: 1
   }));
