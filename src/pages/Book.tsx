@@ -848,13 +848,6 @@ const Book = () => {
 
           <Card className="p-6">
             <h3 className="text-lg font-semibold mb-4">Resumo da Reserva</h3>
-            {reservationFromOffer && timeLeft !== null && timeLeft > 0 && (
-              <div className="mb-4 p-3 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
-                <p className="text-sm font-semibold text-orange-900 dark:text-orange-100">
-                  ⏱️ Tempo para concluir: {formatTime(timeLeft)}
-                </p>
-              </div>
-            )}
               <div className="space-y-3 text-sm mb-6">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Serviço:</span>
@@ -920,18 +913,6 @@ const Book = () => {
               )}
             </div>
           </Card>
-
-          {/* Timer da oferta */}
-          {reservationFromOffer && timeLeft !== null && timeLeft > 0 && (
-            <Card className="p-4 bg-orange-50 dark:bg-orange-950/20 border-orange-200">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Tempo para concluir:</span>
-                <span className="text-lg font-bold text-orange-600">
-                  {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
-                </span>
-              </div>
-            </Card>
-          )}
 
           <PriceSummary
             services={selectedServiceDetails ? [selectedServiceDetails] : []}
