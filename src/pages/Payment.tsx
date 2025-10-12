@@ -30,6 +30,8 @@ const Payment = () => {
   const [subscriptionDiscountPercent, setSubscriptionDiscountPercent] = useState(0);
   const [friendCodeDiscount, setFriendCodeDiscount] = useState(0);
   const [activeVoucherId, setActiveVoucherId] = useState<string | null>(null);
+  const [isPremiumOffer, setIsPremiumOffer] = useState(false);
+  const [premiumOfferDiscount, setPremiumOfferDiscount] = useState(0);
   
   // Enable realtime sync
   useRealtimeSync();
@@ -84,6 +86,35 @@ const Payment = () => {
       
       try {
         const basePrice = parseFloat(price);
+        
+        // Check if this is a PREMIUM+ offer (free 2h captação from Plan X)
+        if (existingReservationId) {
+          const { data: reservationData } = await supabase
+            .from('reservations')
+            .select('offer_id')
+            .eq('id', existingReservationId)
+            .maybeSingle();
+          
+          if (reservationData?.offer_id) {
+            // Check if this offer is the PREMIUM+ offer (free captação)
+            const { data: offerData } = await supabase
+              .from('offers')
+              .select('name, price_eur')
+              .eq('id', reservationData.offer_id)
+              .maybeSingle();
+            
+            // If it's the free PREMIUM+ offer, apply 100% discount
+            if (offerData && offerData.price_eur === 0) {
+              setIsPremiumOffer(true);
+              setPremiumOfferDiscount(basePrice);
+              setFriendCodeDiscount(0);
+              setSubscriptionDiscount(0);
+              setSubscriptionDiscountPercent(0);
+              setVoucherDiscount(0);
+              return;
+            }
+          }
+        }
         
         // If loyalty offer, skip all discounts
         if (loyaltyOffer) {
@@ -651,21 +682,28 @@ const Payment = () => {
               <>
                 <Separator />
                 
-                {(subscriptionDiscount > 0 || friendCodeDiscount > 0 || hasVoucher || loyaltyOffer) && (
+                {(isPremiumOffer || subscriptionDiscount > 0 || friendCodeDiscount > 0 || hasVoucher || loyaltyOffer) && (
                   <div className="flex items-center justify-between text-sm">
                     <span>Subtotal:</span>
                     <span>€{price}</span>
                   </div>
                 )}
                 
-                {subscriptionDiscount > 0 && (
+                {isPremiumOffer && premiumOfferDiscount > 0 && (
+                  <div className="flex items-center justify-between text-sm text-primary font-semibold">
+                    <span>Desconto PREMIUM+ (Plano X):</span>
+                    <span>-€{premiumOfferDiscount.toFixed(2)}</span>
+                  </div>
+                )}
+                
+                {!isPremiumOffer && subscriptionDiscount > 0 && (
                   <div className="flex items-center justify-between text-sm text-green-600">
                     <span>Desconto de Subscrição ({subscriptionDiscountPercent}%):</span>
                     <span>-€{subscriptionDiscount.toFixed(2)}</span>
                   </div>
                 )}
                 
-                {friendCodeDiscount > 0 && (
+                {!isPremiumOffer && friendCodeDiscount > 0 && (
                   <div className="flex items-center justify-between text-sm text-green-600">
                     <span>Código de Amigo ({appliedFriendCode}) - 25%:</span>
                     <span>-€{friendCodeDiscount.toFixed(2)}</span>
@@ -689,12 +727,12 @@ const Payment = () => {
                   </div>
                 )}
                 
-                {(subscriptionDiscount > 0 || friendCodeDiscount > 0 || hasVoucher || loyaltyOffer) && <Separator />}
+                {(isPremiumOffer || subscriptionDiscount > 0 || friendCodeDiscount > 0 || hasVoucher || loyaltyOffer) && <Separator />}
                 
                 <div className="flex items-center justify-between text-xl font-bold">
                   <span>Total:</span>
                   <span className="text-primary">
-                    €{loyaltyOffer 
+                    €{isPremiumOffer || loyaltyOffer 
                       ? '0.00' 
                       : Math.max(0, parseFloat(price || '0') - subscriptionDiscount - friendCodeDiscount - voucherDiscount).toFixed(2)
                     }
