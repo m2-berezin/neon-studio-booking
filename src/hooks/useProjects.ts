@@ -87,6 +87,8 @@ export const useProjects = () => {
 
       if (mixmasterError) throw mixmasterError;
       
+      console.log('[PROJECTS] 🔍 Mix&Master data from RPC:', mixmasterData);
+      
       // Map bookings to projects format, filtering out Mix & Master bookings
       const bookingProjects: Project[] = (bookingsData || [])
         .filter((booking: any) => {
@@ -108,27 +110,43 @@ export const useProjects = () => {
       }));
       
       // Map mixmaster projects (both pending requests and confirmed bookings)
-      const mixProjects: Project[] = (mixmasterData || []).map((mix: any) => ({
-        id: mix.id,
-        title: mix.service_name || 'Mix & Master',
-        description: mix.is_booking ? 'Reserva Confirmada' : (mix.note || ''),
-        address: mix.is_booking ? 'Rua Abade Correia da Serra 20A, 2865-207 Fernão Ferro' : '',
-        date_day: mix.starts_at || mix.created_at,
-        start_time: mix.starts_at || mix.created_at,
-        end_time: mix.ends_at || mix.created_at,
-        status: mix.status,
-        user_id: user.id,
-        created_at: mix.created_at,
-        is_mixmaster: true,
-        is_booking: mix.is_booking,
-        transfer_link: mix.transfer_link,
-        note: mix.note,
-      }));
+      const mixProjects: Project[] = (mixmasterData || []).map((mix: any) => {
+        console.log('[PROJECTS] 🔍 Processing mix project:', {
+          id: mix.id,
+          service_name: mix.service_name,
+          is_booking: mix.is_booking,
+          starts_at: mix.starts_at,
+          ends_at: mix.ends_at,
+          status: mix.status
+        });
+        
+        return {
+          id: mix.id,
+          title: mix.service_name || 'Mix & Master',
+          description: mix.is_booking ? 'Reserva Confirmada' : (mix.note || ''),
+          address: mix.is_booking ? 'Rua Abade Correia da Serra 20A, 2865-207 Fernão Ferro' : '',
+          date_day: mix.starts_at || mix.created_at,
+          start_time: mix.starts_at || mix.created_at,
+          end_time: mix.ends_at || mix.created_at,
+          status: mix.status,
+          user_id: user.id,
+          created_at: mix.created_at,
+          is_mixmaster: true,
+          is_booking: mix.is_booking,
+          transfer_link: mix.transfer_link,
+          note: mix.note,
+        };
+      });
+      
+      console.log('[PROJECTS] ✅ Mapped mix projects:', mixProjects.length);
+      console.log('[PROJECTS] ✅ Mapped booking projects:', bookingProjects.length);
       
       // Combine and sort by created_at
       const allProjects = [...bookingProjects, ...mixProjects].sort(
         (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       );
+      
+      console.log('[PROJECTS] ✅ Total projects to display:', allProjects.length);
       
       setProjects(allProjects);
     } catch (error: any) {
