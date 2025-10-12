@@ -85,6 +85,15 @@ const Payment = () => {
       try {
         const basePrice = parseFloat(price);
         
+        // If loyalty offer, skip all discounts
+        if (loyaltyOffer) {
+          setFriendCodeDiscount(0);
+          setSubscriptionDiscount(0);
+          setSubscriptionDiscountPercent(0);
+          setVoucherDiscount(0);
+          return;
+        }
+        
         // Calculate friend code discount (25%)
         if (hasFriendCodeDiscount()) {
           const friendDiscount = basePrice * 0.25;
@@ -145,7 +154,7 @@ const Payment = () => {
     };
     
     loadDiscounts();
-  }, [user, price, service, hasFriendCodeDiscount]);
+  }, [user, price, service, hasFriendCodeDiscount, loyaltyOffer]);
   
   useEffect(() => {
     // For subscriptions, we don't need 'option', just 'plan'
@@ -640,7 +649,7 @@ const Payment = () => {
               <>
                 <Separator />
                 
-                {(subscriptionDiscount > 0 || friendCodeDiscount > 0 || hasVoucher) && (
+                {(subscriptionDiscount > 0 || friendCodeDiscount > 0 || hasVoucher || loyaltyOffer) && (
                   <div className="flex items-center justify-between text-sm">
                     <span>Subtotal:</span>
                     <span>€{price}</span>
@@ -671,11 +680,23 @@ const Payment = () => {
                   </div>
                 )}
                 
-                {(subscriptionDiscount > 0 || friendCodeDiscount > 0 || hasVoucher) && <Separator />}
+                {loyaltyOffer && (
+                  <div className="flex items-center justify-between text-sm text-green-600 font-semibold">
+                    <span>🎁 Oferta Mix&Master (7 Pontos):</span>
+                    <span>-€{parseFloat(price || '0').toFixed(2)}</span>
+                  </div>
+                )}
+                
+                {(subscriptionDiscount > 0 || friendCodeDiscount > 0 || hasVoucher || loyaltyOffer) && <Separator />}
                 
                 <div className="flex items-center justify-between text-xl font-bold">
                   <span>Total:</span>
-                  <span className="text-primary">€{Math.max(0, parseFloat(price || '0') - subscriptionDiscount - friendCodeDiscount - voucherDiscount).toFixed(2)}</span>
+                  <span className="text-primary">
+                    €{loyaltyOffer 
+                      ? '0.00' 
+                      : Math.max(0, parseFloat(price || '0') - subscriptionDiscount - friendCodeDiscount - voucherDiscount).toFixed(2)
+                    }
+                  </span>
                 </div>
               </>
             )}
