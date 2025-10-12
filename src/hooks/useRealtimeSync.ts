@@ -78,11 +78,29 @@ export const useRealtimeSync = (forAdmin = false) => {
       )
       .subscribe();
 
+    const userOffersChannel = supabase
+      .channel(forAdmin ? 'admin-user-offers-changes' : 'user-offers-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'user_offers',
+          ...(forAdmin ? {} : { filter: `user_id=eq.${user.id}` }),
+        },
+        () => {
+          console.log('[REALTIME] User offers changed, refreshing...');
+          refreshUserData();
+        }
+      )
+      .subscribe();
+
     return () => {
       supabase.removeChannel(subscriptionsChannel);
       supabase.removeChannel(paymentRequestsChannel);
       supabase.removeChannel(bookingsChannel);
       supabase.removeChannel(reservationsChannel);
+      supabase.removeChannel(userOffersChannel);
     };
   }, [user?.id, forAdmin, isAdminUser]);
 

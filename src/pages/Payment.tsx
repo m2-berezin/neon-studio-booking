@@ -47,6 +47,7 @@ const Payment = () => {
   const plan = searchParams.get('plan'); // For subscriptions
   const transferLink = searchParams.get('transferLink'); // For mixmaster
   const voucherId = searchParams.get('voucherId'); // Voucher ID if applied
+  const existingReservationId = searchParams.get('reservation_id'); // Existing reservation from offer
 
   // Determine service title based on service and option
   let serviceTitle = '';
@@ -421,24 +422,50 @@ const Payment = () => {
         return;
       }
 
-      // 1. Create reservation first
+      // 1. Update existing reservation OR create new one
       const startDateTime = new Date(`${bookingDate}T${startTime}`);
       const endDateTime = new Date(`${bookingDate}T${endTime}`);
-      const {
-        data: reservationData,
-        error: reservationError
-      } = await supabase.from('reservations').insert({
-        user_id: user.id,
-        service_id: serviceId,
-        starts_at: startDateTime.toISOString(),
-        ends_at: endDateTime.toISOString(),
-        status: 'pending'
-      }).select().single();
+      
+      let reservationData;
+      let reservationError;
+      
+      if (existingReservationId) {
+        // UPDATE existing reservation from offer with date/time
+        console.log('[PAYMENT] Updating existing reservation with offer:', existingReservationId);
+        const { data, error } = await supabase
+          .from('reservations')
+          .update({
+            starts_at: startDateTime.toISOString(),
+            ends_at: endDateTime.toISOString(),
+            status: 'pending'
+          })
+          .eq('id', existingReservationId)
+          .select()
+          .single();
+        reservationData = data;
+        reservationError = error;
+      } else {
+        // CREATE new reservation
+        const { data, error } = await supabase
+          .from('reservations')
+          .insert({
+            user_id: user.id,
+            service_id: serviceId,
+            starts_at: startDateTime.toISOString(),
+            ends_at: endDateTime.toISOString(),
+            status: 'pending'
+          })
+          .select()
+          .single();
+        reservationData = data;
+        reservationError = error;
+      }
+      
       if (reservationError) {
         console.error('Reservation error:', reservationError);
         toast({
           title: 'Erro',
-          description: 'Não foi possível criar a reserva. Tenta novamente.',
+          description: 'Não foi possível processar a reserva. Tenta novamente.',
           variant: 'destructive'
         });
         setLoading(false);
