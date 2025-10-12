@@ -70,7 +70,7 @@ const Rewards = () => {
       table: 'user_offers',
       filter: `user_id=eq.${user.id}`
     }, payload => {
-      console.log('user_offers changed:', payload);
+      console.log('[REWARDS REALTIME] user_offers changed:', payload);
       fetchOffersAndUsage();
     }).on('postgres_changes', {
       event: '*',
@@ -78,9 +78,11 @@ const Rewards = () => {
       table: 'loyalty_points',
       filter: `user_id=eq.${user.id}`
     }, payload => {
-      console.log('loyalty_points changed:', payload);
+      console.log('[REWARDS REALTIME] loyalty_points changed:', payload);
       fetchLoyaltyPoints();
-    }).subscribe();
+    }).subscribe((status) => {
+      console.log('[REWARDS REALTIME] Subscription status:', status);
+    });
     return () => {
       supabase.removeChannel(channel);
     };
@@ -93,13 +95,14 @@ const Rewards = () => {
         error: offersError
       } = await supabase.from('offers').select('*').eq('is_active', true);
       if (offersError) throw offersError;
+      console.log('[REWARDS] Active offers:', offersData);
       setOffers(offersData || []);
 
       // Fetch usage for current month - use exact month_year format (YYYY-MM-01)
       const now = new Date();
       const monthYear = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
       
-      console.log('Fetching user_offers for month_year:', monthYear, 'user_id:', user!.id);
+      console.log('[REWARDS] Fetching user_offers for month_year:', monthYear, 'user_id:', user!.id);
       
       const {
         data: usageData,
@@ -111,19 +114,20 @@ const Rewards = () => {
         .eq('month_year', monthYear);
       
       if (usageError) {
-        console.error('Error fetching usage:', usageError);
+        console.error('[REWARDS] Error fetching usage:', usageError);
         throw usageError;
       }
       
-      console.log('Received usage data:', usageData);
+      console.log('[REWARDS] ✅ Received usage data:', usageData);
       
       const usageMap: Record<string, number> = {};
       usageData?.forEach(item => {
         usageMap[item.offer_id] = item.used_count;
+        console.log('[REWARDS] Offer', item.offer_id, 'used:', item.used_count);
       });
       setOfferUsage(usageMap);
     } catch (error) {
-      console.error('Error fetching offers:', error);
+      console.error('[REWARDS] Error fetching offers:', error);
     }
   };
 
@@ -156,6 +160,8 @@ const Rewards = () => {
     if (!user) return;
     setApplyingOffer(offerId);
     try {
+      console.log('[REWARDS] 🔵 Applying offer:', offerId);
+      
       // Call RPC to apply offer and create reservation
       const {
         data: reservationId,
@@ -165,7 +171,11 @@ const Rewards = () => {
         p_offer_id: offerId,
         p_starts_at: null
       });
+      
       if (error) throw error;
+      
+      console.log('[REWARDS] ✅ Offer applied! Reservation created:', reservationId);
+      
       toast({
         title: 'Oferta aplicada!',
         description: 'Redireccionando para o calendário...'
@@ -176,7 +186,7 @@ const Rewards = () => {
         navigate(`/book?reservation=${reservationId}`);
       }, 500);
     } catch (error: any) {
-      console.error('Error applying offer:', error);
+      console.error('[REWARDS] ❌ Error applying offer:', error);
       toast({
         title: 'Erro',
         description: error.message || 'Não foi possível aplicar a oferta',

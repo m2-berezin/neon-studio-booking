@@ -128,17 +128,19 @@ const AdminPayments = () => {
   const handleUpdateStatus = async (id: string, newStatus: 'approved' | 'rejected', request: PaymentRequest) => {
     try {
       if (newStatus === 'approved') {
-        console.log('Approving payment:', id);
+        console.log('[ADMIN] 🔵 Approving payment:', id);
+        console.log('[ADMIN] 🔵 Reservation ID:', request.reservation_id);
+        
         const { data, error } = await supabase.rpc('admin_approve_payment', {
           p_payment_id: id
         });
 
         if (error) {
-          console.error('Error approving payment:', error);
+          console.error('[ADMIN] ❌ Error approving payment:', error);
           throw error;
         }
 
-        console.log('Payment approved successfully:', data);
+        console.log('[ADMIN] ✅ Payment approved successfully! Result:', data);
         toast({
           title: 'Reserva Aprovada',
           description: 'A reserva foi aprovada e confirmada com sucesso.',

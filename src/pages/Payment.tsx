@@ -444,6 +444,10 @@ const Payment = () => {
           .single();
         reservationData = data;
         reservationError = error;
+        
+        if (data) {
+          console.log('[PAYMENT] ✅ Reservation updated with offer_id:', data.offer_id);
+        }
       } else {
         // CREATE new reservation
         const { data, error } = await supabase
@@ -459,6 +463,8 @@ const Payment = () => {
           .single();
         reservationData = data;
         reservationError = error;
+        
+        console.log('[PAYMENT] New reservation created (no offer)');
       }
       
       if (reservationError) {
@@ -477,6 +483,8 @@ const Payment = () => {
       const priceAfterSubscription = parseFloat(price) - subscriptionDiscount;
       const priceAfterRewardOrVoucher = priceAfterSubscription - Math.max(friendCodeDiscount, voucherDiscount);
       const finalPrice = Math.max(0, priceAfterRewardOrVoucher);
+      
+      console.log('[PAYMENT] Creating payment request for reservation:', reservationData.id, 'with offer_id:', reservationData.offer_id);
       
       const {
         data: paymentId,
