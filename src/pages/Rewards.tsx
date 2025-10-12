@@ -95,15 +95,28 @@ const Rewards = () => {
       if (offersError) throw offersError;
       setOffers(offersData || []);
 
-      // Fetch usage for current month
-      const currentMonth = new Date();
-      currentMonth.setDate(1);
-      currentMonth.setHours(0, 0, 0, 0);
+      // Fetch usage for current month - use exact month_year format (YYYY-MM-01)
+      const now = new Date();
+      const monthYear = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+      
+      console.log('Fetching user_offers for month_year:', monthYear, 'user_id:', user!.id);
+      
       const {
         data: usageData,
         error: usageError
-      } = await supabase.from('user_offers').select('offer_id, used_count').eq('user_id', user!.id).gte('month_year', currentMonth.toISOString().split('T')[0]);
-      if (usageError) throw usageError;
+      } = await supabase
+        .from('user_offers')
+        .select('offer_id, used_count, month_year')
+        .eq('user_id', user!.id)
+        .eq('month_year', monthYear);
+      
+      if (usageError) {
+        console.error('Error fetching usage:', usageError);
+        throw usageError;
+      }
+      
+      console.log('Received usage data:', usageData);
+      
       const usageMap: Record<string, number> = {};
       usageData?.forEach(item => {
         usageMap[item.offer_id] = item.used_count;
