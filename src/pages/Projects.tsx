@@ -118,7 +118,7 @@ const Projects = () => {
 
               <CardContent>
                 <div className="space-y-3">
-                  {!project.is_mixmaster && project.address && (
+                  {project.address && (
                     <div className="flex items-start gap-2 text-sm">
                       <Folder className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
                       <a 
@@ -132,7 +132,7 @@ const Projects = () => {
                     </div>
                   )}
 
-                  {project.is_mixmaster ? (
+                  {project.is_mixmaster && !project.is_booking ? (
                     <div className="flex items-center gap-2 text-sm">
                       <Clock className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                       <span className="text-foreground">

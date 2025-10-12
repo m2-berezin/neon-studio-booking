@@ -1493,9 +1493,12 @@ export type Database = {
         Returns: {
           amount_eur: number
           created_at: string
+          ends_at: string
           id: string
+          is_booking: boolean
           note: string
           service_name: string
+          starts_at: string
           status: string
           transfer_link: string
         }[]

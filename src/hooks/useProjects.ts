@@ -26,6 +26,7 @@ interface Project {
   is_mixmaster?: boolean;
   transfer_link?: string;
   note?: string;
+  is_booking?: boolean;
 }
 
 export const useProjects = () => {
@@ -37,6 +38,28 @@ export const useProjects = () => {
   useEffect(() => {
     if (user) {
       loadProjects();
+      
+      // Setup realtime subscription for bookings
+      const bookingsChannel = supabase
+        .channel('bookings-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'bookings',
+            filter: `user_id=eq.${user.id}`,
+          },
+          (payload) => {
+            console.log('[PROJECTS] Booking changed, reloading...', payload);
+            loadProjects();
+          }
+        )
+        .subscribe();
+      
+      return () => {
+        supabase.removeChannel(bookingsChannel);
+      };
     }
   }, [user]);
 
@@ -84,19 +107,20 @@ export const useProjects = () => {
         is_mixmaster: false,
       }));
       
-      // Map mixmaster projects
+      // Map mixmaster projects (both pending requests and confirmed bookings)
       const mixProjects: Project[] = (mixmasterData || []).map((mix: any) => ({
         id: mix.id,
         title: mix.service_name || 'Mix & Master',
-        description: mix.note || '',
-        address: '',
-        date_day: mix.created_at,
-        start_time: mix.created_at,
-        end_time: mix.created_at,
+        description: mix.is_booking ? 'Reserva Confirmada' : (mix.note || ''),
+        address: mix.is_booking ? 'Rua Abade Correia da Serra 20A, 2865-207 Fernão Ferro' : '',
+        date_day: mix.starts_at || mix.created_at,
+        start_time: mix.starts_at || mix.created_at,
+        end_time: mix.ends_at || mix.created_at,
         status: mix.status,
         user_id: user.id,
         created_at: mix.created_at,
         is_mixmaster: true,
+        is_booking: mix.is_booking,
         transfer_link: mix.transfer_link,
         note: mix.note,
       }));
