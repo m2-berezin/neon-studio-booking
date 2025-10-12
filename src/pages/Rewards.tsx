@@ -225,7 +225,7 @@ const Rewards = () => {
 
     // Navigate to MixMaster page with loyalty offer flag
     setTimeout(() => {
-      navigate('/mixmaster?loyalty=true');
+      navigate('/mix-master?loyalty=true');
     }, 500);
   };
 
