@@ -101,6 +101,9 @@ const Subscriptions = () => {
     if (activePlanType === 'S' && plan.planType === 'X') {
       return 'Upgrade';
     }
+    if (activePlanType === 'X' && plan.planType === 'S') {
+      return 'Downgrade';
+    }
     return 'Subscrever Agora';
   };
   const daysOfWeek = [{
