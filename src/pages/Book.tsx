@@ -125,13 +125,10 @@ const Book = () => {
         setSelectedBackendServiceId(data.service_id);
         setStep(2); // Go directly to calendar
         
-        // Iniciar timer de 5min (300 segundos)
-        setTimeLeft(300);
-        
         toast({
           title: isPremium ? 'Oferta 2h captação plano PREMIUM+ ativada' : 'Oferta aplicada',
           description: isPremium 
-            ? 'Captação 2h PREMIUM+ - Tens 5 minutos para escolher uma data'
+            ? 'Captação 2h PREMIUM+'
             : `3h totais (2h pagas + 1h grátis) por €${data.price_eur_snapshot}`,
         });
       }

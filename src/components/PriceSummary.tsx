@@ -119,7 +119,8 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
   const premiumOfferDiscount = isPremiumOffer ? premiumOfferOriginalPrice : 0;
 
   // Calculate subscription discount automatically if user has active subscription
-  const subscriptionDiscount = subscription?.is_active 
+  // BUT NOT for premium offers (they are already 100% off)
+  const subscriptionDiscount = (subscription?.is_active && !isPremiumOffer)
     ? (subtotal * subscriptionDiscountPercent) / 100
     : 0;
 
@@ -167,6 +168,9 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
 
   // Calculate reward discount
   const getRewardDiscount = () => {
+    // Premium offers don't stack with other discounts
+    if (isPremiumOffer) return 0;
+    
     // Friend code discount takes priority and is automatically applied
     if (hasFriendCodeDiscount() && appliedFriendCode) {
       console.log('[PRICE SUMMARY] Applying friend code discount:', appliedFriendCode);
@@ -185,7 +189,8 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
   };
 
   const rewardDiscount = getRewardDiscount();
-  const voucherDiscount = excludeVouchers ? 0 : (appliedVoucher ? appliedVoucher.amount : 0);
+  // Premium offers don't stack with vouchers
+  const voucherDiscount = (excludeVouchers || isPremiumOffer) ? 0 : (appliedVoucher ? appliedVoucher.amount : 0);
   
   // Calculate final price with PREMIUM+ discount
   const priceAfterSubscription = subtotal - subscriptionDiscount;
