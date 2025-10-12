@@ -909,7 +909,7 @@ const Book = () => {
                 <span className="text-muted-foreground">Hora de Fim:</span>
                 <span className="font-medium">
                   {reservationFromOffer
-                    ? calculateEndTime(selectedSlot?.start_time || '', 180).slice(0, 5)
+                    ? calculateEndTime(selectedSlot?.start_time || '', isPremiumOffer ? 120 : 180).slice(0, 5)
                     : selectedService === 'captacao' 
                     ? calculateEndTime(selectedSlot?.start_time || '', selectedHours * 60).slice(0, 5)
                     : selectedService === 'captacao_mixmaster'
