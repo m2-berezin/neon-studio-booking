@@ -48,7 +48,6 @@ const Rewards = () => {
   const [offerUsage, setOfferUsage] = useState<Record<string, number>>({});
   const [applyingOffer, setApplyingOffer] = useState<string | null>(null);
   const [loyaltyPoints, setLoyaltyPoints] = useState<number>(0);
-  const [redeeming, setRedeeming] = useState(false);
   const [voucherStatus, setVoucherStatus] = useState<{ available: boolean; days_left: number } | null>(null);
   const [claimingVoucher, setClaimingVoucher] = useState(false);
 
@@ -389,12 +388,12 @@ const Rewards = () => {
                 </p>
                 <Button 
                   onClick={handleLoyaltyRedeem}
-                  disabled={loyaltyPoints < 7 || redeeming || hasActivePenalty()} 
+                  disabled={loyaltyPoints < 7 || hasActivePenalty()} 
                   variant={loyaltyPoints >= 7 ? 'default' : 'outline'}
                   size="lg"
                   className="w-full sm:w-auto"
                 >
-                  {redeeming ? 'A reclamar...' : loyaltyPoints >= 7 ? 'Reclamar Oferta Mix&Master' : 'Não Disponível'}
+                  {loyaltyPoints >= 7 ? 'Reclamar Oferta Mix&Master' : 'Não Disponível'}
                 </Button>
               </div>
             </div>
