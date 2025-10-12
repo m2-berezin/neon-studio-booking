@@ -124,7 +124,7 @@ export const useProjects = () => {
           id: mix.id,
           title: mix.service_name || 'Mix & Master',
           description: mix.is_booking ? 'Reserva Confirmada' : (mix.note || ''),
-          address: mix.is_booking ? 'Rua Abade Correia da Serra 20A, 2865-207 Fernão Ferro' : '',
+          address: '', // Mix & Master não tem morada
           date_day: mix.starts_at || mix.created_at,
           start_time: mix.starts_at || mix.created_at,
           end_time: mix.ends_at || mix.created_at,
