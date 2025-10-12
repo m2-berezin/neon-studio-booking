@@ -48,6 +48,7 @@ const Payment = () => {
   const transferLink = searchParams.get('transferLink'); // For mixmaster
   const voucherId = searchParams.get('voucherId'); // Voucher ID if applied
   const existingReservationId = searchParams.get('reservation_id'); // Existing reservation from offer
+  const loyaltyOffer = searchParams.get('loyaltyOffer') === 'true'; // Loyalty offer from 7 points
 
   // Determine service title based on service and option
   let serviceTitle = '';
@@ -321,9 +322,15 @@ const Payment = () => {
 
         // Create payment request with transfer_link and voucher_id
         // Apply subscription discount first, then apply the HIGHEST of friend code or voucher (not both)
-        const priceAfterSubscription = parseFloat(price) - subscriptionDiscount;
-        const priceAfterRewardOrVoucher = priceAfterSubscription - Math.max(friendCodeDiscount, voucherDiscount);
-        const finalPrice = Math.max(0, priceAfterRewardOrVoucher);
+        // For loyalty offers, price is always 0
+        let finalPrice = 0;
+        if (loyaltyOffer) {
+          finalPrice = 0;
+        } else {
+          const priceAfterSubscription = parseFloat(price) - subscriptionDiscount;
+          const priceAfterRewardOrVoucher = priceAfterSubscription - Math.max(friendCodeDiscount, voucherDiscount);
+          finalPrice = Math.max(0, priceAfterRewardOrVoucher);
+        }
         
         const { data: paymentData, error: paymentError } = await supabase
           .from('payment_requests')
@@ -332,11 +339,11 @@ const Payment = () => {
             reservation_id: reservationData.id,
             amount_eur: finalPrice,
             currency: 'EUR',
-            type: 'reservation',
+            type: loyaltyOffer ? 'loyalty_mixmaster' : 'reservation',
             status: 'pending',
             transfer_link: transferLink || null,
             note: notes || null,
-            voucher_id: activeVoucherId
+            voucher_id: loyaltyOffer ? null : activeVoucherId // No voucher for loyalty offers
           })
           .select()
           .single();
@@ -372,10 +379,12 @@ const Payment = () => {
         }
 
         // Send message to admin with transfer link and notes
-        let messageContent = `🎵 Novo pedido de Mix & Master\n\n`;
+        let messageContent = loyaltyOffer 
+          ? `🎁 Novo pedido de Mix & Master GRÁTIS (Oferta de Fidelidade - 7 Pontos)\n\n`
+          : `🎵 Novo pedido de Mix & Master\n\n`;
         messageContent += `Cliente: ${clientName}\n`;
         messageContent += `Opção: ${optionTitle}\n`;
-        messageContent += `Valor: €${finalPrice.toFixed(2)}\n\n`;
+        messageContent += `Valor: €${finalPrice.toFixed(2)}${loyaltyOffer ? ' (Oferta Grátis)' : ''}\n\n`;
         
         if (transferLink) {
           messageContent += `📎 Link de Transferência:\n${transferLink}\n\n`;

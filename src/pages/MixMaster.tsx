@@ -35,7 +35,11 @@ const MixMaster = () => {
   const { user, subscription, subscriptionDiscountPercent } = useAuth();
   const { toast } = useToast();
   
-  const [selectedOption, setSelectedOption] = useState<'1project' | '2projects' | null>(null);
+  // Check if this is a loyalty offer claim from URL
+  const searchParams = new URLSearchParams(window.location.search);
+  const isLoyaltyOffer = searchParams.get('loyalty') === 'true';
+  
+  const [selectedOption, setSelectedOption] = useState<'1project' | '2projects' | null>(isLoyaltyOffer ? '1project' : null);
   const [deliveryMethod, setDeliveryMethod] = useState<'upload' | 'link' | 'whatsapp' | 'later' | null>(null);
   const [transferLink, setTransferLink] = useState('');
   const [projectNotes, setProjectNotes] = useState('');
@@ -73,6 +77,9 @@ const MixMaster = () => {
   }, [user]);
   
   const getProjectPrice = () => {
+    // If loyalty offer, price is always 0
+    if (isLoyaltyOffer) return 0;
+    
     const basePrice = 40;
     let finalPrice = basePrice;
     
@@ -96,7 +103,13 @@ const MixMaster = () => {
   };
   
   const getVoucherDiscount = () => {
+    // No voucher discount if loyalty offer
+    if (isLoyaltyOffer) return 0;
     return selectedVoucher ? selectedVoucher.amount_eur : 0;
+  };
+  
+  const getLoyaltyDiscount = () => {
+    return isLoyaltyOffer ? 40 : 0;
   };
 
   const pricingOptions = [
@@ -183,7 +196,8 @@ const MixMaster = () => {
       notes: projectNotes,
       transferLink: transferLink,
       voucherId: selectedVoucher?.id || '',
-      voucherCode: selectedVoucher?.code || ''
+      voucherCode: selectedVoucher?.code || '',
+      loyaltyOffer: isLoyaltyOffer ? 'true' : ''
     });
     
     navigate(`/payment?${queryParams.toString()}`);
@@ -206,6 +220,11 @@ const MixMaster = () => {
         <p className="text-muted-foreground text-lg">
           Serviço profissional de mistura e masterização
         </p>
+        {isLoyaltyOffer && (
+          <Badge className="mt-4 text-lg px-4 py-2 bg-primary/20 text-primary border-primary">
+            🎁 Oferta de Fidelidade Ativada - Mix&Master Grátis!
+          </Badge>
+        )}
       </div>
 
       {/* Pricing Options */}
@@ -399,7 +418,7 @@ const MixMaster = () => {
                   <span>€40</span>
                 </div>
                 
-                {getSubscriptionDiscount() > 0 && (
+                {getSubscriptionDiscount() > 0 && !isLoyaltyOffer && (
                   <div className="flex items-center justify-between text-sm text-green-600">
                     <span>Desconto Subscrição ({subscriptionDiscountPercent}%):</span>
                     <span>-€{getSubscriptionDiscount().toFixed(2)}</span>
@@ -410,6 +429,13 @@ const MixMaster = () => {
                   <div className="flex items-center justify-between text-sm text-green-600">
                     <span>Desconto Voucher:</span>
                     <span>-€{getVoucherDiscount().toFixed(2)}</span>
+                  </div>
+                )}
+                
+                {getLoyaltyDiscount() > 0 && (
+                  <div className="flex items-center justify-between text-sm text-green-600 font-semibold">
+                    <span>🎁 Oferta Mix&Master (7 Pontos):</span>
+                    <span>-€{getLoyaltyDiscount().toFixed(2)}</span>
                   </div>
                 )}
               </div>

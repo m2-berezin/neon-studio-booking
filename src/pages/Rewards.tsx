@@ -219,31 +219,15 @@ const Rewards = () => {
   const handleLoyaltyRedeem = async () => {
     if (!user || loyaltyPoints < 7) return;
     
-    setRedeeming(true);
-    try {
-      const { data, error } = await supabase.rpc('redeem_loyalty_offer' as any, {
-        p_user_id: user.id
-      });
-      
-      if (error) throw error;
-      
-      toast({
-        title: 'Oferta reclamada!',
-        description: 'A tua Mix&Master grátis foi adicionada. Vai ao calendário para agendar.',
-      });
-      
-      // Refresh loyalty points
-      await fetchLoyaltyPoints();
-    } catch (error: any) {
-      console.error('Error redeeming loyalty offer:', error);
-      toast({
-        title: 'Erro',
-        description: error.message || 'Não foi possível reclamar a oferta',
-        variant: 'destructive',
-      });
-    } finally {
-      setRedeeming(false);
-    }
+    toast({
+      title: 'Oferta ativada!',
+      description: 'Redireccionando para Mix&Master...',
+    });
+
+    // Navigate to MixMaster page with loyalty offer flag
+    setTimeout(() => {
+      navigate('/mixmaster?loyalty=true');
+    }, 500);
   };
 
   const handleClaimVoucher = async () => {
