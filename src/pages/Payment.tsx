@@ -275,14 +275,12 @@ const Payment = () => {
           return;
         }
 
-        // Mark friend code as used if applicable
-        if (hasFriendCodeDiscount() && requestId) {
-          console.log('[PAYMENT] Marking friend code as used for subscription:', requestId);
-          const marked = await markCodeAsUsed(requestId);
-          if (marked) {
-            console.log('[PAYMENT] Friend code marked successfully');
-            await refreshAppliedCode();
-          }
+        // Save friend code in payment request (will be marked as used when admin approves)
+        if (hasFriendCodeDiscount() && requestId && appliedFriendCode) {
+          await supabase
+            .from('payment_requests')
+            .update({ friend_code: appliedFriendCode })
+            .eq('id', requestId);
         }
 
         toast({
@@ -385,7 +383,8 @@ const Payment = () => {
             status: 'pending',
             transfer_link: transferLink || null,
             note: notes || null,
-            voucher_id: loyaltyOffer ? null : activeVoucherId // No voucher for loyalty offers
+            voucher_id: loyaltyOffer ? null : activeVoucherId, // No voucher for loyalty offers
+            friend_code: hasFriendCodeDiscount() ? appliedFriendCode : null // Save friend code (will be marked as used when admin approves)
           })
           .select()
           .single();
@@ -400,16 +399,6 @@ const Payment = () => {
           });
           setLoading(false);
           return;
-        }
-
-        // Mark friend code as used if applicable
-        if (hasFriendCodeDiscount() && paymentData) {
-          console.log('[PAYMENT] Marking friend code as used for mixmaster:', paymentData.id);
-          const marked = await markCodeAsUsed(paymentData.id);
-          if (marked) {
-            console.log('[PAYMENT] Friend code marked successfully');
-            await refreshAppliedCode(); // Refresh to ensure UI is cleared
-          }
         }
 
         // Mark voucher as used if applicable

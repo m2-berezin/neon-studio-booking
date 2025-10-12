@@ -420,6 +420,7 @@ export type Database = {
           currency: string
           decided_at: string | null
           decided_by: string | null
+          friend_code: string | null
           hidden_from_admin: boolean | null
           hidden_from_client: boolean | null
           id: string
@@ -442,6 +443,7 @@ export type Database = {
           currency?: string
           decided_at?: string | null
           decided_by?: string | null
+          friend_code?: string | null
           hidden_from_admin?: boolean | null
           hidden_from_client?: boolean | null
           id?: string
@@ -464,6 +466,7 @@ export type Database = {
           currency?: string
           decided_at?: string | null
           decided_by?: string | null
+          friend_code?: string | null
           hidden_from_admin?: boolean | null
           hidden_from_client?: boolean | null
           id?: string
