@@ -1121,7 +1121,7 @@ export type Database = {
       }
       admin_approve_payment: {
         Args: { p_payment_id: string }
-        Returns: boolean
+        Returns: string
       }
       admin_hide_project: {
         Args: { p_project_id: string; p_project_type: string }
