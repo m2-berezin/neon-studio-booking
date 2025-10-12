@@ -1226,7 +1226,14 @@ export type Database = {
         Returns: string
       }
       create_subscription_payment_request: {
-        Args: { p_amount_eur: number; p_plan_type: string; p_user_id: string }
+        Args:
+          | {
+              p_amount_eur: number
+              p_friend_code?: string
+              p_plan_type: string
+              p_user_id: string
+            }
+          | { p_amount_eur: number; p_plan_type: string; p_user_id: string }
         Returns: string
       }
       delete_mixmaster_project: {
@@ -1677,6 +1684,15 @@ export type Database = {
       }
       request_payment: {
         Args:
+          | {
+              p_amount_eur: number
+              p_currency?: string
+              p_friend_code?: string
+              p_note?: string
+              p_proof_url?: string
+              p_reservation_id: string
+              p_voucher_id?: string
+            }
           | {
               p_amount_eur: number
               p_currency?: string

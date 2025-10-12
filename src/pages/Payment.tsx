@@ -22,7 +22,7 @@ const Payment = () => {
     user
   } = useAuth();
   const { sendMessage, ADMIN_ID } = useMessaging();
-  const { appliedFriendCode, hasFriendCodeDiscount, markCodeAsUsed, refreshAppliedCode } = useFriendCode();
+  const { appliedFriendCode, hasFriendCodeDiscount } = useFriendCode();
   const [loading, setLoading] = useState(false);
   const [voucherDiscount, setVoucherDiscount] = useState(0);
   const [hasVoucher, setHasVoucher] = useState(false);
@@ -261,7 +261,8 @@ const Payment = () => {
         const { data: requestId, error: requestError } = await supabase.rpc('create_subscription_payment_request', {
           p_user_id: user.id,
           p_plan_type: planType,
-          p_amount_eur: finalPrice
+          p_amount_eur: finalPrice,
+          p_friend_code: appliedFriendCode || null
         });
 
         if (requestError) {
@@ -273,14 +274,6 @@ const Payment = () => {
           });
           setLoading(false);
           return;
-        }
-
-        // Save friend code in payment request (will be marked as used when admin approves)
-        if (hasFriendCodeDiscount() && requestId && appliedFriendCode) {
-          await supabase
-            .from('payment_requests')
-            .update({ friend_code: appliedFriendCode })
-            .eq('id', requestId);
         }
 
         toast({
@@ -545,7 +538,8 @@ const Payment = () => {
         p_amount_eur: finalPrice,
         p_currency: 'EUR',
         p_note: notes || `${serviceTitle} - ${optionTitle}`,
-        p_voucher_id: activeVoucherId
+        p_voucher_id: activeVoucherId,
+        p_friend_code: appliedFriendCode || null
       });
       if (paymentError) {
         console.error('Payment error:', paymentError);
@@ -558,16 +552,6 @@ const Payment = () => {
         });
         setLoading(false);
         return;
-      }
-
-      // Mark friend code as used if applicable
-      if (hasFriendCodeDiscount() && paymentId) {
-        console.log('[PAYMENT] Marking friend code as used for booking:', paymentId);
-        const marked = await markCodeAsUsed(paymentId);
-        if (marked) {
-          console.log('[PAYMENT] Friend code marked successfully');
-          await refreshAppliedCode(); // Refresh to ensure UI is cleared
-        }
       }
 
       // Mark voucher as used if applicable
