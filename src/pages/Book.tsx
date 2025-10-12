@@ -107,7 +107,7 @@ const Book = () => {
     try {
       const { data, error } = await supabase
         .from('reservations')
-        .select('*')
+        .select('*, offers(*)')
         .eq('id', reservationId)
         .single();
       
@@ -123,9 +123,14 @@ const Book = () => {
         // Iniciar timer de 5min (300 segundos)
         setTimeLeft(300);
         
+        // Check if it's a PREMIUM+ offer
+        const isPremiumOffer = data.offers && data.offers.name?.includes('PREMIUM+');
+        
         toast({
-          title: 'Oferta aplicada',
-          description: `3h totais (2h pagas + 1h grátis) por €${data.price_eur_snapshot}`,
+          title: isPremiumOffer ? 'Oferta 2h captação plano PREMIUM+ ativada' : 'Oferta aplicada',
+          description: isPremiumOffer 
+            ? 'Tens 5 minutos para escolher uma data'
+            : `3h totais (2h pagas + 1h grátis) por €${data.price_eur_snapshot}`,
         });
       }
     } catch (error) {
@@ -918,7 +923,7 @@ const Book = () => {
             services={selectedServiceDetails ? [selectedServiceDetails] : []}
             bookingDate={selectedDate || undefined}
             showFriendCode={false}
-            isPremiumOffer={reservationFromOffer && reservationFromOffer.price_eur_snapshot === 0}
+            isPremiumOffer={reservationFromOffer?.offers?.name?.includes('PREMIUM+')}
             premiumOfferOriginalPrice={20} // Preço original de 2h captação
           />
 

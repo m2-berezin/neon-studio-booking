@@ -177,6 +177,11 @@ const Rewards = () => {
   const handleApplyOffer = async (offerId: string) => {
     if (!user) return;
     setApplyingOffer(offerId);
+    
+    // Find the offer to determine the correct notification
+    const offer = offers.find(o => o.id === offerId);
+    const isPremiumOffer = offer?.name.includes('PREMIUM+');
+    
     try {
       console.log('[REWARDS] 🔵 Applying offer:', offerId);
       
@@ -194,8 +199,9 @@ const Rewards = () => {
       
       console.log('[REWARDS] ✅ Offer applied! Reservation created:', reservationId);
       
+      // Show different notification based on offer type
       toast({
-        title: 'Oferta aplicada!',
+        title: isPremiumOffer ? 'Oferta 2h captação plano PREMIUM+ ativada' : 'Oferta aplicada!',
         description: 'Redireccionando para o calendário...'
       });
 
