@@ -401,7 +401,7 @@ const Payment = () => {
 
       // Handle booking payment (existing code)
       // Validate required fields
-      if (!price || !service || !serviceId) {
+      if (!price || !service) {
         toast({
           title: 'Erro',
           description: 'Dados de pagamento incompletos',
@@ -422,6 +422,17 @@ const Payment = () => {
         return;
       }
 
+      // Validate serviceId only if creating new reservation (not updating existing one)
+      if (!existingReservationId && (!serviceId || serviceId === 'undefined')) {
+        toast({
+          title: 'Erro',
+          description: 'ID do serviço inválido',
+          variant: 'destructive'
+        });
+        setLoading(false);
+        return;
+      }
+
       // 1. Update existing reservation OR create new one
       const startDateTime = new Date(`${bookingDate}T${startTime}`);
       const endDateTime = new Date(`${bookingDate}T${endTime}`);
@@ -429,7 +440,7 @@ const Payment = () => {
       let reservationData;
       let reservationError;
       
-      if (existingReservationId) {
+      if (existingReservationId && existingReservationId !== 'undefined') {
         // UPDATE existing reservation from offer with date/time
         console.log('[PAYMENT] Updating existing reservation with offer:', existingReservationId);
         const { data, error } = await supabase
