@@ -118,7 +118,7 @@ const Projects = () => {
 
               <CardContent>
                 <div className="space-y-3">
-                  {project.address && !project.is_mixmaster && (
+                  {project.address && (
                     <div className="flex items-start gap-2 text-sm">
                       <Folder className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
                       <a 

@@ -120,11 +120,13 @@ export const useProjects = () => {
           status: mix.status
         });
         
+        const hasCaptacao = (mix.service_name || '').toLowerCase().includes('capta');
+        
         return {
           id: mix.id,
           title: mix.service_name || 'Mix & Master',
           description: mix.is_booking ? 'Reserva Confirmada' : (mix.note || ''),
-          address: '', // Mix & Master não tem morada
+          address: hasCaptacao ? 'Rua Abade Correia da Serra 20A, 2865-207 Fernão Ferro' : '',
           date_day: mix.starts_at || mix.created_at,
           start_time: mix.starts_at || mix.created_at,
           end_time: mix.ends_at || mix.created_at,
