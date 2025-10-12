@@ -203,15 +203,16 @@ const Payment = () => {
           return;
         }
 
-        // Check if user already has a pending subscription
-        const { data: existingPendingSub } = await supabase
-          .from('subscriptions')
+        // Check if user already has a pending subscription payment request
+        const { data: existingPendingRequest } = await supabase
+          .from('payment_requests')
           .select('id')
           .eq('user_id', user.id)
-          .eq('payment_status', 'pending')
+          .eq('type', 'subscription_request')
+          .eq('status', 'pending')
           .maybeSingle();
 
-        if (existingPendingSub) {
+        if (existingPendingRequest) {
           toast({
             title: 'Pedido Pendente',
             description: 'Já tens um pedido de subscrição pendente. Aguarda aprovação do administrador.',
@@ -221,11 +222,12 @@ const Payment = () => {
           return;
         }
 
-        // Create payment request for subscription using subscribe_request RPC
+        // Create payment request for subscription without creating subscription itself
+        // Subscription will be created/updated when admin approves
         const planType = plan === 'plan-s' ? 'S' : 'X';
         const finalPrice = parseFloat(price);
         
-        const { data: requestId, error: requestError } = await supabase.rpc('subscribe_request', {
+        const { data: requestId, error: requestError } = await supabase.rpc('create_subscription_payment_request', {
           p_user_id: user.id,
           p_plan_type: planType,
           p_amount_eur: finalPrice

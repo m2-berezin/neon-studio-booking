@@ -1222,6 +1222,10 @@ export type Database = {
           | { p_starts_at: string; p_user_id: string }
         Returns: string
       }
+      create_subscription_payment_request: {
+        Args: { p_amount_eur: number; p_plan_type: string; p_user_id: string }
+        Returns: string
+      }
       delete_mixmaster_project: {
         Args: { p_payment_id: string }
         Returns: boolean
