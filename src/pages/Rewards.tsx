@@ -429,35 +429,6 @@ const Rewards = () => {
         </h2>
         
         <div className="grid gap-4">
-          {/* Offer A: 3h for €20 - Dynamic from database */}
-          {recordingOffer && <Card className="studio-card">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Star className="w-5 h-5 text-primary" />
-                  Compra 2h de gravação, ganha +1h grátis
-                </CardTitle>
-                <CardDescription>
-                  {recordingOffer.description || `${recordingOffer.total_duration_min / 60}h totais de gravação por apenas €${recordingOffer.price_eur}`}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-2xl font-bold text-accent">€{recordingOffer.price_eur}</p>
-                    <p className="text-sm text-muted-foreground">
-                      Usado: {offerUsage[recordingOffer.id] || 0}/{recordingOffer.limit_per_month} este mês
-                    </p>
-                    {(offerUsage[recordingOffer.id] || 0) >= recordingOffer.limit_per_month && <Badge variant="outline" className="text-xs mt-1">
-                        Limite mensal atingido
-                      </Badge>}
-                  </div>
-                  <Button onClick={() => handleApplyOffer(recordingOffer.id)} disabled={(offerUsage[recordingOffer.id] || 0) >= recordingOffer.limit_per_month || applyingOffer === recordingOffer.id || hasActivePenalty()} variant="default">
-                    {applyingOffer === recordingOffer.id ? 'A aplicar...' : 'Aplicar à minha próxima reserva'}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>}
-          
           {/* PREMIUM+ Offer: 2h captação grátis - Only for Plan X subscribers */}
           {premiumOffer && activePlanType === 'X' && <Card className="studio-card border-primary bg-primary/5">
               <CardHeader>
@@ -482,6 +453,35 @@ const Rewards = () => {
                   </div>
                   <Button onClick={() => handleApplyOffer(premiumOffer.id)} disabled={(offerUsage[premiumOffer.id] || 0) >= premiumOffer.limit_per_month || applyingOffer === premiumOffer.id || hasActivePenalty()} variant="default" className="bg-primary hover:bg-primary/90">
                     {applyingOffer === premiumOffer.id ? 'A aplicar...' : 'Aplicar Esta Oferta'}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>}
+          
+          {/* Offer A: 3h for €20 - Dynamic from database */}
+          {recordingOffer && <Card className="studio-card">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Star className="w-5 h-5 text-primary" />
+                  Compra 2h de gravação, ganha + 1h grátis
+                </CardTitle>
+                <CardDescription>
+                  {recordingOffer.description || `${recordingOffer.total_duration_min / 60}h totais de gravação por apenas €${recordingOffer.price_eur}`}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-2xl font-bold text-accent">€{recordingOffer.price_eur}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Usado: {offerUsage[recordingOffer.id] || 0}/{recordingOffer.limit_per_month} este mês
+                    </p>
+                    {(offerUsage[recordingOffer.id] || 0) >= recordingOffer.limit_per_month && <Badge variant="outline" className="text-xs mt-1">
+                        Limite mensal atingido
+                      </Badge>}
+                  </div>
+                  <Button onClick={() => handleApplyOffer(recordingOffer.id)} disabled={(offerUsage[recordingOffer.id] || 0) >= recordingOffer.limit_per_month || applyingOffer === recordingOffer.id || hasActivePenalty()} variant="default">
+                    {applyingOffer === recordingOffer.id ? 'A aplicar...' : 'Aplicar à minha próxima reserva'}
                   </Button>
                 </div>
               </CardContent>
