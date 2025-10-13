@@ -427,6 +427,7 @@ export type Database = {
           note: string | null
           plan_type: string | null
           proof_url: string | null
+          referral_reward_id: string | null
           reservation_id: string | null
           status: string
           subscription_id: string | null
@@ -450,6 +451,7 @@ export type Database = {
           note?: string | null
           plan_type?: string | null
           proof_url?: string | null
+          referral_reward_id?: string | null
           reservation_id?: string | null
           status?: string
           subscription_id?: string | null
@@ -473,6 +475,7 @@ export type Database = {
           note?: string | null
           plan_type?: string | null
           proof_url?: string | null
+          referral_reward_id?: string | null
           reservation_id?: string | null
           status?: string
           subscription_id?: string | null
@@ -483,6 +486,13 @@ export type Database = {
           voucher_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "payment_requests_referral_reward_id_fkey"
+            columns: ["referral_reward_id"]
+            isOneToOne: false
+            referencedRelation: "referral_rewards"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "payment_requests_reservation_id_fkey"
             columns: ["reservation_id"]
@@ -713,6 +723,7 @@ export type Database = {
           generated_at: string
           id: string
           is_active: boolean
+          times_used: number | null
           user_id: string
         }
         Insert: {
@@ -720,6 +731,7 @@ export type Database = {
           generated_at?: string
           id?: string
           is_active?: boolean
+          times_used?: number | null
           user_id: string
         }
         Update: {
@@ -727,9 +739,61 @@ export type Database = {
           generated_at?: string
           id?: string
           is_active?: boolean
+          times_used?: number | null
           user_id?: string
         }
         Relationships: []
+      }
+      referral_rewards: {
+        Row: {
+          created_at: string | null
+          created_from_friend_code_use_id: string | null
+          discount_percent: number
+          expires_at: string
+          id: string
+          is_used: boolean | null
+          updated_at: string | null
+          used_in_payment_request_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_from_friend_code_use_id?: string | null
+          discount_percent?: number
+          expires_at: string
+          id?: string
+          is_used?: boolean | null
+          updated_at?: string | null
+          used_in_payment_request_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          created_from_friend_code_use_id?: string | null
+          discount_percent?: number
+          expires_at?: string
+          id?: string
+          is_used?: boolean | null
+          updated_at?: string | null
+          used_in_payment_request_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_rewards_created_from_friend_code_use_id_fkey"
+            columns: ["created_from_friend_code_use_id"]
+            isOneToOne: false
+            referencedRelation: "friend_code_uses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referral_rewards_used_in_payment_request_id_fkey"
+            columns: ["used_in_payment_request_id"]
+            isOneToOne: false
+            referencedRelation: "payment_requests"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reservations: {
         Row: {

@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useMessaging } from '@/hooks/useMessaging';
 import { useFriendCode } from '@/hooks/useFriendCode';
+import { useReferralReward } from '@/hooks/useReferralReward';
 import { ArrowLeft, CheckCircle, Copy, Smartphone, Building2, Tag } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useRealtimeSync } from '@/hooks/useRealtimeSync';
@@ -23,12 +24,14 @@ const Payment = () => {
   } = useAuth();
   const { sendMessage, ADMIN_ID } = useMessaging();
   const { appliedFriendCode, hasFriendCodeDiscount } = useFriendCode();
+  const { referralReward, hasReferralReward } = useReferralReward();
   const [loading, setLoading] = useState(false);
   const [voucherDiscount, setVoucherDiscount] = useState(0);
   const [hasVoucher, setHasVoucher] = useState(false);
   const [subscriptionDiscount, setSubscriptionDiscount] = useState(0);
   const [subscriptionDiscountPercent, setSubscriptionDiscountPercent] = useState(0);
   const [friendCodeDiscount, setFriendCodeDiscount] = useState(0);
+  const [referralRewardDiscount, setReferralRewardDiscount] = useState(0);
   const [activeVoucherId, setActiveVoucherId] = useState<string | null>(null);
   const [isPremiumOffer, setIsPremiumOffer] = useState(false);
   const [premiumOfferDiscount, setPremiumOfferDiscount] = useState(0);
@@ -133,6 +136,14 @@ const Payment = () => {
           setFriendCodeDiscount(0);
         }
         
+        // Calculate referral reward discount (25% for sharing code)
+        if (hasReferralReward && referralReward && !isPremiumOffer && !loyaltyOffer) {
+          const rewardDiscount = basePrice * (referralReward.discount_percent / 100);
+          setReferralRewardDiscount(rewardDiscount);
+        } else {
+          setReferralRewardDiscount(0);
+        }
+        
         // Load subscription discount
         const { data: subscriptionData } = await supabase
           .from('subscriptions')
@@ -185,7 +196,7 @@ const Payment = () => {
     };
     
     loadDiscounts();
-  }, [user, price, service, hasFriendCodeDiscount, loyaltyOffer]);
+  }, [user, price, service, hasFriendCodeDiscount, hasReferralReward, loyaltyOffer]);
   
   useEffect(() => {
     // For subscriptions, we don't need 'option', just 'plan'
@@ -264,6 +275,17 @@ const Payment = () => {
           p_amount_eur: finalPrice,
           p_friend_code: appliedFriendCode || null
         });
+
+        // Update payment request with referral_reward_id if applicable
+        if (requestId && hasReferralReward && referralReward) {
+          await supabase
+            .from('payment_requests')
+            .update({ 
+              referral_reward_id: referralReward.id,
+              note: 'Aplicado 25% desconto codigo de amigo (partilha)'
+            })
+            .eq('id', requestId);
+        }
 
         if (requestError) {
           console.error('Payment request error:', requestError);
@@ -354,14 +376,15 @@ const Payment = () => {
         }
 
         // Create payment request with transfer_link and voucher_id
-        // Apply subscription discount first, then apply the HIGHEST of friend code or voucher (not both)
+        // Apply subscription discount first, then referral reward, then apply the HIGHEST of friend code or voucher (not both)
         // For loyalty offers, price is always 0
         let finalPrice = 0;
         if (loyaltyOffer) {
           finalPrice = 0;
         } else {
           const priceAfterSubscription = parseFloat(price) - subscriptionDiscount;
-          const priceAfterRewardOrVoucher = priceAfterSubscription - Math.max(friendCodeDiscount, voucherDiscount);
+          const priceAfterReferralReward = priceAfterSubscription - referralRewardDiscount;
+          const priceAfterRewardOrVoucher = priceAfterReferralReward - Math.max(friendCodeDiscount, voucherDiscount);
           finalPrice = Math.max(0, priceAfterRewardOrVoucher);
         }
         
@@ -377,10 +400,21 @@ const Payment = () => {
             transfer_link: transferLink || null,
             note: notes || null,
             voucher_id: loyaltyOffer ? null : activeVoucherId, // No voucher for loyalty offers
-            friend_code: hasFriendCodeDiscount() ? appliedFriendCode : null // Save friend code (will be marked as used when admin approves)
+            friend_code: hasFriendCodeDiscount() ? appliedFriendCode : null, // Save friend code (will be marked as used when admin approves)
+            referral_reward_id: hasReferralReward && referralReward ? referralReward.id : null
           })
           .select()
           .single();
+
+        // Update note if referral reward is applied
+        if (paymentData && hasReferralReward && referralReward) {
+          await supabase
+            .from('payment_requests')
+            .update({ 
+              note: (notes || '') + '\n\nAplicado 25% desconto codigo de amigo (partilha)'
+            })
+            .eq('id', paymentData.id);
+        }
 
         if (paymentError) {
           console.error('Payment error:', paymentError);
@@ -523,9 +557,10 @@ const Payment = () => {
       }
 
       // 2. Call RPC to create payment request with voucher_id
-      // Apply subscription discount first, then apply the HIGHEST of friend code or voucher (not both)
+      // Apply subscription discount first, then referral reward, then apply the HIGHEST of friend code or voucher (not both)
       const priceAfterSubscription = parseFloat(price) - subscriptionDiscount;
-      const priceAfterRewardOrVoucher = priceAfterSubscription - Math.max(friendCodeDiscount, voucherDiscount);
+      const priceAfterReferralReward = priceAfterSubscription - referralRewardDiscount;
+      const priceAfterRewardOrVoucher = priceAfterReferralReward - Math.max(friendCodeDiscount, voucherDiscount);
       const finalPrice = Math.max(0, priceAfterRewardOrVoucher);
       
       console.log('[PAYMENT] Creating payment request for reservation:', reservationData.id, 'with offer_id:', reservationData.offer_id);
@@ -541,6 +576,17 @@ const Payment = () => {
         p_voucher_id: activeVoucherId,
         p_friend_code: appliedFriendCode || null
       });
+
+      // Update payment request with referral_reward_id if applicable
+      if (paymentId && hasReferralReward && referralReward) {
+        await supabase
+          .from('payment_requests')
+          .update({ 
+            referral_reward_id: referralReward.id,
+            note: (notes || `${serviceTitle} - ${optionTitle}`) + '\n\nAplicado 25% desconto codigo de amigo (partilha)'
+          })
+          .eq('id', paymentId);
+      }
       if (paymentError) {
         console.error('Payment error:', paymentError);
         // Cleanup: delete the reservation if payment request failed
@@ -655,7 +701,7 @@ const Payment = () => {
               <>
                 <Separator />
                 
-                {(isPremiumOffer || subscriptionDiscount > 0 || friendCodeDiscount > 0 || hasVoucher || loyaltyOffer) && (
+                {(isPremiumOffer || subscriptionDiscount > 0 || referralRewardDiscount > 0 || friendCodeDiscount > 0 || hasVoucher || loyaltyOffer) && (
                   <div className="flex items-center justify-between text-sm">
                     <span>Subtotal:</span>
                     <span>€{price}</span>
@@ -676,8 +722,15 @@ const Payment = () => {
                   </div>
                 )}
                 
+                {!isPremiumOffer && referralRewardDiscount > 0 && (
+                  <div className="flex items-center justify-between text-sm text-blue-600 font-medium">
+                    <span>🎉 Desconto Partilha de Código (25%):</span>
+                    <span>-€{referralRewardDiscount.toFixed(2)}</span>
+                  </div>
+                )}
+                
                 {!isPremiumOffer && friendCodeDiscount > 0 && (
-                  <div className="flex items-center justify-between text-sm text-green-600">
+                  <div className="flex items-center justify-between text-sm text-purple-600">
                     <span>Código de Amigo ({appliedFriendCode}) - 25%:</span>
                     <span>-€{friendCodeDiscount.toFixed(2)}</span>
                   </div>
@@ -700,14 +753,14 @@ const Payment = () => {
                   </div>
                 )}
                 
-                {(isPremiumOffer || subscriptionDiscount > 0 || friendCodeDiscount > 0 || hasVoucher || loyaltyOffer) && <Separator />}
+                {(isPremiumOffer || subscriptionDiscount > 0 || referralRewardDiscount > 0 || friendCodeDiscount > 0 || hasVoucher || loyaltyOffer) && <Separator />}
                 
                 <div className="flex items-center justify-between text-xl font-bold">
                   <span>Total:</span>
                   <span className="text-primary">
                     €{isPremiumOffer || loyaltyOffer 
                       ? '0.00' 
-                      : Math.max(0, parseFloat(price || '0') - subscriptionDiscount - friendCodeDiscount - voucherDiscount).toFixed(2)
+                      : Math.max(0, parseFloat(price || '0') - subscriptionDiscount - referralRewardDiscount - friendCodeDiscount - voucherDiscount).toFixed(2)
                     }
                   </span>
                 </div>
