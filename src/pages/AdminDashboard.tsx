@@ -26,6 +26,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { toast as sonnerToast } from 'sonner';
 import { DaysOffManager } from '@/components/admin/DaysOffManager';
+import ReferralCodeStats from '@/components/admin/ReferralCodeStats';
 
 import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 import { DebugPanel } from '@/components/DebugPanel';
@@ -502,7 +503,7 @@ const AdminDashboard = () => {
           markNotificationsRead();
         }
       }}>
-        <TabsList className="grid w-full grid-cols-3 max-w-2xl">
+        <TabsList className="grid w-full grid-cols-4 max-w-3xl">
           <TabsTrigger value="overview">Visão Geral</TabsTrigger>
           <TabsTrigger value="messages" className="relative">
             Mensagens
@@ -513,6 +514,7 @@ const AdminDashboard = () => {
             )}
           </TabsTrigger>
           <TabsTrigger value="daysoff">Days Off</TabsTrigger>
+          <TabsTrigger value="referrals">Referrals</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6 mt-6">
@@ -794,6 +796,10 @@ const AdminDashboard = () => {
 
         <TabsContent value="daysoff" className="space-y-6 mt-6">
           <DaysOffManager />
+        </TabsContent>
+
+        <TabsContent value="referrals" className="space-y-6 mt-6">
+          <ReferralCodeStats />
         </TabsContent>
       </Tabs>
     </div>
