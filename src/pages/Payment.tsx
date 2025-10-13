@@ -374,6 +374,16 @@ const Payment = () => {
           finalPrice = Math.max(0, priceAfterRewardOrVoucher);
         }
         
+        console.log('[PAYMENT MIX&MASTER] Final price calculation:', {
+          basePrice: parseFloat(price),
+          subscriptionDiscount,
+          referralRewardDiscount,
+          friendCodeDiscount,
+          voucherDiscount,
+          loyaltyOffer,
+          finalPrice
+        });
+        
         const { data: paymentData, error: paymentError } = await supabase
           .from('payment_requests')
           .insert({
@@ -560,11 +570,22 @@ const Payment = () => {
       }
 
       // 2. Call RPC to create payment request with voucher_id
-      // Apply subscription discount first, then referral reward, then apply the HIGHEST of friend code or voucher (not both)
-      const priceAfterSubscription = parseFloat(price) - subscriptionDiscount;
+      // Apply discounts in order: premium offer, subscription, referral reward, then the HIGHEST of friend code or voucher
+      const priceAfterPremiumOffer = parseFloat(price) - premiumOfferDiscount;
+      const priceAfterSubscription = priceAfterPremiumOffer - subscriptionDiscount;
       const priceAfterReferralReward = priceAfterSubscription - referralRewardDiscount;
       const priceAfterRewardOrVoucher = priceAfterReferralReward - Math.max(friendCodeDiscount, voucherDiscount);
       const finalPrice = Math.max(0, priceAfterRewardOrVoucher);
+      
+      console.log('[PAYMENT] Final price calculation:', {
+        basePrice: parseFloat(price),
+        premiumOfferDiscount,
+        subscriptionDiscount,
+        referralRewardDiscount,
+        friendCodeDiscount,
+        voucherDiscount,
+        finalPrice
+      });
       
       console.log('[PAYMENT] Creating payment request for reservation:', reservationData.id, 'with offer_id:', reservationData.offer_id);
       
@@ -763,7 +784,7 @@ const Payment = () => {
                   <span className="text-primary">
                     €{isPremiumOffer || loyaltyOffer 
                       ? '0.00' 
-                      : Math.max(0, parseFloat(price || '0') - subscriptionDiscount - referralRewardDiscount - Math.max(friendCodeDiscount, voucherDiscount)).toFixed(2)
+                      : Math.max(0, parseFloat(price || '0') - premiumOfferDiscount - subscriptionDiscount - referralRewardDiscount - Math.max(friendCodeDiscount, voucherDiscount)).toFixed(2)
                     }
                   </span>
                 </div>
