@@ -12,7 +12,7 @@ import { z } from 'zod';
 const emailSchema = z.string().trim().email('Por favor, introduza um endereço de email válido');
 const passwordSchema = z.string().min(6, 'A palavra-passe deve ter pelo menos 6 caracteres');
 const fullNameSchema = z.string().trim().min(2, 'O nome completo deve ter pelo menos 2 caracteres').max(100, 'O nome completo deve ter menos de 100 caracteres');
-const phoneSchema = z.string().trim().min(10, 'O telefone deve ter pelo menos 10 caracteres').max(20, 'O telefone deve ter menos de 20 caracteres').regex(/^[\d\s\-\+\(\)]+$/, 'O telefone só pode conter números, espaços e pontuação básica');
+const phoneSchema = z.string().trim().min(9, 'O telefone deve ter pelo menos 9 dígitos').max(20, 'O telefone deve ter menos de 20 caracteres').regex(/^[\d\s\-\+\(\)]+$/, 'O telefone só pode conter números, espaços e pontuação básica');
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -311,12 +311,12 @@ const Auth = () => {
                   <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     type="tel"
-                    placeholder="Número de Telefone"
+                    placeholder="Número de Telefone (min. 9 dígitos)"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     className="pl-10"
                     required
-                    minLength={10}
+                    minLength={9}
                     maxLength={20}
                   />
                 </div>

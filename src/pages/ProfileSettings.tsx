@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, User, Mail, Phone, Key, Bell, Moon, Sun, Globe, Save, Edit3 } from 'lucide-react';
+import { ArrowLeft, User, Mail, Phone, Key, Bell, Save, Edit3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useNotificationSettings } from '@/hooks/useNotificationSettings';
+import { supabase } from '@/integrations/supabase/client';
 const ProfileSettings = () => {
   const navigate = useNavigate();
   const {
@@ -22,9 +22,14 @@ const ProfileSettings = () => {
   } = useToast();
   const [loading, setLoading] = useState(false);
   const [editingProfile, setEditingProfile] = useState(false);
+  const [changingPassword, setChangingPassword] = useState(false);
   const [formData, setFormData] = useState({
     full_name: profile?.full_name || '',
     phone: profile?.phone || ''
+  });
+  const [passwordData, setPasswordData] = useState({
+    newPassword: '',
+    confirmPassword: ''
   });
   const {
     settings: notificationSettings,
@@ -62,15 +67,48 @@ const ProfileSettings = () => {
       setLoading(false);
     }
   };
-  const handleAppSettingChange = (key: string, value: boolean | string) => {
-    setAppSettings(prev => ({
-      ...prev,
-      [key]: value
-    }));
-    toast({
-      title: 'Definição Atualizada',
-      description: `${key} foi atualizada.`
-    });
+  const handlePasswordChange = async () => {
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast({
+        title: 'Erro',
+        description: 'As passwords não coincidem.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      toast({
+        title: 'Erro',
+        description: 'A password deve ter pelo menos 6 caracteres.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: passwordData.newPassword
+      });
+
+      if (error) throw error;
+
+      setPasswordData({ newPassword: '', confirmPassword: '' });
+      setChangingPassword(false);
+      toast({
+        title: 'Password Atualizada',
+        description: 'A tua password foi alterada com sucesso.'
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Erro',
+        description: error.message || 'Falha ao alterar a password',
+        variant: 'destructive'
+      });
+    } finally {
+      setLoading(false);
+    }
   };
   if (!user || !profile) {
     return <div className="flex items-center justify-center min-h-64">
@@ -210,19 +248,62 @@ const ProfileSettings = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Button variant="outline" onClick={() => toast({
-          title: 'Funcionalidade em Desenvolvimento',
-          description: 'A alteração de password estará disponível em breve.'
-        })} className="w-full">
-            Alterar Password
-          </Button>
-          
-          <Button variant="outline" onClick={() => toast({
-          title: 'Autenticação de Dois Fatores',
-          description: 'Esta funcionalidade estará disponível numa atualização futura.'
-        })} className="w-full">
-            Configurar 2FA
-          </Button>
+          {!changingPassword ? (
+            <Button 
+              variant="outline" 
+              onClick={() => setChangingPassword(true)} 
+              className="w-full"
+            >
+              Alterar Password
+            </Button>
+          ) : (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="newPassword">Nova Password</Label>
+                <Input
+                  id="newPassword"
+                  type="password"
+                  value={passwordData.newPassword}
+                  onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
+                  placeholder="Mínimo 6 caracteres"
+                  minLength={6}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirmar Password</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  value={passwordData.confirmPassword}
+                  onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                  placeholder="Repete a nova password"
+                  minLength={6}
+                />
+              </div>
+
+              <div className="flex gap-2">
+                <Button 
+                  onClick={handlePasswordChange} 
+                  disabled={loading || !passwordData.newPassword || !passwordData.confirmPassword}
+                  size="sm"
+                >
+                  <Save className="h-4 w-4 mr-2" />
+                  {loading ? 'A guardar...' : 'Guardar Nova Password'}
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setChangingPassword(false);
+                    setPasswordData({ newPassword: '', confirmPassword: '' });
+                  }}
+                  size="sm"
+                >
+                  Cancelar
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
