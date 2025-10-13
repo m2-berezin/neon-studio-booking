@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import ServiceCard from '@/components/ServiceCard';
-import { Calendar, Music, FolderOpen, Gift, CreditCard, MapPin } from 'lucide-react';
+import { Calendar, Music, FolderOpen, Gift, CreditCard, MapPin, Upload } from 'lucide-react';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -18,7 +18,7 @@ const Home = () => {
   }, {
     title: 'Mix & Master',
     description: 'Envia os teus projetos',
-    icon: Music,
+    icon: Upload,
     path: '/mix-master',
     gradient: true
   }, {
@@ -29,7 +29,7 @@ const Home = () => {
     gradient: true
   }, {
     title: 'Subscrições',
-    description: 'Poupe com os nossos planos de subscrição',
+    description: 'Subscreve para teres descontos em serviços e obter ofertas exclusivas!',
     icon: CreditCard,
     path: '/subscriptions'
   }];

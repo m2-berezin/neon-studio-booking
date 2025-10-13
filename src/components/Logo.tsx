@@ -15,7 +15,7 @@ export const Logo = ({ size = 'md', className = '' }: LogoProps) => {
   return (
     <div className={`flex items-center gap-2 ${className}`}>
       <div 
-        className={`font-bold ${sizeClasses[size]}`}
+        className={`font-bold ${sizeClasses[size]} text-white`}
         style={{ 
           fontFamily: 'Georgia, serif',
           textShadow: '0 0 20px rgba(255, 255, 255, 0.3), 0 0 40px rgba(255, 255, 255, 0.2)'
@@ -24,8 +24,8 @@ export const Logo = ({ size = 'md', className = '' }: LogoProps) => {
         7T7Studios
       </div>
       <div className="flex flex-col text-xs opacity-70">
-        <span className="text-accent">MUSIC</span>
-        <span className="text-primary">STUDIO</span>
+        <span className="text-white">MUSIC</span>
+        <span className="text-white">STUDIO</span>
       </div>
     </div>
   );

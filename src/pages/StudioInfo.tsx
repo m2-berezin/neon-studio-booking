@@ -11,11 +11,11 @@ const StudioInfo = () => {
   const houseRules = [{
     icon: <Clock className="h-5 w-5" />,
     title: "Pontualidade",
-    description: "Por favor chegue a horas. Atrasos podem resultar em sessões encurtadas."
+    description: "Por favor chega a horas. Atrasos podem resultar em sessões encurtadas."
   }, {
     icon: <Music className="h-5 w-5" />,
-    title: "Respeite o Equipamento",
-    description: "Manuseie todo o equipamento com cuidado. Reporte qualquer problema imediatamente."
+    title: "Respeita o Equipamento",
+    description: "Manuseia todo o equipamento com cuidado. Reporta qualquer problema imediatamente."
   }, {
     icon: <Settings className="h-5 w-5" />,
     title: "PROIBIDO COMER",
@@ -23,11 +23,11 @@ const StudioInfo = () => {
   }, {
     icon: <Phone className="h-5 w-5" />,
     title: "Etiqueta do Telemóvel",
-    description: "Mantenha os telemóveis em modo silencioso durante as sessões de gravação."
+    description: "Mantém os telemóveis em modo silencioso durante as sessões de gravação."
   }, {
     icon: <Mic className="h-5 w-5" />,
     title: "Conduta Profissional",
-    description: "Mantenha uma atmosfera profissional. Comportamento disruptivo não será tolerado."
+    description: "Mantém uma atmosfera profissional. Comportamento disruptivo não será tolerado."
   }];
   const prepChecklist = [{
     category: "Before You Arrive",
@@ -142,7 +142,7 @@ const StudioInfo = () => {
         <CardHeader>
           <CardTitle>Regras da Casa do Estúdio</CardTitle>
           <p className="text-sm text-muted-foreground">
-            Por favor siga estas diretrizes para garantir um ambiente profissional e produtivo para todos.
+            Por favor segue estas diretrizes para garantir um ambiente profissional e produtivo para todos.
           </p>
         </CardHeader>
         <CardContent>

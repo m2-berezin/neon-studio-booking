@@ -2,7 +2,7 @@ import { ReactNode, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Home, User, LogOut, Settings, Folder, Info, Award, MessageSquare } from 'lucide-react';
+import { Home, User, LogOut, Settings, Folder, HelpCircle, Award, MessageSquare } from 'lucide-react';
 import { NotificationBell } from '@/components/NotificationBell';
 import { Logo } from '@/components/Logo';
 import { NotificationHandler } from '@/components/NotificationHandler';
@@ -39,7 +39,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
     { path: '/rewards', icon: Award, label: 'Recompensas' },
     { path: '/', icon: Home, label: '7', isLogo: true },
     { path: '/messages', icon: MessageSquare, label: 'Mensagens' },
-    { path: '/studio-info', icon: Info, label: 'Info' },
+    { path: '/studio-info', icon: HelpCircle, label: 'Info' },
   ];
 
   const adminNavItems: NavItem[] = [
@@ -80,8 +80,8 @@ const Layout = ({ children }: { children: ReactNode }) => {
             <p className="text-xs text-muted-foreground -mt-1">Studios</p>
             {subscription?.is_active && (
               <div className="flex justify-center mt-1.5">
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-white text-black">
-                  {subscription.plan_type === 'X' ? 'Premium+' : 'Premium'}
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold neon-title">
+                  {subscription.plan_type === 'X' ? 'PREMIUM+' : 'PREMIUM'}
                 </span>
               </div>
             )}

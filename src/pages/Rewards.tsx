@@ -341,11 +341,11 @@ const Rewards = () => {
         </Alert>
       )}
 
-      {/* Weekly Offers */}
+      {/* Monthly Offers */}
       <section>
         <h2 className="text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
           <Clock className="w-6 h-6 text-primary" />
-          Ofertas Semanais
+          Ofertas Mensais
         </h2>
         
         <div className="grid gap-4">
