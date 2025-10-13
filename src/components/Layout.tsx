@@ -2,7 +2,7 @@ import { ReactNode, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Home, User, LogOut, Settings, Folder, HelpCircle, Award, MessageSquare } from 'lucide-react';
+import { Home, User, LogOut, Settings, Folder, Award, MessageSquare } from 'lucide-react';
 import { NotificationBell } from '@/components/NotificationBell';
 import { Logo } from '@/components/Logo';
 import { NotificationHandler } from '@/components/NotificationHandler';
@@ -31,6 +31,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
     icon: any;
     label: string;
     isLogo?: boolean;
+    isQuestion?: boolean; // For custom ? icon
   };
 
   // Different navigation items based on role
@@ -39,7 +40,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
     { path: '/rewards', icon: Award, label: 'Recompensas' },
     { path: '/', icon: Home, label: '7', isLogo: true },
     { path: '/messages', icon: MessageSquare, label: 'Mensagens' },
-    { path: '/studio-info', icon: HelpCircle, label: 'Info' },
+    { path: '/studio-info', icon: null, label: 'Info', isLogo: true }, // Custom ? icon
   ];
 
   const adminNavItems: NavItem[] = [
@@ -117,6 +118,25 @@ const Layout = ({ children }: { children: ReactNode }) => {
               const isActive = item.path === '/admin/dashboard' 
                 ? location.pathname.startsWith('/admin')
                 : location.pathname === item.path;
+              
+              // Special rendering for Info tab (? icon)
+              if (item.path === '/studio-info') {
+                return (
+                  <button
+                    key={item.path}
+                    onClick={() => navigate(item.path)}
+                    className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-all ${
+                      isActive 
+                        ? 'text-primary' 
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    <span className="text-2xl font-bold" style={{ fontFamily: 'Times New Roman, serif' }}>?</span>
+                    <span className="text-xs font-medium">Info</span>
+                  </button>
+                );
+              }
+              
               return (
                 <button
                   key={item.path}
