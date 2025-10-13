@@ -31,7 +31,6 @@ const Layout = ({ children }: { children: ReactNode }) => {
     icon: any;
     label: string;
     isLogo?: boolean;
-    isQuestion?: boolean; // For custom ? icon
   };
 
   // Different navigation items based on role
@@ -40,7 +39,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
     { path: '/rewards', icon: Award, label: 'Recompensas' },
     { path: '/', icon: Home, label: '7', isLogo: true },
     { path: '/messages', icon: MessageSquare, label: 'Mensagens' },
-    { path: '/studio-info', icon: null, label: 'Info', isLogo: true }, // Custom ? icon
+    { path: '/studio-info', icon: 'question', label: 'Info' },
   ];
 
   const adminNavItems: NavItem[] = [
@@ -118,25 +117,6 @@ const Layout = ({ children }: { children: ReactNode }) => {
               const isActive = item.path === '/admin/dashboard' 
                 ? location.pathname.startsWith('/admin')
                 : location.pathname === item.path;
-              
-              // Special rendering for Info tab (? icon)
-              if (item.path === '/studio-info') {
-                return (
-                  <button
-                    key={item.path}
-                    onClick={() => navigate(item.path)}
-                    className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-all ${
-                      isActive 
-                        ? 'text-primary' 
-                        : 'text-muted-foreground hover:text-foreground'
-                    }`}
-                  >
-                    <span className="text-2xl font-bold" style={{ fontFamily: 'Times New Roman, serif' }}>?</span>
-                    <span className="text-xs font-medium">Info</span>
-                  </button>
-                );
-              }
-              
               return (
                 <button
                   key={item.path}
@@ -153,7 +133,11 @@ const Layout = ({ children }: { children: ReactNode }) => {
                     </span>
                   ) : (
                     <>
-                      <item.icon className="w-5 h-5" />
+                      {item.icon === 'question' ? (
+                        <span className="text-xl font-bold" style={{ fontFamily: 'Times New Roman, serif' }}>?</span>
+                      ) : (
+                        <item.icon className="w-5 h-5" />
+                      )}
                       <span className="text-xs font-medium">{item.label}</span>
                     </>
                   )}
