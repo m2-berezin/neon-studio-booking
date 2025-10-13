@@ -754,7 +754,7 @@ const Book = () => {
           <div className="flex items-center justify-center gap-4 text-xs">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-orange-500"></div>
-              <span className="text-muted-foreground">Verificar horário disponível, reservas já foram feitas</span>
+              <span className="text-muted-foreground">Verificar horário disponível</span>
             </div>
           </div>
         </div>
