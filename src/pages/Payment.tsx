@@ -145,12 +145,14 @@ const Payment = () => {
         }
         
         // Load subscription discount
-        const { data: subscriptionData } = await supabase
+        const { data: subscriptionData, error: subError } = await supabase
           .from('subscriptions')
           .select('id, plan_type, is_active, start_date')
           .eq('user_id', user.id)
           .eq('is_active', true)
           .maybeSingle();
+        
+        console.log('[PAYMENT] Subscription data:', subscriptionData, 'Error:', subError);
         
         if (subscriptionData) {
           // Calculate month number since subscription started
@@ -158,20 +160,30 @@ const Payment = () => {
           const now = new Date();
           const monthsSinceStart = Math.floor((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 30)) + 1;
           
+          console.log('[PAYMENT] Months since start:', monthsSinceStart);
+          
           // Get discount percentage for current month
-          const { data: discountData } = await supabase
+          const { data: discountData, error: discountError } = await supabase
             .from('plan_discounts')
             .select('discount_pct')
             .eq('subscription_id', subscriptionData.id)
             .eq('month_num', monthsSinceStart)
             .maybeSingle();
           
+          console.log('[PAYMENT] Discount data:', discountData, 'Error:', discountError);
+          
           const discountPercent = discountData?.discount_pct || 0;
           const basePrice = parseFloat(price);
           const discount = (basePrice * discountPercent) / 100;
           
+          console.log('[PAYMENT] Base price:', basePrice, 'Discount %:', discountPercent, 'Discount amount:', discount);
+          
           setSubscriptionDiscountPercent(discountPercent);
           setSubscriptionDiscount(discount);
+        } else {
+          console.log('[PAYMENT] No active subscription found');
+          setSubscriptionDiscountPercent(0);
+          setSubscriptionDiscount(0);
         }
         
         // Load voucher discount ONLY if voucherId is explicitly provided in URL params
