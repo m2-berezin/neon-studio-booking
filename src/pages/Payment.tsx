@@ -490,7 +490,9 @@ const Payment = () => {
       }
 
       // Validate serviceId only if creating new reservation (not updating existing one)
-      if (!existingReservationId && (!serviceId || serviceId === 'undefined')) {
+      // Treat 'undefined' string as no reservation
+      const hasValidReservation = existingReservationId && existingReservationId !== 'undefined';
+      if (!hasValidReservation && (!serviceId || serviceId === 'undefined')) {
         toast({
           title: 'Erro',
           description: 'ID do serviço inválido',
@@ -507,7 +509,10 @@ const Payment = () => {
       let reservationData;
       let reservationError;
       
-      if (existingReservationId && existingReservationId !== 'undefined') {
+      // Use the validated hasValidReservation from above
+      const shouldUpdateReservation = existingReservationId && existingReservationId !== 'undefined';
+      
+      if (shouldUpdateReservation) {
         // UPDATE existing reservation from offer with date/time
         console.log('[PAYMENT] Updating existing reservation with offer:', existingReservationId);
         const { data, error } = await supabase
@@ -547,9 +552,21 @@ const Payment = () => {
       
       if (reservationError) {
         console.error('Reservation error:', reservationError);
+        console.error('Reservation error details:', JSON.stringify(reservationError, null, 2));
         toast({
           title: 'Erro',
-          description: 'Não foi possível processar a reserva. Tenta novamente.',
+          description: `Não foi possível processar a reserva: ${reservationError.message || 'Tenta novamente.'}`,
+          variant: 'destructive'
+        });
+        setLoading(false);
+        return;
+      }
+      
+      if (!reservationData) {
+        console.error('No reservation data returned');
+        toast({
+          title: 'Erro',
+          description: 'Não foi possível criar a reserva. Tenta novamente.',
           variant: 'destructive'
         });
         setLoading(false);
@@ -760,7 +777,7 @@ const Payment = () => {
                   <span className="text-primary">
                     €{isPremiumOffer || loyaltyOffer 
                       ? '0.00' 
-                      : Math.max(0, parseFloat(price || '0') - subscriptionDiscount - referralRewardDiscount - friendCodeDiscount - voucherDiscount).toFixed(2)
+                      : Math.max(0, parseFloat(price || '0') - subscriptionDiscount - referralRewardDiscount - Math.max(friendCodeDiscount, voucherDiscount)).toFixed(2)
                     }
                   </span>
                 </div>
