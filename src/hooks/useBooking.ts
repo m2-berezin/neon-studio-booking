@@ -223,6 +223,11 @@ export const useBooking = () => {
     console.log(`   Slot end: ${sessionEndTime.toLocaleTimeString('pt-PT')}`);
     console.log(`   Duration_min: ${sessionDurationMinutes}, ms: ${durationMs} (${sessionDurationMinutes} * 60 * 1000)`);
     console.log(`   Total blocked ranges: ${slotsToCheck.length}`);
+    
+    // Hard-coded test for 2025-10-22 at 10:00 with 120 min
+    if (dateStr === '2025-10-22' && slotStart === '10:00:00') {
+      console.log(`🧪 [TEST] Test ${horaStr}h slot with ${sessionDurationMinutes} min`);
+    }
 
     let hasOverlap = false;
     
@@ -234,22 +239,21 @@ export const useBooking = () => {
       console.log(`       Blocked start: ${blocked_start.toLocaleTimeString('pt-PT')}`);
       console.log(`       Blocked end: ${blocked_end.toLocaleTimeString('pt-PT')}`);
       
-      // Only block if the slot START falls within the blocked range
-      // This prevents blocking slots that would end during a blocked period
-      const overlaps = slotStartTime >= blocked_start && slotStartTime < blocked_end;
+      // Overlap occurs if: slot_start < blocked_end AND slot_end > blocked_start
+      const overlaps = slotStartTime < blocked_end && sessionEndTime > blocked_start;
       
       if (overlaps) {
-        console.log(`       ⚠️ Slot start is within blocked range!`);
+        console.log(`       ⚠️ Overlap detected for ${horaStr}h slot!`);
         hasOverlap = true;
       } else {
-        console.log(`       ✅ Slot start is outside blocked range ${blocked_start.toLocaleTimeString('pt-PT')}-${blocked_end.toLocaleTimeString('pt-PT')}`);
+        console.log(`       ✅ No overlap for ${horaStr}h with blocked ${blocked_start.toLocaleTimeString('pt-PT')}-${blocked_end.toLocaleTimeString('pt-PT')}`);
       }
     });
     
     if (hasOverlap) {
-      console.log(`\n❌ [FINAL] Slot ${horaStr}h is BLOCKED (starts during blocked period)`);
+      console.log(`\n❌ [FINAL] Slot ${horaStr}h is BLOCKED (overlap detected)`);
     } else {
-      console.log(`\n✅ [FINAL] Slot ${horaStr}h is AVAILABLE (starts outside blocked period)`);
+      console.log(`\n✅ [FINAL] Slot ${horaStr}h is AVAILABLE (no overlaps)`);
     }
     
     return hasOverlap;
