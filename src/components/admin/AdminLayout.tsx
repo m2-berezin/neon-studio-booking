@@ -12,7 +12,8 @@ import {
   Menu,
   X,
   Shield,
-  CreditCard
+  CreditCard,
+  Users
 } from 'lucide-react';
 import { useState } from 'react';
 import { NotificationBell } from '@/components/NotificationBell';
@@ -40,10 +41,11 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
   }
 
   const menuItems = [
-    { path: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+    { path: '/admin/dashboard', icon: LayoutDashboard, label: 'Visão Geral' },
     { path: '/admin/payments', icon: DollarSign, label: 'Pagamentos' },
     { path: '/admin/bookings', icon: Calendar, label: 'Reservas' },
     { path: '/admin/subscriptions', icon: CreditCard, label: 'Subscrições' },
+    { path: '/admin/referrals', icon: Users, label: 'Referrals' },
   ];
 
   return (

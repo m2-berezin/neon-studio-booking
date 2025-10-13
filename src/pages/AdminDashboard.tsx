@@ -26,7 +26,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { toast as sonnerToast } from 'sonner';
 import { DaysOffManager } from '@/components/admin/DaysOffManager';
-import ReferralCodeStats from '@/components/admin/ReferralCodeStats';
+
 import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 import { DebugPanel } from '@/components/DebugPanel';
 
@@ -793,10 +793,7 @@ const AdminDashboard = () => {
         </TabsContent>
 
         <TabsContent value="daysoff" className="space-y-6 mt-6">
-          <div className="grid gap-6 md:grid-cols-2">
-            <DaysOffManager />
-            <ReferralCodeStats />
-          </div>
+          <DaysOffManager />
         </TabsContent>
       </Tabs>
     </div>
