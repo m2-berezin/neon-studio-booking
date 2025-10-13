@@ -20,7 +20,7 @@ const Payment = () => {
     toast
   } = useToast();
   const {
-    user
+    user, subscription: userSubscription, subscriptionDiscountPercent: authSubscriptionDiscountPercent
   } = useAuth();
   const { sendMessage, ADMIN_ID } = useMessaging();
   const { appliedFriendCode, hasFriendCodeDiscount } = useFriendCode();
@@ -144,41 +144,15 @@ const Payment = () => {
           setReferralRewardDiscount(0);
         }
         
-        // Load subscription discount
-        const { data: subscriptionData, error: subError } = await supabase
-          .from('subscriptions')
-          .select('id, plan_type, is_active, start_date')
-          .eq('user_id', user.id)
-          .eq('is_active', true)
-          .maybeSingle();
-        
-        console.log('[PAYMENT] Subscription data:', subscriptionData, 'Error:', subError);
-        
-        if (subscriptionData) {
-          // Calculate month number since subscription started
-          const startDate = new Date(subscriptionData.start_date);
-          const now = new Date();
-          const monthsSinceStart = Math.floor((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 30)) + 1;
-          
-          console.log('[PAYMENT] Months since start:', monthsSinceStart);
-          
-          // Get discount percentage for current month
-          const { data: discountData, error: discountError } = await supabase
-            .from('plan_discounts')
-            .select('discount_pct')
-            .eq('subscription_id', subscriptionData.id)
-            .eq('month_num', monthsSinceStart)
-            .maybeSingle();
-          
-          console.log('[PAYMENT] Discount data:', discountData, 'Error:', discountError);
-          
-          const discountPercent = discountData?.discount_pct || 0;
+        // Use subscription discount from AuthContext (consistent with PriceSummary)
+        if (userSubscription?.is_active) {
           const basePrice = parseFloat(price);
-          const discount = (basePrice * discountPercent) / 100;
+          const discount = (basePrice * authSubscriptionDiscountPercent) / 100;
           
-          console.log('[PAYMENT] Base price:', basePrice, 'Discount %:', discountPercent, 'Discount amount:', discount);
+          console.log('[PAYMENT] Subscription data:', userSubscription);
+          console.log('[PAYMENT] Base price:', basePrice, 'Discount %:', authSubscriptionDiscountPercent, 'Discount amount:', discount);
           
-          setSubscriptionDiscountPercent(discountPercent);
+          setSubscriptionDiscountPercent(authSubscriptionDiscountPercent);
           setSubscriptionDiscount(discount);
         } else {
           console.log('[PAYMENT] No active subscription found');
@@ -208,7 +182,7 @@ const Payment = () => {
     };
     
     loadDiscounts();
-  }, [user, price, service, hasFriendCodeDiscount, hasReferralReward, loyaltyOffer]);
+  }, [user, price, service, hasFriendCodeDiscount, hasReferralReward, loyaltyOffer, userSubscription, authSubscriptionDiscountPercent, voucherId, existingReservationId]);
   
   useEffect(() => {
     // For subscriptions, we don't need 'option', just 'plan'
@@ -746,7 +720,7 @@ const Payment = () => {
                 
                 {!isPremiumOffer && subscriptionDiscount > 0 && (
                   <div className="flex items-center justify-between text-sm text-green-600">
-                    <span>Desconto de Subscrição ({subscriptionDiscountPercent}%):</span>
+                    <span>Desconto de Subscrição ({subscriptionDiscountPercent}% - Plano {userSubscription?.plan_type}):</span>
                     <span>-€{subscriptionDiscount.toFixed(2)}</span>
                   </div>
                 )}
