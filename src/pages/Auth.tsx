@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Mail, Lock, Zap, User, Phone, Shield } from 'lucide-react';
+import { Mail, Lock, User, Phone, Shield, Eye, EyeOff } from 'lucide-react';
 import { z } from 'zod';
 
 const emailSchema = z.string().trim().email('Por favor, introduza um endereço de email válido');
@@ -24,6 +24,8 @@ const Auth = () => {
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [adminMode, setAdminMode] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showSignupPassword, setShowSignupPassword] = useState(false);
 
   // Redirect if already authenticated
   if (user && profile) {
@@ -121,38 +123,6 @@ const Auth = () => {
     setLoading(false);
   };
 
-  const handleMagicLink = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    const emailError = validateField(emailSchema, email, 'email');
-    
-    if (emailError) {
-      toast({
-        title: 'Erro de Validação',
-        description: emailError,
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    setLoading(true);
-    const { error } = await signInWithMagicLink(email);
-    
-    if (error) {
-      toast({
-        title: 'Erro de Link Mágico',
-        description: error.message,
-        variant: 'destructive',
-      });
-    } else {
-      toast({
-        title: 'Verifica o teu email',
-        description: 'Enviámos um link mágico para iniciar sessão.',
-      });
-    }
-    setLoading(false);
-  };
-
   const handleAdminToggle = async () => {
     if (!isAdmin()) return;
     
@@ -235,40 +205,32 @@ const Auth = () => {
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     placeholder="Palavra-passe"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10"
+                    className="pl-10 pr-10"
                     required
                     minLength={6}
                   />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <Eye className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </Button>
                 </div>
               </div>
               
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? 'A iniciar sessão...' : 'Iniciar Sessão'}
-              </Button>
-            </form>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">Ou</span>
-              </div>
-            </div>
-
-            <form onSubmit={handleMagicLink}>
-              <Button 
-                type="submit" 
-                variant="outline" 
-                className="w-full" 
-                disabled={loading}
-              >
-                <Zap className="w-4 h-4 mr-2" />
-                {loading ? 'A enviar...' : 'Enviar Link Mágico'}
               </Button>
             </form>
           </TabsContent>
@@ -326,14 +288,27 @@ const Auth = () => {
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
-                    type="password"
+                    type={showSignupPassword ? "text" : "password"}
                     placeholder="Palavra-passe (min. 6 caracteres)"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10"
+                    className="pl-10 pr-10"
                     required
                     minLength={6}
                   />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                    onClick={() => setShowSignupPassword(!showSignupPassword)}
+                  >
+                    {showSignupPassword ? (
+                      <EyeOff className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <Eye className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </Button>
                 </div>
               </div>
               
