@@ -154,7 +154,7 @@ const Auth = () => {
             7T7Studios
           </h1>
           <p className="text-muted-foreground">
-            Bem-vindo ao estúdio
+            Bem-vindo ao Futuro.
           </p>
         </div>
 
