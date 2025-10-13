@@ -567,6 +567,47 @@ export type Database = {
           },
         ]
       }
+      plan_180day_offers: {
+        Row: {
+          claimed_at: string | null
+          created_at: string
+          id: string
+          is_claimed: boolean
+          offer_type: string
+          plan_type: string
+          subscription_id: string
+          user_id: string
+        }
+        Insert: {
+          claimed_at?: string | null
+          created_at?: string
+          id?: string
+          is_claimed?: boolean
+          offer_type: string
+          plan_type: string
+          subscription_id: string
+          user_id: string
+        }
+        Update: {
+          claimed_at?: string | null
+          created_at?: string
+          id?: string
+          is_claimed?: boolean
+          offer_type?: string
+          plan_type?: string
+          subscription_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_180day_offers_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       plan_discounts: {
         Row: {
           created_at: string
@@ -1260,12 +1301,20 @@ export type Database = {
         Args: { p_hours: number }
         Returns: string
       }
+      check_180day_offer_eligibility: {
+        Args: { p_offer_type: string; p_user_id: string }
+        Returns: Json
+      }
       check_user_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      claim_180day_offer: {
+        Args: { p_offer_type: string; p_user_id: string }
+        Returns: string
       }
       claim_plan_offer: {
         Args: { p_offer_type: string; p_user_id: string }

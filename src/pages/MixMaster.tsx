@@ -35,11 +35,12 @@ const MixMaster = () => {
   const { user, subscription, subscriptionDiscountPercent } = useAuth();
   const { toast } = useToast();
   
-  // Check if this is a loyalty offer claim from URL
+  // Check if this is a loyalty offer or plan 180-day offer from URL
   const searchParams = new URLSearchParams(window.location.search);
   const isLoyaltyOffer = searchParams.get('loyalty') === 'true';
+  const isPlan180DayOffer = searchParams.get('plan180day') === 'true';
   
-  const [selectedOption, setSelectedOption] = useState<'1project' | '2projects' | null>(isLoyaltyOffer ? '1project' : null);
+  const [selectedOption, setSelectedOption] = useState<'1project' | '2projects' | null>((isLoyaltyOffer || isPlan180DayOffer) ? '1project' : null);
   const [deliveryMethod, setDeliveryMethod] = useState<'upload' | 'link' | 'whatsapp' | 'later' | null>(null);
   const [transferLink, setTransferLink] = useState('');
   const [projectNotes, setProjectNotes] = useState('');
@@ -77,8 +78,8 @@ const MixMaster = () => {
   }, [user]);
   
   const getProjectPrice = () => {
-    // If loyalty offer, price is always 0
-    if (isLoyaltyOffer) return 0;
+    // If loyalty offer or plan 180-day offer, price is always 0
+    if (isLoyaltyOffer || isPlan180DayOffer) return 0;
     
     const basePrice = 40;
     let finalPrice = basePrice;
@@ -103,13 +104,17 @@ const MixMaster = () => {
   };
   
   const getVoucherDiscount = () => {
-    // No voucher discount if loyalty offer
-    if (isLoyaltyOffer) return 0;
+    // No voucher discount if loyalty offer or plan 180-day offer
+    if (isLoyaltyOffer || isPlan180DayOffer) return 0;
     return selectedVoucher ? selectedVoucher.amount_eur : 0;
   };
   
   const getLoyaltyDiscount = () => {
     return isLoyaltyOffer ? 40 : 0;
+  };
+  
+  const getPlan180DayDiscount = () => {
+    return isPlan180DayOffer ? 40 : 0;
   };
 
   const pricingOptions = [
@@ -197,7 +202,8 @@ const MixMaster = () => {
       transferLink: transferLink,
       voucherId: selectedVoucher?.id || '',
       voucherCode: selectedVoucher?.code || '',
-      loyaltyOffer: isLoyaltyOffer ? 'true' : ''
+      loyaltyOffer: isLoyaltyOffer ? 'true' : '',
+      plan180DayOffer: isPlan180DayOffer ? 'true' : ''
     });
     
     navigate(`/payment?${queryParams.toString()}`);
@@ -223,6 +229,11 @@ const MixMaster = () => {
         {isLoyaltyOffer && (
           <Badge className="mt-4 text-lg px-4 py-2 bg-primary/20 text-primary border-primary">
             🎁 Oferta de Fidelidade Ativada - Mix&Master Grátis!
+          </Badge>
+        )}
+        {isPlan180DayOffer && (
+          <Badge className="mt-4 text-lg px-4 py-2 bg-primary/20 text-primary border-primary">
+            🎁 Oferta Plano S (180 dias) - Mix&Master Grátis!
           </Badge>
         )}
       </div>
@@ -436,6 +447,13 @@ const MixMaster = () => {
                   <div className="flex items-center justify-between text-sm text-green-600 font-semibold">
                     <span>🎁 Oferta Mix&Master (7 Pontos):</span>
                     <span>-€{getLoyaltyDiscount().toFixed(2)}</span>
+                  </div>
+                )}
+                
+                {getPlan180DayDiscount() > 0 && (
+                  <div className="flex items-center justify-between text-sm text-green-600 font-semibold">
+                    <span>🎁 Oferta Plano S (180 dias):</span>
+                    <span>-€{getPlan180DayDiscount().toFixed(2)}</span>
                   </div>
                 )}
               </div>

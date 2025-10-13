@@ -35,6 +35,7 @@ const Payment = () => {
   const [activeVoucherId, setActiveVoucherId] = useState<string | null>(null);
   const [isPremiumOffer, setIsPremiumOffer] = useState(false);
   const [premiumOfferDiscount, setPremiumOfferDiscount] = useState(0);
+  const [isPlan180DayOffer, setIsPlan180DayOffer] = useState(false);
   
   // Enable realtime sync
   useRealtimeSync();
@@ -54,6 +55,7 @@ const Payment = () => {
   const voucherId = searchParams.get('voucherId'); // Voucher ID if applied
   const existingReservationId = searchParams.get('reservation_id'); // Existing reservation from offer
   const loyaltyOffer = searchParams.get('loyaltyOffer') === 'true'; // Loyalty offer from 7 points
+  const plan180DayOffer = searchParams.get('plan180DayOffer') === 'true'; // Plan 180-day offer
 
   // Determine service title based on service and option
   let serviceTitle = '';
@@ -119,12 +121,13 @@ const Payment = () => {
           }
         }
         
-        // If loyalty offer, skip all discounts
-        if (loyaltyOffer) {
+        // If loyalty offer or plan 180-day offer, skip all discounts
+        if (loyaltyOffer || plan180DayOffer) {
           setFriendCodeDiscount(0);
           setSubscriptionDiscount(0);
           setSubscriptionDiscountPercent(0);
           setVoucherDiscount(0);
+          setIsPlan180DayOffer(plan180DayOffer);
           return;
         }
         
@@ -137,7 +140,7 @@ const Payment = () => {
         }
         
         // Calculate referral reward discount (25% for sharing code)
-        if (hasReferralReward && referralReward && !isPremiumOffer && !loyaltyOffer) {
+        if (hasReferralReward && referralReward && !isPremiumOffer && !loyaltyOffer && !plan180DayOffer) {
           const rewardDiscount = basePrice * (referralReward.discount_percent / 100);
           setReferralRewardDiscount(rewardDiscount);
         } else {
@@ -182,7 +185,7 @@ const Payment = () => {
     };
     
     loadDiscounts();
-  }, [user, price, service, hasFriendCodeDiscount, hasReferralReward, loyaltyOffer, userSubscription, authSubscriptionDiscountPercent, voucherId, existingReservationId]);
+  }, [user, price, service, hasFriendCodeDiscount, hasReferralReward, loyaltyOffer, plan180DayOffer, userSubscription, authSubscriptionDiscountPercent, voucherId, existingReservationId]);
   
   useEffect(() => {
     // For subscriptions, we don't need 'option', just 'plan'
@@ -363,9 +366,9 @@ const Payment = () => {
 
         // Create payment request with transfer_link and voucher_id
         // Apply subscription discount first, then referral reward, then apply the HIGHEST of friend code or voucher (not both)
-        // For loyalty offers, price is always 0
+        // For loyalty offers or plan 180-day offers, price is always 0
         let finalPrice = 0;
-        if (loyaltyOffer) {
+        if (loyaltyOffer || plan180DayOffer) {
           finalPrice = 0;
         } else {
           const priceAfterSubscription = parseFloat(price) - subscriptionDiscount;
@@ -381,6 +384,7 @@ const Payment = () => {
           friendCodeDiscount,
           voucherDiscount,
           loyaltyOffer,
+          plan180DayOffer: isPlan180DayOffer,
           finalPrice
         });
         
@@ -391,7 +395,7 @@ const Payment = () => {
             reservation_id: reservationData.id,
             amount_eur: finalPrice,
             currency: 'EUR',
-            type: loyaltyOffer ? 'loyalty_mixmaster' : 'reservation',
+            type: loyaltyOffer ? 'loyalty_mixmaster' : plan180DayOffer ? 'plan_180day_mixmaster' : 'reservation',
             status: 'pending',
             transfer_link: transferLink || null,
             note: notes || null,
@@ -435,10 +439,12 @@ const Payment = () => {
         // Send message to admin with transfer link and notes
         let messageContent = loyaltyOffer 
           ? `🎁 Novo pedido de Mix & Master GRÁTIS (Oferta de Fidelidade - 7 Pontos)\n\n`
+          : plan180DayOffer
+          ? `🎁 Novo pedido de Mix & Master GRÁTIS (Oferta Plano S - 180 dias)\n\n`
           : `🎵 Novo pedido de Mix & Master\n\n`;
         messageContent += `Cliente: ${clientName}\n`;
         messageContent += `Opção: ${optionTitle}\n`;
-        messageContent += `Valor: €${finalPrice.toFixed(2)}${loyaltyOffer ? ' (Oferta Grátis)' : ''}\n\n`;
+        messageContent += `Valor: €${finalPrice.toFixed(2)}${(loyaltyOffer || plan180DayOffer) ? ' (Oferta Grátis)' : ''}\n\n`;
         
         if (transferLink) {
           messageContent += `📎 Link de Transferência:\n${transferLink}\n\n`;
@@ -725,7 +731,7 @@ const Payment = () => {
               <>
                 <Separator />
                 
-                {(isPremiumOffer || subscriptionDiscount > 0 || referralRewardDiscount > 0 || friendCodeDiscount > 0 || hasVoucher || loyaltyOffer) && (
+                {(isPremiumOffer || subscriptionDiscount > 0 || referralRewardDiscount > 0 || friendCodeDiscount > 0 || hasVoucher || loyaltyOffer || plan180DayOffer) && (
                   <div className="flex items-center justify-between text-sm">
                     <span>Subtotal:</span>
                     <span>€{price}</span>
@@ -777,16 +783,23 @@ const Payment = () => {
                   </div>
                 )}
                 
-                {(isPremiumOffer || subscriptionDiscount > 0 || referralRewardDiscount > 0 || friendCodeDiscount > 0 || hasVoucher || loyaltyOffer) && <Separator />}
+                {plan180DayOffer && (
+                  <div className="flex items-center justify-between text-sm text-green-600 font-semibold">
+                    <span>🎁 Oferta Plano S (180 dias):</span>
+                    <span>-€{parseFloat(price || '0').toFixed(2)}</span>
+                  </div>
+                )}
+                
+                {(isPremiumOffer || subscriptionDiscount > 0 || referralRewardDiscount > 0 || friendCodeDiscount > 0 || hasVoucher || loyaltyOffer || plan180DayOffer) && <Separator />}
                 
                 <div className="flex items-center justify-between text-xl font-bold">
                   <span>Total:</span>
-                  <span className="text-primary">
-                    €{isPremiumOffer || loyaltyOffer 
-                      ? '0.00' 
-                      : Math.max(0, parseFloat(price || '0') - premiumOfferDiscount - subscriptionDiscount - referralRewardDiscount - Math.max(friendCodeDiscount, voucherDiscount)).toFixed(2)
-                    }
-                  </span>
+                <span className="text-primary">
+                  €{isPremiumOffer || loyaltyOffer || isPlan180DayOffer
+                    ? '0.00' 
+                    : Math.max(0, parseFloat(price || '0') - premiumOfferDiscount - subscriptionDiscount - referralRewardDiscount - Math.max(friendCodeDiscount, voucherDiscount)).toFixed(2)
+                  }
+                </span>
                 </div>
               </>
             )}

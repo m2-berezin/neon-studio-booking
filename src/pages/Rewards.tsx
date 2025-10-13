@@ -51,6 +51,12 @@ const Rewards = () => {
   const [voucherStatus, setVoucherStatus] = useState<{ available: boolean; days_left: number } | null>(null);
   const [claimingVoucher, setClaimingVoucher] = useState(false);
   const [activePlanType, setActivePlanType] = useState<string | null>(null);
+  const [plan180DayOffer, setPlan180DayOffer] = useState<{ 
+    eligible: boolean; 
+    days_remaining: number | null;
+    reason?: string;
+  } | null>(null);
+  const [claiming180DayOffer, setClaiming180DayOffer] = useState(false);
 
   // Fetch active offers and usage
   useEffect(() => {
@@ -59,6 +65,7 @@ const Rewards = () => {
       fetchLoyaltyPoints();
       fetchVoucherStatus();
       fetchActivePlan();
+      fetch180DayOfferEligibility();
     }
   }, [user]);
 
@@ -174,6 +181,33 @@ const Rewards = () => {
       console.error('Error fetching active plan:', error);
     }
   };
+
+  const fetch180DayOfferEligibility = async () => {
+    if (!user || !activePlanType) return;
+    
+    try {
+      // Determine offer type based on plan
+      const offerType = activePlanType === 'S' ? 'mixmaster' : activePlanType === 'X' ? 'captacao_mixmaster' : null;
+      if (!offerType) return;
+      
+      const { data, error } = await supabase.rpc('check_180day_offer_eligibility' as any, {
+        p_user_id: user.id,
+        p_offer_type: offerType
+      });
+      
+      if (error) throw error;
+      setPlan180DayOffer(data as any);
+    } catch (error) {
+      console.error('Error fetching 180-day offer eligibility:', error);
+    }
+  };
+
+  // Refetch 180-day offer when plan changes
+  useEffect(() => {
+    if (activePlanType) {
+      fetch180DayOfferEligibility();
+    }
+  }, [activePlanType]);
   const handleApplyOffer = async (offerId: string) => {
     if (!user) return;
     setApplyingOffer(offerId);
@@ -284,6 +318,52 @@ const Rewards = () => {
       });
     } finally {
       setClaimingVoucher(false);
+    }
+  };
+
+  const handleClaim180DayOffer = async () => {
+    if (!user || !activePlanType || !plan180DayOffer?.eligible) return;
+    
+    setClaiming180DayOffer(true);
+    try {
+      const offerType = activePlanType === 'S' ? 'mixmaster' : 'captacao_mixmaster';
+      
+      const { data: reservationId, error } = await supabase.rpc('claim_180day_offer' as any, {
+        p_user_id: user.id,
+        p_offer_type: offerType
+      });
+      
+      if (error) throw error;
+      
+      const offerName = activePlanType === 'S' ? 'Mix&Master' : 'Captação 3h + Mix&Master';
+      
+      toast({
+        title: `Oferta ${offerName} ativada!`,
+        description: activePlanType === 'S' 
+          ? 'Redireccionando para Mix&Master...' 
+          : 'Redireccionando para o calendário...',
+      });
+      
+      // Navigate based on plan type
+      setTimeout(() => {
+        if (activePlanType === 'S') {
+          navigate(`/mix-master?plan180day=true&reservation=${reservationId}`);
+        } else {
+          navigate(`/book?plan180day=true&reservation=${reservationId}`);
+        }
+      }, 500);
+      
+      // Refresh eligibility
+      await fetch180DayOfferEligibility();
+    } catch (error: any) {
+      console.error('Error claiming 180-day offer:', error);
+      toast({
+        title: 'Erro',
+        description: error.message || 'Não foi possível reclamar a oferta',
+        variant: 'destructive',
+      });
+    } finally {
+      setClaiming180DayOffer(false);
     }
   };
   return <div className="space-y-6">
@@ -408,6 +488,84 @@ const Rewards = () => {
             </Card>}
         </div>
       </section>
+
+      {/* Plan 180-Day Offer */}
+      {activePlanType && plan180DayOffer && (
+        <section>
+          <h2 className="text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
+            <Award className="w-6 h-6 text-primary" />
+            Oferta Exclusiva Plano {activePlanType}
+          </h2>
+          
+          <Card className="studio-card border-primary bg-primary/5">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Gift className="w-5 h-5 text-primary" />
+                {activePlanType === 'S' ? 'Mix&Master Grátis (180 dias)' : 'Captação 3h + Mix&Master Grátis (180 dias)'}
+              </CardTitle>
+              <CardDescription>
+                {activePlanType === 'S' 
+                  ? 'Após 180 dias de subscrição, ganha 1 Mix&Master totalmente grátis' 
+                  : 'Após 180 dias de subscrição, ganha 1 Captação 3h + Mix&Master totalmente grátis'}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {plan180DayOffer.eligible ? (
+                  <>
+                    <div className="text-center p-6 bg-green-500/10 rounded-lg border border-green-500/20">
+                      <p className="text-2xl font-bold text-green-600 mb-2">
+                        🎉 Oferta Disponível!
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Parabéns! Podes reclamar a tua oferta agora.
+                      </p>
+                    </div>
+                    
+                    <Button 
+                      onClick={handleClaim180DayOffer}
+                      disabled={claiming180DayOffer || hasActivePenalty()} 
+                      variant="default"
+                      size="lg"
+                      className="w-full bg-primary hover:bg-primary/90"
+                    >
+                      {claiming180DayOffer ? 'A ativar...' : `Reclamar ${activePlanType === 'S' ? 'Mix&Master' : 'Captação 3h + Mix&Master'} Grátis`}
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <div className="text-center p-6 bg-secondary/50 rounded-lg">
+                      <p className="text-4xl font-bold text-primary mb-2">
+                        {plan180DayOffer.days_remaining !== null 
+                          ? `${plan180DayOffer.days_remaining} dias` 
+                          : 'Indisponível'}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {plan180DayOffer.reason === 'waiting_period' 
+                          ? 'Faltam para desbloquear esta oferta' 
+                          : plan180DayOffer.reason === 'already_claimed'
+                          ? 'Oferta já reclamada'
+                          : plan180DayOffer.reason === 'no_subscription'
+                          ? 'Sem subscrição ativa'
+                          : 'Oferta indisponível'}
+                      </p>
+                    </div>
+                    
+                    <Button 
+                      disabled={true}
+                      variant="outline"
+                      size="lg"
+                      className="w-full"
+                    >
+                      Ainda Não Disponível
+                    </Button>
+                  </>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+      )}
 
       {/* Loyalty Rewards */}
       <section>

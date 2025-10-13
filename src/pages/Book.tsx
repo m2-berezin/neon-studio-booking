@@ -53,15 +53,18 @@ const Book = () => {
   // Check for reservation ID from offer application
   const [reservationFromOffer, setReservationFromOffer] = useState<any>(null);
   const [isPremiumOffer, setIsPremiumOffer] = useState<boolean>(false);
+  const [isPlan180DayOffer, setIsPlan180DayOffer] = useState<boolean>(false);
   const [timeLeft, setTimeLeft] = useState<number | null>(null); // Timer em segundos
   const timerIntervalRef = React.useRef<NodeJS.Timeout | null>(null);
   
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const reservationId = urlParams.get('reservation');
+    const plan180day = urlParams.get('plan180day') === 'true';
     
     if (reservationId) {
-      fetchReservationDetails(reservationId);
+      setIsPlan180DayOffer(plan180day);
+      fetchReservationDetails(reservationId, plan180day);
     }
   }, []);
   
@@ -104,7 +107,7 @@ const Book = () => {
     }
   };
   
-  const fetchReservationDetails = async (reservationId: string) => {
+  const fetchReservationDetails = async (reservationId: string, plan180day: boolean = false) => {
     try {
       const { data, error } = await supabase
         .from('reservations')
@@ -116,21 +119,34 @@ const Book = () => {
       
       if (data) {
         setReservationFromOffer(data);
-        // Check if it's a PREMIUM+ offer and store it in state
-        const isPremium = data.offers && data.offers.name?.includes('PREMIUM+');
-        setIsPremiumOffer(isPremium);
         
-        // Pre-select service as "captacao" since it's from offer
-        setSelectedService('captacao');
-        setSelectedBackendServiceId(data.service_id);
-        setStep(2); // Go directly to calendar
-        
-        toast({
-          title: isPremium ? 'Oferta 2h captação plano PREMIUM+ ativada' : 'Oferta aplicada',
-          description: isPremium 
-            ? 'Captação 2h PREMIUM+'
-            : `3h totais (2h pagas + 1h grátis) por €${data.price_eur_snapshot}`,
-        });
+        if (plan180day) {
+          // 180-day plan offer
+          setIsPlan180DayOffer(true);
+          setSelectedService('captacao_mixmaster');
+          setSelectedBackendServiceId(data.service_id);
+          setStep(2);
+          
+          toast({
+            title: 'Oferta Plano X (180 dias) ativada!',
+            description: 'Captação 3h + Mix&Master totalmente grátis',
+          });
+        } else {
+          // Regular monthly offer
+          const isPremium = data.offers && data.offers.name?.includes('PREMIUM+');
+          setIsPremiumOffer(isPremium);
+          
+          setSelectedService('captacao');
+          setSelectedBackendServiceId(data.service_id);
+          setStep(2);
+          
+          toast({
+            title: isPremium ? 'Oferta 2h captação plano PREMIUM+ ativada' : 'Oferta aplicada',
+            description: isPremium 
+              ? 'Captação 2h PREMIUM+'
+              : `3h totais (2h pagas + 1h grátis) por €${data.price_eur_snapshot}`,
+          });
+        }
       }
     } catch (error) {
       console.error('Error fetching reservation:', error);
