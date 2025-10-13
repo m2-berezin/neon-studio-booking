@@ -949,6 +949,18 @@ const Book = () => {
                 const serviceName = services.find(s => s.id === selectedService)?.name || 'Serviço';
                 const bookingPrice = selectedService === 'captacao' ? getRecordingPrice() : selectedServiceDetails?.base_price || 0;
                 
+                // Calculate correct end time based on session duration
+                let sessionEndTime: string;
+                if (reservationFromOffer) {
+                  sessionEndTime = calculateEndTime(selectedSlot.start_time, isPremiumOffer ? 120 : 180);
+                } else if (selectedService === 'captacao') {
+                  sessionEndTime = calculateEndTime(selectedSlot.start_time, selectedHours * 60);
+                } else if (selectedService === 'captacao_mixmaster') {
+                  sessionEndTime = calculateEndTime(selectedSlot.start_time, 180);
+                } else {
+                  sessionEndTime = selectedSlot.end_time;
+                }
+                
                 // Navigate to payment with backend service ID
                 const queryParams = new URLSearchParams({
                   service: 'booking',
@@ -958,7 +970,7 @@ const Book = () => {
                   notes: `${serviceName} - ${format(selectedDate, 'dd/MM/yyyy')} às ${selectedSlot.start_time}`,
                   date: format(selectedDate, 'yyyy-MM-dd'),
                   start_time: selectedSlot.start_time,
-                  end_time: selectedSlot.end_time,
+                  end_time: sessionEndTime, // Use calculated session end time, not slot end time
                   service_id: selectedBackendServiceId, // Use backend service ID
                   hours: selectedService === 'captacao' ? selectedHours.toString() : undefined,
                   reservation_id: reservationFromOffer?.id, // Incluir reservation_id se for oferta
