@@ -312,14 +312,6 @@ const AdminPayments = () => {
                       {request.reservations?.service_name_snapshot && (
                         <p><span className="font-medium">Serviço:</span> {request.reservations.service_name_snapshot}</p>
                       )}
-                      {request.payment_method && (
-                        <p><span className="font-medium">Método de Pagamento:</span> {
-                          request.payment_method === 'mbway' ? 'MB Way' :
-                          request.payment_method === 'transferencia' ? 'Transferência Bancária' :
-                          request.payment_method === 'revolut' ? 'Revolut' :
-                          request.payment_method
-                        }</p>
-                      )}
                       {request.reservations?.starts_at && (
                         <p>
                           <span className="font-medium">Data/Hora da Reserva:</span>{' '}
@@ -327,6 +319,13 @@ const AdminPayments = () => {
                           {request.reservations.ends_at && ` às ${format(new Date(request.reservations.ends_at), "HH:mm")}`}
                         </p>
                       )}
+                      <p>
+                        <span className="font-medium">Método de Pagamento:</span>{' '}
+                        {request.payment_method === 'mbway' ? 'MB Way' :
+                         request.payment_method === 'transferencia' ? 'Transferência Bancária' :
+                         request.payment_method === 'revolut' ? 'Revolut' :
+                         'Não especificado'}
+                      </p>
                       <p className="text-muted-foreground">
                         <span className="font-medium">Pedido em:</span> {format(new Date(request.created_at), "dd/MM/yyyy 'às' HH:mm")}
                       </p>
