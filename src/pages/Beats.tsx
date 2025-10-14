@@ -27,53 +27,17 @@ const Beats = () => {
     );
   }
 
-  const beatPackages = [
-    {
-      id: 'single-beat',
-      name: 'Beat Exclusivo Individual',
-      description: 'Um beat personalizado ao teu estilo',
-      price: 150,
-      features: [
-        'Produção personalizada',
-        'Direitos exclusivos totais',
-        'Stems WAV + MP3',
-        '2 revisões incluídas',
-        'Entrega em 48 horas'
-      ]
-    },
-    {
-      id: 'beat-pack-3',
-      name: 'Pack de 3 Beats',
-      description: 'Três beats exclusivos com som coeso',
-      price: 400,
-      originalPrice: 450,
-      features: [
-        'Três beats personalizados',
-        'Direitos exclusivos totais',
-        'Stems WAV + MP3',
-        '3 revisões por beat',
-        'Entrega em 1 semana',
-        'Bónus: Variações instrumentais'
-      ],
-      popular: true
-    },
-    {
-      id: 'beat-pack-5',
-      name: 'Pack de Álbum 5 Beats',
-      description: 'Pacote completo de álbum com mistura profissional',
-      price: 650,
-      originalPrice: 750,
-      features: [
-        'Cinco beats exclusivos',
-        'Mistura profissional',
-        'Todos os stems + ficheiros MIDI',
-        'Revisões ilimitadas',
-        'Entrega em 2 semanas',
-        'Bónus: Versões acapella',
-        'Suporte prioritário'
-      ]
-    }
-  ];
+  // Beat package data - single option
+  const beatPackage = {
+    id: 'beat-exclusivo',
+    name: 'Beat Exclusivo',
+    description: 'um beat único ao teu estilo',
+    price: 100,
+    paymentTerms: [
+      '30% como sinal para começar o trabalho',
+      '70% antes do envio do produto final'
+    ]
+  };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -89,7 +53,7 @@ const Beats = () => {
     setReferenceFiles(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handlePurchaseClick = (beatPackage: any) => {
+  const handlePurchaseClick = () => {
     setSelectedBeat(beatPackage.name);
     setMessage(`Tenho interesse no ${beatPackage.name}. Por favor, indique-me os próximos passos para compra.`);
     setDialogOpen(true);
@@ -117,70 +81,46 @@ const Beats = () => {
         </p>
       </div>
 
-      {/* Pricing Table */}
-      <div className="grid lg:grid-cols-3 gap-6">
-        {beatPackages.map((beatPackage) => (
-          <Card 
-            key={beatPackage.id} 
-            className={`studio-card relative ${beatPackage.popular ? 'border-primary' : ''}`}
-          >
-            {beatPackage.popular && (
-              <Badge className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-primary">
-                Mais Popular
-              </Badge>
-            )}
+      {/* Single Beat Package Card */}
+      <div className="max-w-2xl mx-auto mb-8">
+        <Card className="studio-card">
+          <CardHeader className="text-center">
+            <CardTitle className="flex items-center justify-center gap-2 text-2xl">
+              <Music className="w-6 h-6 text-primary" />
+              {beatPackage.name}
+            </CardTitle>
+            <CardDescription className="text-lg">{beatPackage.description}</CardDescription>
             
-            <CardHeader className="text-center">
-              <CardTitle className="flex items-center justify-center gap-2">
-                <Music className="w-5 h-5 text-primary" />
-                {beatPackage.name}
-              </CardTitle>
-              <CardDescription>{beatPackage.description}</CardDescription>
-              
-              <div className="pt-4">
-                <div className="flex items-center justify-center gap-2">
-                  <span className="text-3xl font-bold text-primary">€{beatPackage.price}</span>
-                  {beatPackage.originalPrice && (
-                    <span className="text-lg text-muted-foreground line-through">
-                      €{beatPackage.originalPrice}
-                    </span>
-                  )}
-                </div>
-                {beatPackage.originalPrice && (
-                  <Badge variant="secondary" className="mt-2">
-                    Poupa €{beatPackage.originalPrice - beatPackage.price}
-                  </Badge>
-                )}
-              </div>
-            </CardHeader>
+            <div className="pt-6">
+              <span className="text-5xl font-bold text-primary">€{beatPackage.price}</span>
+            </div>
+          </CardHeader>
+          
+          <CardContent className="space-y-6">
+            <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
+              <p className="text-sm font-semibold mb-3 text-foreground">
+                Condições de Pagamento:
+              </p>
+              <ul className="space-y-2">
+                {beatPackage.paymentTerms.map((term, idx) => (
+                  <li key={idx} className="flex items-start gap-2 text-sm text-muted-foreground">
+                    <span className="text-primary mt-0.5">•</span>
+                    <span>{term}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
             
-            <CardContent>
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-muted-foreground">Premium</span>
-                          <span className="font-semibold text-primary">€{beatPackage.price}</span>
-                        </div>
-                        
-                        <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                          <p className="text-xs text-yellow-800 mb-2">
-                            <strong>Condições de Pagamento:</strong>
-                          </p>
-                          <p className="text-xs text-yellow-700">
-                            • 30% como sinal para começar o trabalho<br/>
-                            • 70% antes do envio do produto final
-                          </p>
-                        </div>
-              
-                <Button 
-                  className="w-full" 
-                  onClick={() => handlePurchaseClick(beatPackage)}
-                  variant={beatPackage.popular ? 'default' : 'outline'}
-                >
-                  <MessageCircle className="w-4 h-4 mr-2" />
-                  Conversar para Comprar
-                </Button>
-            </CardContent>
-          </Card>
-        ))}
+            <Button 
+              className="w-full" 
+              onClick={handlePurchaseClick}
+              size="lg"
+            >
+              <MessageCircle className="w-4 h-4 mr-2" />
+              Conversar para Comprar
+            </Button>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Purchase Dialog */}
