@@ -425,6 +425,7 @@ export type Database = {
           hidden_from_client: boolean | null
           id: string
           note: string | null
+          payment_method: string | null
           plan_type: string | null
           proof_url: string | null
           referral_reward_id: string | null
@@ -449,6 +450,7 @@ export type Database = {
           hidden_from_client?: boolean | null
           id?: string
           note?: string | null
+          payment_method?: string | null
           plan_type?: string | null
           proof_url?: string | null
           referral_reward_id?: string | null
@@ -473,6 +475,7 @@ export type Database = {
           hidden_from_client?: boolean | null
           id?: string
           note?: string | null
+          payment_method?: string | null
           plan_type?: string | null
           proof_url?: string | null
           referral_reward_id?: string | null

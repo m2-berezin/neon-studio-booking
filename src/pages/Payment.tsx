@@ -11,8 +11,11 @@ import { useMessaging } from '@/hooks/useMessaging';
 import { useFriendCode } from '@/hooks/useFriendCode';
 import { useReferralReward } from '@/hooks/useReferralReward';
 import { ArrowLeft, CheckCircle, Copy, Smartphone, Building2, Tag } from 'lucide-react';
-import { QRCodeSVG } from 'qrcode.react';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
+import mbwayQR from '@/assets/mbway-qr.png';
 import { useRealtimeSync } from '@/hooks/useRealtimeSync';
+
 const Payment = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -36,6 +39,7 @@ const Payment = () => {
   const [isPremiumOffer, setIsPremiumOffer] = useState(false);
   const [premiumOfferDiscount, setPremiumOfferDiscount] = useState(0);
   const [isPlan180DayOffer, setIsPlan180DayOffer] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<'mbway' | 'transferencia' | 'revolut'>('mbway');
   
   // Enable realtime sync
   useRealtimeSync();
@@ -265,14 +269,16 @@ const Payment = () => {
           p_friend_code: appliedFriendCode || null
         });
 
-        // Update payment request with referral_reward_id if applicable
-        if (requestId && hasReferralReward && referralReward) {
+        // Update payment request with referral_reward_id and payment method if applicable
+        if (requestId) {
+          const updates: any = { payment_method: paymentMethod };
+          if (hasReferralReward && referralReward) {
+            updates.referral_reward_id = referralReward.id;
+            updates.note = 'Aplicado 25% desconto codigo de amigo (partilha)';
+          }
           await supabase
             .from('payment_requests')
-            .update({ 
-              referral_reward_id: referralReward.id,
-              note: 'Aplicado 25% desconto codigo de amigo (partilha)'
-            })
+            .update(updates)
             .eq('id', requestId);
         }
 
@@ -401,7 +407,8 @@ const Payment = () => {
             note: notes || null,
             voucher_id: loyaltyOffer ? null : activeVoucherId, // No voucher for loyalty offers
             friend_code: hasFriendCodeDiscount() ? appliedFriendCode : null, // Save friend code (will be marked as used when admin approves)
-            referral_reward_id: hasReferralReward && referralReward ? referralReward.id : null
+            referral_reward_id: hasReferralReward && referralReward ? referralReward.id : null,
+            payment_method: paymentMethod
           })
           .select()
           .single();
@@ -607,6 +614,14 @@ const Payment = () => {
         p_friend_code: appliedFriendCode || null
       });
 
+      // Update payment request with payment method
+      if (paymentId) {
+        await supabase
+          .from('payment_requests')
+          .update({ payment_method: paymentMethod })
+          .eq('id', paymentId);
+      }
+
       // Update payment request with referral_reward_id if applicable
       if (paymentId && hasReferralReward && referralReward) {
         await supabase
@@ -807,6 +822,40 @@ const Payment = () => {
         </CardContent>
       </Card>
 
+      {/* Payment Method Selection */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Método de Pagamento</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <RadioGroup value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as 'mbway' | 'transferencia' | 'revolut')}>
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="mbway" id="mbway" />
+                <Label htmlFor="mbway" className="flex items-center gap-2 cursor-pointer">
+                  <Smartphone className="h-4 w-4 text-primary" />
+                  <span>MB Way</span>
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="transferencia" id="transferencia" />
+                <Label htmlFor="transferencia" className="flex items-center gap-2 cursor-pointer">
+                  <Building2 className="h-4 w-4 text-primary" />
+                  <span>Transferência Bancária</span>
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="revolut" id="revolut" />
+                <Label htmlFor="revolut" className="flex items-center gap-2 cursor-pointer">
+                  <Building2 className="h-4 w-4 text-primary" />
+                  <span>Revolut</span>
+                </Label>
+              </div>
+            </div>
+          </RadioGroup>
+        </CardContent>
+      </Card>
+
       {/* Payment Instructions */}
       <Card className="mb-6">
         <CardHeader>
@@ -814,73 +863,76 @@ const Payment = () => {
         </CardHeader>
         <CardContent className="space-y-6">
           {/* MBWay */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <Smartphone className="h-5 w-5 text-primary" />
-              <h3 className="font-semibold text-lg">MB Way</h3>
-            </div>
-            
-            <div className="bg-gradient-to-br from-primary/5 to-primary/10 p-6 rounded-xl border-2 border-primary/20">
-              <div className="flex flex-col md:flex-row items-center gap-6">
-                <div className="bg-white p-4 rounded-lg shadow-lg">
-                  <QRCodeSVG value={`MBWAY:${MBWAY_PHONE}:${price}`} size={160} level="H" includeMargin={true} />
-                </div>
-                
-                <div className="flex-1 text-center md:text-left">
-                  <p className="text-sm text-muted-foreground mb-2">Número de Telemóvel:</p>
-                  <div className="flex items-center justify-center md:justify-start gap-2 mb-4">
-                    <span className="text-2xl font-bold font-mono">{MBWAY_PHONE}</span>
-                    <Button variant="ghost" size="sm" onClick={() => copyToClipboard(MBWAY_PHONE, 'Número MB Way')}>
-                      <Copy className="h-4 w-4" />
-                    </Button>
+          {paymentMethod === 'mbway' && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Smartphone className="h-5 w-5 text-primary" />
+                <h3 className="font-semibold text-lg">MB Way</h3>
+              </div>
+              
+              <div className="bg-gradient-to-br from-primary/5 to-primary/10 p-6 rounded-xl border-2 border-primary/20">
+                <div className="flex flex-col md:flex-row items-center gap-6">
+                  <div className="bg-white p-4 rounded-lg shadow-lg">
+                    <img src={mbwayQR} alt="MB Way QR Code" className="w-40 h-40" />
                   </div>
-                  <p className="text-sm text-muted-foreground">Digitaliza o QR code com a app MB Way ou usa o número manualmente</p>
+                  
+                  <div className="flex-1 text-center md:text-left">
+                    <p className="text-sm text-muted-foreground mb-2">Número de Telemóvel:</p>
+                    <div className="flex items-center justify-center md:justify-start gap-2 mb-4">
+                      <span className="text-2xl font-bold font-mono">{MBWAY_PHONE}</span>
+                      <Button variant="ghost" size="sm" onClick={() => copyToClipboard(MBWAY_PHONE, 'Número MB Way')}>
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <p className="text-sm text-muted-foreground">Digitaliza o QR code com a app MB Way ou usa o número manualmente</p>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-
-          <Separator />
+          )}
 
           {/* IBAN */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <Building2 className="h-5 w-5 text-primary" />
-              <h3 className="font-semibold text-lg">Transferência Bancária</h3>
-            </div>
-            
-            <div className="bg-gradient-to-br from-secondary/5 to-secondary/10 p-4 rounded-xl border-2 border-secondary/20">
-              <p className="text-sm text-muted-foreground mb-2">IBAN:</p>
-              <div className="flex items-center justify-between gap-2 mb-2">
-                <span className="font-mono text-sm md:text-base font-semibold break-all">{IBAN}</span>
-                <Button variant="ghost" size="sm" onClick={() => copyToClipboard(IBAN, 'IBAN')} className="flex-shrink-0">
-                  <Copy className="h-4 w-4" />
-                </Button>
+          {paymentMethod === 'transferencia' && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Building2 className="h-5 w-5 text-primary" />
+                <h3 className="font-semibold text-lg">Transferência Bancária</h3>
               </div>
-              <p className="text-xs text-muted-foreground">Utiliza este IBAN para transferência bancária nacional ou internacional</p>
+              
+              <div className="bg-gradient-to-br from-secondary/5 to-secondary/10 p-4 rounded-xl border-2 border-secondary/20">
+                <p className="text-sm text-muted-foreground mb-2">IBAN:</p>
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <span className="font-mono text-sm md:text-base font-semibold break-all">{IBAN}</span>
+                  <Button variant="ghost" size="sm" onClick={() => copyToClipboard(IBAN, 'IBAN')} className="flex-shrink-0">
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground mb-3">Utiliza este IBAN para transferência bancária nacional ou internacional</p>
+                <p className="text-xs text-muted-foreground font-medium">Enviar comprovativo por mensagem chat da app</p>
+              </div>
             </div>
-          </div>
-
-          <Separator />
+          )}
 
           {/* Revolut */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <Building2 className="h-5 w-5 text-primary" />
-              <h3 className="font-semibold text-lg">Revolut</h3>
-            </div>
-            
-            <div className="bg-gradient-to-br from-secondary/5 to-secondary/10 p-4 rounded-xl border-2 border-secondary/20">
-              <p className="text-sm text-muted-foreground mb-2">RevTag:</p>
-              <div className="flex items-center justify-between gap-2 mb-2">
-                <span className="font-mono text-sm md:text-base font-semibold">{REVOLUT_REVTAG}</span>
-                <Button variant="ghost" size="sm" onClick={() => copyToClipboard(REVOLUT_REVTAG, 'RevTag')} className="flex-shrink-0">
-                  <Copy className="h-4 w-4" />
-                </Button>
+          {paymentMethod === 'revolut' && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Building2 className="h-5 w-5 text-primary" />
+                <h3 className="font-semibold text-lg">Revolut</h3>
               </div>
-              <p className="text-xs text-muted-foreground">Utiliza este RevTag para enviar dinheiro via Revolut</p>
+              
+              <div className="bg-gradient-to-br from-secondary/5 to-secondary/10 p-4 rounded-xl border-2 border-secondary/20">
+                <p className="text-sm text-muted-foreground mb-2">RevTag:</p>
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <span className="font-mono text-sm md:text-base font-semibold">{REVOLUT_REVTAG}</span>
+                  <Button variant="ghost" size="sm" onClick={() => copyToClipboard(REVOLUT_REVTAG, 'RevTag')} className="flex-shrink-0">
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">Utiliza este RevTag para enviar dinheiro via Revolut</p>
+              </div>
             </div>
-          </div>
+          )}
 
           <Separator />
 

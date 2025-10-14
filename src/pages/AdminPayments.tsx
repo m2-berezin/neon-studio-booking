@@ -27,6 +27,7 @@ interface PaymentRequest {
   created_at: string;
   note?: string;
   reservation_id: string;
+  payment_method?: string;
   profiles: {
     full_name: string;
   };
@@ -305,6 +306,14 @@ const AdminPayments = () => {
                       <p><span className="font-medium">Cliente:</span> {request.profiles.full_name}</p>
                       {request.reservations?.service_name_snapshot && (
                         <p><span className="font-medium">Serviço:</span> {request.reservations.service_name_snapshot}</p>
+                      )}
+                      {request.payment_method && (
+                        <p><span className="font-medium">Método de Pagamento:</span> {
+                          request.payment_method === 'mbway' ? 'MB Way' :
+                          request.payment_method === 'transferencia' ? 'Transferência Bancária' :
+                          request.payment_method === 'revolut' ? 'Revolut' :
+                          request.payment_method
+                        }</p>
                       )}
                       {request.reservations?.starts_at && (
                         <p>
