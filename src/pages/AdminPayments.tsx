@@ -83,6 +83,11 @@ const AdminPayments = () => {
         }
       }));
       
+      // Debug: Log payment methods
+      console.log('[ADMIN PAYMENTS] Loaded payment requests with methods:', 
+        mappedData.map(p => ({ id: p.id, payment_method: p.payment_method }))
+      );
+      
       setPaymentRequests(mappedData);
     } catch (error) {
       console.error('Error loading payment requests:', error);
