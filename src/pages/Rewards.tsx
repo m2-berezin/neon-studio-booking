@@ -235,7 +235,7 @@ const Rewards = () => {
       
       // Show different notification based on offer type
       toast({
-        title: isPremiumOffer ? 'Oferta 2h captação plano PREMIUM+ ativada' : 'Oferta aplicada!',
+        title: isPremiumOffer ? 'Oferta 2h Captação plano PREMIUM+ ativada' : 'Oferta aplicada!',
         description: 'Redireccionando para o calendário...'
       });
 

@@ -141,7 +141,7 @@ const Book = () => {
           setStep(2);
           
           toast({
-            title: isPremium ? 'Oferta 2h captação plano PREMIUM+ ativada' : 'Oferta aplicada',
+            title: isPremium ? 'Oferta 2h Captação plano PREMIUM+ ativada' : 'Oferta aplicada',
             description: isPremium 
               ? 'Captação 2h PREMIUM+'
               : `3h totais (2h pagas + 1h grátis) por €${data.price_eur_snapshot}`,
@@ -160,11 +160,11 @@ const Book = () => {
 
   // Service IDs from backend (Supabase)
   const BACKEND_SERVICE_IDS = {
-    captacao2h: 'b1041ae7-af06-494e-89e3-a3eafcd1e8e0', // Captacao 2h - 20EUR
-    captacao3h: 'dd60e9fe-395f-4b16-a4c9-96a7d96696a6', // Captacao 3h - 30EUR
-    captacao4h: '2c91d14c-a08a-4d31-99e7-13630ced02cd', // Captacao 4h - 40EUR
-    captacao5h: 'ecd1a25b-7188-4ec7-9ae9-237a0fe380d1', // Captacao 5h - 50EUR
-    captacaoMixMaster: '3542c1c1-544c-4aa6-b157-7f909468aa4a', // Captacao 3h + MixMaster - 70EUR
+    captacao2h: 'b1041ae7-af06-494e-89e3-a3eafcd1e8e0', // Captação 2h - 20EUR
+    captacao3h: 'dd60e9fe-395f-4b16-a4c9-96a7d96696a6', // Captação 3h - 30EUR
+    captacao4h: '2c91d14c-a08a-4d31-99e7-13630ced02cd', // Captação 4h - 40EUR
+    captacao5h: 'ecd1a25b-7188-4ec7-9ae9-237a0fe380d1', // Captação 5h - 50EUR
+    captacaoMixMaster: '3542c1c1-544c-4aa6-b157-7f909468aa4a', // Captação 3h + MixMaster - 70EUR
   };
 
   const services = [
@@ -272,10 +272,7 @@ const Book = () => {
 
   // Calculate dynamic price for recording service
   const getRecordingPrice = () => {
-    if (selectedService === 'captacao') {
-      return selectedHours * 10; // €10 per hour
-    }
-    return 70; // Mix&Master base price
+    return selectedHours * 10; // €10 per hour
   };
 
   // Get service with updated price and backend service ID
@@ -996,10 +993,10 @@ const Book = () => {
               className="w-full"
               disabled={loading}
             >
-              {reservationFromOffer ? 'Já Paguei' : 'Ir para Pagamento'}
+              {reservationFromOffer ? 'Ir para Pagamento' : 'Ir para Pagamento'}
             </Button>
             <p className="text-xs text-muted-foreground text-center">
-              {reservationFromOffer ? 'Clica aqui após fazeres o pagamento.' : 'Será redirecionado para a página de pagamento.'}
+              Será redirecionado para a página de pagamento.
             </p>
           </div>
         </div>

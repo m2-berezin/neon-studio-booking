@@ -140,7 +140,7 @@ const StudioInfo = () => {
       {/* House Rules */}
       <Card className="mt-8">
         <CardHeader>
-          <CardTitle>Regras da Casa do Estúdio</CardTitle>
+          <CardTitle>Regras do Estúdio</CardTitle>
           <p className="text-sm text-muted-foreground">
             Por favor segue estas diretrizes para garantir um ambiente profissional e produtivo para todos.
           </p>
@@ -166,7 +166,7 @@ const StudioInfo = () => {
         <CardContent className="p-6 text-center">
           <h3 className="font-semibold text-foreground mb-2">Dúvidas?</h3>
           <p className="text-sm text-muted-foreground mb-4">
-            Não encontrou o que procurava? Entre em contacto connosco directamente.
+            Algum problema? Entra em contacto comigo.
           </p>
           <div className="flex justify-center">
             <Button variant="outline" onClick={() => window.open(whatsappLink, '_blank')} className="border-green-600 text-green-600 hover:bg-green-50">
