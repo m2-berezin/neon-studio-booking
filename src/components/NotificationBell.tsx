@@ -21,9 +21,14 @@ export const NotificationBell = () => {
       await markAsRead(notificationId);
     }
     
-    // Navigate to projects if it's a payment approval notification
-    if (title === 'Pagamento aprovado') {
-      setOpen(false);
+    setOpen(false);
+    
+    // Navigate to messages tab if it's a new message notification
+    if (title === 'Nova mensagem') {
+      navigate('/messages');
+    }
+    // Navigate to projects tab if it's an approval/confirmation notification
+    else if (title.toLowerCase().includes('aprovad') || title.toLowerCase().includes('confirmad')) {
       navigate('/projects');
     }
   };
