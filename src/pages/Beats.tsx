@@ -113,10 +113,6 @@ const Beats = () => {
               <Label className="text-sm font-medium">Pacote Selecionado</Label>
               <p className="text-sm text-muted-foreground">{selectedBeat}</p>
             </div>
-            <DialogTitle>Contactar para Compra</DialogTitle>
-            <DialogDescription>
-              Antes de enviares uma mensagem ao Ghost pelo WhatsApp, preenche abaixo:
-            </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4">
@@ -133,6 +129,13 @@ const Beats = () => {
                 className="mt-1"
                 rows={4}
               />
+            </div>
+            
+            <div>
+              <h3 className="text-lg font-semibold">Contactar para Compra</h3>
+              <p className="text-sm text-muted-foreground">
+                Antes de enviares uma mensagem ao Ghost pelo WhatsApp, preenche abaixo:
+              </p>
             </div>
             
             {/* Reference Links */}
