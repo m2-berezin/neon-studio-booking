@@ -224,6 +224,8 @@ const Payment = () => {
       return;
     }
 
+    console.log('[PAYMENT CONFIRMATION] Payment method selected:', paymentMethod);
+
     setLoading(true);
     try {
       // Handle subscription payment
@@ -271,6 +273,7 @@ const Payment = () => {
 
         // Update payment request with referral_reward_id and payment method if applicable
         if (requestId) {
+          console.log('[PAYMENT SUBSCRIPTION] Saving payment method:', paymentMethod);
           const updates: any = { payment_method: paymentMethod };
           if (hasReferralReward && referralReward) {
             updates.referral_reward_id = referralReward.id;
@@ -393,6 +396,8 @@ const Payment = () => {
           plan180DayOffer: isPlan180DayOffer,
           finalPrice
         });
+        
+        console.log('[PAYMENT MIX&MASTER] Saving payment method:', paymentMethod);
         
         const { data: paymentData, error: paymentError } = await supabase
           .from('payment_requests')
@@ -600,6 +605,7 @@ const Payment = () => {
         finalPrice
       });
       
+      console.log('[PAYMENT BOOKING] Saving payment method:', paymentMethod);
       console.log('[PAYMENT] Creating payment request for reservation:', reservationData.id, 'with offer_id:', reservationData.offer_id);
       
       const {
@@ -616,6 +622,7 @@ const Payment = () => {
 
       // Update payment request with payment method
       if (paymentId) {
+        console.log('[PAYMENT BOOKING] Updating payment request with method:', paymentMethod);
         await supabase
           .from('payment_requests')
           .update({ payment_method: paymentMethod })
