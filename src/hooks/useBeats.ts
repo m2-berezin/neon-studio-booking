@@ -124,9 +124,8 @@ export const useBeats = () => {
 
   // Generate WhatsApp deep link
   const generateWhatsAppLink = (beatType: string, message: string) => {
-    const phoneNumber = '1234567890'; // Replace with actual studio phone number
-    const whatsappMessage = `Hi! I'm interested in purchasing ${beatType}.\n\n${message}`;
-    const encodedMessage = encodeURIComponent(whatsappMessage);
+    const phoneNumber = '351934941263'; // Ghost's WhatsApp number
+    const encodedMessage = encodeURIComponent(message);
     return `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
   };
 

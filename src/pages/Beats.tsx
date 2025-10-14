@@ -15,7 +15,7 @@ const Beats = () => {
   
   const [selectedBeat, setSelectedBeat] = useState<string>('');
   const [message, setMessage] = useState('');
-  const [referenceFiles, setReferenceFiles] = useState<File[]>([]);
+  const [referenceLinks, setReferenceLinks] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
 
   if (!user) {
@@ -39,36 +39,18 @@ const Beats = () => {
     ]
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    const audioFiles = files.filter(file => 
-      file.type.startsWith('audio/') || 
-      file.name.toLowerCase().match(/\.(mp3|wav|m4a|aac|flac|ogg)$/i)
-    );
-    
-    setReferenceFiles(prev => [...prev, ...audioFiles]);
-  };
-
-  const removeFile = (index: number) => {
-    setReferenceFiles(prev => prev.filter((_, i) => i !== index));
-  };
 
   const handlePurchaseClick = () => {
     setSelectedBeat(beatPackage.name);
-    setMessage(`Tenho interesse no ${beatPackage.name}. Por favor, indique-me os próximos passos para compra.`);
+    setMessage('Yooo Ghost, queria comprar um beat exclusivo. Podemos falar?');
     setDialogOpen(true);
   };
 
-  const handleSendMessage = async () => {
-    const success = await startBeatConversation(selectedBeat, message, referenceFiles);
-    if (success) {
-      setDialogOpen(false);
-      setMessage('');
-      setReferenceFiles([]);
-    }
-  };
-
-  const whatsAppLink = generateWhatsAppLink(selectedBeat, message);
+  const whatsAppMessage = referenceLinks 
+    ? `${message}\n\nLinks de referência:\n${referenceLinks}`
+    : message;
+  
+  const whatsAppLink = generateWhatsAppLink(selectedBeat, whatsAppMessage);
 
   return (
     <div className="space-y-6">
@@ -127,17 +109,17 @@ const Beats = () => {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
+            <div className="mb-3">
+              <Label className="text-sm font-medium">Pacote Selecionado</Label>
+              <p className="text-sm text-muted-foreground">{selectedBeat}</p>
+            </div>
             <DialogTitle>Contactar para Compra</DialogTitle>
             <DialogDescription>
-              Envia uma mensagem à nossa equipa ou conversa pelo WhatsApp
+              Antes de enviares uma mensagem ao Ghost pelo WhatsApp, preenche abaixo:
             </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4">
-            <div>
-              <Label className="text-sm font-medium">Pacote Selecionado</Label>
-              <p className="text-sm text-muted-foreground">{selectedBeat}</p>
-            </div>
             
             <div>
               <Label htmlFor="message" className="text-sm font-medium">
@@ -147,78 +129,36 @@ const Beats = () => {
                 id="message"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                placeholder="Conta-nos sobre o teu projeto, preferências de estilo, ou requisitos específicos..."
+                placeholder="Yooo Ghost, queria comprar um beat exclusivo. Podemos falar?"
                 className="mt-1"
                 rows={4}
               />
             </div>
             
-            {/* File Upload */}
+            {/* Reference Links */}
             <div>
-              <Label className="text-sm font-medium">Ficheiros de Referência (Opcional)</Label>
-              <p className="text-xs text-muted-foreground mb-2">
-                Carrega referências áudio para nos ajudar a entender o teu estilo
-              </p>
-              
-              <div className="space-y-2">
-                <input
-                  type="file"
-                  id="reference-files"
-                  multiple
-                  accept="audio/*,.mp3,.wav,.m4a,.aac,.flac,.ogg"
-                  onChange={handleFileUpload}
-                  className="hidden"
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => document.getElementById('reference-files')?.click()}
-                  disabled={uploading}
-                  className="w-full"
-                >
-                  <Upload className="w-4 h-4 mr-2" />
-                  {uploading ? 'A carregar...' : 'Adicionar Ficheiros de Referência'}
-                </Button>
-                
-                {referenceFiles.length > 0 && (
-                  <div className="space-y-1">
-                    {referenceFiles.map((file, index) => (
-                      <div key={index} className="flex items-center justify-between text-xs bg-secondary p-2 rounded">
-                        <span className="truncate">{file.name}</span>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeFile(index)}
-                          className="h-auto p-0 ml-2"
-                        >
-                          <X className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+              <Label htmlFor="reference-links" className="text-sm font-medium">
+                Links de Referência (Opcional)
+              </Label>
+              <Textarea
+                id="reference-links"
+                value={referenceLinks}
+                onChange={(e) => setReferenceLinks(e.target.value)}
+                placeholder="Cola aqui 1/2 links de sons para referência do beat que estás à procura."
+                className="mt-1"
+                rows={3}
+              />
             </div>
           </div>
           
-          <DialogFooter className="flex-col space-y-2">
+          <DialogFooter>
             <Button
-              onClick={handleSendMessage}
-              disabled={loading || !message.trim()}
-              className="w-full"
-            >
-              <MessageCircle className="w-4 h-4 mr-2" />
-              {loading ? 'A enviar...' : 'Enviar Mensagem'}
-            </Button>
-            
-            <Button
-              variant="outline"
               asChild
               className="w-full"
+              disabled={!message.trim()}
             >
               <a href={whatsAppLink} target="_blank" rel="noopener noreferrer">
-                <ExternalLink className="w-4 w-4 mr-2" />
+                <ExternalLink className="w-4 h-4 mr-2" />
                 Conversar no WhatsApp
               </a>
             </Button>
