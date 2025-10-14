@@ -13,7 +13,6 @@ import { useReferralReward } from '@/hooks/useReferralReward';
 import { ArrowLeft, CheckCircle, Copy, Smartphone, Building2, Tag } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import mbwayQR from '@/assets/mbway-qr.png';
 import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 
 const Payment = () => {
@@ -876,20 +875,13 @@ const Payment = () => {
               </div>
               
               <div className="bg-gradient-to-br from-primary/5 to-primary/10 p-6 rounded-xl border-2 border-primary/20">
-                <div className="flex flex-col md:flex-row items-center gap-6">
-                  <div className="bg-white p-4 rounded-lg shadow-lg">
-                    <img src={mbwayQR} alt="MB Way QR Code" className="w-40 h-40" />
-                  </div>
-                  
-                  <div className="flex-1 text-center md:text-left">
-                    <p className="text-sm text-muted-foreground mb-2">Número de Telemóvel:</p>
-                    <div className="flex items-center justify-center md:justify-start gap-2 mb-4">
-                      <span className="text-2xl font-bold font-mono">{MBWAY_PHONE}</span>
-                      <Button variant="ghost" size="sm" onClick={() => copyToClipboard(MBWAY_PHONE, 'Número MB Way')}>
-                        <Copy className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    <p className="text-sm text-muted-foreground">Digitaliza o QR code com a app MB Way ou usa o número manualmente</p>
+                <div className="text-center">
+                  <p className="text-sm text-muted-foreground mb-2">Número de Telemóvel:</p>
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="text-2xl font-bold font-mono">{MBWAY_PHONE}</span>
+                    <Button variant="ghost" size="sm" onClick={() => copyToClipboard(MBWAY_PHONE, 'Número MB Way')}>
+                      <Copy className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -945,9 +937,10 @@ const Payment = () => {
           <div className="space-y-2">
             <h3 className="font-semibold">Instruções:</h3>
             <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
-              <li>Faz o pagamento do sinal usando um método de pagamento à tua escolha</li>
-              <li>Clica em "Já Paguei" após realizar o pagamento</li>
-              <li>Aguarda a confirmação do pagamento (normalmente 2-6h)</li>
+              <li>Faz o pagamento do sinal (15€) usando um método de pagamento à tua escolha.</li>
+              <li>Clica em "Já Paguei" após realizares o pagamento.</li>
+              <li>Aguarda a confirmação do pagamento. (normalmente 1h-6h, serás notificado)</li>
+              <li>O valor restante é pago no dia. Pagamento a dinheiro ou outro método de pagamento à tua escolha.</li>
             </ol>
           </div>
 

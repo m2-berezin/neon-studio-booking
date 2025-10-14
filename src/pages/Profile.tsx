@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, Music, Award, User, Settings, LogOut, Shield, Mail, Phone } from 'lucide-react';
+import { Calendar, Music, Award, User, Settings, LogOut, Shield, Mail, Phone, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -92,6 +92,13 @@ const Profile = () => {
       </div>;
   }
   return <div className="space-y-6">
+      <div className="mb-4">
+        <Button variant="ghost" onClick={() => navigate('/?tab=7')} className="gap-2">
+          <ArrowLeft className="h-4 w-4" />
+          Voltar
+        </Button>
+      </div>
+
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-accent accent-glow mb-2">
           O Teu Perfil

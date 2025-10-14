@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send } from 'lucide-react';
+import { Send, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { refetchUnreadMessages } from '@/hooks/useUnreadMessages';
@@ -19,6 +20,7 @@ interface Message {
 }
 const ADMIN_ID = '6d9d1dc1-e16f-4f3d-a817-1591a1b27477';
 const Messages = () => {
+  const navigate = useNavigate();
   const {
     user
   } = useAuth();
@@ -142,6 +144,13 @@ const Messages = () => {
   };
   if (!user) return null;
   return <div className="container mx-auto p-6 max-w-4xl">
+      <div className="mb-4">
+        <Button variant="ghost" onClick={() => navigate('/?tab=7')} className="gap-2">
+          <ArrowLeft className="h-4 w-4" />
+          Voltar
+        </Button>
+      </div>
+      
       <h1 className="text-3xl font-bold mb-6">Mensagens</h1>
       
       <Card className="flex flex-col h-[600px]">
