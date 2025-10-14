@@ -1346,6 +1346,13 @@ export type Database = {
           | {
               p_amount_eur: number
               p_friend_code?: string
+              p_payment_method?: string
+              p_plan_type: string
+              p_user_id: string
+            }
+          | {
+              p_amount_eur: number
+              p_friend_code?: string
               p_plan_type: string
               p_user_id: string
             }
@@ -1800,6 +1807,16 @@ export type Database = {
       }
       request_payment: {
         Args:
+          | {
+              p_amount_eur: number
+              p_currency?: string
+              p_friend_code?: string
+              p_note?: string
+              p_payment_method?: string
+              p_proof_url?: string
+              p_reservation_id: string
+              p_voucher_id?: string
+            }
           | {
               p_amount_eur: number
               p_currency?: string

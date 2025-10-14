@@ -268,21 +268,22 @@ const Payment = () => {
           p_user_id: user.id,
           p_plan_type: planType,
           p_amount_eur: finalPrice,
-          p_friend_code: appliedFriendCode || null
+          p_friend_code: appliedFriendCode || null,
+          p_payment_method: paymentMethod
         });
 
-        // Update payment request with referral_reward_id and payment method if applicable
+        // Update payment request with referral_reward_id if applicable
         if (requestId) {
-          console.log('[PAYMENT SUBSCRIPTION] Saving payment method:', paymentMethod);
-          const updates: any = { payment_method: paymentMethod };
+          console.log('[PAYMENT SUBSCRIPTION] ✅ Payment request created with method:', paymentMethod);
           if (hasReferralReward && referralReward) {
-            updates.referral_reward_id = referralReward.id;
-            updates.note = 'Aplicado 25% desconto codigo de amigo (partilha)';
+            await supabase
+              .from('payment_requests')
+              .update({ 
+                referral_reward_id: referralReward.id,
+                note: 'Aplicado 25% desconto codigo de amigo (partilha)'
+              })
+              .eq('id', requestId);
           }
-          await supabase
-            .from('payment_requests')
-            .update(updates)
-            .eq('id', requestId);
         }
 
         if (requestError) {
@@ -617,16 +618,13 @@ const Payment = () => {
         p_currency: 'EUR',
         p_note: notes || `${serviceTitle} - ${optionTitle}`,
         p_voucher_id: activeVoucherId,
-        p_friend_code: appliedFriendCode || null
+        p_friend_code: appliedFriendCode || null,
+        p_payment_method: paymentMethod
       });
 
       // Update payment request with payment method
       if (paymentId) {
-        console.log('[PAYMENT BOOKING] Updating payment request with method:', paymentMethod);
-        await supabase
-          .from('payment_requests')
-          .update({ payment_method: paymentMethod })
-          .eq('id', paymentId);
+        console.log('[PAYMENT BOOKING] ✅ Payment request created with method:', paymentMethod);
       }
 
       // Update payment request with referral_reward_id if applicable
