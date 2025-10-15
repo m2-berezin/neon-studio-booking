@@ -855,11 +855,6 @@ const AdminDashboard = () => {
                               <h3 className="font-semibold text-lg truncate">
                                 {thread.user_name}
                               </h3>
-                              {thread.unread_count > 0 && (
-                                <Badge key={`badge-${thread.user_id}-${thread.unread_count}`} className="h-6 w-6 p-0 flex items-center justify-center text-xs rounded-full">
-                                  {thread.unread_count}
-                                </Badge>
-                              )}
                             </div>
                             <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                               <Paperclip className="h-3 w-3 shrink-0" />
