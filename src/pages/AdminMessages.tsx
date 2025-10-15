@@ -414,19 +414,22 @@ const AdminMessages = () => {
                     </div>
                   )}
                   
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 items-center">
                     <input
                       ref={fileInputRef}
                       type="file"
                       accept="image/*,audio/mp3,audio/mpeg"
                       onChange={handleFileSelect}
                       className="hidden"
+                      id="admin-file-input"
                     />
                     <Button
+                      type="button"
                       variant="outline"
                       size="icon"
                       onClick={() => fileInputRef.current?.click()}
                       disabled={uploading}
+                      title="Anexar ficheiro"
                     >
                       <Paperclip className="h-4 w-4" />
                     </Button>
@@ -444,9 +447,11 @@ const AdminMessages = () => {
                       disabled={uploading}
                     />
                     <Button 
+                      type="button"
                       onClick={handleSendMessage} 
                       size="icon"
                       disabled={uploading || (!newMessage.trim() && !selectedFile)}
+                      title="Enviar mensagem"
                     >
                       <Send className="h-4 w-4" />
                     </Button>
