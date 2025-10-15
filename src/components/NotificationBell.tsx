@@ -16,15 +16,19 @@ export const NotificationBell = () => {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
 
-  const handleNotificationClick = async (notificationId: string, isRead: boolean, title: string) => {
+  const handleNotificationClick = async (notificationId: string, isRead: boolean, title: string, body: string) => {
     if (!isRead) {
       await markAsRead(notificationId);
     }
     
     setOpen(false);
     
-    // Navigate to messages tab if it's a new message notification
-    if (title === 'Nova mensagem') {
+    // Navigate to admin messages tab with client name if it's a new message notification
+    if (title === 'Recebeu uma mensagem') {
+      navigate('/admin/dashboard', { state: { openMessages: true, clientName: body } });
+    }
+    // Navigate to messages tab if it's a new message notification for regular users
+    else if (title === 'Nova mensagem') {
       navigate('/messages');
     }
     // Navigate to projects tab if it's an approval/confirmation notification
@@ -98,7 +102,7 @@ export const NotificationBell = () => {
                         className={`p-4 cursor-pointer transition-colors hover:bg-muted/50 ${
                           !notification.read ? 'bg-primary/5 border-l-4 border-l-primary' : ''
                         }`}
-                        onClick={() => handleNotificationClick(notification.id, notification.read, notification.title)}
+                        onClick={() => handleNotificationClick(notification.id, notification.read, notification.title, notification.body)}
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex-1 min-w-0">

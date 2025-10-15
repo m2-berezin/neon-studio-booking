@@ -29,7 +29,7 @@ import {
   Music
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { toast as sonnerToast } from 'sonner';
 import { DaysOffManager } from '@/components/admin/DaysOffManager';
 import ReferralCodeStats from '@/components/admin/ReferralCodeStats';
@@ -78,9 +78,12 @@ const AdminDashboard = () => {
   const { isAdmin, user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
   
   // Enable realtime sync for admin (all users)
   useRealtimeSync(true);
+
+  const [activeTab, setActiveTab] = useState('overview');
 
   // Helper function to render text with clickable links
   const renderMessageWithLinks = (text: string) => {
@@ -589,6 +592,22 @@ const AdminDashboard = () => {
     }
   }, [isAdmin, selectedUserId]);
 
+  // Handle navigation from notification
+  useEffect(() => {
+    const state = location.state as { openMessages?: boolean; clientName?: string };
+    if (state?.openMessages && state?.clientName && threads.length > 0) {
+      setActiveTab('messages');
+      // Find and select the client
+      const thread = threads.find(t => t.user_name === state.clientName);
+      if (thread) {
+        setSelectedUserId(thread.user_id);
+        loadMessages(thread.user_id);
+      }
+      // Clear the state
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state, threads]);
+
   // Scroll to bottom when messages change
   useEffect(() => {
     if (messages.length > 0) {
@@ -638,47 +657,51 @@ const AdminDashboard = () => {
   ];
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold mb-2">Bem-vindo ao Dashboard</h1>
-        <p className="text-muted-foreground">
+    <div className="space-y-4 md:space-y-6 p-2 md:p-4 lg:p-6">
+      <div className="space-y-1 md:space-y-2">
+        <h1 className="text-2xl md:text-3xl font-bold">Bem-vindo ao Dashboard</h1>
+        <p className="text-sm md:text-base text-muted-foreground">
           Visão geral das operações do estúdio
         </p>
       </div>
 
-      <Tabs defaultValue="overview" onValueChange={(value) => {
+      <Tabs value={activeTab} onValueChange={(value) => {
+        setActiveTab(value);
         if (value === 'messages') {
           markNotificationsRead();
         }
       }}>
-        <TabsList className="grid w-full grid-cols-4 max-w-3xl">
-          <TabsTrigger value="overview">Visão Geral</TabsTrigger>
-          <TabsTrigger value="messages" className="relative">
+        <TabsList className="grid w-full grid-cols-4 max-w-full lg:max-w-3xl overflow-x-auto">
+          <TabsTrigger value="overview" className="text-xs md:text-sm">Visão Geral</TabsTrigger>
+          <TabsTrigger value="messages" className="relative text-xs md:text-sm">
             Mensagens
             {unreadCount > 0 && (
-              <Badge className="ml-2 h-5 w-5 p-0 flex items-center justify-center">
+              <Badge className="ml-1 md:ml-2 h-4 w-4 md:h-5 md:w-5 p-0 flex items-center justify-center text-xs">
                 {unreadCount}
               </Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="daysoff">Days Off</TabsTrigger>
-          <TabsTrigger value="referrals">Referrals</TabsTrigger>
+          <TabsTrigger value="daysoff" className="text-xs md:text-sm">Days Off</TabsTrigger>
+          <TabsTrigger value="referrals" className="text-xs md:text-sm">Referrals</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview" className="space-y-6 mt-6">
+        <TabsContent value="overview" className="space-y-4 md:space-y-6 mt-4 md:mt-6">
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Stats Grid - Asymmetric Mobile Layout */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
         {statCards.map((stat, index) => (
-          <Card key={index}>
-            <CardContent className="p-6">
+          <Card key={index} className={`
+            ${index === 0 ? 'col-span-2 lg:col-span-1' : ''}
+            ${index === 3 ? 'col-span-2 lg:col-span-1' : ''}
+          `}>
+            <CardContent className="p-4 md:p-6">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">{stat.title}</p>
-                  <p className="text-2xl font-bold">{stat.value}</p>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs md:text-sm text-muted-foreground mb-1 truncate">{stat.title}</p>
+                  <p className="text-xl md:text-2xl font-bold truncate">{stat.value}</p>
                 </div>
-                <div className={`${stat.bgColor} p-3 rounded-lg`}>
-                  <stat.icon className={`h-6 w-6 ${stat.color}`} />
+                <div className={`${stat.bgColor} p-2 md:p-3 rounded-lg ml-2 shrink-0`}>
+                  <stat.icon className={`h-5 w-5 md:h-6 md:w-6 ${stat.color}`} />
                 </div>
               </div>
             </CardContent>
@@ -737,41 +760,41 @@ const AdminDashboard = () => {
       {/* Quick Actions */}
       <Card>
         <CardHeader>
-          <CardTitle>Ações Rápidas</CardTitle>
+          <CardTitle className="text-lg md:text-xl">Ações Rápidas</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <CardContent className="space-y-4 md:space-y-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
             <Button
               variant="outline"
-              className="h-20 flex flex-col gap-2 hover:bg-primary/10"
+              className="h-16 md:h-20 flex flex-col gap-1 md:gap-2 hover:bg-primary/10 p-2"
               onClick={() => navigate('/admin/payments')}
             >
-              <DollarSign className="h-6 w-6" />
-              <span className="text-sm font-medium">Gerir Pagamentos</span>
+              <DollarSign className="h-5 w-5 md:h-6 md:w-6" />
+              <span className="text-xs md:text-sm font-medium text-center leading-tight">Gerir Pagamentos</span>
             </Button>
             <Button
               variant="outline"
-              className="h-20 flex flex-col gap-2 hover:bg-primary/10"
+              className="h-16 md:h-20 flex flex-col gap-1 md:gap-2 hover:bg-primary/10 p-2"
               onClick={loadActiveReservations}
             >
-              <Calendar className="h-6 w-6" />
-              <span className="text-sm font-medium">Ver Reservas</span>
+              <Calendar className="h-5 w-5 md:h-6 md:w-6" />
+              <span className="text-xs md:text-sm font-medium text-center leading-tight">Ver Reservas</span>
             </Button>
             <Button
               variant="outline"
-              className="h-20 flex flex-col gap-2 hover:bg-primary/10"
+              className="h-16 md:h-20 flex flex-col gap-1 md:gap-2 hover:bg-primary/10 p-2"
               onClick={() => navigate('/admin/subscriptions')}
             >
-              <CreditCard className="h-6 w-6" />
-              <span className="text-sm font-medium">Subscrições</span>
+              <CreditCard className="h-5 w-5 md:h-6 md:w-6" />
+              <span className="text-xs md:text-sm font-medium text-center leading-tight">Subscrições</span>
             </Button>
             <Button
               variant="outline"
-              className="h-20 flex flex-col gap-2 hover:bg-primary/10"
+              className="h-16 md:h-20 flex flex-col gap-1 md:gap-2 hover:bg-primary/10 p-2"
               onClick={() => navigate('/admin/projects')}
             >
-              <FolderOpen className="h-6 w-6" />
-              <span className="text-sm font-medium">Projetos Mix & Master</span>
+              <FolderOpen className="h-5 w-5 md:h-6 md:w-6" />
+              <span className="text-xs md:text-sm font-medium text-center leading-tight">Projetos Mix & Master</span>
             </Button>
           </div>
 
@@ -822,41 +845,41 @@ const AdminDashboard = () => {
 
         </TabsContent>
 
-        <TabsContent value="messages" className="space-y-6 mt-6">
+        <TabsContent value="messages" className="space-y-4 md:space-y-6 mt-4 md:mt-6">
           {!selectedUserId ? (
             /* Lista de conversas */
-            <div className="max-w-4xl mx-auto">
-              <h1 className="text-3xl font-bold mb-6 flex items-center gap-2">
+            <div className="max-w-full md:max-w-4xl mx-auto px-2 md:px-0">
+              <h1 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6 flex items-center gap-2">
                 Mensagens 🦇
               </h1>
               
               {threads.length === 0 ? (
-                <Card className="p-8">
+                <Card className="p-6 md:p-8">
                   <div className="text-center text-muted-foreground">
-                    <MessageSquare className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                    <p>Sem mensagens</p>
+                    <MessageSquare className="h-10 w-10 md:h-12 md:w-12 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm md:text-base">Sem mensagens</p>
                   </div>
                 </Card>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-2 md:space-y-3">
                   {threads.map((thread) => (
                       <Card 
                         key={thread.user_id}
-                        className="p-4 cursor-pointer hover:bg-muted/50 transition-colors"
+                        className="p-3 md:p-4 cursor-pointer hover:bg-muted/50 transition-colors active:scale-98"
                         onClick={() => {
                           console.log('🖱️ Opening thread for:', thread.user_name);
                           setSelectedUserId(thread.user_id);
                           loadMessages(thread.user_id);
                         }}
                       >
-                        <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-start justify-between gap-2 md:gap-3">
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
-                              <h3 className="font-semibold text-lg truncate">
+                              <h3 className="font-semibold text-base md:text-lg truncate">
                                 {thread.user_name}
                               </h3>
                             </div>
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+                            <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground mb-1">
                               <Paperclip className="h-3 w-3 shrink-0" />
                               <span className="truncate">{thread.last_message}</span>
                             </div>
@@ -872,19 +895,20 @@ const AdminDashboard = () => {
             </div>
           ) : (
             /* Chat aberto */
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-full md:max-w-4xl mx-auto px-2 md:px-0">
               <Button
                 variant="ghost"
-                className="mb-4"
+                size="sm"
+                className="mb-3 md:mb-4"
                 onClick={() => setSelectedUserId(null)}
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Voltar às conversas
+                <span className="text-sm">Voltar às conversas</span>
               </Button>
 
-              <Card className="flex flex-col h-[600px]">
-                <div className="p-4 border-b">
-                  <h2 className="font-semibold">
+              <Card className="flex flex-col h-[calc(100vh-16rem)] md:h-[600px]">
+                <div className="p-3 md:p-4 border-b">
+                  <h2 className="font-semibold text-sm md:text-base">
                     {threads.find((t) => t.user_id === selectedUserId)?.user_name || 'Cliente'}
                   </h2>
                 </div>
