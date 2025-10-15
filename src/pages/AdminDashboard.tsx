@@ -313,10 +313,16 @@ const AdminDashboard = () => {
         .from('messages')
         .update({ is_read: true })
         .eq('sender_id', userId)
-        .eq('receiver_id', user.id);
+        .eq('receiver_id', user.id)
+        .eq('is_read', false);
 
       // Reload threads immediately to update badge
       await loadThreads();
+      
+      // Scroll to bottom after loading
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
+      }, 100);
     } catch (error) {
       console.error('Error loading messages:', error);
     }
@@ -429,6 +435,12 @@ const AdminDashboard = () => {
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
+      
+      // Scroll to bottom after sending
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+      
       sonnerToast.success('Mensagem enviada');
     } catch (error) {
       console.error('Error sending message:', error);
@@ -554,8 +566,13 @@ const AdminDashboard = () => {
     }
   }, [isAdmin, selectedUserId]);
 
+  // Scroll to bottom when messages change
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messages.length > 0) {
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
   }, [messages]);
 
   if (loading) {

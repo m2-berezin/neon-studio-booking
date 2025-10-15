@@ -102,6 +102,11 @@ const Messages = () => {
 
       // Mark messages as read immediately after loading
       await markThreadAsRead();
+      
+      // Scroll to bottom after loading
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
+      }, 100);
     } catch (error) {
       console.error('Error loading messages:', error);
       toast.error('Erro ao carregar mensagens');
@@ -204,10 +209,13 @@ const Messages = () => {
       };
     }
   }, [user?.id]);
+  // Scroll to bottom when messages change
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({
-      behavior: 'smooth'
-    });
+    if (messages.length > 0) {
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
   }, [messages]);
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -239,6 +247,12 @@ const Messages = () => {
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
+    
+    // Scroll to bottom after sending
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+    
     await markThreadAsRead();
   };
   const handleKeyPress = (e: React.KeyboardEvent) => {
