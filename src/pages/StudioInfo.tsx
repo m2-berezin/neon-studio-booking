@@ -1,10 +1,13 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { MapPin, Clock, Phone, MessageCircle, ExternalLink, AlertTriangle, CheckCircle, Calendar, Music, Headphones, Mic, Settings } from 'lucide-react';
+import { MapPin, Clock, Phone, MessageCircle, ExternalLink, AlertTriangle, CheckCircle, Calendar, Music, Headphones, Mic, Settings, ArrowLeft } from 'lucide-react';
+
 const StudioInfo = () => {
+  const navigate = useNavigate();
   const whatsappNumber = "+351934941263";
   const studioLocation = "Pinhal do General, Seixal";
   const whatsappLink = `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}?text=Hi! I'd like to inquire about studio sessions.`;
@@ -40,6 +43,13 @@ const StudioInfo = () => {
     items: ["Ensure all files are properly labeled", "Audio files should be in 24-bit/48kHz or higher", "Remove any limiting or heavy compression from stems", "Organize tracks by instrument/element"]
   }];
   return <div className="container mx-auto p-6 max-w-4xl">
+      <div className="mb-4">
+        <Button variant="ghost" onClick={() => navigate('/?tab=7')} className="gap-2">
+          <ArrowLeft className="h-4 w-4" />
+          Voltar
+        </Button>
+      </div>
+      
       {/* Header */}
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold neon-title mb-2">

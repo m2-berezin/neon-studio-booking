@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Gift, Star, Clock, Award, Ticket } from 'lucide-react';
+import { Gift, Star, Clock, Award, Ticket, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -367,6 +367,13 @@ const Rewards = () => {
     }
   };
   return <div className="space-y-6">
+      <div className="mb-4">
+        <Button variant="ghost" onClick={() => navigate('/?tab=7')} className="gap-2">
+          <ArrowLeft className="h-4 w-4" />
+          Voltar
+        </Button>
+      </div>
+      
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold neon-title mb-2">
           Recompensas do Estúdio

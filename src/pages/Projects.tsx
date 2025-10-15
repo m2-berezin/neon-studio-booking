@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Folder, Clock, CheckCircle, FileText, Music, Zap, Trash2, FileAudio } from 'lucide-react';
+import { Folder, Clock, CheckCircle, FileText, Music, Zap, Trash2, FileAudio, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -22,6 +22,7 @@ import {
 const Projects = () => {
   const { user } = useAuth();
   const { loading, projects, deleteProject } = useProjects();
+  const navigate = useNavigate();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
 
@@ -71,6 +72,13 @@ const Projects = () => {
 
   return (
     <div className="space-y-6">
+      <div className="mb-4">
+        <Button variant="ghost" onClick={() => navigate('/?tab=7')} className="gap-2">
+          <ArrowLeft className="h-4 w-4" />
+          Voltar
+        </Button>
+      </div>
+      
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold neon-title mb-2">
           As Minhas Sessões

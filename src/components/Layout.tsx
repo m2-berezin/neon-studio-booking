@@ -88,18 +88,10 @@ const Layout = ({ children }: { children: ReactNode }) => {
           </div>
         </div>
         
-        {/* Logout and Notifications - Right */}
+        {/* Notifications - Right */}
         {user && (
           <div className="flex items-center gap-2">
             <NotificationBell />
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => signOut()}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              <LogOut className="h-4 w-4" />
-            </Button>
           </div>
         )}
       </header>
