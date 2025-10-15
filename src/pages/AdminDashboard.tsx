@@ -21,7 +21,8 @@ import {
   MessageSquare,
   Send,
   FolderOpen,
-  Paperclip
+  Paperclip,
+  ArrowLeft
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -672,52 +673,137 @@ const AdminDashboard = () => {
         </TabsContent>
 
         <TabsContent value="messages" className="space-y-6 mt-6">
-          <div className="max-w-2xl mx-auto">
-            <h1 className="text-3xl font-bold mb-6 flex items-center gap-2">
-              Mensagens 🦇
-            </h1>
-            
-            {threads.length === 0 ? (
-              <Card className="p-8">
-                <div className="text-center text-muted-foreground">
-                  <MessageSquare className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                  <p>Sem mensagens</p>
+          {!selectedUserId ? (
+            /* Lista de conversas */
+            <div className="max-w-4xl mx-auto">
+              <h1 className="text-3xl font-bold mb-6 flex items-center gap-2">
+                Mensagens 🦇
+              </h1>
+              
+              {threads.length === 0 ? (
+                <Card className="p-8">
+                  <div className="text-center text-muted-foreground">
+                    <MessageSquare className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                    <p>Sem mensagens</p>
+                  </div>
+                </Card>
+              ) : (
+                <div className="space-y-3">
+                  {threads.map((thread) => (
+                    <Card 
+                      key={thread.user_id}
+                      className="p-4 cursor-pointer hover:bg-muted/50 transition-colors"
+                      onClick={() => {
+                        setSelectedUserId(thread.user_id);
+                        loadMessages(thread.user_id);
+                      }}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-semibold text-lg truncate">
+                              {thread.user_name}
+                            </h3>
+                            {thread.unread_count > 0 && (
+                              <Badge className="h-6 w-6 p-0 flex items-center justify-center text-xs rounded-full">
+                                {thread.unread_count}
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+                            <Paperclip className="h-3 w-3 shrink-0" />
+                            <span className="truncate">{thread.last_message}</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            {format(new Date(thread.last_timestamp), 'dd/MM/yyyy HH:mm')}
+                          </p>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            /* Chat aberto */
+            <div className="max-w-4xl mx-auto">
+              <Button
+                variant="ghost"
+                className="mb-4"
+                onClick={() => setSelectedUserId(null)}
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Voltar às conversas
+              </Button>
+
+              <Card className="flex flex-col h-[600px]">
+                <div className="p-4 border-b">
+                  <h2 className="font-semibold">
+                    {threads.find((t) => t.user_id === selectedUserId)?.user_name || 'Cliente'}
+                  </h2>
+                </div>
+
+                <ScrollArea className="flex-1 p-4">
+                  {messages.length === 0 ? (
+                    <div className="text-center text-muted-foreground">Sem mensagens</div>
+                  ) : (
+                    <div className="space-y-4">
+                      {messages.map((msg) => {
+                        const isSender = msg.sender_id === user?.id;
+                        return (
+                          <div key={msg.id} className={`flex ${isSender ? 'justify-end' : 'justify-start'}`}>
+                            <div className="flex flex-col">
+                              {!isSender && msg.sender_name && (
+                                <p className="text-xs text-muted-foreground mb-1 px-1">
+                                  {msg.sender_name}
+                                </p>
+                              )}
+                              <div
+                                className={`max-w-[85%] md:max-w-[70%] rounded-lg px-4 py-2 ${
+                                  isSender
+                                    ? 'bg-primary text-primary-foreground'
+                                    : 'bg-muted text-foreground'
+                                }`}
+                              >
+                                <p className="text-sm break-words">{msg.message}</p>
+                                <p className="text-xs opacity-70 mt-1">
+                                  {new Date(msg.timestamp).toLocaleTimeString('pt-PT', {
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                  })}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                      <div ref={messagesEndRef} />
+                    </div>
+                  )}
+                </ScrollArea>
+
+                <div className="p-4 border-t">
+                  <div className="flex gap-2">
+                    <Input
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          handleSendMessage();
+                        }
+                      }}
+                      placeholder="Escreve a tua mensagem..."
+                      className="flex-1"
+                    />
+                    <Button onClick={handleSendMessage} size="icon">
+                      <Send className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </Card>
-            ) : (
-              <div className="space-y-3">
-                {threads.map((thread) => (
-                  <Card 
-                    key={thread.user_id}
-                    className="p-4 cursor-pointer hover:bg-muted/50 transition-colors"
-                    onClick={() => navigate('/admin/messages')}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-semibold text-lg truncate">
-                            {thread.user_name}
-                          </h3>
-                          {thread.unread_count > 0 && (
-                            <Badge className="h-6 w-6 p-0 flex items-center justify-center text-xs rounded-full">
-                              {thread.unread_count}
-                            </Badge>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                          <Paperclip className="h-3 w-3" />
-                          <span className="truncate">{thread.last_message}</span>
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                          {format(new Date(thread.last_timestamp), 'dd/MM/yyyy HH:mm')}
-                        </p>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </div>
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="daysoff" className="space-y-6 mt-6">
