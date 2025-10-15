@@ -13,6 +13,9 @@ export interface Message {
   message: string;
   timestamp: string;
   is_read: boolean;
+  attachment_url?: string;
+  attachment_type?: string;
+  attachment_name?: string;
 }
 
 export const useMessaging = () => {
@@ -49,20 +52,68 @@ export const useMessaging = () => {
     }
   };
 
-  const sendMessage = async (receiverId: string, messageText: string) => {
-    if (!user || !messageText.trim()) return;
+  const uploadAttachment = async (file: File): Promise<string | null> => {
+    if (!user) return null;
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('message-attachments')
+        .upload(fileName, file);
+
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        toast.error('Erro ao enviar ficheiro');
+        return null;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('message-attachments')
+        .getPublicUrl(fileName);
+
+      return publicUrl;
+    } catch (error) {
+      console.error('Error uploading attachment:', error);
+      toast.error('Erro ao enviar ficheiro');
+      return null;
+    }
+  };
+
+  const sendMessage = async (
+    receiverId: string, 
+    messageText: string, 
+    attachment?: File
+  ) => {
+    if (!user || (!messageText.trim() && !attachment)) return;
 
     try {
       const threadId = getThreadId(user.id, receiverId);
       
+      let attachmentUrl: string | null = null;
+      let attachmentType: string | null = null;
+      let attachmentName: string | null = null;
+
+      if (attachment) {
+        attachmentUrl = await uploadAttachment(attachment);
+        if (attachmentUrl) {
+          attachmentType = attachment.type;
+          attachmentName = attachment.name;
+        }
+      }
+
       const { error } = await supabase
         .from('messages')
         .insert({
           thread_id: threadId,
           sender_id: user.id,
           receiver_id: receiverId,
-          message: messageText.trim(),
+          message: messageText.trim() || '📎 Anexo',
           timestamp: new Date().toISOString(),
+          attachment_url: attachmentUrl,
+          attachment_type: attachmentType,
+          attachment_name: attachmentName,
         });
 
       if (error) throw error;
@@ -105,6 +156,7 @@ export const useMessaging = () => {
     loading,
     loadMessages,
     sendMessage,
+    uploadAttachment,
     subscribeToMessages,
     ADMIN_ID,
   };

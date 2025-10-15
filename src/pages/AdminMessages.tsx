@@ -4,9 +4,10 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, MessageSquare } from 'lucide-react';
+import { Send, MessageSquare, Paperclip, X, Download, Image as ImageIcon, Music } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { AdminLayout } from '@/components/admin/AdminLayout';
+import { toast } from 'sonner';
 
 interface Thread {
   user_id: string;
@@ -24,6 +25,9 @@ interface Message {
   message: string;
   timestamp: string;
   is_read: boolean;
+  attachment_url?: string;
+  attachment_type?: string;
+  attachment_name?: string;
 }
 
 const AdminMessages = () => {
@@ -32,7 +36,10 @@ const AdminMessages = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const loadThreads = async () => {
     if (!user) return;
@@ -124,12 +131,76 @@ const AdminMessages = () => {
     }
   };
 
+  const uploadAttachment = async (file: File): Promise<string | null> => {
+    if (!user) return null;
+    
+    setUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('message-attachments')
+        .upload(fileName, file);
+
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        toast.error('Erro ao enviar ficheiro');
+        return null;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('message-attachments')
+        .getPublicUrl(fileName);
+
+      return publicUrl;
+    } catch (error) {
+      console.error('Error uploading attachment:', error);
+      toast.error('Erro ao enviar ficheiro');
+      return null;
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const allowedTypes = ['image/', 'audio/mp3', 'audio/mpeg'];
+      const isAllowed = allowedTypes.some(type => file.type.startsWith(type) || file.type === type);
+      
+      if (!isAllowed) {
+        toast.error('Apenas imagens e ficheiros MP3 são permitidos');
+        return;
+      }
+      
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error('O ficheiro é muito grande (máximo 10MB)');
+        return;
+      }
+      
+      setSelectedFile(file);
+    }
+  };
+
   const handleSendMessage = async () => {
-    if (!newMessage.trim() || !selectedUserId || !user) return;
+    if ((!newMessage.trim() && !selectedFile) || !selectedUserId || !user) return;
 
     try {
       const ids = [user.id, selectedUserId].sort();
       const threadId = `${ids[0]}-${ids[1]}`;
+      
+      let attachmentUrl: string | null = null;
+      let attachmentType: string | null = null;
+      let attachmentName: string | null = null;
+
+      if (selectedFile) {
+        attachmentUrl = await uploadAttachment(selectedFile);
+        if (attachmentUrl) {
+          attachmentType = selectedFile.type;
+          attachmentName = selectedFile.name;
+        }
+      }
 
       const { error } = await supabase
         .from('messages')
@@ -137,14 +208,23 @@ const AdminMessages = () => {
           thread_id: threadId,
           sender_id: user.id,
           receiver_id: selectedUserId,
-          message: newMessage.trim(),
+          message: newMessage.trim() || '📎 Anexo',
           timestamp: new Date().toISOString(),
+          attachment_url: attachmentUrl,
+          attachment_type: attachmentType,
+          attachment_name: attachmentName,
         });
 
       if (error) throw error;
       setNewMessage('');
+      setSelectedFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      toast.success('Mensagem enviada');
     } catch (error) {
       console.error('Error sending message:', error);
+      toast.error('Erro ao enviar mensagem');
     }
   };
 
@@ -242,6 +322,10 @@ const AdminMessages = () => {
                     <div className="space-y-4">
                       {messages.map((msg) => {
                         const isSender = msg.sender_id === user.id;
+                        const hasAttachment = msg.attachment_url;
+                        const isImage = msg.attachment_type?.startsWith('image/');
+                        const isAudio = msg.attachment_type?.startsWith('audio/');
+                        
                         return (
                           <div
                             key={msg.id}
@@ -255,6 +339,42 @@ const AdminMessages = () => {
                               }`}
                             >
                               <p className="text-sm">{msg.message}</p>
+                              
+                              {hasAttachment && (
+                                <div className="mt-2">
+                                  {isImage && (
+                                    <div className="relative">
+                                      <img 
+                                        src={msg.attachment_url} 
+                                        alt={msg.attachment_name || 'Imagem'} 
+                                        className="rounded max-w-full max-h-64 object-contain cursor-pointer"
+                                        onClick={() => window.open(msg.attachment_url, '_blank')}
+                                      />
+                                    </div>
+                                  )}
+                                  
+                                  {isAudio && (
+                                    <div className="flex items-center gap-2 bg-background/20 rounded p-2">
+                                      <Music className="h-4 w-4" />
+                                      <audio controls className="max-w-full">
+                                        <source src={msg.attachment_url} type={msg.attachment_type || 'audio/mpeg'} />
+                                      </audio>
+                                    </div>
+                                  )}
+                                  
+                                  <a 
+                                    href={msg.attachment_url} 
+                                    download={msg.attachment_name}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-1 text-xs mt-1 opacity-70 hover:opacity-100"
+                                  >
+                                    <Download className="h-3 w-3" />
+                                    {msg.attachment_name}
+                                  </a>
+                                </div>
+                              )}
+                              
                               <p className="text-xs opacity-70 mt-1">
                                 {new Date(msg.timestamp).toLocaleTimeString('pt-PT', {
                                   hour: '2-digit',
@@ -271,7 +391,45 @@ const AdminMessages = () => {
                 </ScrollArea>
 
                 <div className="p-4 border-t">
+                  {selectedFile && (
+                    <div className="mb-2 flex items-center gap-2 bg-muted p-2 rounded">
+                      {selectedFile.type.startsWith('image/') ? (
+                        <ImageIcon className="h-4 w-4" />
+                      ) : (
+                        <Music className="h-4 w-4" />
+                      )}
+                      <span className="text-sm flex-1 truncate">{selectedFile.name}</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedFile(null);
+                          if (fileInputRef.current) {
+                            fileInputRef.current.value = '';
+                          }
+                        }}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
+                  
                   <div className="flex gap-2">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*,audio/mp3,audio/mpeg"
+                      onChange={handleFileSelect}
+                      className="hidden"
+                    />
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploading}
+                    >
+                      <Paperclip className="h-4 w-4" />
+                    </Button>
                     <Input
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
@@ -283,8 +441,13 @@ const AdminMessages = () => {
                       }}
                       placeholder="Escreve a tua mensagem..."
                       className="flex-1"
+                      disabled={uploading}
                     />
-                    <Button onClick={handleSendMessage} size="icon">
+                    <Button 
+                      onClick={handleSendMessage} 
+                      size="icon"
+                      disabled={uploading || (!newMessage.trim() && !selectedFile)}
+                    >
                       <Send className="h-4 w-4" />
                     </Button>
                   </div>

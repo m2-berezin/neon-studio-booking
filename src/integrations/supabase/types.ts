@@ -315,6 +315,9 @@ export type Database = {
       }
       messages: {
         Row: {
+          attachment_name: string | null
+          attachment_type: string | null
+          attachment_url: string | null
           id: string
           is_read: boolean
           message: string
@@ -324,6 +327,9 @@ export type Database = {
           timestamp: string
         }
         Insert: {
+          attachment_name?: string | null
+          attachment_type?: string | null
+          attachment_url?: string | null
           id?: string
           is_read?: boolean
           message: string
@@ -333,6 +339,9 @@ export type Database = {
           timestamp?: string
         }
         Update: {
+          attachment_name?: string | null
+          attachment_type?: string | null
+          attachment_url?: string | null
           id?: string
           is_read?: boolean
           message?: string
