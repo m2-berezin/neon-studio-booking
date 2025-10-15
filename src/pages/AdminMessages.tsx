@@ -390,16 +390,17 @@ const AdminMessages = () => {
                   )}
                 </ScrollArea>
 
-                <div className="p-4 border-t">
+                <div className="p-4 border-t space-y-2">
                   {selectedFile && (
-                    <div className="mb-2 flex items-center gap-2 bg-muted p-2 rounded">
+                    <div className="flex items-center gap-2 bg-muted p-2 rounded">
                       {selectedFile.type.startsWith('image/') ? (
-                        <ImageIcon className="h-4 w-4" />
+                        <ImageIcon className="h-4 w-4 flex-shrink-0" />
                       ) : (
-                        <Music className="h-4 w-4" />
+                        <Music className="h-4 w-4 flex-shrink-0" />
                       )}
                       <span className="text-sm flex-1 truncate">{selectedFile.name}</span>
                       <Button
+                        type="button"
                         variant="ghost"
                         size="sm"
                         onClick={() => {
@@ -414,7 +415,7 @@ const AdminMessages = () => {
                     </div>
                   )}
                   
-                  <div className="flex gap-2 items-center">
+                  <div className="flex gap-2">
                     <input
                       ref={fileInputRef}
                       type="file"
@@ -429,11 +430,12 @@ const AdminMessages = () => {
                       size="icon"
                       onClick={() => fileInputRef.current?.click()}
                       disabled={uploading}
-                      title="Anexar ficheiro"
+                      className="shrink-0"
                     >
                       <Paperclip className="h-4 w-4" />
                     </Button>
                     <Input
+                      type="text"
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
                       onKeyPress={(e) => {
@@ -451,7 +453,7 @@ const AdminMessages = () => {
                       onClick={handleSendMessage} 
                       size="icon"
                       disabled={uploading || (!newMessage.trim() && !selectedFile)}
-                      title="Enviar mensagem"
+                      className="shrink-0"
                     >
                       <Send className="h-4 w-4" />
                     </Button>
