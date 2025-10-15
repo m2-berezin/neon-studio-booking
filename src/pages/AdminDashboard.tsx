@@ -318,14 +318,11 @@ const AdminDashboard = () => {
       if (updateError) {
         console.error('❌ Error marking as read:', updateError);
       } else {
-        console.log('✅ Messages marked as read');
-      }
-
-      // Wait a moment for DB to update, then reload threads
-      setTimeout(async () => {
+        console.log('✅ Messages marked as read successfully');
+        // Immediately reload threads after marking as read
         console.log('🔄 Reloading threads to update badges...');
-        await loadThreads();
-      }, 300);
+        loadThreads();
+      }
       
       // Scroll to bottom after loading
       setTimeout(() => {
@@ -542,10 +539,23 @@ const AdminDashboard = () => {
             table: 'messages',
           },
           () => {
+            console.log('📩 New message inserted, reloading threads');
             loadThreads();
             if (selectedUserId) {
               loadMessages(selectedUserId);
             }
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'messages',
+          },
+          (payload) => {
+            console.log('✏️ Message updated (marked as read), reloading threads', payload);
+            loadThreads();
           }
         )
         .subscribe();
