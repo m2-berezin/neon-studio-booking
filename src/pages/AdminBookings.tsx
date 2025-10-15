@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useAdmin } from '@/hooks/useAdmin';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { format, parse } from 'date-fns';
+import { format } from 'date-fns';
 import { Calendar, Clock, User, AlertTriangle, Edit, Shield, Trash2 } from 'lucide-react';
 import {
   AlertDialog,
@@ -25,34 +25,26 @@ import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 
 interface Booking {
   id: string;
-  client_id: string;
+  user_id: string;
   service_id: string;
-  date: string;
-  start_time: string;
-  end_time: string;
+  starts_at: string;
+  ends_at: string;
   status: string;
-  notes: string;
   created_at: string;
-  profiles: {
-    full_name: string;
-  };
-  services: {
-    name: string;
-    base_price: number;
-  };
+  service_name_snapshot: string;
+  price_eur_snapshot: number;
 }
 
 const AdminBookings = () => {
   const { isAdmin } = useAuth();
   const { toast } = useToast();
-  const { loading, updateBookingStatus, loadBookings, bookings } = useAdmin();
   
   // Enable realtime sync for admin
   useRealtimeSync(true);
-  const [localBookings, setLocalBookings] = useState<Booking[]>([]);
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [newStatus, setNewStatus] = useState('');
-  const [notes, setNotes] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [bookingToHide, setBookingToHide] = useState<string | null>(null);
@@ -74,28 +66,77 @@ const AdminBookings = () => {
   ];
 
   const loadAllBookings = async () => {
-    await loadBookings();
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('bookings')
+        .select('*')
+        .eq('hidden_from_admin', false)
+        .order('starts_at', { ascending: true });
+
+      if (error) throw error;
+
+      // Fetch user profiles separately
+      const userIds = [...new Set(data?.map(b => b.user_id) || [])];
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('id, full_name')
+        .in('id', userIds);
+
+      const profilesMap = new Map(profilesData?.map(p => [p.id, p.full_name]) || []);
+      
+      // Add client names to bookings
+      const bookingsWithNames = (data || []).map(b => ({
+        ...b,
+        client_name: profilesMap.get(b.user_id) || 'Cliente Desconhecido'
+      }));
+      
+      setBookings(bookingsWithNames as any);
+    } catch (error) {
+      console.error('Error loading bookings:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível carregar as reservas',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleStatusUpdate = async () => {
     if (!selectedBooking || !newStatus) return;
 
     try {
-      await updateBookingStatus(selectedBooking.id, newStatus);
-      await loadAllBookings(); // Refresh the list
+      const { error } = await supabase
+        .from('bookings')
+        .update({ status: newStatus })
+        .eq('id', selectedBooking.id);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Status Atualizado',
+        description: 'O status da reserva foi atualizado com sucesso.',
+      });
+
+      await loadAllBookings();
       setDialogOpen(false);
       setSelectedBooking(null);
       setNewStatus('');
-      setNotes('');
     } catch (error) {
       console.error('Failed to update booking:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível atualizar o status',
+        variant: 'destructive',
+      });
     }
   };
 
   const openEditDialog = (booking: Booking) => {
     setSelectedBooking(booking);
     setNewStatus(booking.status);
-    setNotes(booking.notes || '');
     setDialogOpen(true);
   };
 
@@ -146,15 +187,14 @@ const AdminBookings = () => {
   }
 
   const exportToCSV = () => {
-    const csvData = bookings.map(booking => ({
-      Cliente: booking.profiles.full_name,
-      Serviço: booking.services.name,
-      Data: format(new Date(booking.date), 'dd/MM/yyyy'),
-      Hora_Início: booking.start_time,
-      Hora_Fim: booking.end_time,
+    const csvData = bookings.map((booking: any) => ({
+      Cliente: booking.client_name,
+      Serviço: booking.service_name_snapshot,
+      Data: format(new Date(booking.starts_at), 'dd/MM/yyyy'),
+      Hora_Início: format(new Date(booking.starts_at), 'HH:mm'),
+      Hora_Fim: format(new Date(booking.ends_at), 'HH:mm'),
       Status: booking.status,
-      Preço: `€${booking.services.base_price}`,
-      Notas: booking.notes || '',
+      Preço: `€${booking.price_eur_snapshot}`,
       Data_Reserva: format(new Date(booking.created_at), 'dd/MM/yyyy HH:mm'),
     }));
 
@@ -197,11 +237,11 @@ const AdminBookings = () => {
         {bookings.length === 0 ? (
           <div className="text-center py-8">
             <Calendar className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-foreground mb-2">No Bookings Found</h3>
-            <p className="text-muted-foreground">There are no bookings to display.</p>
+            <h3 className="text-lg font-semibold text-foreground mb-2">Sem Reservas</h3>
+            <p className="text-muted-foreground">Não há reservas para exibir.</p>
           </div>
         ) : (
-          bookings.map((booking) => (
+          bookings.map((booking: any) => (
             <Card key={booking.id} className="p-4">
               <div className="flex items-center justify-between">
                 <div className="flex-1">
@@ -211,48 +251,36 @@ const AdminBookings = () => {
                     >
                       {booking.status.replace('_', ' ').toUpperCase()}
                     </Badge>
-                    {booking.status === 'no_show' && (
-                      <div className="flex items-center gap-1 text-destructive">
-                        <AlertTriangle className="w-4 h-4" />
-                        <span className="text-xs font-medium">Penalty Applied</span>
-                      </div>
-                    )}
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 text-sm">
                         <User className="w-4 h-4 text-muted-foreground" />
-                        <span className="font-medium">{booking.profiles.full_name}</span>
+                        <span className="font-medium">{booking.client_name}</span>
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        {booking.services.name} - €{booking.services.base_price}
+                        {booking.service_name_snapshot} - €{booking.price_eur_snapshot}
                       </div>
                     </div>
 
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 text-sm">
                         <Calendar className="w-4 h-4 text-muted-foreground" />
-                        <span>{format(new Date(booking.date), 'EEEE, MMM do, yyyy')}</span>
+                        <span>{format(new Date(booking.starts_at), 'dd/MM/yyyy')}</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm">
                         <Clock className="w-4 h-4 text-muted-foreground" />
                         <span>
-                          {format(parse(booking.start_time, 'HH:mm:ss', new Date()), 'h:mm a')} - 
-                          {format(parse(booking.end_time, 'HH:mm:ss', new Date()), 'h:mm a')}
+                          {format(new Date(booking.starts_at), 'HH:mm')} - {format(new Date(booking.ends_at), 'HH:mm')}
                         </span>
                       </div>
                     </div>
 
                     <div className="space-y-1">
                       <div className="text-sm text-muted-foreground">
-                        Booked: {format(new Date(booking.created_at), 'MMM do, yyyy')}
+                        Reservado: {format(new Date(booking.created_at), 'dd/MM/yyyy')}
                       </div>
-                      {booking.notes && (
-                        <div className="text-sm text-muted-foreground">
-                          Notes: {booking.notes}
-                        </div>
-                      )}
                     </div>
                   </div>
                 </div>
@@ -264,7 +292,7 @@ const AdminBookings = () => {
                     onClick={() => openEditDialog(booking)}
                   >
                     <Edit className="w-4 h-4 mr-2" />
-                    Edit
+                    Editar
                   </Button>
                   <Button
                     variant="ghost"
@@ -287,19 +315,18 @@ const AdminBookings = () => {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Update Booking Status</DialogTitle>
+            <DialogTitle>Atualizar Status da Reserva</DialogTitle>
           </DialogHeader>
           
           {selectedBooking && (
             <div className="space-y-4">
               <div className="p-4 bg-muted rounded-lg">
-                <h4 className="font-semibold mb-2">{selectedBooking.profiles.full_name}</h4>
+                <h4 className="font-semibold mb-2">{(selectedBooking as any).client_name}</h4>
                 <p className="text-sm text-muted-foreground">
-                  {selectedBooking.services.name} - {format(new Date(selectedBooking.date), 'EEEE, MMM do, yyyy')}
+                  {selectedBooking.service_name_snapshot} - {format(new Date(selectedBooking.starts_at), 'dd/MM/yyyy')}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  {format(parse(selectedBooking.start_time, 'HH:mm:ss', new Date()), 'h:mm a')} - 
-                  {format(parse(selectedBooking.end_time, 'HH:mm:ss', new Date()), 'h:mm a')}
+                  {format(new Date(selectedBooking.starts_at), 'HH:mm')} - {format(new Date(selectedBooking.ends_at), 'HH:mm')}
                 </p>
               </div>
 
@@ -313,44 +340,18 @@ const AdminBookings = () => {
                     {statusOptions.map((option) => (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}
-                        {option.value === 'no_show' && (
-                          <span className="ml-2 text-destructive text-xs">(Applies 3-month penalty)</span>
-                        )}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Notes (Optional)</label>
-                <Textarea
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Add any additional notes about this booking..."
-                  rows={3}
-                />
-              </div>
-
-              {newStatus === 'no_show' && (
-                <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
-                  <div className="flex items-center gap-2 text-destructive">
-                    <AlertTriangle className="w-4 h-4" />
-                    <span className="font-medium text-sm">Penalty Warning</span>
-                  </div>
-                  <p className="text-sm text-destructive/80 mt-1">
-                    Setting status to "No Show" will apply a 3-month penalty to this client, 
-                    preventing them from redeeming rewards until the penalty expires.
-                  </p>
-                </div>
-              )}
-
               <div className="flex gap-2 pt-4">
                 <Button onClick={handleStatusUpdate} disabled={loading} className="flex-1">
-                  {loading ? 'Updating...' : 'Update Status'}
+                  {loading ? 'Atualizando...' : 'Atualizar Status'}
                 </Button>
                 <Button variant="outline" onClick={() => setDialogOpen(false)}>
-                  Cancel
+                  Cancelar
                 </Button>
               </div>
             </div>
