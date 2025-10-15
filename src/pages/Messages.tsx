@@ -28,6 +28,31 @@ const Messages = () => {
   const {
     user
   } = useAuth();
+
+  // Helper function to render text with clickable links
+  const renderMessageWithLinks = (text: string) => {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const parts = text.split(urlRegex);
+    
+    return parts.map((part, index) => {
+      if (part.match(urlRegex)) {
+        return (
+          <a
+            key={index}
+            href={part}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:opacity-80"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {part}
+          </a>
+        );
+      }
+      return <span key={index}>{part}</span>;
+    });
+  };
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [newMessage, setNewMessage] = useState('');
@@ -249,7 +274,9 @@ const Messages = () => {
             
             return <div key={msg.id} className={`flex ${isSender ? 'justify-end' : 'justify-start'}`}>
                     <div className={`max-w-[70%] rounded-lg px-4 py-2 ${isSender ? 'bg-primary text-primary-foreground' : 'bg-muted text-foreground'}`}>
-                      <p className="text-sm">{msg.message}</p>
+                      <p className="text-sm">
+                        {renderMessageWithLinks(msg.message)}
+                      </p>
                       
                       {hasAttachment && (
                         <div className="mt-2">

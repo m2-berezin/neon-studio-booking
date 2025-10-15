@@ -32,6 +32,31 @@ interface Message {
 
 const AdminMessages = () => {
   const { user } = useAuth();
+
+  // Helper function to render text with clickable links
+  const renderMessageWithLinks = (text: string) => {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const parts = text.split(urlRegex);
+    
+    return parts.map((part, index) => {
+      if (part.match(urlRegex)) {
+        return (
+          <a
+            key={index}
+            href={part}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:opacity-80"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {part}
+          </a>
+        );
+      }
+      return <span key={index}>{part}</span>;
+    });
+  };
+
   const [threads, setThreads] = useState<Thread[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
@@ -359,7 +384,9 @@ const AdminMessages = () => {
                                 : 'bg-muted text-foreground'
                             }`}
                           >
-                            <p className="text-sm break-words">{msg.message}</p>
+                            <p className="text-sm break-words">
+                              {renderMessageWithLinks(msg.message)}
+                            </p>
                             
                             {hasAttachment && (
                               <div className="mt-2">

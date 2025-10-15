@@ -81,6 +81,31 @@ const AdminDashboard = () => {
   
   // Enable realtime sync for admin (all users)
   useRealtimeSync(true);
+
+  // Helper function to render text with clickable links
+  const renderMessageWithLinks = (text: string) => {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const parts = text.split(urlRegex);
+    
+    return parts.map((part, index) => {
+      if (part.match(urlRegex)) {
+        return (
+          <a
+            key={index}
+            href={part}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:opacity-80"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {part}
+          </a>
+        );
+      }
+      return <span key={index}>{part}</span>;
+    });
+  };
+
   const [stats, setStats] = useState<DashboardStats>({
     totalBookings: 0,
     pendingPayments: 0,
@@ -853,7 +878,9 @@ const AdminDashboard = () => {
                                     : 'bg-muted text-foreground'
                                 }`}
                               >
-                                <p className="text-sm break-words">{msg.message}</p>
+                                <p className="text-sm break-words">
+                                  {renderMessageWithLinks(msg.message)}
+                                </p>
                                 
                                 {hasAttachment && (
                                   <div className="mt-2">
