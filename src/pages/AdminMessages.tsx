@@ -321,7 +321,7 @@ const AdminMessages = () => {
 
         {/* Chat modal/overlay - mobile optimized */}
         {selectedUserId && (
-          <div className="fixed inset-0 z-50 bg-background flex flex-col">
+          <div className="fixed inset-0 z-[100] bg-background flex flex-col">
             <Card className="flex-1 flex flex-col rounded-none border-x-0 border-t-0">
               <div className="p-4 border-b flex items-center gap-3">
                 <Button
