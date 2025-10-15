@@ -194,7 +194,7 @@ const AdminDashboard = () => {
   const loadThreads = async () => {
     if (!user) return;
 
-    console.log('=== LOADING THREADS ===');
+    console.log('🔄 === LOADING THREADS ===');
     console.log('Admin user ID:', user.id);
 
     try {
@@ -210,19 +210,10 @@ const AdminDashboard = () => {
         throw error;
       }
 
-      console.log('Messages data loaded:', messagesData);
-
       const threadsMap = new Map<string, Thread>();
       
       for (const msg of messagesData || []) {
         const otherUserId = msg.sender_id === user.id ? msg.receiver_id : msg.sender_id;
-        
-        console.log('Processing message:', {
-          msg_id: msg.id,
-          sender_id: msg.sender_id,
-          receiver_id: msg.receiver_id,
-          otherUserId
-        });
         
         if (!threadsMap.has(otherUserId)) {
           // Fetch profile directly
@@ -237,28 +228,34 @@ const AdminDashboard = () => {
           }
 
           const userName = profile?.full_name?.trim() || 'Sem Nome';
-          
-          console.log('✅ Loaded sender_name:', userName, 'for user_id:', otherUserId);
 
-          const { count } = await supabase
+          // Count unread messages FROM this user TO admin
+          const { count, error: countError } = await supabase
             .from('messages')
             .select('*', { count: 'exact', head: true })
             .eq('sender_id', otherUserId)
             .eq('receiver_id', user.id)
             .eq('is_read', false);
 
+          if (countError) {
+            console.error('Error counting unread for', otherUserId, ':', countError);
+          }
+
+          const unreadCount = count || 0;
+          console.log(`📊 User ${userName}: ${unreadCount} unread messages`);
+
           threadsMap.set(otherUserId, {
             user_id: otherUserId,
             user_name: userName,
             last_message: msg.message,
             last_timestamp: msg.timestamp,
-            unread_count: count || 0,
+            unread_count: unreadCount,
           });
         }
       }
 
       const threadsArray = Array.from(threadsMap.values());
-      console.log('Final threads array:', threadsArray);
+      console.log('✅ Final threads array with unread counts:', threadsArray.map(t => ({ name: t.user_name, unread: t.unread_count })));
       setThreads(threadsArray);
     } catch (error) {
       console.error('Error loading threads:', error);
@@ -267,6 +264,8 @@ const AdminDashboard = () => {
 
   const loadMessages = async (userId: string) => {
     if (!user) return;
+
+    console.log('📩 Loading messages for user:', userId);
 
     try {
       const ids = [user.id, userId].sort();
@@ -289,7 +288,6 @@ const AdminDashboard = () => {
           .single();
 
         const senderName = profile?.full_name?.trim() || 'Sem Nome';
-        console.log('Loaded sender_name:', senderName, 'for message:', msg.id);
         
         return {
           id: msg.id,
@@ -308,16 +306,26 @@ const AdminDashboard = () => {
       
       setMessages(messagesWithSender);
 
-      // Mark messages as read
-      await supabase
+      // Mark ALL messages from this user to admin as read
+      console.log('✅ Marking messages as read for thread:', threadId);
+      const { error: updateError } = await supabase
         .from('messages')
         .update({ is_read: true })
-        .eq('sender_id', userId)
+        .eq('thread_id', threadId)
         .eq('receiver_id', user.id)
         .eq('is_read', false);
 
-      // Reload threads immediately to update badge
-      await loadThreads();
+      if (updateError) {
+        console.error('❌ Error marking as read:', updateError);
+      } else {
+        console.log('✅ Messages marked as read');
+      }
+
+      // Wait a moment for DB to update, then reload threads
+      setTimeout(async () => {
+        console.log('🔄 Reloading threads to update badges...');
+        await loadThreads();
+      }, 300);
       
       // Scroll to bottom after loading
       setTimeout(() => {
