@@ -95,8 +95,7 @@ const AdminDashboard = () => {
             href={part}
             target="_blank"
             rel="noopener noreferrer"
-            className="underline hover:opacity-80"
-            onClick={(e) => e.stopPropagation()}
+            className="underline hover:opacity-80 cursor-pointer"
           >
             {part}
           </a>
@@ -309,13 +308,15 @@ const AdminDashboard = () => {
       
       setMessages(messagesWithSender);
 
+      // Mark messages as read
       await supabase
         .from('messages')
         .update({ is_read: true })
         .eq('sender_id', userId)
         .eq('receiver_id', user.id);
 
-      loadThreads();
+      // Reload threads immediately to update badge
+      await loadThreads();
     } catch (error) {
       console.error('Error loading messages:', error);
     }

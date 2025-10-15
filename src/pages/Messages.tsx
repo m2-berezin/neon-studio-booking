@@ -42,8 +42,7 @@ const Messages = () => {
             href={part}
             target="_blank"
             rel="noopener noreferrer"
-            className="underline hover:opacity-80"
-            onClick={(e) => e.stopPropagation()}
+            className="underline hover:opacity-80 cursor-pointer"
           >
             {part}
           </a>
