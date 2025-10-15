@@ -121,8 +121,6 @@ const AdminDashboard = () => {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState('');
   const [unreadCount, setUnreadCount] = useState(0);
-  const [activeReservations, setActiveReservations] = useState<any[]>([]);
-  const [showReservations, setShowReservations] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -477,27 +475,6 @@ const AdminDashboard = () => {
     }
   };
 
-  const loadActiveReservations = async () => {
-    try {
-      const { data, error } = await supabase.rpc('get_active_reservations' as any);
-      
-      if (error) {
-        console.error('Error loading active reservations:', error);
-        toast({
-          title: 'Erro',
-          description: 'Não foi possível carregar as reservas ativas.',
-          variant: 'destructive',
-        });
-        return;
-      }
-      
-      setActiveReservations(data || []);
-      setShowReservations(true);
-    } catch (error) {
-      console.error('Error loading active reservations:', error);
-    }
-  };
-
   useEffect(() => {
     if (isAdmin()) {
       loadDashboardData();
@@ -689,24 +666,34 @@ const AdminDashboard = () => {
 
       {/* Stats Grid - Asymmetric Mobile Layout */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
-        {statCards.map((stat, index) => (
-          <Card key={index} className={`
-            ${index === 0 ? 'col-span-2 lg:col-span-1' : ''}
-            ${index === 3 ? 'col-span-2 lg:col-span-1' : ''}
-          `}>
-            <CardContent className="p-4 md:p-6">
-              <div className="flex items-center justify-between">
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs md:text-sm text-muted-foreground mb-1 truncate">{stat.title}</p>
-                  <p className="text-xl md:text-2xl font-bold truncate">{stat.value}</p>
+        {statCards.map((stat, index) => {
+          const isClickable = index === 0 || index === 3; // Total de Reservas or Receita Mensal
+          const navPath = index === 0 ? '/admin/bookings' : '/admin/payments';
+          
+          return (
+            <Card 
+              key={index} 
+              className={`
+                ${index === 0 ? 'col-span-2 lg:col-span-1' : ''}
+                ${index === 3 ? 'col-span-2 lg:col-span-1' : ''}
+                ${isClickable ? 'cursor-pointer hover:bg-muted/50 transition-colors' : ''}
+              `}
+              onClick={() => isClickable && navigate(navPath)}
+            >
+              <CardContent className="p-4 md:p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs md:text-sm text-muted-foreground mb-1 truncate">{stat.title}</p>
+                    <p className="text-xl md:text-2xl font-bold truncate">{stat.value}</p>
+                  </div>
+                  <div className={`${stat.bgColor} p-2 md:p-3 rounded-lg ml-2 shrink-0`}>
+                    <stat.icon className={`h-5 w-5 md:h-6 md:w-6 ${stat.color}`} />
+                  </div>
                 </div>
-                <div className={`${stat.bgColor} p-2 md:p-3 rounded-lg ml-2 shrink-0`}>
-                  <stat.icon className={`h-5 w-5 md:h-6 md:w-6 ${stat.color}`} />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       {/* Recent Payment Requests */}
@@ -763,23 +750,7 @@ const AdminDashboard = () => {
           <CardTitle className="text-lg md:text-xl">Ações Rápidas</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4 md:space-y-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-            <Button
-              variant="outline"
-              className="h-16 md:h-20 flex flex-col gap-1 md:gap-2 hover:bg-primary/10 p-2"
-              onClick={() => navigate('/admin/payments')}
-            >
-              <DollarSign className="h-5 w-5 md:h-6 md:w-6" />
-              <span className="text-xs md:text-sm font-medium text-center leading-tight">Gerir Pagamentos</span>
-            </Button>
-            <Button
-              variant="outline"
-              className="h-16 md:h-20 flex flex-col gap-1 md:gap-2 hover:bg-primary/10 p-2"
-              onClick={loadActiveReservations}
-            >
-              <Calendar className="h-5 w-5 md:h-6 md:w-6" />
-              <span className="text-xs md:text-sm font-medium text-center leading-tight">Ver Reservas</span>
-            </Button>
+          <div className="grid grid-cols-2 gap-3 md:gap-4">
             <Button
               variant="outline"
               className="h-16 md:h-20 flex flex-col gap-1 md:gap-2 hover:bg-primary/10 p-2"
@@ -797,49 +768,6 @@ const AdminDashboard = () => {
               <span className="text-xs md:text-sm font-medium text-center leading-tight">Projetos Mix & Master</span>
             </Button>
           </div>
-
-          {showReservations && activeReservations.length > 0 && (
-            <div className="border rounded-lg overflow-hidden">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Cliente</TableHead>
-                    <TableHead>Serviço</TableHead>
-                    <TableHead>Início</TableHead>
-                    <TableHead>Fim</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {activeReservations.map((reservation) => {
-                    const clientId = reservation.booking_id?.split('-')[0] || '';
-                    const threadId = `${clientId}-6d9d1dc1-e16f-4f3d-a817-1591a1b27477`;
-                    
-                    return (
-                      <TableRow key={reservation.booking_id}>
-                        <TableCell>
-                          {reservation.client_name || 'Sem Nome'}
-                        </TableCell>
-                        <TableCell>{reservation.service_name}</TableCell>
-                        <TableCell>
-                          {format(new Date(reservation.start_time), 'dd/MM/yyyy HH:mm')}
-                        </TableCell>
-                        <TableCell>
-                          {format(new Date(reservation.end_time), 'HH:mm')}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-
-          {showReservations && activeReservations.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
-              <Calendar className="h-12 w-12 mx-auto mb-2 opacity-50" />
-              <p>Sem reservas ativas no momento</p>
-            </div>
-          )}
         </CardContent>
       </Card>
 
