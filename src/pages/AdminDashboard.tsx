@@ -306,8 +306,16 @@ const AdminDashboard = () => {
       
       setMessages(messagesWithSender);
 
-      // Mark ALL messages from this user to admin as read
-      console.log('✅ Marking messages as read for thread:', threadId);
+      // First, update the UI immediately by setting unread count to 0
+      setThreads(prevThreads => 
+        prevThreads.map(t => 
+          t.user_id === userId ? { ...t, unread_count: 0 } : t
+        )
+      );
+      console.log('✅ UI updated - badge removed immediately');
+
+      // Then mark messages as read in the database
+      console.log('📝 Marking messages as read for thread:', threadId);
       const { error: updateError } = await supabase
         .from('messages')
         .update({ is_read: true })
@@ -318,10 +326,7 @@ const AdminDashboard = () => {
       if (updateError) {
         console.error('❌ Error marking as read:', updateError);
       } else {
-        console.log('✅ Messages marked as read successfully');
-        // Immediately reload threads after marking as read
-        console.log('🔄 Reloading threads to update badges...');
-        loadThreads();
+        console.log('✅ Messages marked as read in database');
       }
       
       // Scroll to bottom after loading
@@ -835,36 +840,37 @@ const AdminDashboard = () => {
               ) : (
                 <div className="space-y-3">
                   {threads.map((thread) => (
-                    <Card 
-                      key={thread.user_id}
-                      className="p-4 cursor-pointer hover:bg-muted/50 transition-colors"
-                      onClick={() => {
-                        setSelectedUserId(thread.user_id);
-                        loadMessages(thread.user_id);
-                      }}
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-semibold text-lg truncate">
-                              {thread.user_name}
-                            </h3>
-                            {thread.unread_count > 0 && (
-                              <Badge className="h-6 w-6 p-0 flex items-center justify-center text-xs rounded-full">
-                                {thread.unread_count}
-                              </Badge>
-                            )}
+                      <Card 
+                        key={thread.user_id}
+                        className="p-4 cursor-pointer hover:bg-muted/50 transition-colors"
+                        onClick={() => {
+                          console.log('🖱️ Opening thread for:', thread.user_name);
+                          setSelectedUserId(thread.user_id);
+                          loadMessages(thread.user_id);
+                        }}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h3 className="font-semibold text-lg truncate">
+                                {thread.user_name}
+                              </h3>
+                              {thread.unread_count > 0 && (
+                                <Badge key={`badge-${thread.user_id}-${thread.unread_count}`} className="h-6 w-6 p-0 flex items-center justify-center text-xs rounded-full">
+                                  {thread.unread_count}
+                                </Badge>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+                              <Paperclip className="h-3 w-3 shrink-0" />
+                              <span className="truncate">{thread.last_message}</span>
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              {format(new Date(thread.last_timestamp), 'dd/MM/yyyy HH:mm')}
+                            </p>
                           </div>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                            <Paperclip className="h-3 w-3 shrink-0" />
-                            <span className="truncate">{thread.last_message}</span>
-                          </div>
-                          <p className="text-xs text-muted-foreground">
-                            {format(new Date(thread.last_timestamp), 'dd/MM/yyyy HH:mm')}
-                          </p>
                         </div>
-                      </div>
-                    </Card>
+                      </Card>
                   ))}
                 </div>
               )}
