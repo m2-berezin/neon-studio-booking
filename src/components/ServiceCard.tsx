@@ -12,12 +12,15 @@ interface ServiceCardProps {
 const ServiceCard = ({ title, description, icon: Icon, onClick, gradient }: ServiceCardProps) => {
   return (
     <div 
-      className={`studio-card cursor-pointer tap-target transition-all duration-300 ${
+      className={`cursor-pointer tap-target transition-all duration-300 bg-card border border-border rounded-xl p-5 ${
         gradient ? 'bg-gradient-to-br from-primary/10 to-accent/10 hover:from-primary/15 hover:to-accent/15' : ''
       }`}
       onClick={onClick}
+      style={{
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.6), 0 2px 6px rgba(0, 0, 0, 0.4)'
+      }}
     >
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center gap-4">
         <div className={`w-12 h-12 rounded-lg flex-shrink-0 flex items-center justify-center ${gradient ? 'bg-primary/20' : 'bg-secondary'}`}>
           <Icon 
             size={24} 
