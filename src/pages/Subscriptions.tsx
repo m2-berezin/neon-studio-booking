@@ -222,13 +222,15 @@ const Subscriptions = () => {
       {!userSubscription && <section>
           <h2 className="text-2xl font-bold text-foreground mb-4">Planos</h2>
           <div className="grid md:grid-cols-2 gap-6">
-            {subscriptionPlans.map(plan => <Card key={plan.id} className={`studio-card ${plan.popular ? 'border-primary' : ''}`}>
-                {plan.popular && <Badge className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-primary">
-                    Mais Popular
-                  </Badge>}
+            {subscriptionPlans.map(plan => <Card key={plan.id} className={`studio-card relative ${plan.popular ? 'border-primary pt-8' : ''}`}>
+                {plan.popular && <div className="sticky top-0 z-10 flex justify-center mb-2">
+                    <Badge className="bg-primary text-primary-foreground">
+                      Mais Popular
+                    </Badge>
+                  </div>}
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Star className="w-5 h-5 text-primary" />
+                    <Star className="w-5 h-5 text-primary flex-shrink-0" />
                     {plan.name}
                   </CardTitle>
                 </CardHeader>
@@ -241,10 +243,10 @@ const Subscriptions = () => {
                       <p className="text-sm text-muted-foreground">por mês</p>
                     </div>
                     
-                    <ul className="space-y-2">
-                      {plan.features.map((feature, index) => <li key={index} className="flex items-center gap-2 text-sm">
-                          <CheckCircle className="w-4 h-4 text-primary" />
-                          <span className="text-muted-foreground">{feature}</span>
+                    <ul className="space-y-3">
+                      {plan.features.map((feature, index) => <li key={index} className="flex items-start gap-2 text-sm">
+                          <CheckCircle className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                          <span className="text-muted-foreground flex-1">{feature}</span>
                         </li>)}
                     </ul>
                     

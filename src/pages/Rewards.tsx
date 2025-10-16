@@ -441,25 +441,25 @@ const Rewards = () => {
           {premiumOffer && activePlanType === 'X' && <Card className="studio-card border-primary bg-primary/5">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Award className="w-5 h-5 text-primary" />
+                  <Award className="w-5 h-5 text-primary flex-shrink-0" />
                   Oferta 2h de Captação por Mês PREMIUM+
                 </CardTitle>
-                <CardDescription>
-                  {premiumOffer.description || 'Exclusivo para assinantes Plano X - 2h de captação totalmente grátis'}
+                <CardDescription className="min-h-[40px]">
+                  {premiumOffer.description || 'Exclusivo para assinantes Plano X - 2h de captação totalmente grátis uma vez por mês'}
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-2xl font-bold text-primary">GRÁTIS</p>
-                    <p className="text-sm text-muted-foreground">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div className="flex-1">
+                    <p className="text-2xl font-bold text-primary mb-1">GRÁTIS</p>
+                    <p className="text-sm text-muted-foreground mb-1">
                       Usado: {offerUsage[premiumOffer.id] || 0}/{premiumOffer.limit_per_month} este mês
                     </p>
-                    {(offerUsage[premiumOffer.id] || 0) >= premiumOffer.limit_per_month && <Badge variant="outline" className="text-xs mt-1">
+                    {(offerUsage[premiumOffer.id] || 0) >= premiumOffer.limit_per_month && <Badge variant="outline" className="text-xs">
                         Limite mensal atingido
                       </Badge>}
                   </div>
-                  <Button onClick={() => handleApplyOffer(premiumOffer.id)} disabled={(offerUsage[premiumOffer.id] || 0) >= premiumOffer.limit_per_month || applyingOffer === premiumOffer.id || hasActivePenalty()} variant="default" className="bg-primary hover:bg-primary/90">
+                  <Button onClick={() => handleApplyOffer(premiumOffer.id)} disabled={(offerUsage[premiumOffer.id] || 0) >= premiumOffer.limit_per_month || applyingOffer === premiumOffer.id || hasActivePenalty()} variant="default" className="bg-primary hover:bg-primary/90 w-full sm:w-auto whitespace-nowrap">
                     {applyingOffer === premiumOffer.id ? 'A aplicar...' : 'Aplicar Esta Oferta'}
                   </Button>
                 </div>
@@ -470,18 +470,18 @@ const Rewards = () => {
           {recordingOffer && <Card className="studio-card">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Star className="w-5 h-5 text-primary" />
+                  <Star className="w-5 h-5 text-primary flex-shrink-0" />
                   Compra 2h de gravação, ganha + 1h grátis
                 </CardTitle>
-                <CardDescription>
-                  {recordingOffer.description || `${recordingOffer.total_duration_min / 60}h totais de gravação por apenas €${recordingOffer.price_eur}`}
+                <CardDescription className="min-h-[40px]">
+                  {recordingOffer.description || `3 horas totais de gravação por apenas €20`}
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-2xl font-bold text-accent">{formatPrice(recordingOffer.price_eur)}</p>
-                    <p className="text-sm text-muted-foreground">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div className="flex-1">
+                    <p className="text-2xl font-bold text-accent mb-1">{formatPrice(recordingOffer.price_eur)}</p>
+                    <p className="text-sm text-muted-foreground mb-1">
                       Usado: {offerUsage[recordingOffer.id] || 0}/{recordingOffer.limit_per_month} este mês
                     </p>
                     {(offerUsage[recordingOffer.id] || 0) >= recordingOffer.limit_per_month && <Badge variant="outline" className="text-xs mt-1">
