@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import ServiceCard from '@/components/ServiceCard';
 import { Calendar, Music, FolderOpen, Gift, CreditCard, MapPin, Upload } from 'lucide-react';
+import starsBg from '@/assets/stars-bg.gif';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -35,9 +36,21 @@ const Home = () => {
   }];
   
   return (
-    <div className="min-h-screen flex flex-col">
+    <div 
+      className="min-h-screen flex flex-col relative"
+      style={{
+        backgroundImage: `url(${starsBg})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        backgroundAttachment: 'fixed'
+      }}
+    >
+      {/* Overlay para melhorar legibilidade */}
+      <div className="absolute inset-0 bg-black/30" />
+      
       {/* Welcome Section */}
-      <div className="flex-1 flex items-center justify-center px-4">
+      <div className="flex-1 flex items-center justify-center px-4 relative z-10">
         <div className="text-center max-w-4xl mx-auto w-full">
           <div className="mb-12">
             <h1 className="neon-heading mb-8">Bem-vindo ao Futuro.</h1>

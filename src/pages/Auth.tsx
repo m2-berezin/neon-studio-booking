@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { Mail, Lock, User, Phone, Shield, Eye, EyeOff } from 'lucide-react';
 import { z } from 'zod';
+import starsBg from '@/assets/stars-bg.gif';
 
 const emailSchema = z.string().trim().email('Por favor, introduza um endereço de email válido');
 const passwordSchema = z.string().min(6, 'A palavra-passe deve ter pelo menos 6 caracteres');
@@ -147,8 +148,20 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <Card className="w-full max-w-md p-6">
+    <div 
+      className="min-h-screen flex items-center justify-center p-4 relative"
+      style={{
+        backgroundImage: `url(${starsBg})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        backgroundAttachment: 'fixed'
+      }}
+    >
+      {/* Overlay para melhorar legibilidade */}
+      <div className="absolute inset-0 bg-black/40" />
+      
+      <Card className="w-full max-w-md p-6 relative z-10 bg-card/95 backdrop-blur-sm">
         <div className="flex flex-col items-center mb-6">
           <div className="text-center">
             <div 
