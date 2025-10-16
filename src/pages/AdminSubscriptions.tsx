@@ -135,41 +135,134 @@ export default function AdminSubscriptions() {
       </div>
 
       <Card>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Cliente</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Plano</TableHead>
-              <TableHead>Estado</TableHead>
-              <TableHead>Data de Renovação</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {subscriptions.length === 0 ? (
+        {/* Desktop Table */}
+        <div className="hidden md:block">
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={6} className="text-center text-muted-foreground">
-                  Nenhuma subscrição encontrada
-                </TableCell>
+                <TableHead>Cliente</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Plano</TableHead>
+                <TableHead>Estado</TableHead>
+                <TableHead>Data de Renovação</TableHead>
+                <TableHead className="text-right">Ações</TableHead>
               </TableRow>
-            ) : (
-              subscriptions.map((sub) => (
-                <TableRow key={sub.id}>
-                  <TableCell className="font-medium">{sub.client_name || "N/A"}</TableCell>
-                  <TableCell>{sub.client_email}</TableCell>
-                  <TableCell>{getPlanTypeBadge(sub.plan_type)}</TableCell>
-                  <TableCell>{getStatusBadge(sub.payment_status, sub.is_active)}</TableCell>
-                  <TableCell>
-                    {sub.end_date ? format(new Date(sub.end_date), "dd/MM/yyyy") : "N/A"}
+            </TableHeader>
+            <TableBody>
+              {subscriptions.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center text-muted-foreground">
+                    Nenhuma subscrição encontrada
                   </TableCell>
-                  <TableCell className="text-right space-x-2">
+                </TableRow>
+              ) : (
+                subscriptions.map((sub) => (
+                  <TableRow key={sub.id}>
+                    <TableCell className="font-medium">{sub.client_name || "N/A"}</TableCell>
+                    <TableCell>{sub.client_email}</TableCell>
+                    <TableCell>{getPlanTypeBadge(sub.plan_type)}</TableCell>
+                    <TableCell>{getStatusBadge(sub.payment_status, sub.is_active)}</TableCell>
+                    <TableCell>
+                      {sub.end_date ? format(new Date(sub.end_date), "dd/MM/yyyy") : "N/A"}
+                    </TableCell>
+                    <TableCell className="text-right space-x-2">
+                      {sub.is_active && sub.payment_status === "pending" && (
+                        <Button
+                          size="sm"
+                          variant="default"
+                          onClick={() => handleAction(sub.id, "aceitar")}
+                          disabled={actionLoading === sub.id}
+                        >
+                          {actionLoading === sub.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <>
+                              <Check className="h-4 w-4 mr-1" />
+                              Aceitar
+                            </>
+                          )}
+                        </Button>
+                      )}
+                      {sub.is_active && sub.payment_status === "confirmed" && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleAction(sub.id, "renovar")}
+                          disabled={actionLoading === sub.id}
+                        >
+                          {actionLoading === sub.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <>
+                              <RefreshCw className="h-4 w-4 mr-1" />
+                              Renovar
+                            </>
+                          )}
+                        </Button>
+                      )}
+                      {sub.is_active && (
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => handleAction(sub.id, "recusar")}
+                          disabled={actionLoading === sub.id}
+                        >
+                          {actionLoading === sub.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <>
+                              <X className="h-4 w-4 mr-1" />
+                              Recusar
+                            </>
+                          )}
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+
+        {/* Mobile Cards */}
+        <div className="md:hidden p-4 space-y-4">
+          {subscriptions.length === 0 ? (
+            <div className="text-center text-muted-foreground py-8">
+              Nenhuma subscrição encontrada
+            </div>
+          ) : (
+            subscriptions.map((sub) => (
+              <Card key={sub.id} className="p-4">
+                <div className="space-y-3">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <div className="font-medium">{sub.client_name || "N/A"}</div>
+                      <div className="text-sm text-muted-foreground">{sub.client_email}</div>
+                    </div>
+                    {getPlanTypeBadge(sub.plan_type)}
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Estado:</span>
+                    {getStatusBadge(sub.payment_status, sub.is_active)}
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Renovação:</span>
+                    <span className="text-sm">
+                      {sub.end_date ? format(new Date(sub.end_date), "dd/MM/yyyy") : "N/A"}
+                    </span>
+                  </div>
+
+                  <div className="flex flex-col gap-2 pt-2">
                     {sub.is_active && sub.payment_status === "pending" && (
                       <Button
                         size="sm"
                         variant="default"
                         onClick={() => handleAction(sub.id, "aceitar")}
                         disabled={actionLoading === sub.id}
+                        className="w-full"
                       >
                         {actionLoading === sub.id ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
@@ -187,6 +280,7 @@ export default function AdminSubscriptions() {
                         variant="outline"
                         onClick={() => handleAction(sub.id, "renovar")}
                         disabled={actionLoading === sub.id}
+                        className="w-full"
                       >
                         {actionLoading === sub.id ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
@@ -204,6 +298,7 @@ export default function AdminSubscriptions() {
                         variant="destructive"
                         onClick={() => handleAction(sub.id, "recusar")}
                         disabled={actionLoading === sub.id}
+                        className="w-full"
                       >
                         {actionLoading === sub.id ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
@@ -215,12 +310,12 @@ export default function AdminSubscriptions() {
                         )}
                       </Button>
                     )}
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+                  </div>
+                </div>
+              </Card>
+            ))
+          )}
+        </div>
       </Card>
     </div>
   );
