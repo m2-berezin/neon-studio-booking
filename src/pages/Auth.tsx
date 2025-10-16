@@ -8,7 +8,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { Mail, Lock, User, Phone, Shield, Eye, EyeOff } from 'lucide-react';
 import { z } from 'zod';
-import { Logo } from '@/components/Logo';
 
 const emailSchema = z.string().trim().email('Por favor, introduza um endereço de email válido');
 const passwordSchema = z.string().min(6, 'A palavra-passe deve ter pelo menos 6 caracteres');
@@ -151,8 +150,29 @@ const Auth = () => {
     <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="w-full max-w-md p-6">
         <div className="flex flex-col items-center mb-6">
-          <Logo size="md" />
-          <p className="text-muted-foreground mt-2">
+          <div className="text-center">
+            <div 
+              className="text-4xl font-bold text-white"
+              style={{ 
+                fontFamily: 'Georgia, serif',
+                textShadow: '0 0 20px rgba(255, 255, 255, 0.3), 0 0 40px rgba(255, 255, 255, 0.2)',
+                letterSpacing: '0.1em'
+              }}
+            >
+              7T7
+            </div>
+            <div 
+              className="text-xl font-bold text-white mt-1"
+              style={{ 
+                fontFamily: 'Georgia, serif',
+                textShadow: '0 0 20px rgba(255, 255, 255, 0.3)',
+                letterSpacing: '0.15em'
+              }}
+            >
+              Studios
+            </div>
+          </div>
+          <p className="text-muted-foreground mt-4">
             Bem-vindo ao Futuro.
           </p>
         </div>
