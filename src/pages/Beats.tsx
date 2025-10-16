@@ -58,9 +58,6 @@ const Beats = () => {
         <h1 className="text-3xl font-bold neon-title mb-2">
           Beats Exclusivos
         </h1>
-        <p className="text-muted-foreground">
-          Beats personalizados premium criados exclusivamente para ti
-        </p>
       </div>
 
       {/* Single Beat Package Card */}
@@ -71,10 +68,10 @@ const Beats = () => {
               <Music className="w-6 h-6 text-primary" />
               {beatPackage.name}
             </CardTitle>
-            <CardDescription className="text-lg">{beatPackage.description}</CardDescription>
+            <CardDescription className="text-lg">Beats personalizados premium criados exclusivamente para ti</CardDescription>
             
             <div className="pt-6">
-              <span className="text-5xl font-bold text-primary">€{beatPackage.price}</span>
+              <span className="text-5xl font-bold text-primary">{beatPackage.price}€</span>
             </div>
           </CardHeader>
           
@@ -169,38 +166,13 @@ const Beats = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Info Section */}
-      <Card className="studio-card bg-gradient-to-br from-primary/10 to-accent/10">
-        <CardContent className="pt-6">
-          <div className="text-center space-y-4">
-            <h3 className="text-xl font-semibold text-foreground">Porquê Escolher os Nossos Beats Exclusivos?</h3>
-            <div className="grid md:grid-cols-3 gap-4 text-sm">
-              <div className="space-y-2">
-                <Music className="w-6 h-6 text-primary mx-auto" />
-                <h4 className="font-medium text-foreground">100% Original</h4>
-                <p className="text-muted-foreground">Cada beat é criado de raiz exclusivamente para ti</p>
-              </div>
-              <div className="space-y-2">
-                <MessageCircle className="w-6 h-6 text-primary mx-auto" />
-                <h4 className="font-medium text-foreground">Colaboração Direta</h4>
-                <p className="text-muted-foreground">Trabalha diretamente com os nossos produtores durante todo o processo</p>
-              </div>
-              <div className="space-y-2">
-                <Upload className="w-6 h-6 text-primary mx-auto" />
-                <h4 className="font-medium text-foreground">Direitos Completos</h4>
-                <p className="text-muted-foreground">Propriedade exclusiva completa e direitos comerciais</p>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Footer */}
       <div className="text-center py-4">
         <p className="text-xs text-muted-foreground">
           Todos os beats incluem direitos exclusivos completos e mistura profissional.
           <span className="block mt-1">
-            Contacta-nos para pacotes personalizados ou descontos por volume.
+            Manda mensagem para pacotes personalizados ou descontos por volume.
           </span>
         </p>
       </div>
