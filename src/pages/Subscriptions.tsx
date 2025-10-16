@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { toast as sonnerToast } from 'sonner';
+import { formatPrice } from '@/lib/utils';
 const Subscriptions = () => {
   const {
     user,
@@ -210,8 +211,8 @@ const Subscriptions = () => {
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-2xl font-bold text-primary">€{userSubscription.discounted_price}</p>
-                <p className="text-sm text-muted-foreground line-through">€{userSubscription.price}</p>
+                <p className="text-2xl font-bold text-primary">{formatPrice(userSubscription.discounted_price)}</p>
+                <p className="text-sm text-muted-foreground line-through">{formatPrice(userSubscription.price)}</p>
               </div>
             </div>
           </CardContent>
@@ -235,7 +236,7 @@ const Subscriptions = () => {
                   <div className="space-y-4">
                     <div className="text-center">
                       <div className="flex items-center justify-center gap-2">
-                        <span className="text-3xl font-bold text-primary">€{plan.price}</span>
+                        <span className="text-3xl font-bold text-primary">{formatPrice(plan.price)}</span>
                       </div>
                       <p className="text-sm text-muted-foreground">por mês</p>
                     </div>

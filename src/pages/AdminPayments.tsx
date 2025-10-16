@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useRealtimeSync } from '@/hooks/useRealtimeSync';
+import { formatPrice } from '@/lib/utils';
 
 interface PaymentRequest {
   id: string;
@@ -305,7 +306,7 @@ const AdminPayments = () => {
                   <div className="space-y-2 flex-1">
                     <div className="flex items-center gap-3">
                       {getStatusBadge(request.status)}
-                      <span className="font-semibold">€{request.amount_eur}</span>
+                      <span className="font-semibold">{formatPrice(request.amount_eur)}</span>
                     </div>
                     <div className="text-sm space-y-1">
                       <p><span className="font-medium">Cliente:</span> {request.profiles.full_name}</p>
@@ -378,7 +379,7 @@ const AdminPayments = () => {
                   <div className="space-y-2 flex-1">
                     <div className="flex items-center gap-3">
                       {getStatusBadge(request.status)}
-                      <span className="font-semibold">€{request.amount_eur}</span>
+                      <span className="font-semibold">{formatPrice(request.amount_eur)}</span>
                     </div>
                     <div className="text-sm space-y-1">
                       <p><span className="font-medium">Cliente:</span> {request.profiles.full_name}</p>

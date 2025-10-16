@@ -212,9 +212,9 @@ const ProfileSettings = () => {
 
           <div className="flex items-center justify-between">
             <div>
-              <Label>Voucher de €15 Disponível</Label>
+              <Label>Voucher de 15€ Disponível</Label>
               <p className="text-sm text-muted-foreground">
-                Notificação quando o voucher de €15 fica disponível
+                Notificação quando o voucher de 15€ fica disponível
               </p>
             </div>
             <Switch checked={notificationSettings.voucherAvailable} onCheckedChange={() => toggleSetting('voucherAvailable')} />

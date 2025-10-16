@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import PenaltyBanner from '@/components/PenaltyBanner';
 import ReferralSystem from '@/components/ReferralSystem';
+import { formatPrice } from '@/lib/utils';
 interface Offer {
   id: string;
   name: string;
@@ -479,7 +480,7 @@ const Rewards = () => {
               <CardContent>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-2xl font-bold text-accent">€{recordingOffer.price_eur}</p>
+                    <p className="text-2xl font-bold text-accent">{formatPrice(recordingOffer.price_eur)}</p>
                     <p className="text-sm text-muted-foreground">
                       Usado: {offerUsage[recordingOffer.id] || 0}/{recordingOffer.limit_per_month} este mês
                     </p>

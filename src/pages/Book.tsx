@@ -25,7 +25,7 @@ import {
   MessageCircle,
   ExternalLink
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, formatPrice } from '@/lib/utils';
 
 interface TimeSlot {
   start_time: string;
@@ -659,9 +659,9 @@ const Book = () => {
                       <div className="text-right">
                         <div className="space-y-1">
                           <div className="flex flex-col">
-                            <p className="text-lg font-bold">€{currentPrice}</p>
+                            <p className="text-lg font-bold">{formatPrice(currentPrice)}</p>
                             {service.subscriptionPrice && (
-                              <p className="text-lg font-bold text-primary">€{service.subscriptionPrice} <span className="text-xs text-muted-foreground">(com subscrição)</span></p>
+                              <p className="text-lg font-bold text-primary">{formatPrice(service.subscriptionPrice)} <span className="text-xs text-muted-foreground">(com subscrição)</span></p>
                             )}
                           </div>
                           {service.subscriptionPrice && (
@@ -684,10 +684,10 @@ const Book = () => {
                               <SelectValue placeholder="Selecione as horas" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="2">2 horas - €20</SelectItem>
-                              <SelectItem value="3">3 horas - €30</SelectItem>
-                              <SelectItem value="4">4 horas - €40</SelectItem>
-                              <SelectItem value="5">5 horas - €50</SelectItem>
+                              <SelectItem value="2">2 horas - 20€</SelectItem>
+                              <SelectItem value="3">3 horas - 30€</SelectItem>
+                              <SelectItem value="4">4 horas - 40€</SelectItem>
+                              <SelectItem value="5">5 horas - 50€</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
@@ -932,7 +932,7 @@ const Book = () => {
                 <div className="flex justify-between border-t pt-3 mt-3">
                   <span className="text-muted-foreground font-semibold">Preço Total:</span>
                   <span className="font-bold text-primary">
-                    €{reservationFromOffer.price_eur_snapshot}
+                    {formatPrice(reservationFromOffer.price_eur_snapshot)}
                   </span>
                 </div>
               )}

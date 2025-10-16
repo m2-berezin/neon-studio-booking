@@ -28,6 +28,7 @@ import {
   Image as ImageIcon,
   Music
 } from 'lucide-react';
+import { formatPrice } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { toast as sonnerToast } from 'sonner';
@@ -735,7 +736,7 @@ const AdminDashboard = () => {
                     <Badge variant="outline" className="bg-yellow-500/10 text-yellow-600 border-yellow-500/20">
                       Pendente
                     </Badge>
-                    <span className="font-bold text-lg">€{payment.amount_eur}</span>
+                    <span className="font-bold text-lg">{formatPrice(payment.amount_eur)}</span>
                   </div>
                 </div>
               ))}

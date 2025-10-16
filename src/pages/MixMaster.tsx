@@ -22,6 +22,7 @@ import {
   Music,
   FileAudio
 } from 'lucide-react';
+import { formatPrice } from '@/lib/utils';
 
 interface Voucher {
   id: string;
@@ -274,8 +275,8 @@ const MixMaster = () => {
                 
                 <div className="space-y-2">
                   <div className="space-y-1">
-                    <div className="text-base font-medium text-muted-foreground">€40 sem subscrição</div>
-                    <div className="text-2xl font-bold text-primary">€34 com subscrição</div>
+                    <div className="text-base font-medium text-muted-foreground">40€ sem subscrição</div>
+                    <div className="text-2xl font-bold text-primary">34€ com subscrição</div>
                   </div>
                   {option.hasSubscription && (
                     <Badge variant="secondary" className="text-xs">
@@ -413,7 +414,7 @@ const MixMaster = () => {
                         onClick={() => setSelectedVoucher(voucher)}
                         className="text-xs"
                       >
-                        {voucher.code} (€{voucher.amount_eur})
+                        {voucher.code} ({formatPrice(voucher.amount_eur)})
                       </Button>
                     ))}
                   </div>
@@ -426,34 +427,34 @@ const MixMaster = () => {
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
                   <span>Preço Base:</span>
-                  <span>€40</span>
+                  <span>40€</span>
                 </div>
                 
                 {getSubscriptionDiscount() > 0 && !isLoyaltyOffer && (
                   <div className="flex items-center justify-between text-sm text-green-600">
                     <span>Desconto Subscrição ({subscriptionDiscountPercent}%):</span>
-                    <span>-€{getSubscriptionDiscount().toFixed(2)}</span>
+                    <span>-{formatPrice(getSubscriptionDiscount())}</span>
                   </div>
                 )}
                 
                 {getVoucherDiscount() > 0 && (
                   <div className="flex items-center justify-between text-sm text-green-600">
                     <span>Desconto Voucher:</span>
-                    <span>-€{getVoucherDiscount().toFixed(2)}</span>
+                    <span>-{formatPrice(getVoucherDiscount())}</span>
                   </div>
                 )}
                 
                 {getLoyaltyDiscount() > 0 && (
                   <div className="flex items-center justify-between text-sm text-green-600 font-semibold">
                     <span>🎁 Oferta Mix&Master (7 Pontos):</span>
-                    <span>-€{getLoyaltyDiscount().toFixed(2)}</span>
+                    <span>-{formatPrice(getLoyaltyDiscount())}</span>
                   </div>
                 )}
                 
                 {getPlan180DayDiscount() > 0 && (
                   <div className="flex items-center justify-between text-sm text-green-600 font-semibold">
                     <span>🎁 Oferta Plano S (180 dias):</span>
-                    <span>-€{getPlan180DayDiscount().toFixed(2)}</span>
+                    <span>-{formatPrice(getPlan180DayDiscount())}</span>
                   </div>
                 )}
               </div>
@@ -462,7 +463,7 @@ const MixMaster = () => {
               
               <div className="flex items-center justify-between text-lg font-semibold">
                 <span>Total:</span>
-                <span>€{getSelectedPrice()}</span>
+                <span>{formatPrice(getSelectedPrice())}</span>
               </div>
 
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">

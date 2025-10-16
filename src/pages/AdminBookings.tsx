@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useRealtimeSync } from '@/hooks/useRealtimeSync';
+import { formatPrice } from '@/lib/utils';
 
 interface Booking {
   id: string;
@@ -260,7 +261,7 @@ const AdminBookings = () => {
                         <span className="font-medium">{booking.client_name}</span>
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        {booking.service_name_snapshot} - €{booking.price_eur_snapshot}
+                        {booking.service_name_snapshot} - {formatPrice(booking.price_eur_snapshot)}
                       </div>
                     </div>
 

@@ -14,6 +14,7 @@ import { ArrowLeft, CheckCircle, Copy, Smartphone, Building2, Tag } from 'lucide
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { useRealtimeSync } from '@/hooks/useRealtimeSync';
+import { formatPrice } from '@/lib/utils';
 
 const Payment = () => {
   const [searchParams] = useSearchParams();
@@ -732,7 +733,7 @@ const Payment = () => {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="font-medium">Valor:</span>
-                  <span className="text-lg font-semibold text-primary">€{price}</span>
+                  <span className="text-lg font-semibold text-primary">{formatPrice(parseFloat(price || '0'))}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="font-medium">Renovação:</span>
@@ -753,35 +754,35 @@ const Payment = () => {
                 {(isPremiumOffer || subscriptionDiscount > 0 || referralRewardDiscount > 0 || friendCodeDiscount > 0 || hasVoucher || loyaltyOffer || plan180DayOffer) && (
                   <div className="flex items-center justify-between text-sm">
                     <span>Subtotal:</span>
-                    <span>€{price}</span>
+                    <span>{formatPrice(parseFloat(price || '0'))}</span>
                   </div>
                 )}
                 
                 {isPremiumOffer && premiumOfferDiscount > 0 && (
                   <div className="flex items-center justify-between text-sm text-primary font-semibold">
                     <span>Desconto PREMIUM+ (Plano X):</span>
-                    <span>-€{premiumOfferDiscount.toFixed(2)}</span>
+                    <span>-{formatPrice(premiumOfferDiscount)}</span>
                   </div>
                 )}
                 
                 {!isPremiumOffer && subscriptionDiscount > 0 && (
                   <div className="flex items-center justify-between text-sm text-green-600">
                     <span>Desconto de Subscrição ({subscriptionDiscountPercent}% - Plano {userSubscription?.plan_type}):</span>
-                    <span>-€{subscriptionDiscount.toFixed(2)}</span>
+                    <span>-{formatPrice(subscriptionDiscount)}</span>
                   </div>
                 )}
                 
                 {!isPremiumOffer && referralRewardDiscount > 0 && (
                   <div className="flex items-center justify-between text-sm text-blue-600 font-medium">
                     <span>🎉 Desconto Partilha de Código (25%):</span>
-                    <span>-€{referralRewardDiscount.toFixed(2)}</span>
+                    <span>-{formatPrice(referralRewardDiscount)}</span>
                   </div>
                 )}
                 
                 {!isPremiumOffer && friendCodeDiscount > 0 && (
                   <div className="flex items-center justify-between text-sm text-purple-600">
                     <span>Código de Amigo ({appliedFriendCode}) - 25%:</span>
-                    <span>-€{friendCodeDiscount.toFixed(2)}</span>
+                    <span>-{formatPrice(friendCodeDiscount)}</span>
                   </div>
                 )}
                 
@@ -791,21 +792,21 @@ const Payment = () => {
                       <Tag className="h-4 w-4" />
                       Desconto 15€ Voucher:
                     </span>
-                    <span>-€{voucherDiscount.toFixed(2)}</span>
+                    <span>-{formatPrice(voucherDiscount)}</span>
                   </div>
                 )}
                 
                 {loyaltyOffer && (
                   <div className="flex items-center justify-between text-sm text-green-600 font-semibold">
                     <span>🎁 Oferta Mix&Master (7 Pontos):</span>
-                    <span>-€{parseFloat(price || '0').toFixed(2)}</span>
+                    <span>-{formatPrice(parseFloat(price || '0'))}</span>
                   </div>
                 )}
                 
                 {plan180DayOffer && (
                   <div className="flex items-center justify-between text-sm text-green-600 font-semibold">
                     <span>🎁 Oferta Plano S (180 dias):</span>
-                    <span>-€{parseFloat(price || '0').toFixed(2)}</span>
+                    <span>-{formatPrice(parseFloat(price || '0'))}</span>
                   </div>
                 )}
                 
@@ -814,9 +815,9 @@ const Payment = () => {
                 <div className="flex items-center justify-between text-xl font-bold">
                   <span>Total:</span>
                 <span className="text-primary">
-                  €{isPremiumOffer || loyaltyOffer || isPlan180DayOffer
-                    ? '0.00' 
-                    : Math.max(0, parseFloat(price || '0') - premiumOfferDiscount - subscriptionDiscount - referralRewardDiscount - Math.max(friendCodeDiscount, voucherDiscount)).toFixed(2)
+                  {isPremiumOffer || loyaltyOffer || isPlan180DayOffer
+                    ? formatPrice(0) 
+                    : formatPrice(Math.max(0, parseFloat(price || '0') - premiumOfferDiscount - subscriptionDiscount - referralRewardDiscount - Math.max(friendCodeDiscount, voucherDiscount)))
                   }
                 </span>
                 </div>

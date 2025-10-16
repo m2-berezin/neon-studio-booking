@@ -14,7 +14,7 @@ const StudioInfo = () => {
   const houseRules = [{
     icon: <Clock className="h-5 w-5" />,
     title: "Pontualidade",
-    description: "Por favor chega a horas. Atrasos podem resultar em sessões encurtadas."
+    description: "Chega a horas. Atrasos podem resultar em sessões encurtadas."
   }, {
     icon: <Music className="h-5 w-5" />,
     title: "Respeita o Equipamento",
@@ -124,8 +124,7 @@ const StudioInfo = () => {
               <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                 <h5 className="font-medium text-blue-800 text-sm mb-1">Política de Reservas</h5>
                 <p className="text-xs text-blue-700">
-                  Não subscritores: Sinal de €15 obrigatório para reserva de sessão.<br />
-                  Subscritores: Sem necessidade de sinal.
+                  Sinal de 15€ obrigatório para reserva de sessão.
                 </p>
               </div>
             </div>
@@ -140,7 +139,7 @@ const StudioInfo = () => {
             <div>
               <h4 className="font-medium mb-2">Situações de Emergência</h4>
               <p className="text-sm text-muted-foreground">
-                Compreendemos que emergências acontecem. Contacte-nos imediatamente para consideração caso a caso.
+                Em caso de emergências contacta imediatamente. Consideração varia de caso a caso.
               </p>
             </div>
           </CardContent>
@@ -152,7 +151,7 @@ const StudioInfo = () => {
         <CardHeader>
           <CardTitle>Regras do Estúdio</CardTitle>
           <p className="text-sm text-muted-foreground">
-            Por favor segue estas diretrizes para garantir um ambiente profissional e produtivo para todos.
+            Segue estas regras para garantir um ambiente profissional e produtivo para todos.
           </p>
         </CardHeader>
         <CardContent>

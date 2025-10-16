@@ -20,6 +20,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { useRealtimeSync } from '@/hooks/useRealtimeSync';
+import { formatPrice } from '@/lib/utils';
 
 interface MixMasterProject {
   id: string;
@@ -202,7 +203,7 @@ const AdminProjects = () => {
                       <TableCell>
                         {format(new Date(project.created_at), 'dd/MM/yyyy HH:mm')}
                       </TableCell>
-                      <TableCell>€{project.amount_eur.toFixed(2)}</TableCell>
+                      <TableCell>{formatPrice(project.amount_eur)}</TableCell>
                       <TableCell>{getStatusBadge(project.status)}</TableCell>
                       <TableCell>
                         {project.transfer_link ? (

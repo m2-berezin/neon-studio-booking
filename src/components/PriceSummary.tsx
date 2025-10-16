@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFriendCode as useFriendCodeHook } from '@/hooks/useFriendCode';
 import { supabase } from '@/integrations/supabase/client';
+import { formatPrice } from '@/lib/utils';
 
 interface Service {
   id: string;
@@ -145,7 +146,7 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
     const rewardDiscounts: Record<string, { discount: number; description: string }> = {
       'BUY2GET1': { discount: subtotal * 0.33, description: 'Buy 2h Get 1h Free' },
       'MIXING50': { discount: subtotal * 0.5, description: '50% Off Mixing & Mastering' },
-      'NEWCLIENT': { discount: 15, description: '€15 New Client Discount' },
+      'NEWCLIENT': { discount: 15, description: '15€ New Client Discount' },
     };
 
     const reward = rewardDiscounts[rewardCode.toUpperCase()];
@@ -262,13 +263,13 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
           {lineItems.map(item => (
             <div key={item.id} className="flex justify-between text-sm">
               <span>{item.name} x {item.quantity}</span>
-              <span>€{(item.price * item.quantity).toFixed(2)}</span>
+              <span>{formatPrice(item.price * item.quantity)}</span>
             </div>
           ))}
           <Separator />
           <div className="flex justify-between font-medium">
             <span>Subtotal</span>
-            <span>€{subtotal.toFixed(2)}</span>
+            <span>{formatPrice(subtotal)}</span>
           </div>
         </div>
 
@@ -277,7 +278,7 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
           <div className="space-y-2">
             <div className="flex justify-between text-sm text-green-600">
               <span>Desconto de Subscrição ({subscriptionDiscountPercent}% - Plano {subscription?.plan_type})</span>
-              <span>-€{subscriptionDiscount.toFixed(2)}</span>
+              <span>-{formatPrice(subscriptionDiscount)}</span>
             </div>
           </div>
         )}
@@ -321,7 +322,7 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
                   Reserva um serviço em 30 dias ou o desconto ficará inativo.
                 </p>
               </div>
-              <span className="text-green-600 font-bold">-€{rewardDiscount.toFixed(2)}</span>
+              <span className="text-green-600 font-bold">-{formatPrice(rewardDiscount)}</span>
             </div>
           </div>
         )}
@@ -341,7 +342,7 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
                       onClick={() => selectVoucher(voucher)}
                       className="text-xs"
                     >
-                      {voucher.code} (€{voucher.amount})
+                      {voucher.code} ({formatPrice(voucher.amount)})
                     </Button>
                   ))}
                 </div>
@@ -352,7 +353,7 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
             {appliedVoucher && (
               <div className="flex items-center justify-between">
                 <Badge variant="secondary">
-                  {appliedVoucher.code} (€{appliedVoucher.amount})
+                  {appliedVoucher.code} ({formatPrice(appliedVoucher.amount)})
                 </Badge>
                 <Button variant="outline" size="sm" onClick={removeVoucher}>
                   Remover
@@ -369,19 +370,19 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
             {premiumOfferDiscount > 0 && (
               <div className="flex justify-between text-sm text-primary font-semibold">
                 <span>Desconto PREMIUM+ (Plano X)</span>
-                <span>-€{premiumOfferDiscount.toFixed(2)}</span>
+                <span>-{formatPrice(premiumOfferDiscount)}</span>
               </div>
             )}
             {rewardDiscount > 0 && (
               <div className="flex justify-between text-sm text-green-600">
                 <span>Desconto de Recompensa</span>
-                <span>-€{rewardDiscount.toFixed(2)}</span>
+                <span>-{formatPrice(rewardDiscount)}</span>
               </div>
             )}
             {voucherDiscount > 0 && (
               <div className="flex justify-between text-sm text-green-600">
                 <span>Desconto 15€ Voucher</span>
-                <span>-€{voucherDiscount.toFixed(2)}</span>
+                <span>-{formatPrice(voucherDiscount)}</span>
               </div>
             )}
           </div>
@@ -391,7 +392,7 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
         <Separator />
         <div className="flex justify-between text-lg font-bold">
           <span>Total</span>
-          <span>€{finalPrice.toFixed(2)}</span>
+          <span>{formatPrice(finalPrice)}</span>
         </div>
 
         {finalPrice === 0 && (
