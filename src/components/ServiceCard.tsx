@@ -17,14 +17,14 @@ const ServiceCard = ({ title, description, icon: Icon, onClick, gradient }: Serv
       }`}
       onClick={onClick}
     >
-      <div className="flex items-start space-x-4">
+      <div className="flex items-center space-x-4">
         <div className={`w-12 h-12 rounded-lg flex-shrink-0 flex items-center justify-center ${gradient ? 'bg-primary/20' : 'bg-secondary'}`}>
           <Icon 
             size={24} 
             className={gradient ? 'text-primary' : 'text-accent'} 
           />
         </div>
-        <div className="flex-1 min-w-0 flex flex-col justify-center py-1">
+        <div className="flex-1 min-w-0 flex flex-col justify-center">
           <h3 className="text-lg font-bold text-foreground mb-1 font-serif leading-tight">
             {title}
           </h3>
