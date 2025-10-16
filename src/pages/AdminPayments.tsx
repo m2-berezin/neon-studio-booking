@@ -29,6 +29,7 @@ interface PaymentRequest {
   note?: string;
   reservation_id: string;
   payment_method?: string;
+  type?: string;
   profiles: {
     full_name: string;
   };
@@ -148,6 +149,53 @@ const AdminPayments = () => {
         }
 
         console.log('[ADMIN] ✅ Payment approved successfully! Result:', data);
+        
+        // Send calendar invite email if it's a booking (not subscription)
+        if (data && request.type !== 'subscription_request') {
+          try {
+            console.log('[ADMIN] 📧 Fetching booking details for calendar invite...');
+            
+            // Fetch booking details
+            const { data: booking, error: bookingError } = await supabase
+              .from('bookings')
+              .select('id, user_id, service_name_snapshot, starts_at, ends_at')
+              .eq('id', data)
+              .single();
+
+            if (bookingError) {
+              console.error('[ADMIN] ❌ Error fetching booking:', bookingError);
+            } else if (booking && booking.starts_at && booking.ends_at) {
+              // Fetch user profile separately
+              const { data: profile } = await supabase
+                .from('profiles')
+                .select('full_name')
+                .eq('id', booking.user_id)
+                .single();
+              
+              console.log('[ADMIN] 📧 Sending calendar invite email...');
+              
+              const { error: emailError } = await supabase.functions.invoke('send-booking-calendar', {
+                body: {
+                  client_name: profile?.full_name || 'Cliente',
+                  service_name: booking.service_name_snapshot || 'Serviço',
+                  starts_at: booking.starts_at,
+                  ends_at: booking.ends_at,
+                  booking_id: booking.id,
+                }
+              });
+
+              if (emailError) {
+                console.error('[ADMIN] ❌ Error sending calendar invite:', emailError);
+              } else {
+                console.log('[ADMIN] ✅ Calendar invite sent successfully!');
+              }
+            }
+          } catch (emailError) {
+            console.error('[ADMIN] ❌ Error in calendar invite process:', emailError);
+            // Don't throw - we still want to show success for the approval
+          }
+        }
+        
         toast({
           title: 'Reserva Aprovada',
           description: 'A reserva foi aprovada e confirmada com sucesso.',
