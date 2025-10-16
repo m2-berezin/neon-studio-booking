@@ -24,7 +24,6 @@ const StudioGallery = () => {
 
   return (
     <div className="mt-4">
-      <h4 className="font-medium mb-3">Galeria do Estúdio</h4>
       <div className="relative w-full aspect-[4/3] overflow-hidden rounded-lg bg-muted">
         {images.map((image, index) => (
           <img
@@ -58,6 +57,9 @@ const StudioGallery = () => {
           />
         ))}
       </div>
+      <p className="text-sm text-muted-foreground mt-3 text-center">
+        O estúdio dispõe de Ar Condicionado.
+      </p>
     </div>
   );
 };
