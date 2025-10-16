@@ -22,27 +22,14 @@ export const useFriendCode = () => {
     if (!user) return;
 
     try {
-      // Check if user already has a referral code
-      const { data, error } = await supabase
-        .from('referral_codes')
-        .select('code')
-        .eq('user_id', user.id)
-        .maybeSingle();
+      // Always regenerate code to ensure it's based on current profile name
+      const { data: newCode, error: rpcError } = await supabase
+        .rpc('generate_referral_code', { p_user_id: user.id });
 
-      if (error) throw error;
-
-      if (data) {
-        setMyFriendCode(data.code);
-      } else {
-        // Generate a new referral code using RPC function
-        const { data: newCode, error: rpcError } = await supabase
-          .rpc('generate_referral_code', { p_user_id: user.id });
-
-        if (rpcError) throw rpcError;
-        
-        if (newCode) {
-          setMyFriendCode(newCode);
-        }
+      if (rpcError) throw rpcError;
+      
+      if (newCode) {
+        setMyFriendCode(newCode);
       }
     } catch (error) {
       console.error('Error loading friend code:', error);
