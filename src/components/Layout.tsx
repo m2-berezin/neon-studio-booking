@@ -103,7 +103,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
 
       {/* Navigation - Only show if user is authenticated */}
       {user && (
-        <nav className="fixed bottom-0 left-0 right-0 bg-card/80 backdrop-blur-md border-t border-border">
+        <nav className="fixed bottom-0 left-0 right-0 bg-card/80 backdrop-blur-md border-t border-border z-50">
           <div className="flex justify-around py-3">
             {allNavItems.map((item) => {
               const isActive = item.path === '/admin/dashboard' 
