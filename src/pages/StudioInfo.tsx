@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { MapPin, Clock, Phone, MessageCircle, ExternalLink, AlertTriangle, CheckCircle, Calendar, Music, Headphones, Mic, Settings, ArrowLeft } from 'lucide-react';
+import StudioGallery from '@/components/StudioGallery';
 
 const StudioInfo = () => {
   const navigate = useNavigate();
@@ -91,6 +92,10 @@ const StudioInfo = () => {
                 </div>
               </div>
             </div>
+
+            <Separator />
+
+            <StudioGallery />
 
           </CardContent>
         </Card>
