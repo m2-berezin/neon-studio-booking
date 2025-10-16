@@ -126,7 +126,9 @@ const Layout = ({ children }: { children: ReactNode }) => {
                   ) : (
                     <>
                       {item.icon === 'question' ? (
-                        <span className="text-xl font-bold" style={{ fontFamily: 'Times New Roman, serif' }}>?</span>
+                        <div className="w-5 h-5 flex items-center justify-center">
+                          <span className="text-[20px] leading-none font-bold" style={{ fontFamily: 'Times New Roman, serif' }}>?</span>
+                        </div>
                       ) : (
                         <item.icon className="w-5 h-5" />
                       )}
