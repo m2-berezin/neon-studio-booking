@@ -421,129 +421,16 @@ const MixMaster = () => {
                 />
               </div>
             )}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Payment Summary */}
-      {selectedOption && deliveryMethod && (
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Resumo do Pagamento</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span>Serviço:</span>
-                <span>{pricingOptions.find(p => p.id === selectedOption)?.title}</span>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <span>Estado da Subscrição:</span>
-                <Badge variant={hasSubscription ? "default" : "secondary"}>
-                  {hasSubscription ? "Activa" : "Sem Subscrição"}
-                </Badge>
-              </div>
-              
-              {/* Vouchers */}
-              {availableVouchers.length > 0 && (
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Vales Disponíveis:</Label>
-                  <div className="flex flex-wrap gap-2">
-                    {availableVouchers.map(voucher => (
-                      <Button
-                        key={voucher.id}
-                        variant={selectedVoucher?.id === voucher.id ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => setSelectedVoucher(voucher)}
-                        className="text-xs"
-                      >
-                        {voucher.code} ({formatPrice(voucher.amount_eur)})
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              <Separator />
-              
-              {/* Price Breakdown */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span>Preço Base:</span>
-                  <span>40€</span>
-                </div>
-                
-                {getSubscriptionDiscount() > 0 && !isLoyaltyOffer && !isPlan180DayOffer && (
-                  <div className="flex items-center justify-between text-sm text-green-600">
-                    <span>Desconto Subscrição ({subscriptionDiscountPercent}%):</span>
-                    <span>-{formatPrice(getSubscriptionDiscount())}</span>
-                  </div>
-                )}
-                
-                {getReferralRewardDiscount() > 0 && (
-                  <div className="flex items-center justify-between text-sm text-blue-600 font-medium">
-                    <span>🎉 Desconto Partilha de Código (25%):</span>
-                    <span>-{formatPrice(getReferralRewardDiscount())}</span>
-                  </div>
-                )}
-                
-                {getFriendCodeDiscount() > 0 && (
-                  <div className="flex items-center justify-between text-sm text-purple-600">
-                    <span>Código de Amigo (25%):</span>
-                    <span>-{formatPrice(getFriendCodeDiscount())}</span>
-                  </div>
-                )}
-                
-                {getVoucherDiscount() > 0 && (
-                  <div className="flex items-center justify-between text-sm text-green-600">
-                    <span>Desconto Voucher:</span>
-                    <span>-{formatPrice(getVoucherDiscount())}</span>
-                  </div>
-                )}
-                
-                {getLoyaltyDiscount() > 0 && (
-                  <div className="flex items-center justify-between text-sm text-green-600 font-semibold">
-                    <span>🎁 Oferta Mix&Master (7 Pontos):</span>
-                    <span>-{formatPrice(getLoyaltyDiscount())}</span>
-                  </div>
-                )}
-                
-                {getPlan180DayDiscount() > 0 && (
-                  <div className="flex items-center justify-between text-sm text-green-600 font-semibold">
-                    <span>🎁 Oferta Plano S (180 dias):</span>
-                    <span>-{formatPrice(getPlan180DayDiscount())}</span>
-                  </div>
-                )}
-              </div>
-              
-              <Separator />
-              
-              <div className="flex items-center justify-between text-lg font-semibold">
-                <span>Total:</span>
-                <span>{formatPrice(getSelectedPrice())}</span>
-              </div>
-
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <div className="flex items-start gap-2">
-                  <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5" />
-                  <div>
-                    <h4 className="font-medium text-blue-800">Envio Pendente de Pagamento</h4>
-                    <p className="text-sm text-blue-700 mt-1">
-                      O trabalho começará apenas após confirmação do pagamento.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
+            
+            {deliveryMethod && (
               <Button 
                 onClick={handleProceedToPayment}
-                className="w-full"
+                className="w-full mt-6"
               >
                 <CreditCard className="h-4 w-4 mr-2" />
                 Pagar Agora
               </Button>
-            </div>
+            )}
           </CardContent>
         </Card>
       )}
