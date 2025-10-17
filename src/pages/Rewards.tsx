@@ -419,7 +419,7 @@ const Rewards = () => {
               Tens um Código de Amigo?
             </CardTitle>
             <CardDescription>
-              Insere o código de um amigo para receber 25% de desconto válido por 30 dias
+              Insere o código de um amigo para receber 25% de desconto, código de uso único e apenas válido por 30 dias
             </CardDescription>
           </CardHeader>
           <CardContent>

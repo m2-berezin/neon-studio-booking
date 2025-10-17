@@ -30,6 +30,7 @@ interface PaymentRequest {
   reservation_id: string;
   payment_method?: string;
   type?: string;
+  friend_code?: string;
   profiles: {
     full_name: string;
   };
@@ -375,6 +376,11 @@ const AdminPayments = () => {
                          request.payment_method === 'revolut' ? 'Revolut' :
                          'Não especificado'}
                       </p>
+                      {request.friend_code && (
+                        <p className="text-green-600 font-medium">
+                          <span className="font-semibold">✅ Código de Convite Usado:</span> {request.friend_code}
+                        </p>
+                      )}
                       <p className="text-muted-foreground">
                         <span className="font-medium">Pedido em:</span> {format(new Date(request.created_at), "dd/MM/yyyy 'às' HH:mm")}
                       </p>

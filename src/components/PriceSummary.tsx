@@ -8,6 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFriendCode as useFriendCodeHook } from '@/hooks/useFriendCode';
+import { useReferralReward } from '@/hooks/useReferralReward';
 import { supabase } from '@/integrations/supabase/client';
 import { formatPrice } from '@/lib/utils';
 
@@ -60,6 +61,7 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
   const { user, subscription, subscriptionDiscountPercent } = useAuth();
   const { toast } = useToast();
   const { appliedFriendCode, hasFriendCodeDiscount, applyFriendCode, loading: friendCodeLoading } = useFriendCodeHook();
+  const { referralReward, hasReferralReward, getDaysLeft } = useReferralReward();
   
   const [rewardCode, setRewardCode] = useState('');
   const [voucherCode, setVoucherCode] = useState('');
@@ -172,7 +174,13 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
     // Premium offers don't stack with other discounts
     if (isPremiumOffer) return 0;
     
-    // Friend code discount takes priority and is automatically applied
+    // Referral reward takes highest priority (earned by others using your code)
+    if (hasReferralReward && referralReward) {
+      console.log('[PRICE SUMMARY] Applying referral reward discount:', referralReward.discount_percent);
+      return subtotal * (referralReward.discount_percent / 100);
+    }
+    
+    // Friend code discount (using someone else's code)
     if (hasFriendCodeDiscount() && appliedFriendCode) {
       console.log('[PRICE SUMMARY] Applying friend code discount:', appliedFriendCode);
       return subtotal * 0.25; // 25% discount for friend codes
@@ -310,8 +318,25 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
           </div>
         )}
 
-        {/* Friend Code Discount Display */}
-        {hasFriendCodeDiscount() && appliedFriendCode && (
+        {/* Referral Reward Discount Display (earned from others using your code) */}
+        {hasReferralReward && referralReward && (
+          <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 mb-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <Label className="text-sm font-medium text-purple-800">
+                  🎉 Desconto de {referralReward.discount_percent}% ativo! (Recompensa de Convite)
+                </Label>
+                <p className="text-xs text-purple-700 mt-1">
+                  Um amigo usou o teu código! Este desconto expira em {getDaysLeft()} dias.
+                </p>
+              </div>
+              <span className="text-purple-600 font-bold">-{formatPrice(rewardDiscount)}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Friend Code Discount Display (when using someone else's code) */}
+        {hasFriendCodeDiscount() && appliedFriendCode && !hasReferralReward && (
           <div className="bg-green-50 border border-green-200 rounded-lg p-3">
             <div className="flex items-center justify-between">
               <div>
