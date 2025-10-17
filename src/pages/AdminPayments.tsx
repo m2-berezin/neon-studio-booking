@@ -31,6 +31,7 @@ interface PaymentRequest {
   payment_method?: string;
   type?: string;
   friend_code?: string;
+  referral_reward_id?: string;
   profiles: {
     full_name: string;
   };
@@ -384,6 +385,11 @@ const AdminPayments = () => {
                       {request.friend_code && (
                         <p className="text-green-600 font-medium">
                           <span className="font-semibold">✅ Código de Convite Usado:</span> {request.friend_code}
+                        </p>
+                      )}
+                      {request.referral_reward_id && (
+                        <p className="text-purple-600 font-medium">
+                          <span className="font-semibold">🎁 Desconto Referral Reward Ativo:</span> 25% de desconto
                         </p>
                       )}
                       <p className="text-muted-foreground">
