@@ -40,6 +40,11 @@ const MixMaster = () => {
   const { hasFriendCodeDiscount } = useFriendCode();
   const { hasReferralReward, referralReward } = useReferralReward();
   
+  // Debug log for referral reward
+  useEffect(() => {
+    console.log('[MIXMASTER] Referral reward status:', { hasReferralReward, referralReward });
+  }, [hasReferralReward, referralReward]);
+  
   // Check if this is a loyalty offer or plan 180-day offer from URL
   const searchParams = new URLSearchParams(window.location.search);
   const isLoyaltyOffer = searchParams.get('loyalty') === 'true';
@@ -133,18 +138,28 @@ const MixMaster = () => {
   };
   
   const getReferralRewardDiscount = () => {
-    if (!hasReferralReward || !referralReward || isLoyaltyOffer || isPlan180DayOffer) return 0;
+    if (!hasReferralReward || !referralReward || isLoyaltyOffer || isPlan180DayOffer) {
+      console.log('[MIXMASTER] No referral reward:', { hasReferralReward, referralReward, isLoyaltyOffer, isPlan180DayOffer });
+      return 0;
+    }
     const basePrice = 40;
     const afterSubscription = hasSubscription ? basePrice * (1 - subscriptionDiscountPercent / 100) : basePrice;
-    return afterSubscription * (referralReward.discount_percent / 100);
+    const discount = afterSubscription * (referralReward.discount_percent / 100);
+    console.log('[MIXMASTER] Referral reward discount:', discount, 'from', afterSubscription);
+    return discount;
   };
   
   const getFriendCodeDiscount = () => {
-    if (!hasFriendCodeDiscount() || isLoyaltyOffer || isPlan180DayOffer) return 0;
+    if (!hasFriendCodeDiscount() || isLoyaltyOffer || isPlan180DayOffer) {
+      console.log('[MIXMASTER] No friend code discount');
+      return 0;
+    }
     const basePrice = 40;
     const afterSubscription = hasSubscription ? basePrice * (1 - subscriptionDiscountPercent / 100) : basePrice;
     const afterReferral = hasReferralReward && referralReward ? afterSubscription * (1 - referralReward.discount_percent / 100) : afterSubscription;
-    return afterReferral * 0.25;
+    const discount = afterReferral * 0.25;
+    console.log('[MIXMASTER] Friend code discount:', discount, 'from', afterReferral);
+    return discount;
   };
 
   const pricingOptions = [
