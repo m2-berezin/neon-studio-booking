@@ -83,6 +83,11 @@ const AdminDashboard = () => {
   
   // Enable realtime sync for admin (all users)
   useRealtimeSync(true);
+  
+  // Scroll to top when page loads
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const [activeTab, setActiveTab] = useState('overview');
 

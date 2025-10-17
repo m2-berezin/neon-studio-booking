@@ -48,6 +48,11 @@ const Book = () => {
   } = useBooking();
   const { user } = useAuth();
   const { toast } = useToast();
+  
+  // Scroll to top when page loads
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   
   // Check for reservation ID from offer application

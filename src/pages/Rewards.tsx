@@ -48,6 +48,11 @@ const Rewards = () => {
   } = useRewards();
   const { appliedFriendCode, hasFriendCodeDiscount, applyFriendCode, loading: friendCodeLoading } = useFriendCode();
   const [appliedRewards, setAppliedRewards] = useState<Record<string, boolean>>({});
+  
+  // Scroll to top when page loads
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   const [offers, setOffers] = useState<Offer[]>([]);
   const [offerUsage, setOfferUsage] = useState<Record<string, number>>({});
   const [applyingOffer, setApplyingOffer] = useState<string | null>(null);

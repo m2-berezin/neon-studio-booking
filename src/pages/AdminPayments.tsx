@@ -51,6 +51,11 @@ const AdminPayments = () => {
   
   // Enable realtime sync for admin
   useRealtimeSync(true);
+  
+  // Scroll to top when page loads
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const loadPaymentRequests = async () => {
     try {

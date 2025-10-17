@@ -29,6 +29,11 @@ interface MessageWithSender {
 const DashboardCliente = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  
+  // Scroll to top when page loads
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   const [messages, setMessages] = useState<MessageWithSender[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [unreadCount, setUnreadCount] = useState(0);

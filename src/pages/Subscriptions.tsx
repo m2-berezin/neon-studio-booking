@@ -35,6 +35,11 @@ const Subscriptions = () => {
   const [tempPreferences, setTempPreferences] = useState(preferences);
   const [activePlanType, setActivePlanType] = useState<string | null>(null);
   
+  // Scroll to top when page loads
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+  
   // Check for unread renewal notifications on load
   useEffect(() => {
     const checkRenewalNotifications = async () => {

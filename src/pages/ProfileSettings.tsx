@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, User, Mail, Phone, Key, Bell, Save, Edit3, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -25,6 +25,12 @@ const ProfileSettings = () => {
   const [changingPassword, setChangingPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  
+  // Scroll to top when page loads
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+  
   const [formData, setFormData] = useState({
     full_name: profile?.full_name || '',
     phone: profile?.phone || ''

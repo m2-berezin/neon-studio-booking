@@ -45,6 +45,11 @@ const MixMaster = () => {
     console.log('[MIXMASTER] Referral reward status:', { hasReferralReward, referralReward });
   }, [hasReferralReward, referralReward]);
   
+  // Scroll to top when page loads
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+  
   // Check if this is a loyalty offer or plan 180-day offer from URL
   const searchParams = new URLSearchParams(window.location.search);
   const isLoyaltyOffer = searchParams.get('loyalty') === 'true';

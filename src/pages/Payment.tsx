@@ -43,6 +43,11 @@ const Payment = () => {
   
   // Enable realtime sync
   useRealtimeSync();
+  
+  // Scroll to top when page loads
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   // Get payment details from URL params
   const service = searchParams.get('service');
