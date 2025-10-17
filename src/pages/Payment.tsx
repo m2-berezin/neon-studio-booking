@@ -279,16 +279,25 @@ const Payment = () => {
 
         // Update payment request with referral_reward_id if applicable
         if (requestId) {
-          console.log('[PAYMENT SUBSCRIPTION] ✅ Payment request created with method:', paymentMethod);
+          console.log('[PAYMENT SUBSCRIPTION] ✅ Payment request created:', requestId);
+          
           if (hasReferralReward && referralReward) {
-            console.log('[PAYMENT SUBSCRIPTION] 🎁 Applying referral reward:', referralReward.id, referralReward.discount_percent + '%');
-            await supabase
+            console.log('[PAYMENT SUBSCRIPTION] 🎁 Updating with referral reward:', referralReward.id, referralReward.discount_percent + '%');
+            
+            const { data: updateData, error: updateError } = await supabase
               .from('payment_requests')
               .update({ 
                 referral_reward_id: referralReward.id,
                 note: 'Aplicado 25% desconto codigo de amigo (partilha)'
               })
-              .eq('id', requestId);
+              .eq('id', requestId)
+              .select();
+            
+            if (updateError) {
+              console.error('[PAYMENT SUBSCRIPTION] ❌ Error updating referral reward:', updateError);
+            } else {
+              console.log('[PAYMENT SUBSCRIPTION] ✅ Referral reward updated successfully:', updateData);
+            }
           } else {
             console.log('[PAYMENT SUBSCRIPTION] ℹ️ No referral reward to apply:', { hasReferralReward, referralReward });
           }
@@ -408,6 +417,15 @@ const Payment = () => {
         
         console.log('[PAYMENT MIX&MASTER] Saving payment method:', paymentMethod);
         
+        // Build note with referral reward info if applicable
+        let finalNote = notes || null;
+        if (hasReferralReward && referralReward) {
+          console.log('[PAYMENT MIX&MASTER] 🎁 Referral reward detected BEFORE insert:', referralReward.id, referralReward.discount_percent + '%');
+          finalNote = (notes || '') + '\n\nAplicado 25% desconto codigo de amigo (partilha)';
+        } else {
+          console.log('[PAYMENT MIX&MASTER] ℹ️ No referral reward detected:', { hasReferralReward, referralReward });
+        }
+        
         const { data: paymentData, error: paymentError } = await supabase
           .from('payment_requests')
           .insert({
@@ -418,7 +436,7 @@ const Payment = () => {
             type: loyaltyOffer ? 'loyalty_mixmaster' : plan180DayOffer ? 'plan_180day_mixmaster' : 'reservation',
             status: 'pending',
             transfer_link: transferLink || null,
-            note: notes || null,
+            note: finalNote,
             voucher_id: loyaltyOffer ? null : activeVoucherId, // No voucher for loyalty offers
             friend_code: hasFriendCodeDiscount() ? appliedFriendCode : null, // Save friend code (will be marked as used when admin approves)
             referral_reward_id: hasReferralReward && referralReward ? referralReward.id : null,
@@ -427,17 +445,13 @@ const Payment = () => {
           .select()
           .single();
 
-        // Update note if referral reward is applied
-        if (paymentData && hasReferralReward && referralReward) {
-          console.log('[PAYMENT MIX&MASTER] 🎁 Applying referral reward:', referralReward.id, referralReward.discount_percent + '%');
-          await supabase
-            .from('payment_requests')
-            .update({ 
-              note: (notes || '') + '\n\nAplicado 25% desconto codigo de amigo (partilha)'
-            })
-            .eq('id', paymentData.id);
-        } else {
-          console.log('[PAYMENT MIX&MASTER] ℹ️ No referral reward to apply:', { hasReferralReward, referralReward });
+        if (paymentData) {
+          console.log('[PAYMENT MIX&MASTER] ✅ Payment request created:', {
+            id: paymentData.id,
+            referral_reward_id: paymentData.referral_reward_id,
+            friend_code: paymentData.friend_code,
+            amount: paymentData.amount_eur
+          });
         }
 
         if (paymentError) {
@@ -633,23 +647,37 @@ const Payment = () => {
         p_payment_method: paymentMethod
       });
 
-      // Update payment request with payment method
+      // Log what we're sending
+      console.log('[PAYMENT BOOKING] Referral reward status BEFORE RPC:', {
+        hasReferralReward,
+        referralReward: referralReward ? { id: referralReward.id, discount: referralReward.discount_percent } : null
+      });
+      
       if (paymentId) {
-        console.log('[PAYMENT BOOKING] ✅ Payment request created with method:', paymentMethod);
-      }
-
-      // Update payment request with referral_reward_id if applicable
-      if (paymentId && hasReferralReward && referralReward) {
-        console.log('[PAYMENT BOOKING] 🎁 Applying referral reward:', referralReward.id, referralReward.discount_percent + '%');
-        await supabase
-          .from('payment_requests')
-          .update({ 
-            referral_reward_id: referralReward.id,
-            note: (notes || `${serviceTitle} - ${optionTitle}`) + '\n\nAplicado 25% desconto codigo de amigo (partilha)'
-          })
-          .eq('id', paymentId);
-      } else {
-        console.log('[PAYMENT BOOKING] ℹ️ No referral reward to apply:', { hasReferralReward, referralReward });
+        console.log('[PAYMENT BOOKING] ✅ Payment request created:', paymentId);
+        
+        // CRITICAL: Update payment request with referral_reward_id if applicable
+        // This must happen AFTER the RPC because request_payment doesn't support referral_reward_id param
+        if (hasReferralReward && referralReward) {
+          console.log('[PAYMENT BOOKING] 🎁 Updating with referral reward:', referralReward.id, referralReward.discount_percent + '%');
+          
+          const { data: updateData, error: updateError } = await supabase
+            .from('payment_requests')
+            .update({ 
+              referral_reward_id: referralReward.id,
+              note: (notes || `${serviceTitle} - ${optionTitle}`) + '\n\nAplicado 25% desconto codigo de amigo (partilha)'
+            })
+            .eq('id', paymentId)
+            .select();
+          
+          if (updateError) {
+            console.error('[PAYMENT BOOKING] ❌ Error updating referral reward:', updateError);
+          } else {
+            console.log('[PAYMENT BOOKING] ✅ Referral reward updated successfully:', updateData);
+          }
+        } else {
+          console.log('[PAYMENT BOOKING] ℹ️ No referral reward to apply:', { hasReferralReward, referralReward });
+        }
       }
       if (paymentError) {
         console.error('Payment error:', paymentError);

@@ -15,6 +15,25 @@ export const useFriendCode = () => {
     if (user) {
       loadMyFriendCode();
       loadAppliedFriendCode();
+      
+      // Subscribe to realtime changes in friend_code_uses to refresh when admin approves
+      const channel = supabase
+        .channel('friend_code_uses_changes')
+        .on('postgres_changes', {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'friend_code_uses',
+          filter: `used_by=eq.${user.id}`
+        }, (payload) => {
+          console.log('[FRIEND CODE] Realtime update detected:', payload);
+          // Reload applied friend code to check if it was used in payment
+          loadAppliedFriendCode();
+        })
+        .subscribe();
+      
+      return () => {
+        supabase.removeChannel(channel);
+      };
     }
   }, [user]);
 
