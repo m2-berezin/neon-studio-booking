@@ -11,6 +11,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { RealtimeSyncProvider } from '@/components/RealtimeSyncProvider';
+import { useFriendCode } from '@/hooks/useFriendCode';
+import { useReferralReward } from '@/hooks/useReferralReward';
 import { 
   Upload, 
   Link as LinkIcon, 
@@ -35,6 +37,8 @@ const MixMaster = () => {
   const navigate = useNavigate();
   const { user, subscription, subscriptionDiscountPercent } = useAuth();
   const { toast } = useToast();
+  const { hasFriendCodeDiscount } = useFriendCode();
+  const { hasReferralReward, referralReward } = useReferralReward();
   
   // Check if this is a loyalty offer or plan 180-day offer from URL
   const searchParams = new URLSearchParams(window.location.search);
@@ -90,6 +94,16 @@ const MixMaster = () => {
       finalPrice = basePrice * (1 - subscriptionDiscountPercent / 100);
     }
     
+    // Apply referral reward discount (25% for code sharing)
+    if (hasReferralReward && referralReward) {
+      finalPrice = finalPrice * (1 - referralReward.discount_percent / 100);
+    }
+    
+    // Apply friend code discount (25% for using a friend's code)
+    if (hasFriendCodeDiscount()) {
+      finalPrice = finalPrice * 0.75;
+    }
+    
     // Apply voucher discount
     if (selectedVoucher) {
       finalPrice = Math.max(0, finalPrice - selectedVoucher.amount_eur);
@@ -116,6 +130,21 @@ const MixMaster = () => {
   
   const getPlan180DayDiscount = () => {
     return isPlan180DayOffer ? 40 : 0;
+  };
+  
+  const getReferralRewardDiscount = () => {
+    if (!hasReferralReward || !referralReward || isLoyaltyOffer || isPlan180DayOffer) return 0;
+    const basePrice = 40;
+    const afterSubscription = hasSubscription ? basePrice * (1 - subscriptionDiscountPercent / 100) : basePrice;
+    return afterSubscription * (referralReward.discount_percent / 100);
+  };
+  
+  const getFriendCodeDiscount = () => {
+    if (!hasFriendCodeDiscount() || isLoyaltyOffer || isPlan180DayOffer) return 0;
+    const basePrice = 40;
+    const afterSubscription = hasSubscription ? basePrice * (1 - subscriptionDiscountPercent / 100) : basePrice;
+    const afterReferral = hasReferralReward && referralReward ? afterSubscription * (1 - referralReward.discount_percent / 100) : afterSubscription;
+    return afterReferral * 0.25;
   };
 
   const pricingOptions = [
@@ -430,10 +459,24 @@ const MixMaster = () => {
                   <span>40€</span>
                 </div>
                 
-                {getSubscriptionDiscount() > 0 && !isLoyaltyOffer && (
+                {getSubscriptionDiscount() > 0 && !isLoyaltyOffer && !isPlan180DayOffer && (
                   <div className="flex items-center justify-between text-sm text-green-600">
                     <span>Desconto Subscrição ({subscriptionDiscountPercent}%):</span>
                     <span>-{formatPrice(getSubscriptionDiscount())}</span>
+                  </div>
+                )}
+                
+                {getReferralRewardDiscount() > 0 && (
+                  <div className="flex items-center justify-between text-sm text-blue-600 font-medium">
+                    <span>🎉 Desconto Partilha de Código (25%):</span>
+                    <span>-{formatPrice(getReferralRewardDiscount())}</span>
+                  </div>
+                )}
+                
+                {getFriendCodeDiscount() > 0 && (
+                  <div className="flex items-center justify-between text-sm text-purple-600">
+                    <span>Código de Amigo (25%):</span>
+                    <span>-{formatPrice(getFriendCodeDiscount())}</span>
                   </div>
                 )}
                 
