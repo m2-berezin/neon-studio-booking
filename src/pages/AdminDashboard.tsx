@@ -751,7 +751,7 @@ const AdminDashboard = () => {
           <CardTitle className="text-lg md:text-xl">Ações Rápidas</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4 md:space-y-6">
-          <div className="grid grid-cols-2 gap-3 md:gap-4">
+          <div className="grid grid-cols-1 gap-3 md:gap-4 max-w-xs">
             <Button
               variant="outline"
               className="h-16 md:h-20 flex flex-col gap-1 md:gap-2 hover:bg-primary/10 p-2"
@@ -759,14 +759,6 @@ const AdminDashboard = () => {
             >
               <CreditCard className="h-5 w-5 md:h-6 md:w-6" />
               <span className="text-xs md:text-sm font-medium text-center leading-tight">Subscrições</span>
-            </Button>
-            <Button
-              variant="outline"
-              className="h-16 md:h-20 flex flex-col gap-1 md:gap-2 hover:bg-primary/10 p-2"
-              onClick={() => navigate('/admin/projects')}
-            >
-              <FolderOpen className="h-5 w-5 md:h-6 md:w-6" />
-              <span className="text-xs md:text-sm font-medium text-center leading-tight">Projetos Mix & Master</span>
             </Button>
           </div>
         </CardContent>
