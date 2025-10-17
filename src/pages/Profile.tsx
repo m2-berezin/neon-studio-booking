@@ -63,29 +63,6 @@ const Profile = () => {
     }
     setLoading(false);
   };
-  const toggleAdminMode = async () => {
-    if (!profile) return;
-    setLoading(true);
-    const newRole = profile.role === 'admin' ? 'client' : 'admin';
-    const {
-      error
-    } = await updateProfile({
-      role: newRole
-    });
-    if (error) {
-      toast({
-        title: 'Erro',
-        description: 'Falha ao atualizar o estado de administrador',
-        variant: 'destructive'
-      });
-    } else {
-      toast({
-        title: 'Sucesso',
-        description: `Função atualizada para ${newRole}`
-      });
-    }
-    setLoading(false);
-  };
   if (!user || !profile) {
     return <div className="flex items-center justify-center min-h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -151,18 +128,6 @@ const Profile = () => {
           </div>
         </div>
 
-        {/* Admin Toggle - Only visible for admin users */}
-        {isAdmin() && <div className="mt-4 pt-4 border-t border-border/20">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Shield className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium">Modo Admin</span>
-              </div>
-              <Button variant={profile.role === 'admin' ? "default" : "outline"} size="sm" onClick={toggleAdminMode} disabled={loading}>
-                {profile.role === 'admin' ? 'Desactivar' : 'Activar'}
-              </Button>
-            </div>
-          </div>}
       </div>
 
       {/* Menu Items */}
