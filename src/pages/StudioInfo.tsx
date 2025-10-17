@@ -11,7 +11,7 @@ const StudioInfo = () => {
   const navigate = useNavigate();
   const whatsappNumber = "+351934941263";
   const studioLocation = "Pinhal do General, Seixal";
-  const whatsappLink = `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}?text=Hi! I'd like to inquire about studio sessions.`;
+  const whatsappLink = `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}?text=Boas, estou com problemas na app, podes ajudar me?`;
   const houseRules = [{
     icon: <Clock className="h-5 w-5" />,
     title: "Pontualidade",
