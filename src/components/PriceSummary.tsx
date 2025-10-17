@@ -291,8 +291,8 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
           </div>
         )}
 
-        {/* Apply Friend Code Section - Only show if no code is applied AND friend code discount is not active */}
-        {!appliedFriendCode && !hasFriendCodeDiscount() && showFriendCode && (
+        {/* Apply Friend Code Section - Only show if no discounts are active */}
+        {!appliedFriendCode && !hasFriendCodeDiscount() && !hasReferralReward && showFriendCode && (
           <div className="border-t pt-4 space-y-2">
             <Label htmlFor="friend-code-input" className="text-sm font-medium">
               Tens um código de amigo?

@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
-import { DollarSign, CheckCircle, XCircle, Clock, Shield, Trash2 } from 'lucide-react';
+import { DollarSign, CheckCircle, XCircle, Clock, Shield, Trash2, Tag } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -92,9 +92,15 @@ const AdminPayments = () => {
         }
       }));
       
-      // Debug: Log payment methods
-      console.log('[ADMIN PAYMENTS] Loaded payment requests with methods:', 
-        mappedData.map(p => ({ id: p.id, payment_method: p.payment_method }))
+      // Debug: Log payment methods and referral rewards
+      console.log('[ADMIN PAYMENTS] Loaded payment requests:', 
+        mappedData.map(p => ({ 
+          id: p.id, 
+          payment_method: p.payment_method,
+          friend_code: p.friend_code,
+          referral_reward_id: p.referral_reward_id,
+          user: p.profiles.full_name
+        }))
       );
       
       setPaymentRequests(mappedData);
@@ -383,13 +389,15 @@ const AdminPayments = () => {
                          'Não especificado'}
                       </p>
                       {request.friend_code && (
-                        <p className="text-green-600 font-medium">
-                          <span className="font-semibold">✅ Código de Convite Usado:</span> {request.friend_code}
+                        <p className="text-green-600 font-medium flex items-center gap-1">
+                          <Tag className="w-4 h-4" />
+                          <span className="font-semibold">Código de Convite Usado:</span> {request.friend_code}
                         </p>
                       )}
                       {request.referral_reward_id && (
-                        <p className="text-purple-600 font-medium">
-                          <span className="font-semibold">🎁 Desconto Referral Reward Ativo:</span> 25% de desconto
+                        <p className="text-purple-600 font-medium flex items-center gap-1">
+                          <Tag className="w-4 h-4" />
+                          <span className="font-semibold">Reward Convite de Amigo:</span> 25% desconto (alguém usou o código deste cliente)
                         </p>
                       )}
                       <p className="text-muted-foreground">
