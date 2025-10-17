@@ -63,7 +63,17 @@ const AdminPayments = () => {
       const { data, error } = await supabase
         .from('payment_requests')
         .select(`
-          *,
+          id,
+          user_id,
+          amount_eur,
+          status,
+          created_at,
+          note,
+          reservation_id,
+          payment_method,
+          type,
+          friend_code,
+          referral_reward_id,
           reservations (
             starts_at,
             ends_at,

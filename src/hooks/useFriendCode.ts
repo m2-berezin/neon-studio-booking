@@ -25,11 +25,21 @@ export const useFriendCode = () => {
           table: 'friend_code_uses',
           filter: `used_by=eq.${user.id}`
         }, (payload) => {
-          console.log('[FRIEND CODE] Realtime update detected:', payload);
+          console.log('[FRIEND CODE REALTIME] Update detected:', payload);
+          
+          // Check if the update marked the code as used in payment
+          if (payload.new && (payload.new as any).used_in_payment === true) {
+            console.log('[FRIEND CODE REALTIME] Code marked as used in payment, clearing from UI...');
+            // Immediately clear the applied code
+            setAppliedFriendCode(null);
+          }
+          
           // Reload applied friend code to check if it was used in payment
           loadAppliedFriendCode();
         })
-        .subscribe();
+        .subscribe((status) => {
+          console.log('[FRIEND CODE REALTIME] Subscription status:', status);
+        });
       
       return () => {
         supabase.removeChannel(channel);
