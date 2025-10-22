@@ -32,6 +32,7 @@ interface PaymentRequest {
   type?: string;
   friend_code?: string;
   referral_reward_id?: string;
+  points_used?: number;
   profiles: {
     full_name: string;
   };
@@ -74,6 +75,7 @@ const AdminPayments = () => {
           type,
           friend_code,
           referral_reward_id,
+          points_used,
           reservations (
             starts_at,
             ends_at,
@@ -408,6 +410,12 @@ const AdminPayments = () => {
                         <p className="text-purple-600 font-medium flex items-center gap-1">
                           <Tag className="w-4 h-4" />
                           <span className="font-semibold">Reward Convite de Amigo:</span> 25% desconto (alguém usou o código deste cliente)
+                        </p>
+                      )}
+                      {request.points_used && request.points_used > 0 && (
+                        <p className="text-blue-600 font-medium flex items-center gap-1">
+                          💎
+                          <span className="font-semibold">Pontos Usados:</span> {request.points_used} GW ({(request.points_used / 250).toFixed(2)}€ desconto)
                         </p>
                       )}
                       <p className="text-muted-foreground">

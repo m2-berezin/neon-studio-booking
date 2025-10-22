@@ -1445,6 +1445,17 @@ export type Database = {
             }
             Returns: string
           }
+        | {
+            Args: {
+              p_amount_eur: number
+              p_friend_code?: string
+              p_payment_method?: string
+              p_plan_type: string
+              p_points_used?: number
+              p_user_id: string
+            }
+            Returns: string
+          }
       delete_mixmaster_project: {
         Args: { p_payment_id: string }
         Returns: boolean

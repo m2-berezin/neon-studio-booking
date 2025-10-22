@@ -272,7 +272,8 @@ const Payment = () => {
           p_plan_type: planType,
           p_amount_eur: finalPrice,
           p_friend_code: null,
-          p_payment_method: paymentMethod
+          p_payment_method: paymentMethod,
+          p_points_used: pointsUsedParam
         });
 
         // Update payment request with referral_reward_id if applicable
