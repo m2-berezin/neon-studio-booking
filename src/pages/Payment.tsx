@@ -630,6 +630,7 @@ const Payment = () => {
         referralRewardDiscount,
         voucherDiscount,
         pointsDiscount,
+        pointsUsed: pointsUsedParam,
         finalPrice
       });
       
@@ -646,7 +647,8 @@ const Payment = () => {
         p_note: notes || `${serviceTitle} - ${optionTitle}`,
         p_voucher_id: activeVoucherId,
         p_friend_code: null,
-        p_payment_method: paymentMethod
+        p_payment_method: paymentMethod,
+        p_points_used: pointsUsedParam
       });
 
       // Log what we're sending
@@ -657,14 +659,6 @@ const Payment = () => {
       
       if (paymentId) {
         console.log('[PAYMENT BOOKING] ✅ Payment request created:', paymentId);
-        
-        // Update the payment request with points_used if applicable
-        if (pointsUsedParam > 0) {
-          await supabase
-            .from('payment_requests')
-            .update({ points_used: pointsUsedParam })
-            .eq('id', paymentId);
-        }
         
         // CRITICAL: Update payment request with referral_reward_id if applicable
         // This must happen AFTER the RPC because request_payment doesn't support referral_reward_id param

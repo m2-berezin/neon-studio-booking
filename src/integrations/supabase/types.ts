@@ -1769,6 +1769,20 @@ export type Database = {
             Args: {
               p_amount_eur: number
               p_currency?: string
+              p_friend_code?: string
+              p_note?: string
+              p_payment_method?: string
+              p_points_used?: number
+              p_proof_url?: string
+              p_reservation_id: string
+              p_voucher_id?: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              p_amount_eur: number
+              p_currency?: string
               p_note?: string
               p_proof_url?: string
               p_reservation_id: string

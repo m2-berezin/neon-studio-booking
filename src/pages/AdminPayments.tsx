@@ -111,6 +111,7 @@ const AdminPayments = () => {
           payment_method: p.payment_method,
           friend_code: p.friend_code,
           referral_reward_id: p.referral_reward_id,
+          points_used: p.points_used,
           user: p.profiles.full_name
         }))
       );
