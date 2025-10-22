@@ -5,7 +5,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Coins } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePoints } from '@/hooks/usePoints';
@@ -303,11 +302,11 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
           <div className="border-t pt-4 space-y-3">
             <div className="flex items-center justify-between">
               <Label className="text-sm font-medium flex items-center gap-2">
-                <Coins className="h-4 w-4 text-primary" />
+                <span>💎</span>
                 Usar Pontos
               </Label>
               <span className="text-sm text-muted-foreground">
-                Disponível: {pointsBalance} pontos ({formatPrice(getPointsInEuros(pointsBalance))})
+                Disponível: 💎 {pointsBalance} pontos ({formatPrice(getPointsInEuros(pointsBalance))})
               </span>
             </div>
             <div className="flex gap-2">
@@ -334,7 +333,7 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
             </div>
             {pointsToUse > 0 && (
               <p className="text-xs text-muted-foreground">
-                A usar {pointsToUse} pontos = {formatPrice(getPointsInEuros(pointsToUse))} de desconto
+                A usar 💎 {pointsToUse} pontos = {formatPrice(getPointsInEuros(pointsToUse))} de desconto
               </p>
             )}
           </div>
@@ -400,7 +399,7 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
             )}
             {pointsDiscount > 0 && (
               <div className="flex justify-between text-sm text-primary font-medium">
-                <span>Desconto Pontos ({pointsToUse} pontos)</span>
+                <span>💎 Desconto Pontos ({pointsToUse} pontos)</span>
                 <span>-{formatPrice(pointsDiscount)}</span>
               </div>
             )}
