@@ -6,7 +6,7 @@ import { Home, User, LogOut, Settings, Folder, Award, MessageSquare } from 'luci
 import { NotificationBell } from '@/components/NotificationBell';
 import { Logo } from '@/components/Logo';
 import { NotificationHandler } from '@/components/NotificationHandler';
-import { CoinsDisplay } from '@/components/CoinsDisplay';
+import { PointsDisplay } from '@/components/PointsDisplay';
 
 const Layout = ({ children }: { children: ReactNode }) => {
   const location = useLocation();
@@ -89,10 +89,10 @@ const Layout = ({ children }: { children: ReactNode }) => {
           </div>
         </div>
         
-        {/* Coins and Notifications - Right */}
+        {/* Points and Notifications - Right */}
         {user && (
           <div className="flex items-center gap-2">
-            {!isAdmin() && <CoinsDisplay />}
+            {!isAdmin() && <PointsDisplay />}
             <NotificationBell />
           </div>
         )}

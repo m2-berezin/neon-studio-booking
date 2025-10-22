@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
-interface CoinTransaction {
+interface PointTransaction {
   id: string;
   amount: number;
   transaction_type: string;
@@ -11,25 +11,25 @@ interface CoinTransaction {
   created_at: string;
 }
 
-export const useCoins = () => {
+export const usePoints = () => {
   const { user, profile } = useAuth();
-  const [coinsBalance, setCoinsBalance] = useState<number>(0);
+  const [pointsBalance, setPointsBalance] = useState<number>(0);
   const [loading, setLoading] = useState(true);
-  const [transactions, setTransactions] = useState<CoinTransaction[]>([]);
+  const [transactions, setTransactions] = useState<PointTransaction[]>([]);
 
   useEffect(() => {
     if (!user) {
-      setCoinsBalance(0);
+      setPointsBalance(0);
       setTransactions([]);
       setLoading(false);
       return;
     }
 
-    loadCoins();
-    subscribeToCoins();
+    loadPoints();
+    subscribeToPoints();
   }, [user]);
 
-  const loadCoins = async () => {
+  const loadPoints = async () => {
     if (!user) return;
 
     try {
@@ -38,17 +38,17 @@ export const useCoins = () => {
       // Get current balance from profile
       const { data: profileData } = await supabase
         .from('profiles')
-        .select('coins_balance')
+        .select('points_balance')
         .eq('id', user.id)
         .single();
 
       if (profileData) {
-        setCoinsBalance(profileData.coins_balance || 0);
+        setPointsBalance(profileData.points_balance || 0);
       }
 
       // Get recent transactions
       const { data: txData } = await supabase
-        .from('coin_transactions')
+        .from('point_transactions')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
@@ -58,27 +58,27 @@ export const useCoins = () => {
         setTransactions(txData);
       }
     } catch (error) {
-      console.error('Error loading coins:', error);
+      console.error('Error loading points:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const subscribeToCoins = () => {
+  const subscribeToPoints = () => {
     if (!user) return;
 
     const channel = supabase
-      .channel('coin-changes')
+      .channel('point-changes')
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
-          table: 'coin_transactions',
+          table: 'point_transactions',
           filter: `user_id=eq.${user.id}`,
         },
         () => {
-          loadCoins();
+          loadPoints();
         }
       )
       .on(
@@ -90,8 +90,8 @@ export const useCoins = () => {
           filter: `id=eq.${user.id}`,
         },
         (payload) => {
-          if (payload.new && 'coins_balance' in payload.new) {
-            setCoinsBalance(payload.new.coins_balance || 0);
+          if (payload.new && 'points_balance' in payload.new) {
+            setPointsBalance(payload.new.points_balance || 0);
           }
         }
       )
@@ -102,7 +102,7 @@ export const useCoins = () => {
     };
   };
 
-  const getAvailableCoinsBreakdown = () => {
+  const getAvailablePointsBreakdown = () => {
     const now = new Date();
     const availableBatches: { amount: number; expiresAt: Date | null }[] = [];
     
@@ -122,21 +122,21 @@ export const useCoins = () => {
     return availableBatches;
   };
 
-  const getCoinsInEuros = (coins: number) => {
-    return coins / 250; // 2500 GW = 10€, so 250 GW = 1€
+  const getPointsInEuros = (points: number) => {
+    return points / 250; // 2500 points = 10€, so 250 points = 1€
   };
 
-  const getEurosInCoins = (euros: number) => {
-    return euros * 250; // 1€ = 250 GW
+  const getEurosInPoints = (euros: number) => {
+    return euros * 250; // 1€ = 250 points
   };
 
   return {
-    coinsBalance,
+    pointsBalance,
     loading,
     transactions,
-    refreshCoins: loadCoins,
-    getAvailableCoinsBreakdown,
-    getCoinsInEuros,
-    getEurosInCoins,
+    refreshPoints: loadPoints,
+    getAvailablePointsBreakdown,
+    getPointsInEuros,
+    getEurosInPoints,
   };
 };

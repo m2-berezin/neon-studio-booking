@@ -161,73 +161,6 @@ export type Database = {
           },
         ]
       }
-      coin_transactions: {
-        Row: {
-          amount: number
-          created_at: string | null
-          expires_at: string | null
-          friend_code_use_id: string | null
-          id: string
-          is_expired: boolean | null
-          notes: string | null
-          payment_request_id: string | null
-          referral_reward_id: string | null
-          transaction_type: string
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          amount: number
-          created_at?: string | null
-          expires_at?: string | null
-          friend_code_use_id?: string | null
-          id?: string
-          is_expired?: boolean | null
-          notes?: string | null
-          payment_request_id?: string | null
-          referral_reward_id?: string | null
-          transaction_type: string
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          amount?: number
-          created_at?: string | null
-          expires_at?: string | null
-          friend_code_use_id?: string | null
-          id?: string
-          is_expired?: boolean | null
-          notes?: string | null
-          payment_request_id?: string | null
-          referral_reward_id?: string | null
-          transaction_type?: string
-          updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "coin_transactions_friend_code_use_id_fkey"
-            columns: ["friend_code_use_id"]
-            isOneToOne: false
-            referencedRelation: "friend_code_uses"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "coin_transactions_payment_request_id_fkey"
-            columns: ["payment_request_id"]
-            isOneToOne: false
-            referencedRelation: "payment_requests"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "coin_transactions_referral_reward_id_fkey"
-            columns: ["referral_reward_id"]
-            isOneToOne: false
-            referencedRelation: "referral_rewards"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       emails_log: {
         Row: {
           body: string
@@ -492,7 +425,6 @@ export type Database = {
         Row: {
           amount_eur: number
           client_id: string | null
-          coins_used: number | null
           created_at: string
           currency: string
           decided_at: string | null
@@ -504,6 +436,7 @@ export type Database = {
           note: string | null
           payment_method: string | null
           plan_type: string | null
+          points_used: number | null
           proof_url: string | null
           referral_reward_id: string | null
           reservation_id: string | null
@@ -518,7 +451,6 @@ export type Database = {
         Insert: {
           amount_eur: number
           client_id?: string | null
-          coins_used?: number | null
           created_at?: string
           currency?: string
           decided_at?: string | null
@@ -530,6 +462,7 @@ export type Database = {
           note?: string | null
           payment_method?: string | null
           plan_type?: string | null
+          points_used?: number | null
           proof_url?: string | null
           referral_reward_id?: string | null
           reservation_id?: string | null
@@ -544,7 +477,6 @@ export type Database = {
         Update: {
           amount_eur?: number
           client_id?: string | null
-          coins_used?: number | null
           created_at?: string
           currency?: string
           decided_at?: string | null
@@ -556,6 +488,7 @@ export type Database = {
           note?: string | null
           payment_method?: string | null
           plan_type?: string | null
+          points_used?: number | null
           proof_url?: string | null
           referral_reward_id?: string | null
           reservation_id?: string | null
@@ -754,40 +687,107 @@ export type Database = {
           },
         ]
       }
+      point_transactions: {
+        Row: {
+          amount: number
+          created_at: string | null
+          expires_at: string | null
+          friend_code_use_id: string | null
+          id: string
+          is_expired: boolean | null
+          notes: string | null
+          payment_request_id: string | null
+          referral_reward_id: string | null
+          transaction_type: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          expires_at?: string | null
+          friend_code_use_id?: string | null
+          id?: string
+          is_expired?: boolean | null
+          notes?: string | null
+          payment_request_id?: string | null
+          referral_reward_id?: string | null
+          transaction_type: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          expires_at?: string | null
+          friend_code_use_id?: string | null
+          id?: string
+          is_expired?: boolean | null
+          notes?: string | null
+          payment_request_id?: string | null
+          referral_reward_id?: string | null
+          transaction_type?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coin_transactions_friend_code_use_id_fkey"
+            columns: ["friend_code_use_id"]
+            isOneToOne: false
+            referencedRelation: "friend_code_uses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coin_transactions_payment_request_id_fkey"
+            columns: ["payment_request_id"]
+            isOneToOne: false
+            referencedRelation: "payment_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coin_transactions_referral_reward_id_fkey"
+            columns: ["referral_reward_id"]
+            isOneToOne: false
+            referencedRelation: "referral_rewards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
-          coins_balance: number | null
           created_at: string
           full_name: string | null
           id: string
           last_voucher_at: string | null
           penalty_until: string | null
           phone: string | null
+          points_balance: number | null
           role: string
           updated_at: string
         }
         Insert: {
           avatar_url?: string | null
-          coins_balance?: number | null
           created_at?: string
           full_name?: string | null
           id: string
           last_voucher_at?: string | null
           penalty_until?: string | null
           phone?: string | null
+          points_balance?: number | null
           role?: string
           updated_at?: string
         }
         Update: {
           avatar_url?: string | null
-          coins_balance?: number | null
           created_at?: string
           full_name?: string | null
           id?: string
           last_voucher_at?: string | null
           penalty_until?: string | null
           phone?: string | null
+          points_balance?: number | null
           role?: string
           updated_at?: string
         }
@@ -872,37 +872,37 @@ export type Database = {
       }
       referral_rewards: {
         Row: {
-          coins_amount: number | null
           created_at: string | null
           created_from_friend_code_use_id: string | null
           discount_percent: number
           expires_at: string
           id: string
           is_used: boolean | null
+          points_amount: number | null
           updated_at: string | null
           used_in_payment_request_id: string | null
           user_id: string
         }
         Insert: {
-          coins_amount?: number | null
           created_at?: string | null
           created_from_friend_code_use_id?: string | null
           discount_percent?: number
           expires_at: string
           id?: string
           is_used?: boolean | null
+          points_amount?: number | null
           updated_at?: string | null
           used_in_payment_request_id?: string | null
           user_id: string
         }
         Update: {
-          coins_amount?: number | null
           created_at?: string | null
           created_from_friend_code_use_id?: string | null
           discount_percent?: number
           expires_at?: string
           id?: string
           is_used?: boolean | null
+          points_amount?: number | null
           updated_at?: string | null
           used_in_payment_request_id?: string | null
           user_id?: string
@@ -1334,7 +1334,7 @@ export type Database = {
         Returns: boolean
       }
       admin_revert_day_off: { Args: { p_id: string }; Returns: boolean }
-      apply_friend_code_with_coins: {
+      apply_friend_code_with_points: {
         Args: { p_code: string; p_user_id: string }
         Returns: Json
       }
@@ -1342,7 +1342,7 @@ export type Database = {
         Args: { p_offer_id: string; p_starts_at?: string; p_user_id: string }
         Returns: string
       }
-      award_coins: {
+      award_points: {
         Args: {
           p_amount: number
           p_expires_at?: string
@@ -1474,7 +1474,7 @@ export type Database = {
           plan_type: string
         }[]
       }
-      get_available_coins: { Args: { p_user_id: string }; Returns: number }
+      get_available_points: { Args: { p_user_id: string }; Returns: number }
       get_booking_min_datetime: { Args: never; Returns: string }
       get_client_mixmaster_projects: {
         Args: { p_user_id: string }
@@ -1793,7 +1793,7 @@ export type Database = {
               error: true
             } & "Could not choose the best candidate function between: public.urlencode(string => bytea), public.urlencode(string => varchar). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
           }
-      use_coins: {
+      use_points: {
         Args: {
           p_amount: number
           p_payment_request_id: string

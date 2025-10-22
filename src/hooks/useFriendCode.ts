@@ -122,8 +122,8 @@ export const useFriendCode = () => {
     try {
       setLoading(true);
 
-      // Call new RPC function that handles coins
-      const { data, error } = await supabase.rpc('apply_friend_code_with_coins', {
+      // Call new RPC function that handles points
+      const { data, error } = await supabase.rpc('apply_friend_code_with_points', {
         p_user_id: user.id,
         p_code: code.trim().toUpperCase(),
       }) as { data: any; error: any };
@@ -138,7 +138,7 @@ export const useFriendCode = () => {
         return false;
       }
 
-      const result = data as { success: boolean; error?: string; coins_awarded?: number; expires_in_days?: number };
+      const result = data as { success: boolean; error?: string; points_awarded?: number; expires_in_days?: number };
 
       if (!result.success) {
         toast({
@@ -150,8 +150,8 @@ export const useFriendCode = () => {
       }
 
       toast({
-        title: `Ganhaste ${result.coins_awarded || 2500} GW!`,
-        description: `Código aplicado! Tens ${result.expires_in_days || 30} dias para usar as moedas (10€ de desconto).`,
+        title: `Ganhaste ${result.points_awarded || 2500} Pontos!`,
+        description: `Código aplicado! Tens ${result.expires_in_days || 30} dias para usar os pontos (10€ de desconto).`,
       });
 
       // Reload applied code
