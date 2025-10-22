@@ -113,14 +113,73 @@ const Auth = () => {
     const { error } = await signIn(email, password);
     
     if (error) {
-      toast({
-        title: 'Erro de Início de Sessão',
-        description: error.message,
-        variant: 'destructive',
-      });
+      // Check if it's an email not confirmed error
+      if (error.message.includes('Email not confirmed') || error.message.includes('not confirmed')) {
+        toast({
+          title: 'Email não confirmado',
+          description: 'Por favor, verifica o teu email e clica no link de confirmação. Se não recebeste o email, clica em "Reenviar Email" abaixo.',
+          variant: 'destructive',
+          duration: 8000,
+        });
+      } else {
+        toast({
+          title: 'Erro de Início de Sessão',
+          description: error.message,
+          variant: 'destructive',
+        });
+      }
     } else {
       navigate('/');
     }
+    setLoading(false);
+  };
+
+  const handleResendConfirmation = async () => {
+    if (!email) {
+      toast({
+        title: 'Email necessário',
+        description: 'Por favor, introduz o teu email primeiro.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const emailError = validateField(emailSchema, email, 'email');
+    if (emailError) {
+      toast({
+        title: 'Email inválido',
+        description: emailError,
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setLoading(true);
+    
+    try {
+      const { error } = await signInWithMagicLink(email);
+      
+      if (error) {
+        toast({
+          title: 'Erro',
+          description: error.message,
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'Email enviado!',
+          description: 'Verifica a tua caixa de entrada e clica no link para confirmar o email.',
+          duration: 8000,
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível reenviar o email. Tenta novamente.',
+        variant: 'destructive',
+      });
+    }
+    
     setLoading(false);
   };
 
@@ -264,6 +323,18 @@ const Auth = () => {
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? 'A iniciar sessão...' : 'Iniciar Sessão'}
               </Button>
+              
+              <div className="mt-4 text-center">
+                <Button 
+                  type="button" 
+                  variant="link" 
+                  className="text-sm text-muted-foreground hover:text-primary"
+                  onClick={handleResendConfirmation}
+                  disabled={loading}
+                >
+                  Não recebeste o email de confirmação? Reenviar
+                </Button>
+              </div>
             </form>
           </TabsContent>
           
