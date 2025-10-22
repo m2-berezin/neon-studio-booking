@@ -195,7 +195,7 @@ const AdminBookings = () => {
       Hora_Início: format(new Date(booking.starts_at), 'HH:mm'),
       Hora_Fim: format(new Date(booking.ends_at), 'HH:mm'),
       Status: booking.status,
-      Preço: `€${booking.price_eur_snapshot}`,
+      Preço: formatPrice(booking.price_eur_snapshot),
       Data_Reserva: format(new Date(booking.created_at), 'dd/MM/yyyy HH:mm'),
     }));
 

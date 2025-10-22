@@ -405,7 +405,7 @@ const AdminPayments = () => {
                         <p className="text-blue-600 font-medium flex items-center gap-1 ml-4">
                           💎
                           <span className="font-semibold">{request.points_used} 💎 utilizados</span>
-                          <span className="text-sm">({(request.points_used / 250).toFixed(2)}€ desconto)</span>
+                          <span className="text-sm">({formatPrice(request.points_used / 250)} desconto)</span>
                         </p>
                       )}
                       {request.friend_code && (

@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBeats } from '@/hooks/useBeats';
+import { formatPrice } from '@/lib/utils';
 
 const Beats = () => {
   const { user } = useAuth();
@@ -71,7 +72,7 @@ const Beats = () => {
             <CardDescription className="text-lg">Beats personalizados premium criados exclusivamente para ti</CardDescription>
             
             <div className="pt-6">
-              <span className="text-5xl font-bold text-primary">{beatPackage.price}€</span>
+              <span className="text-5xl font-bold text-primary">{formatPrice(beatPackage.price)}</span>
             </div>
           </CardHeader>
           

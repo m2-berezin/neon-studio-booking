@@ -307,8 +307,8 @@ const MixMaster = () => {
                 
                 <div className="space-y-2">
                   <div className="space-y-1">
-                    <div className="text-base font-medium text-muted-foreground">40€ sem subscrição</div>
-                    <div className="text-2xl font-bold text-primary">34€ com subscrição</div>
+                    <div className="text-base font-medium text-muted-foreground">{formatPrice(40)} sem subscrição</div>
+                    <div className="text-2xl font-bold text-primary">{formatPrice(34)} com subscrição</div>
                   </div>
                   {option.hasSubscription && (
                     <Badge variant="secondary" className="text-xs">

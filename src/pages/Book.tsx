@@ -149,7 +149,7 @@ const Book = () => {
             title: isPremium ? 'Oferta 2h Captação plano PREMIUM+ ativada' : 'Oferta aplicada',
             description: isPremium 
               ? 'Captação 2h PREMIUM+'
-              : `3h totais (2h pagas + 1h grátis) por €${data.price_eur_snapshot}`,
+              : `3h totais (2h pagas + 1h grátis) por ${formatPrice(data.price_eur_snapshot)}`,
           });
         }
       }
@@ -690,10 +690,10 @@ const Book = () => {
                               <SelectValue placeholder="Selecione as horas" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="2">2 horas - 20€</SelectItem>
-                              <SelectItem value="3">3 horas - 30€</SelectItem>
-                              <SelectItem value="4">4 horas - 40€</SelectItem>
-                              <SelectItem value="5">5 horas - 50€</SelectItem>
+                              <SelectItem value="2">2 horas - {formatPrice(20)}</SelectItem>
+                              <SelectItem value="3">3 horas - {formatPrice(30)}</SelectItem>
+                              <SelectItem value="4">4 horas - {formatPrice(40)}</SelectItem>
+                              <SelectItem value="5">5 horas - {formatPrice(50)}</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
@@ -807,7 +807,7 @@ const Book = () => {
               <p className="text-xs text-muted-foreground mt-2">
                 {isPremiumOffer 
                   ? 'Captação 2h PREMIUM+'
-                  : `Oferta: 3h totais (2h pagas + 1h grátis) por €${reservationFromOffer.price_eur_snapshot}`
+                  : `Oferta: 3h totais (2h pagas + 1h grátis) por ${formatPrice(reservationFromOffer.price_eur_snapshot)}`
                 }
               </p>
             )}

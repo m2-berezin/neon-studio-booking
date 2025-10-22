@@ -156,7 +156,7 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
       setAppliedReward(rewardCode.toUpperCase());
       toast({
         title: 'Recompensa Aplicada',
-        description: `${reward.description} - €${reward.discount.toFixed(2)} desconto`,
+        description: `${reward.description} - ${formatPrice(reward.discount)} desconto`,
       });
     } else {
       toast({

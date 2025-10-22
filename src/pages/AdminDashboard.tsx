@@ -632,7 +632,7 @@ const AdminDashboard = () => {
     },
     {
       title: 'Receita Mensal',
-      value: `€${stats.monthlyRevenue.toFixed(2)}`,
+      value: formatPrice(stats.monthlyRevenue),
       icon: TrendingUp,
       color: 'text-purple-500',
       bgColor: 'bg-purple-500/10',
