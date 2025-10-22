@@ -8,7 +8,6 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePoints } from '@/hooks/usePoints';
-import { useReferralReward } from '@/hooks/useReferralReward';
 import { supabase } from '@/integrations/supabase/client';
 import { formatPrice } from '@/lib/utils';
 
@@ -63,7 +62,6 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
   const { user, subscription, subscriptionDiscountPercent } = useAuth();
   const { toast } = useToast();
   const { pointsBalance, getPointsInEuros } = usePoints();
-  const { referralReward, hasReferralReward, getDaysLeft } = useReferralReward();
   
   const [rewardCode, setRewardCode] = useState('');
   const [voucherCode, setVoucherCode] = useState('');
@@ -176,12 +174,6 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
     // Premium offers don't stack with other discounts
     if (isPremiumOffer) return 0;
     
-    // Referral reward takes highest priority (earned by others using your code)
-    if (hasReferralReward && referralReward) {
-      console.log('[PRICE SUMMARY] Applying referral reward discount:', referralReward.discount_percent);
-      return subtotal * (referralReward.discount_percent / 100);
-    }
-    
     if (!appliedReward) return 0;
     
     const rewardDiscounts: Record<string, number> = {
@@ -276,23 +268,6 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
             <div className="flex justify-between text-sm text-green-600">
               <span>Desconto de Subscrição ({subscriptionDiscountPercent}% - Plano {subscription?.plan_type})</span>
               <span>-{formatPrice(subscriptionDiscount)}</span>
-            </div>
-          </div>
-        )}
-
-        {/* Referral Reward Discount Display (earned from others using your code) */}
-        {hasReferralReward && referralReward && (
-          <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 mb-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label className="text-sm font-medium text-purple-800">
-                  🎉 Desconto de {referralReward.discount_percent}% ativo! (Recompensa de Convite)
-                </Label>
-                <p className="text-xs text-purple-700 mt-1">
-                  Um amigo usou o teu código! Este desconto expira em {getDaysLeft()} dias.
-                </p>
-              </div>
-              <span className="text-purple-600 font-bold">-{formatPrice(rewardDiscount)}</span>
             </div>
           </div>
         )}
