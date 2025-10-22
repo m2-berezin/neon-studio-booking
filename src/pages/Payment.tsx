@@ -8,7 +8,6 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useMessaging } from '@/hooks/useMessaging';
-import { useFriendCode } from '@/hooks/useFriendCode';
 import { useReferralReward } from '@/hooks/useReferralReward';
 import { ArrowLeft, CheckCircle, Copy, Smartphone, Building2, Tag } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -26,14 +25,12 @@ const Payment = () => {
     user, subscription: userSubscription, subscriptionDiscountPercent: authSubscriptionDiscountPercent
   } = useAuth();
   const { sendMessage, ADMIN_ID } = useMessaging();
-  const { appliedFriendCode, hasFriendCodeDiscount } = useFriendCode();
   const { referralReward, hasReferralReward } = useReferralReward();
   const [loading, setLoading] = useState(false);
   const [voucherDiscount, setVoucherDiscount] = useState(0);
   const [hasVoucher, setHasVoucher] = useState(false);
   const [subscriptionDiscount, setSubscriptionDiscount] = useState(0);
   const [subscriptionDiscountPercent, setSubscriptionDiscountPercent] = useState(0);
-  const [friendCodeDiscount, setFriendCodeDiscount] = useState(0);
   const [referralRewardDiscount, setReferralRewardDiscount] = useState(0);
   const [activeVoucherId, setActiveVoucherId] = useState<string | null>(null);
   const [isPremiumOffer, setIsPremiumOffer] = useState(false);
@@ -121,7 +118,6 @@ const Payment = () => {
             if (offerData && offerData.price_eur === 0) {
               setIsPremiumOffer(true);
               setPremiumOfferDiscount(basePrice);
-              setFriendCodeDiscount(0);
               setSubscriptionDiscount(0);
               setSubscriptionDiscountPercent(0);
               setVoucherDiscount(0);
@@ -132,20 +128,11 @@ const Payment = () => {
         
         // If loyalty offer or plan 180-day offer, skip all discounts
         if (loyaltyOffer || plan180DayOffer) {
-          setFriendCodeDiscount(0);
           setSubscriptionDiscount(0);
           setSubscriptionDiscountPercent(0);
           setVoucherDiscount(0);
           setIsPlan180DayOffer(plan180DayOffer);
           return;
-        }
-        
-        // Calculate friend code discount (25%)
-        if (hasFriendCodeDiscount()) {
-          const friendDiscount = basePrice * 0.25;
-          setFriendCodeDiscount(friendDiscount);
-        } else {
-          setFriendCodeDiscount(0);
         }
         
         // Calculate referral reward discount (25% for sharing code)
@@ -194,7 +181,7 @@ const Payment = () => {
     };
     
     loadDiscounts();
-  }, [user, price, service, hasFriendCodeDiscount, hasReferralReward, loyaltyOffer, plan180DayOffer, userSubscription, authSubscriptionDiscountPercent, voucherId, existingReservationId]);
+  }, [user, price, service, hasReferralReward, loyaltyOffer, plan180DayOffer, userSubscription, authSubscriptionDiscountPercent, voucherId, existingReservationId]);
   
   useEffect(() => {
     // For subscriptions, we don't need 'option', just 'plan'
@@ -273,7 +260,7 @@ const Payment = () => {
           p_user_id: user.id,
           p_plan_type: planType,
           p_amount_eur: finalPrice,
-          p_friend_code: appliedFriendCode || null,
+          p_friend_code: null,
           p_payment_method: paymentMethod
         });
 
@@ -400,7 +387,7 @@ const Payment = () => {
         } else {
           const priceAfterSubscription = parseFloat(price) - subscriptionDiscount;
           const priceAfterReferralReward = priceAfterSubscription - referralRewardDiscount;
-          const priceAfterRewardOrVoucher = priceAfterReferralReward - Math.max(friendCodeDiscount, voucherDiscount);
+          const priceAfterRewardOrVoucher = priceAfterReferralReward - voucherDiscount;
           finalPrice = Math.max(0, priceAfterRewardOrVoucher);
         }
         
@@ -408,7 +395,6 @@ const Payment = () => {
           basePrice: parseFloat(price),
           subscriptionDiscount,
           referralRewardDiscount,
-          friendCodeDiscount,
           voucherDiscount,
           loyaltyOffer,
           plan180DayOffer: isPlan180DayOffer,
@@ -438,7 +424,7 @@ const Payment = () => {
             transfer_link: transferLink || null,
             note: finalNote,
             voucher_id: loyaltyOffer ? null : activeVoucherId, // No voucher for loyalty offers
-            friend_code: hasFriendCodeDiscount() ? appliedFriendCode : null, // Save friend code (will be marked as used when admin approves)
+            friend_code: null,
             referral_reward_id: hasReferralReward && referralReward ? referralReward.id : null,
             payment_method: paymentMethod
           })
@@ -618,7 +604,7 @@ const Payment = () => {
       const priceAfterPremiumOffer = parseFloat(price) - premiumOfferDiscount;
       const priceAfterSubscription = priceAfterPremiumOffer - subscriptionDiscount;
       const priceAfterReferralReward = priceAfterSubscription - referralRewardDiscount;
-      const priceAfterRewardOrVoucher = priceAfterReferralReward - Math.max(friendCodeDiscount, voucherDiscount);
+      const priceAfterRewardOrVoucher = priceAfterReferralReward - voucherDiscount;
       const finalPrice = Math.max(0, priceAfterRewardOrVoucher);
       
       console.log('[PAYMENT] Final price calculation:', {
@@ -626,7 +612,6 @@ const Payment = () => {
         premiumOfferDiscount,
         subscriptionDiscount,
         referralRewardDiscount,
-        friendCodeDiscount,
         voucherDiscount,
         finalPrice
       });
@@ -643,7 +628,7 @@ const Payment = () => {
         p_currency: 'EUR',
         p_note: notes || `${serviceTitle} - ${optionTitle}`,
         p_voucher_id: activeVoucherId,
-        p_friend_code: appliedFriendCode || null,
+        p_friend_code: null,
         p_payment_method: paymentMethod
       });
 
@@ -793,7 +778,7 @@ const Payment = () => {
               <>
                 <Separator />
                 
-                {(isPremiumOffer || subscriptionDiscount > 0 || referralRewardDiscount > 0 || friendCodeDiscount > 0 || hasVoucher || loyaltyOffer || plan180DayOffer) && (
+                {(isPremiumOffer || subscriptionDiscount > 0 || referralRewardDiscount > 0 || hasVoucher || loyaltyOffer || plan180DayOffer) && (
                   <div className="flex items-center justify-between text-sm">
                     <span>Subtotal:</span>
                     <span>{formatPrice(parseFloat(price || '0'))}</span>
@@ -821,13 +806,6 @@ const Payment = () => {
                   </div>
                 )}
                 
-                {!isPremiumOffer && friendCodeDiscount > 0 && (
-                  <div className="flex items-center justify-between text-sm text-purple-600">
-                    <span>Código de Amigo ({appliedFriendCode}) - 25%:</span>
-                    <span>-{formatPrice(friendCodeDiscount)}</span>
-                  </div>
-                )}
-                
                 {hasVoucher && voucherDiscount > 0 && (
                   <div className="flex items-center justify-between text-sm text-green-600">
                     <span className="flex items-center gap-1">
@@ -852,14 +830,14 @@ const Payment = () => {
                   </div>
                 )}
                 
-                {(isPremiumOffer || subscriptionDiscount > 0 || referralRewardDiscount > 0 || friendCodeDiscount > 0 || hasVoucher || loyaltyOffer || plan180DayOffer) && <Separator />}
+                {(isPremiumOffer || subscriptionDiscount > 0 || referralRewardDiscount > 0 || hasVoucher || loyaltyOffer || plan180DayOffer) && <Separator />}
                 
                 <div className="flex items-center justify-between text-xl font-bold">
                   <span>Total:</span>
                 <span className="text-primary">
                   {isPremiumOffer || loyaltyOffer || isPlan180DayOffer
                     ? formatPrice(0) 
-                    : formatPrice(Math.max(0, parseFloat(price || '0') - premiumOfferDiscount - subscriptionDiscount - referralRewardDiscount - Math.max(friendCodeDiscount, voucherDiscount)))
+                    : formatPrice(Math.max(0, parseFloat(price || '0') - premiumOfferDiscount - subscriptionDiscount - referralRewardDiscount - voucherDiscount))
                   }
                 </span>
                 </div>

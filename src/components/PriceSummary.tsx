@@ -5,9 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Coins } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import { useFriendCode as useFriendCodeHook } from '@/hooks/useFriendCode';
+import { usePoints } from '@/hooks/usePoints';
 import { useReferralReward } from '@/hooks/useReferralReward';
 import { supabase } from '@/integrations/supabase/client';
 import { formatPrice } from '@/lib/utils';
@@ -52,15 +53,17 @@ interface PriceBreakdown {
   subscriptionDiscount: number;
   rewardDiscount: number;
   voucherDiscount: number;
+  pointsDiscount: number;
   finalPrice: number;
   appliedReward?: string;
   appliedVoucher?: Voucher;
+  pointsUsed?: number;
 }
 
 export const PriceSummary = ({ services, bookingDate, className, onPriceChange, showFriendCode = true, excludeVouchers = false, isPremiumOffer = false, premiumOfferOriginalPrice = 0 }: PriceSummaryProps) => {
   const { user, subscription, subscriptionDiscountPercent } = useAuth();
   const { toast } = useToast();
-  const { appliedFriendCode, hasFriendCodeDiscount, applyFriendCode, loading: friendCodeLoading } = useFriendCodeHook();
+  const { pointsBalance, getPointsInEuros } = usePoints();
   const { referralReward, hasReferralReward, getDaysLeft } = useReferralReward();
   
   const [rewardCode, setRewardCode] = useState('');
@@ -69,7 +72,7 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
   const [appliedVoucher, setAppliedVoucher] = useState<Voucher | null>(null);
   const [availableVouchers, setAvailableVouchers] = useState<Voucher[]>([]);
   const [loading, setLoading] = useState(false);
-  const [friendCodeInput, setFriendCodeInput] = useState('');
+  const [pointsToUse, setPointsToUse] = useState(0);
 
   // Load user's available vouchers
   const loadVouchers = async () => {
@@ -180,12 +183,6 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
       return subtotal * (referralReward.discount_percent / 100);
     }
     
-    // Friend code discount (using someone else's code)
-    if (hasFriendCodeDiscount() && appliedFriendCode) {
-      console.log('[PRICE SUMMARY] Applying friend code discount:', appliedFriendCode);
-      return subtotal * 0.25; // 25% discount for friend codes
-    }
-    
     if (!appliedReward) return 0;
     
     const rewardDiscounts: Record<string, number> = {
@@ -201,11 +198,15 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
   // Premium offers don't stack with vouchers
   const voucherDiscount = (excludeVouchers || isPremiumOffer) ? 0 : (appliedVoucher ? appliedVoucher.amount : 0);
   
-  // Calculate final price with PREMIUM+ discount
+  // Calculate points discount
+  const pointsDiscount = getPointsInEuros(pointsToUse);
+  
+  // Calculate final price with PREMIUM+ discount and points
   const priceAfterSubscription = subtotal - subscriptionDiscount;
   const priceAfterPremiumOffer = priceAfterSubscription - premiumOfferDiscount;
   const priceAfterRewardOrVoucher = priceAfterPremiumOffer - Math.max(rewardDiscount, voucherDiscount);
-  const finalPrice = Math.max(0, priceAfterRewardOrVoucher);
+  const priceAfterPoints = priceAfterRewardOrVoucher - pointsDiscount;
+  const finalPrice = Math.max(0, priceAfterPoints);
 
   // Notify parent component of price changes
   useEffect(() => {
@@ -214,13 +215,15 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
       subscriptionDiscount,
       rewardDiscount,
       voucherDiscount,
+      pointsDiscount,
       finalPrice,
       appliedReward: appliedReward || undefined,
       appliedVoucher: appliedVoucher || undefined,
+      pointsUsed: pointsToUse,
     };
     
     onPriceChange?.(finalPrice, breakdown);
-  }, [subtotal, subscriptionDiscount, rewardDiscount, voucherDiscount, finalPrice, appliedReward, appliedVoucher, onPriceChange]);
+  }, [subtotal, subscriptionDiscount, rewardDiscount, voucherDiscount, pointsDiscount, finalPrice, appliedReward, appliedVoucher, pointsToUse, onPriceChange]);
 
   const removeReward = () => {
     setAppliedReward('');
@@ -241,22 +244,9 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
     }
   };
 
-  const handleApplyFriendCode = async () => {
-    if (!friendCodeInput.trim()) {
-      toast({
-        title: 'Código Vazio',
-        description: 'Por favor insere um código de amigo',
-        variant: 'destructive',
-      });
-      return;
-    }
-    
-    const success = await applyFriendCode(friendCodeInput.toUpperCase());
-    if (success) {
-      setFriendCodeInput('');
-      setAppliedReward(''); // Clear any active reward
-      setAppliedVoucher(null); // Clear any active voucher
-    }
+  const handleUsePoints = (points: number) => {
+    const maxPointsToUse = Math.min(pointsBalance, Math.ceil((priceAfterSubscription - premiumOfferDiscount - Math.max(rewardDiscount, voucherDiscount)) / getPointsInEuros(1)));
+    setPointsToUse(Math.min(points, maxPointsToUse));
   };
 
   return (
@@ -291,33 +281,6 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
           </div>
         )}
 
-        {/* Apply Friend Code Section - Only show if no discounts are active */}
-        {!appliedFriendCode && !hasFriendCodeDiscount() && !hasReferralReward && showFriendCode && (
-          <div className="border-t pt-4 space-y-2">
-            <Label htmlFor="friend-code-input" className="text-sm font-medium">
-              Tens um código de amigo?
-            </Label>
-            <div className="flex gap-2">
-              <Input
-                id="friend-code-input"
-                placeholder="Insere o código aqui"
-                value={friendCodeInput}
-                onChange={(e) => setFriendCodeInput(e.target.value.toUpperCase().trim())}
-                className="font-mono text-center"
-                maxLength={100}
-              />
-              <Button
-                onClick={handleApplyFriendCode}
-                disabled={friendCodeLoading || !friendCodeInput.trim()}
-                size="sm"
-                variant="default"
-              >
-                {friendCodeLoading ? 'A aplicar...' : 'Aplicar'}
-              </Button>
-            </div>
-          </div>
-        )}
-
         {/* Referral Reward Discount Display (earned from others using your code) */}
         {hasReferralReward && referralReward && (
           <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 mb-3">
@@ -335,20 +298,45 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
           </div>
         )}
 
-        {/* Friend Code Discount Display (when using someone else's code) */}
-        {hasFriendCodeDiscount() && appliedFriendCode && !hasReferralReward && (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+        {/* Use Points Section */}
+        {pointsBalance > 0 && !isPremiumOffer && (
+          <div className="border-t pt-4 space-y-3">
             <div className="flex items-center justify-between">
-              <div>
-                <Label className="text-sm font-medium text-green-800">
-                  Desconto de 25% ativo! (Código: {appliedFriendCode})
-                </Label>
-                <p className="text-xs text-green-700 mt-1">
-                  Reserva um serviço em 30 dias ou o desconto ficará inativo.
-                </p>
-              </div>
-              <span className="text-green-600 font-bold">-{formatPrice(rewardDiscount)}</span>
+              <Label className="text-sm font-medium flex items-center gap-2">
+                <Coins className="h-4 w-4 text-primary" />
+                Usar Pontos
+              </Label>
+              <span className="text-sm text-muted-foreground">
+                Disponível: {pointsBalance} pontos ({formatPrice(getPointsInEuros(pointsBalance))})
+              </span>
             </div>
+            <div className="flex gap-2">
+              <Input
+                type="number"
+                min="0"
+                max={pointsBalance}
+                step="100"
+                placeholder="Pontos a usar"
+                value={pointsToUse || ''}
+                onChange={(e) => handleUsePoints(parseInt(e.target.value) || 0)}
+                className="text-center"
+              />
+              <Button
+                onClick={() => {
+                  const maxPoints = Math.floor((priceAfterSubscription - premiumOfferDiscount - Math.max(rewardDiscount, voucherDiscount)) / getPointsInEuros(1));
+                  handleUsePoints(Math.min(pointsBalance, maxPoints));
+                }}
+                size="sm"
+                variant="outline"
+              >
+                Usar Máximo
+              </Button>
+            </div>
+            {pointsToUse > 0 && (
+              <p className="text-xs text-muted-foreground">
+                A usar {pointsToUse} pontos = {formatPrice(getPointsInEuros(pointsToUse))} de desconto
+              </p>
+            )}
           </div>
         )}
 
@@ -389,7 +377,7 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
         )}
 
         {/* Discount Summary */}
-        {(premiumOfferDiscount > 0 || rewardDiscount > 0 || voucherDiscount > 0) && (
+        {(premiumOfferDiscount > 0 || rewardDiscount > 0 || voucherDiscount > 0 || pointsDiscount > 0) && (
           <div className="space-y-2">
             <Separator />
             {premiumOfferDiscount > 0 && (
@@ -408,6 +396,12 @@ export const PriceSummary = ({ services, bookingDate, className, onPriceChange, 
               <div className="flex justify-between text-sm text-green-600">
                 <span>Desconto 15€ Voucher</span>
                 <span>-{formatPrice(voucherDiscount)}</span>
+              </div>
+            )}
+            {pointsDiscount > 0 && (
+              <div className="flex justify-between text-sm text-primary font-medium">
+                <span>Desconto Pontos ({pointsToUse} pontos)</span>
+                <span>-{formatPrice(pointsDiscount)}</span>
               </div>
             )}
           </div>
