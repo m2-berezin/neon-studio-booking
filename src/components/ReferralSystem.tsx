@@ -84,7 +84,7 @@ const ReferralSystem = ({ className }: ReferralSystemProps) => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-primary">
           <Users className="h-5 w-5" />
-          Convida Amigos e Ganha 25% de Desconto
+          Convida Amigos e Ganha 10€ de Desconto!
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -93,11 +93,11 @@ const ReferralSystem = ({ className }: ReferralSystemProps) => {
           <div className="flex items-center gap-2 mb-3">
             <Gift className="h-5 w-5 text-accent" />
             <span className="text-sm font-medium">
-              Tu e o teu amigo ganham 25% de desconto!
+              Tu e o teu amigo ganham 2500 pontos (10€ de desconto)!
             </span>
           </div>
           
-          <div className="bg-background/80 rounded-lg p-4 mb-4">
+          <div className="bg-background/80 rounded-lg p-4">
             <Label htmlFor="referral-code" className="text-sm font-medium">
               O Teu Código de Convite
             </Label>
@@ -121,15 +121,6 @@ const ReferralSystem = ({ className }: ReferralSystemProps) => {
                 )}
               </Button>
             </div>
-          </div>
-
-          <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
-            <p className="text-xs text-orange-800 font-medium">
-              ℹ️ O desconto só fica disponível após o amigo fazer a sua primeira reserva
-            </p>
-            <p className="text-xs text-orange-700 mt-1">
-              Desconto não acumulável com outros.
-            </p>
           </div>
         </div>
       </CardContent>

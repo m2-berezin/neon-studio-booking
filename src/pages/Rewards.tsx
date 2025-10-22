@@ -5,11 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Input } from '@/components/ui/input';
 import { useRewards } from '@/hooks/useRewards';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { useFriendCode } from '@/hooks/useFriendCode';
 import { supabase } from '@/integrations/supabase/client';
 import PenaltyBanner from '@/components/PenaltyBanner';
 import ReferralSystem from '@/components/ReferralSystem';
@@ -46,7 +44,6 @@ const Rewards = () => {
     claimVoucher,
     projectStats
   } = useRewards();
-  const { appliedFriendCode, hasFriendCodeDiscount, applyFriendCode, loading: friendCodeLoading } = useFriendCode();
   const [appliedRewards, setAppliedRewards] = useState<Record<string, boolean>>({});
   
   // Scroll to top when page loads
@@ -66,7 +63,6 @@ const Rewards = () => {
     reason?: string;
   } | null>(null);
   const [claiming180DayOffer, setClaiming180DayOffer] = useState(false);
-  const [friendCodeInput, setFriendCodeInput] = useState('');
 
   // Fetch active offers and usage
   useEffect(() => {
@@ -376,22 +372,6 @@ const Rewards = () => {
       setClaiming180DayOffer(false);
     }
   };
-
-  const handleApplyFriendCode = async () => {
-    if (!friendCodeInput.trim()) {
-      toast({
-        title: 'Código Vazio',
-        description: 'Por favor insere um código de amigo',
-        variant: 'destructive',
-      });
-      return;
-    }
-    
-    const success = await applyFriendCode(friendCodeInput.toUpperCase());
-    if (success) {
-      setFriendCodeInput('');
-    }
-  };
   return <div className="space-y-6">
       <div className="mb-4">
         <Button variant="ghost" onClick={() => navigate('/?tab=7')} className="gap-2">
@@ -414,59 +394,6 @@ const Rewards = () => {
 
       {/* Referral System */}
       <ReferralSystem className="mb-6" />
-
-      {/* Friend Code Input Section */}
-      {!hasFriendCodeDiscount() && (
-        <Card className="studio-card border-primary/50 bg-primary/5 mb-6">
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Gift className="h-5 w-5 text-primary" />
-              Tens um Código de Amigo?
-            </CardTitle>
-            <CardDescription>
-              Insere o código de um amigo para receber 25% de desconto, código de uso único e apenas válido por 30 dias
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex gap-2">
-              <Input
-                placeholder="Insere o código aqui"
-                value={friendCodeInput}
-                onChange={(e) => setFriendCodeInput(e.target.value.toUpperCase().trim())}
-                className="font-mono text-center"
-                maxLength={100}
-              />
-              <Button
-                onClick={handleApplyFriendCode}
-                disabled={friendCodeLoading || !friendCodeInput.trim()}
-                variant="default"
-              >
-                {friendCodeLoading ? 'A aplicar...' : 'Aplicar'}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Active Friend Code Discount Display */}
-      {hasFriendCodeDiscount() && appliedFriendCode && (
-        <Alert className="border-green-600 bg-green-50 mb-6">
-          <Gift className="h-4 w-4 text-green-600" />
-          <AlertDescription className="text-green-800 font-medium">
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <span className="font-semibold">Desconto de 25% Ativo!</span>
-                <p className="text-sm text-green-700 mt-1">
-                  Código: <span className="font-mono">{appliedFriendCode}</span> - Reserva um serviço em 30 dias para usar o desconto.
-                </p>
-                <p className="text-xs text-orange-600 font-medium mt-2">
-                  ⚠️ O desconto será aplicado automaticamente na tua próxima reserva e ficará inativo após o admin aceitar o pagamento.
-                </p>
-              </div>
-            </div>
-          </AlertDescription>
-        </Alert>
-      )}
 
       {/* Voucher 15€ Section */}
       {voucherStatus && (
