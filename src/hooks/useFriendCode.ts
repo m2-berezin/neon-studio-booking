@@ -117,105 +117,51 @@ export const useFriendCode = () => {
   };
 
   const applyFriendCode = async (code: string): Promise<boolean> => {
-    if (!user) {
-      toast({
-        title: 'Erro',
-        description: 'Deves estar autenticado para usar um código',
-        variant: 'destructive',
-      });
-      return false;
-    }
+    if (!user) return false;
 
-    setLoading(true);
     try {
-      // Trim and validate code
-      const trimmedCode = code.trim().toUpperCase();
-      
-      console.log('Attempting to apply friend code:', trimmedCode);
-      
-      if (!trimmedCode) {
+      setLoading(true);
+
+      // Call new RPC function that handles coins
+      const { data, error } = await supabase.rpc('apply_friend_code_with_coins', {
+        p_user_id: user.id,
+        p_code: code.trim().toUpperCase(),
+      }) as { data: any; error: any };
+
+      if (error) {
+        console.error('Error applying friend code:', error);
         toast({
-          title: 'Código Vazio',
-          description: 'Por favor insere um código válido',
+          title: 'Erro',
+          description: error.message || 'Erro ao aplicar o código.',
           variant: 'destructive',
         });
         return false;
       }
 
-      // Check if code exists (exact match, case-insensitive via uppercase)
-      const { data: codeData, error: codeError } = await supabase
-        .from('referral_codes')
-        .select('code, user_id')
-        .eq('code', trimmedCode)
-        .eq('is_active', true)
-        .maybeSingle();
+      const result = data as { success: boolean; error?: string; coins_awarded?: number; expires_in_days?: number };
 
-      console.log('Code lookup result:', { codeData, codeError });
-
-      if (codeError) throw codeError;
-
-      if (!codeData) {
-        console.log('Code not found in database');
+      if (!result.success) {
         toast({
-          title: 'Código Não Encontrado',
-          description: 'Este código de amigo não existe',
+          title: 'Código inválido',
+          description: result.error || 'Este código não pode ser usado.',
           variant: 'destructive',
         });
         return false;
       }
 
-      console.log('Code found, checking ownership...');
-
-      // Check if user is trying to use their own code
-      if (codeData.user_id === user.id) {
-        toast({
-          title: 'Código Inválido',
-          description: 'Não podes usar o teu próprio código',
-          variant: 'destructive',
-        });
-        return false;
-      }
-
-      // Check if user already used any friend code
-      const { data: existingUse, error: useError } = await supabase
-        .from('friend_code_uses')
-        .select('code')
-        .eq('used_by', user.id)
-        .maybeSingle();
-
-      if (useError) throw useError;
-
-      if (existingUse) {
-        toast({
-          title: 'Código Já Usado',
-          description: 'Já usaste um código de amigo anteriormente',
-          variant: 'destructive',
-        });
-        return false;
-      }
-
-      // Apply the friend code
-      const { error: insertError } = await supabase
-        .from('friend_code_uses')
-        .insert({
-          code: trimmedCode,
-          used_by: user.id,
-        });
-
-      if (insertError) throw insertError;
-
-      setAppliedFriendCode(trimmedCode);
       toast({
-        title: 'Código Aplicado!',
-        description: '25% de desconto ativo nas tuas reservas por 30 dias',
+        title: `Ganhaste ${result.coins_awarded || 2500} GW!`,
+        description: `Código aplicado! Tens ${result.expires_in_days || 30} dias para usar as moedas (10€ de desconto).`,
       });
 
+      // Reload applied code
+      await loadAppliedFriendCode();
       return true;
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error applying friend code:', error);
       toast({
         title: 'Erro',
-        description: error.message || 'Não foi possível aplicar o código',
+        description: 'Erro ao aplicar o código. Tenta novamente.',
         variant: 'destructive',
       });
       return false;

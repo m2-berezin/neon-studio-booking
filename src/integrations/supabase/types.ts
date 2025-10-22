@@ -1334,6 +1334,10 @@ export type Database = {
         Returns: boolean
       }
       admin_revert_day_off: { Args: { p_id: string }; Returns: boolean }
+      apply_friend_code_with_coins: {
+        Args: { p_code: string; p_user_id: string }
+        Returns: Json
+      }
       apply_offer: {
         Args: { p_offer_id: string; p_starts_at?: string; p_user_id: string }
         Returns: string
