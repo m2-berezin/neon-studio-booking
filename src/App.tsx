@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import Layout from "./components/Layout";
+import { FriendCodeDialog } from "./components/FriendCodeDialog";
 import SplashScreen from "./components/SplashScreen";
 import Home from "./pages/Home";
 import Book from "./pages/Book";
@@ -50,6 +51,7 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
+        <FriendCodeDialog />
         <TooltipProvider>
           <Toaster />
           <Sonner />
