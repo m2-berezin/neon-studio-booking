@@ -56,7 +56,6 @@ export const FriendCodeDialog = () => {
             placeholder="CÓDIGO DE AMIGO"
             value={code}
             onChange={(e) => setCode(e.target.value.toUpperCase())}
-            maxLength={20}
             className="text-center text-lg font-semibold tracking-wider"
             disabled={loading}
           />
