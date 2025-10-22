@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useMessaging } from '@/hooks/useMessaging';
 import { useReferralReward } from '@/hooks/useReferralReward';
+import { useFriendCode } from '@/hooks/useFriendCode';
 import { ArrowLeft, CheckCircle, Copy, Smartphone, Building2, Tag } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
@@ -26,6 +27,7 @@ const Payment = () => {
   } = useAuth();
   const { sendMessage, ADMIN_ID } = useMessaging();
   const { referralReward, hasReferralReward } = useReferralReward();
+  const { appliedFriendCode } = useFriendCode();
   const [loading, setLoading] = useState(false);
   const [voucherDiscount, setVoucherDiscount] = useState(0);
   const [hasVoucher, setHasVoucher] = useState(false);
@@ -271,7 +273,7 @@ const Payment = () => {
           p_user_id: user.id,
           p_plan_type: planType,
           p_amount_eur: finalPrice,
-          p_friend_code: null,
+          p_friend_code: appliedFriendCode,
           p_payment_method: paymentMethod,
           p_points_used: pointsUsedParam
         });
@@ -438,7 +440,7 @@ const Payment = () => {
             transfer_link: transferLink || null,
             note: finalNote,
             voucher_id: loyaltyOffer ? null : activeVoucherId, // No voucher for loyalty offers
-            friend_code: null,
+            friend_code: appliedFriendCode,
             referral_reward_id: hasReferralReward && referralReward ? referralReward.id : null,
             payment_method: paymentMethod,
             points_used: pointsUsedParam, // Save points used
@@ -646,7 +648,7 @@ const Payment = () => {
         p_currency: 'EUR',
         p_note: notes || `${serviceTitle} - ${optionTitle}`,
         p_voucher_id: activeVoucherId,
-        p_friend_code: null,
+        p_friend_code: appliedFriendCode,
         p_payment_method: paymentMethod,
         p_points_used: pointsUsedParam
       });
