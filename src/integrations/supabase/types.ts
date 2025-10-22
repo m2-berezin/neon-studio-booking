@@ -739,17 +739,17 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "coin_transactions_payment_request_id_fkey"
-            columns: ["payment_request_id"]
-            isOneToOne: false
-            referencedRelation: "payment_requests"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "coin_transactions_referral_reward_id_fkey"
             columns: ["referral_reward_id"]
             isOneToOne: false
             referencedRelation: "referral_rewards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "point_transactions_payment_request_id_fkey"
+            columns: ["payment_request_id"]
+            isOneToOne: false
+            referencedRelation: "payment_requests"
             referencedColumns: ["id"]
           },
         ]
