@@ -161,6 +161,73 @@ export type Database = {
           },
         ]
       }
+      coin_transactions: {
+        Row: {
+          amount: number
+          created_at: string | null
+          expires_at: string | null
+          friend_code_use_id: string | null
+          id: string
+          is_expired: boolean | null
+          notes: string | null
+          payment_request_id: string | null
+          referral_reward_id: string | null
+          transaction_type: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          expires_at?: string | null
+          friend_code_use_id?: string | null
+          id?: string
+          is_expired?: boolean | null
+          notes?: string | null
+          payment_request_id?: string | null
+          referral_reward_id?: string | null
+          transaction_type: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          expires_at?: string | null
+          friend_code_use_id?: string | null
+          id?: string
+          is_expired?: boolean | null
+          notes?: string | null
+          payment_request_id?: string | null
+          referral_reward_id?: string | null
+          transaction_type?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coin_transactions_friend_code_use_id_fkey"
+            columns: ["friend_code_use_id"]
+            isOneToOne: false
+            referencedRelation: "friend_code_uses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coin_transactions_payment_request_id_fkey"
+            columns: ["payment_request_id"]
+            isOneToOne: false
+            referencedRelation: "payment_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coin_transactions_referral_reward_id_fkey"
+            columns: ["referral_reward_id"]
+            isOneToOne: false
+            referencedRelation: "referral_rewards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       emails_log: {
         Row: {
           body: string
@@ -425,6 +492,7 @@ export type Database = {
         Row: {
           amount_eur: number
           client_id: string | null
+          coins_used: number | null
           created_at: string
           currency: string
           decided_at: string | null
@@ -450,6 +518,7 @@ export type Database = {
         Insert: {
           amount_eur: number
           client_id?: string | null
+          coins_used?: number | null
           created_at?: string
           currency?: string
           decided_at?: string | null
@@ -475,6 +544,7 @@ export type Database = {
         Update: {
           amount_eur?: number
           client_id?: string | null
+          coins_used?: number | null
           created_at?: string
           currency?: string
           decided_at?: string | null
@@ -687,6 +757,7 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          coins_balance: number | null
           created_at: string
           full_name: string | null
           id: string
@@ -698,6 +769,7 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          coins_balance?: number | null
           created_at?: string
           full_name?: string | null
           id: string
@@ -709,6 +781,7 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          coins_balance?: number | null
           created_at?: string
           full_name?: string | null
           id?: string
@@ -799,6 +872,7 @@ export type Database = {
       }
       referral_rewards: {
         Row: {
+          coins_amount: number | null
           created_at: string | null
           created_from_friend_code_use_id: string | null
           discount_percent: number
@@ -810,6 +884,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          coins_amount?: number | null
           created_at?: string | null
           created_from_friend_code_use_id?: string | null
           discount_percent?: number
@@ -821,6 +896,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          coins_amount?: number | null
           created_at?: string | null
           created_from_friend_code_use_id?: string | null
           discount_percent?: number
@@ -1235,14 +1311,8 @@ export type Database = {
       }
     }
     Functions: {
-      abandon_offer: {
-        Args: { p_reservation_id: string }
-        Returns: boolean
-      }
-      admin_approve_payment: {
-        Args: { p_payment_id: string }
-        Returns: string
-      }
+      abandon_offer: { Args: { p_reservation_id: string }; Returns: boolean }
+      admin_approve_payment: { Args: { p_payment_id: string }; Returns: string }
       admin_hide_project: {
         Args: { p_project_id: string; p_project_type: string }
         Returns: boolean
@@ -1263,28 +1333,27 @@ export type Database = {
         Args: { p_action: string; p_subscription_id: string }
         Returns: boolean
       }
-      admin_revert_day_off: {
-        Args: { p_id: string }
-        Returns: boolean
-      }
+      admin_revert_day_off: { Args: { p_id: string }; Returns: boolean }
       apply_offer: {
         Args: { p_offer_id: string; p_starts_at?: string; p_user_id: string }
         Returns: string
       }
-      backfill_referral_codes: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      backfill_welcome_messages: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      bytea_to_text: {
-        Args: { data: string }
+      award_coins: {
+        Args: {
+          p_amount: number
+          p_expires_at?: string
+          p_friend_code_use_id?: string
+          p_referral_reward_id?: string
+          p_transaction_type: string
+          p_user_id: string
+        }
         Returns: string
       }
+      backfill_referral_codes: { Args: never; Returns: undefined }
+      backfill_welcome_messages: { Args: never; Returns: undefined }
+      bytea_to_text: { Args: { data: string }; Returns: string }
       captacao_mixmaster_options: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           currency: string
           duration_minutes: number
@@ -1299,7 +1368,7 @@ export type Database = {
         Returns: string
       }
       captacao_options: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           currency: string
           duration_minutes: number
@@ -1309,10 +1378,7 @@ export type Database = {
           service_name: string
         }[]
       }
-      captacao_service_by_hours: {
-        Args: { p_hours: number }
-        Returns: string
-      }
+      captacao_service_by_hours: { Args: { p_hours: number }; Returns: string }
       check_180day_offer_eligibility: {
         Args: { p_offer_type: string; p_user_id: string }
         Returns: Json
@@ -1332,10 +1398,7 @@ export type Database = {
         Args: { p_offer_type: string; p_user_id: string }
         Returns: boolean
       }
-      claim_voucher: {
-        Args: { p_user_id: string }
-        Returns: string
-      }
+      claim_voucher: { Args: { p_user_id: string }; Returns: string }
       client_delete_project: {
         Args: { p_booking_id: string }
         Returns: boolean
@@ -1344,268 +1407,48 @@ export type Database = {
         Args: { p_hours: number; p_starts_at: string; p_user_id: string }
         Returns: string
       }
-      create_reservation_mixmaster: {
-        Args:
-          | { p_hours: number; p_starts_at: string; p_user_id: string }
-          | { p_starts_at: string; p_user_id: string }
-        Returns: string
-      }
-      create_subscription_payment_request: {
-        Args:
-          | {
+      create_reservation_mixmaster:
+        | {
+            Args: { p_hours: number; p_starts_at: string; p_user_id: string }
+            Returns: string
+          }
+        | { Args: { p_starts_at: string; p_user_id: string }; Returns: string }
+      create_subscription_payment_request:
+        | {
+            Args: {
+              p_amount_eur: number
+              p_plan_type: string
+              p_user_id: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              p_amount_eur: number
+              p_friend_code?: string
+              p_plan_type: string
+              p_user_id: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
               p_amount_eur: number
               p_friend_code?: string
               p_payment_method?: string
               p_plan_type: string
               p_user_id: string
             }
-          | {
-              p_amount_eur: number
-              p_friend_code?: string
-              p_plan_type: string
-              p_user_id: string
-            }
-          | { p_amount_eur: number; p_plan_type: string; p_user_id: string }
-        Returns: string
-      }
+            Returns: string
+          }
       delete_mixmaster_project: {
         Args: { p_payment_id: string }
         Returns: boolean
       }
-      gbt_bit_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_bool_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_bool_fetch: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_bpchar_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_bytea_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_cash_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_cash_fetch: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_date_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_date_fetch: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_decompress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_enum_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_enum_fetch: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_float4_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_float4_fetch: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_float8_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_float8_fetch: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_inet_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_int2_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_int2_fetch: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_int4_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_int4_fetch: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_int8_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_int8_fetch: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_intv_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_intv_decompress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_intv_fetch: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_macad_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_macad_fetch: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_macad8_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_macad8_fetch: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_numeric_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_oid_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_oid_fetch: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_text_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_time_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_time_fetch: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_timetz_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_ts_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_ts_fetch: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_tstz_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_uuid_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_uuid_fetch: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_var_decompress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_var_fetch: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbtreekey_var_in: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbtreekey_var_out: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbtreekey16_in: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbtreekey16_out: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbtreekey2_in: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbtreekey2_out: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbtreekey32_in: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbtreekey32_out: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbtreekey4_in: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbtreekey4_out: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbtreekey8_in: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbtreekey8_out: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      generate_referral_code: {
-        Args: { p_user_id: string }
-        Returns: string
-      }
-      get_active_bookings_count: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
+      generate_referral_code: { Args: { p_user_id: string }; Returns: string }
+      get_active_bookings_count: { Args: never; Returns: number }
       get_active_reservations: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           booking_id: string
           client_name: string
@@ -1614,12 +1457,9 @@ export type Database = {
           start_time: string
         }[]
       }
-      get_active_users_count: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
+      get_active_users_count: { Args: never; Returns: number }
       get_admin_subscriptions: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           client_email: string
           client_name: string
@@ -1630,10 +1470,8 @@ export type Database = {
           plan_type: string
         }[]
       }
-      get_booking_min_datetime: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      get_available_coins: { Args: { p_user_id: string }; Returns: number }
+      get_booking_min_datetime: { Args: never; Returns: string }
       get_client_mixmaster_projects: {
         Args: { p_user_id: string }
         Returns: {
@@ -1649,12 +1487,9 @@ export type Database = {
           transfer_link: string
         }[]
       }
-      get_loyalty_points: {
-        Args: { p_user_id: string }
-        Returns: number
-      }
+      get_loyalty_points: { Args: { p_user_id: string }; Returns: number }
       get_mixmaster_projects: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           amount_eur: number
           client_id: string
@@ -1667,10 +1502,7 @@ export type Database = {
           transfer_link: string
         }[]
       }
-      get_monthly_revenue: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
+      get_monthly_revenue: { Args: never; Returns: number }
       get_subscription_renewal_date: {
         Args: { p_user_id: string }
         Returns: string
@@ -1688,18 +1520,9 @@ export type Database = {
           starts_at: string
         }[]
       }
-      get_unread_count: {
-        Args: { p_user_id: string }
-        Returns: number
-      }
-      get_user_role: {
-        Args: { p_user_id: string }
-        Returns: string
-      }
-      get_voucher_status: {
-        Args: { p_user_id: string }
-        Returns: Json
-      }
+      get_unread_count: { Args: { p_user_id: string }; Returns: number }
+      get_user_role: { Args: { p_user_id: string }; Returns: string }
+      get_voucher_status: { Args: { p_user_id: string }; Returns: Json }
       has_role: {
         Args: { p_role: string; p_user_id: string }
         Returns: boolean
@@ -1707,27 +1530,77 @@ export type Database = {
       http: {
         Args: { request: Database["public"]["CompositeTypes"]["http_request"] }
         Returns: Database["public"]["CompositeTypes"]["http_response"]
+        SetofOptions: {
+          from: "http_request"
+          to: "http_response"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
-      http_delete: {
-        Args:
-          | { content: string; content_type: string; uri: string }
-          | { uri: string }
-        Returns: Database["public"]["CompositeTypes"]["http_response"]
-      }
-      http_get: {
-        Args: { data: Json; uri: string } | { uri: string }
-        Returns: Database["public"]["CompositeTypes"]["http_response"]
-      }
+      http_delete:
+        | {
+            Args: { uri: string }
+            Returns: Database["public"]["CompositeTypes"]["http_response"]
+            SetofOptions: {
+              from: "*"
+              to: "http_response"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
+        | {
+            Args: { content: string; content_type: string; uri: string }
+            Returns: Database["public"]["CompositeTypes"]["http_response"]
+            SetofOptions: {
+              from: "*"
+              to: "http_response"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
+      http_get:
+        | {
+            Args: { uri: string }
+            Returns: Database["public"]["CompositeTypes"]["http_response"]
+            SetofOptions: {
+              from: "*"
+              to: "http_response"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
+        | {
+            Args: { data: Json; uri: string }
+            Returns: Database["public"]["CompositeTypes"]["http_response"]
+            SetofOptions: {
+              from: "*"
+              to: "http_response"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
       http_head: {
         Args: { uri: string }
         Returns: Database["public"]["CompositeTypes"]["http_response"]
+        SetofOptions: {
+          from: "*"
+          to: "http_response"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       http_header: {
         Args: { field: string; value: string }
         Returns: Database["public"]["CompositeTypes"]["http_header"]
+        SetofOptions: {
+          from: "*"
+          to: "http_header"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       http_list_curlopt: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           curlopt: string
           value: string
@@ -1736,21 +1609,45 @@ export type Database = {
       http_patch: {
         Args: { content: string; content_type: string; uri: string }
         Returns: Database["public"]["CompositeTypes"]["http_response"]
+        SetofOptions: {
+          from: "*"
+          to: "http_response"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
-      http_post: {
-        Args:
-          | { content: string; content_type: string; uri: string }
-          | { data: Json; uri: string }
-        Returns: Database["public"]["CompositeTypes"]["http_response"]
-      }
+      http_post:
+        | {
+            Args: { content: string; content_type: string; uri: string }
+            Returns: Database["public"]["CompositeTypes"]["http_response"]
+            SetofOptions: {
+              from: "*"
+              to: "http_response"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
+        | {
+            Args: { data: Json; uri: string }
+            Returns: Database["public"]["CompositeTypes"]["http_response"]
+            SetofOptions: {
+              from: "*"
+              to: "http_response"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
       http_put: {
         Args: { content: string; content_type: string; uri: string }
         Returns: Database["public"]["CompositeTypes"]["http_response"]
+        SetofOptions: {
+          from: "*"
+          to: "http_response"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
-      http_reset_curlopt: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      http_reset_curlopt: { Args: never; Returns: boolean }
       http_set_curlopt: {
         Args: { curlopt: string; value: string }
         Returns: boolean
@@ -1759,12 +1656,11 @@ export type Database = {
         Args: { p_ends_at: string; p_starts_at: string }
         Returns: undefined
       }
-      is_admin: {
-        Args: Record<PropertyKey, never> | { uid: string }
-        Returns: boolean
-      }
+      is_admin:
+        | { Args: { uid: string }; Returns: boolean }
+        | { Args: never; Returns: boolean }
       list_active_services: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           base_price: number | null
           category_id: string | null
@@ -1786,6 +1682,12 @@ export type Database = {
           type: string | null
           updated_at: string
         }[]
+        SetofOptions: {
+          from: "*"
+          to: "services"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       list_admin_payment_requests: {
         Args: { p_status?: string }
@@ -1810,13 +1712,33 @@ export type Database = {
         Args: { p_thread_id: string }
         Returns: boolean
       }
-      redeem_loyalty_offer: {
-        Args: { p_user_id: string }
-        Returns: boolean
-      }
-      request_payment: {
-        Args:
-          | {
+      redeem_loyalty_offer: { Args: { p_user_id: string }; Returns: boolean }
+      request_payment:
+        | {
+            Args: {
+              p_amount_eur: number
+              p_currency?: string
+              p_note?: string
+              p_proof_url?: string
+              p_reservation_id: string
+              p_voucher_id?: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              p_amount_eur: number
+              p_currency?: string
+              p_friend_code?: string
+              p_note?: string
+              p_proof_url?: string
+              p_reservation_id: string
+              p_voucher_id?: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
               p_amount_eur: number
               p_currency?: string
               p_friend_code?: string
@@ -1826,40 +1748,20 @@ export type Database = {
               p_reservation_id: string
               p_voucher_id?: string
             }
-          | {
-              p_amount_eur: number
-              p_currency?: string
-              p_friend_code?: string
-              p_note?: string
-              p_proof_url?: string
-              p_reservation_id: string
-              p_voucher_id?: string
-            }
-          | {
+            Returns: string
+          }
+        | {
+            Args: {
               p_amount_eur: number
               p_currency?: string
               p_note?: string
               p_proof_url?: string
               p_reservation_id: string
             }
-          | {
-              p_amount_eur: number
-              p_currency?: string
-              p_note?: string
-              p_proof_url?: string
-              p_reservation_id: string
-              p_voucher_id?: string
-            }
-        Returns: string
-      }
-      send_renewal_alerts: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      slugify: {
-        Args: { txt: string }
-        Returns: string
-      }
+            Returns: string
+          }
+      send_renewal_alerts: { Args: never; Returns: undefined }
+      slugify: { Args: { txt: string }; Returns: string }
       subscribe_payment_request: {
         Args: { p_amount_eur: number; p_plan_type: string; p_user_id: string }
         Returns: string
@@ -1872,13 +1774,28 @@ export type Database = {
         Args: { p_amount_eur: number; p_plan_type: string; p_user_id: string }
         Returns: string
       }
-      text_to_bytea: {
-        Args: { data: string }
-        Returns: string
-      }
-      urlencode: {
-        Args: { data: Json } | { string: string } | { string: string }
-        Returns: string
+      text_to_bytea: { Args: { data: string }; Returns: string }
+      urlencode:
+        | { Args: { data: Json }; Returns: string }
+        | {
+            Args: { string: string }
+            Returns: {
+              error: true
+            } & "Could not choose the best candidate function between: public.urlencode(string => bytea), public.urlencode(string => varchar). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
+          }
+        | {
+            Args: { string: string }
+            Returns: {
+              error: true
+            } & "Could not choose the best candidate function between: public.urlencode(string => bytea), public.urlencode(string => varchar). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
+          }
+      use_coins: {
+        Args: {
+          p_amount: number
+          p_payment_request_id: string
+          p_user_id: string
+        }
+        Returns: boolean
       }
       validate_referral_on_signup: {
         Args: { p_code: string; p_friend_user_id: string }
@@ -1894,7 +1811,7 @@ export type Database = {
         value: string | null
       }
       http_request: {
-        method: unknown | null
+        method: unknown
         uri: string | null
         headers: Database["public"]["CompositeTypes"]["http_header"][] | null
         content_type: string | null
