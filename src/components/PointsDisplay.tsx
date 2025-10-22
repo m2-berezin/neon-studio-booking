@@ -10,8 +10,8 @@ export const PointsDisplay = () => {
 
   return (
     <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
-      <span className="text-sm">💎</span>
-      <span className="text-sm font-medium text-primary">
+      <span className="text-base leading-none">💎</span>
+      <span className="text-xs font-semibold text-primary leading-none">
         {pointsBalance.toLocaleString()}
       </span>
     </div>
