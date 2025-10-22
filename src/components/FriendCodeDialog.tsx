@@ -10,18 +10,18 @@ export const FriendCodeDialog = () => {
   const { applyFriendCode, loading, appliedFriendCode } = useFriendCode();
   const [open, setOpen] = useState(false);
   const [code, setCode] = useState('');
-  const [hasSeenDialog, setHasSeenDialog] = useState(false);
 
   useEffect(() => {
-    // Check if user is new and hasn't seen the dialog yet
-    if (user && !appliedFriendCode && !hasSeenDialog) {
+    // Only show dialog once per user, on first login after account creation
+    if (user && !appliedFriendCode) {
       const dialogShown = localStorage.getItem(`friend_code_dialog_shown_${user.id}`);
       if (!dialogShown) {
         setOpen(true);
-        setHasSeenDialog(true);
+        // Mark as shown immediately to prevent re-showing on navigation
+        localStorage.setItem(`friend_code_dialog_shown_${user.id}`, 'true');
       }
     }
-  }, [user, appliedFriendCode, hasSeenDialog]);
+  }, [user, appliedFriendCode]);
 
   const handleClose = () => {
     if (user) {
