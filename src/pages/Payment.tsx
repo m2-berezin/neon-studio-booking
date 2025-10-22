@@ -37,6 +37,7 @@ const Payment = () => {
   const [premiumOfferDiscount, setPremiumOfferDiscount] = useState(0);
   const [isPlan180DayOffer, setIsPlan180DayOffer] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<'mbway' | 'transferencia' | 'revolut'>('mbway');
+  const [pointsDiscount, setPointsDiscount] = useState(0);
   
   // Enable realtime sync
   useRealtimeSync();
@@ -62,6 +63,7 @@ const Payment = () => {
   const existingReservationId = searchParams.get('reservation_id'); // Existing reservation from offer
   const loyaltyOffer = searchParams.get('loyaltyOffer') === 'true'; // Loyalty offer from 7 points
   const plan180DayOffer = searchParams.get('plan180DayOffer') === 'true'; // Plan 180-day offer
+  const pointsUsedParam = parseInt(searchParams.get('points_used') || '0'); // Points used from price summary
 
   // Determine service title based on service and option
   let serviceTitle = '';
@@ -131,8 +133,17 @@ const Payment = () => {
           setSubscriptionDiscount(0);
           setSubscriptionDiscountPercent(0);
           setVoucherDiscount(0);
+          setPointsDiscount(0);
           setIsPlan180DayOffer(plan180DayOffer);
           return;
+        }
+        
+        // Calculate points discount (2500 points = 10€)
+        if (pointsUsedParam > 0) {
+          const pointsInEuros = (pointsUsedParam / 250); // 250 points = 1€
+          setPointsDiscount(pointsInEuros);
+        } else {
+          setPointsDiscount(0);
         }
         
         // Calculate referral reward discount (25% for sharing code)
@@ -387,8 +398,9 @@ const Payment = () => {
         } else {
           const priceAfterSubscription = parseFloat(price) - subscriptionDiscount;
           const priceAfterReferralReward = priceAfterSubscription - referralRewardDiscount;
-          const priceAfterRewardOrVoucher = priceAfterReferralReward - voucherDiscount;
-          finalPrice = Math.max(0, priceAfterRewardOrVoucher);
+          const priceAfterVoucher = priceAfterReferralReward - voucherDiscount;
+          const priceAfterPoints = priceAfterVoucher - pointsDiscount;
+          finalPrice = Math.max(0, priceAfterPoints);
         }
         
         console.log('[PAYMENT MIX&MASTER] Final price calculation:', {
@@ -396,6 +408,7 @@ const Payment = () => {
           subscriptionDiscount,
           referralRewardDiscount,
           voucherDiscount,
+          pointsDiscount,
           loyaltyOffer,
           plan180DayOffer: isPlan180DayOffer,
           finalPrice
@@ -426,7 +439,8 @@ const Payment = () => {
             voucher_id: loyaltyOffer ? null : activeVoucherId, // No voucher for loyalty offers
             friend_code: null,
             referral_reward_id: hasReferralReward && referralReward ? referralReward.id : null,
-            payment_method: paymentMethod
+            payment_method: paymentMethod,
+            points_used: pointsUsedParam, // Save points used
           })
           .select()
           .single();
@@ -604,8 +618,9 @@ const Payment = () => {
       const priceAfterPremiumOffer = parseFloat(price) - premiumOfferDiscount;
       const priceAfterSubscription = priceAfterPremiumOffer - subscriptionDiscount;
       const priceAfterReferralReward = priceAfterSubscription - referralRewardDiscount;
-      const priceAfterRewardOrVoucher = priceAfterReferralReward - voucherDiscount;
-      const finalPrice = Math.max(0, priceAfterRewardOrVoucher);
+      const priceAfterVoucher = priceAfterReferralReward - voucherDiscount;
+      const priceAfterPoints = priceAfterVoucher - pointsDiscount;
+      const finalPrice = Math.max(0, priceAfterPoints);
       
       console.log('[PAYMENT] Final price calculation:', {
         basePrice: parseFloat(price),
@@ -613,6 +628,7 @@ const Payment = () => {
         subscriptionDiscount,
         referralRewardDiscount,
         voucherDiscount,
+        pointsDiscount,
         finalPrice
       });
       
@@ -640,6 +656,14 @@ const Payment = () => {
       
       if (paymentId) {
         console.log('[PAYMENT BOOKING] ✅ Payment request created:', paymentId);
+        
+        // Update the payment request with points_used if applicable
+        if (pointsUsedParam > 0) {
+          await supabase
+            .from('payment_requests')
+            .update({ points_used: pointsUsedParam })
+            .eq('id', paymentId);
+        }
         
         // CRITICAL: Update payment request with referral_reward_id if applicable
         // This must happen AFTER the RPC because request_payment doesn't support referral_reward_id param
@@ -778,7 +802,7 @@ const Payment = () => {
               <>
                 <Separator />
                 
-                {(isPremiumOffer || subscriptionDiscount > 0 || referralRewardDiscount > 0 || hasVoucher || loyaltyOffer || plan180DayOffer) && (
+                {(isPremiumOffer || subscriptionDiscount > 0 || referralRewardDiscount > 0 || pointsDiscount > 0 || hasVoucher || loyaltyOffer || plan180DayOffer) && (
                   <div className="flex items-center justify-between text-sm">
                     <span>Subtotal:</span>
                     <span>{formatPrice(parseFloat(price || '0'))}</span>
@@ -806,6 +830,13 @@ const Payment = () => {
                   </div>
                 )}
                 
+                {!isPremiumOffer && pointsDiscount > 0 && (
+                  <div className="flex items-center justify-between text-sm text-primary font-medium">
+                    <span>💎 Desconto Pontos ({pointsUsedParam} pontos):</span>
+                    <span>-{formatPrice(pointsDiscount)}</span>
+                  </div>
+                )}
+                
                 {hasVoucher && voucherDiscount > 0 && (
                   <div className="flex items-center justify-between text-sm text-green-600">
                     <span className="flex items-center gap-1">
@@ -830,14 +861,14 @@ const Payment = () => {
                   </div>
                 )}
                 
-                {(isPremiumOffer || subscriptionDiscount > 0 || referralRewardDiscount > 0 || hasVoucher || loyaltyOffer || plan180DayOffer) && <Separator />}
+                {(isPremiumOffer || subscriptionDiscount > 0 || referralRewardDiscount > 0 || pointsDiscount > 0 || hasVoucher || loyaltyOffer || plan180DayOffer) && <Separator />}
                 
                 <div className="flex items-center justify-between text-xl font-bold">
                   <span>Total:</span>
                 <span className="text-primary">
                   {isPremiumOffer || loyaltyOffer || isPlan180DayOffer
                     ? formatPrice(0) 
-                    : formatPrice(Math.max(0, parseFloat(price || '0') - premiumOfferDiscount - subscriptionDiscount - referralRewardDiscount - voucherDiscount))
+                    : formatPrice(Math.max(0, parseFloat(price || '0') - premiumOfferDiscount - subscriptionDiscount - referralRewardDiscount - pointsDiscount - voucherDiscount))
                   }
                 </span>
                 </div>

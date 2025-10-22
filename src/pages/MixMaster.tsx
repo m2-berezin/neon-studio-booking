@@ -61,6 +61,7 @@ const MixMaster = () => {
   const [files, setFiles] = useState<FileList | null>(null);
   const [availableVouchers, setAvailableVouchers] = useState<Voucher[]>([]);
   const [selectedVoucher, setSelectedVoucher] = useState<Voucher | null>(null);
+  const [pointsUsed, setPointsUsed] = useState(0);
 
   const hasSubscription = subscription?.is_active;
 
@@ -234,7 +235,8 @@ const MixMaster = () => {
       voucherId: selectedVoucher?.id || '',
       voucherCode: selectedVoucher?.code || '',
       loyaltyOffer: isLoyaltyOffer ? 'true' : '',
-      plan180DayOffer: isPlan180DayOffer ? 'true' : ''
+      plan180DayOffer: isPlan180DayOffer ? 'true' : '',
+      points_used: pointsUsed.toString(), // Add points used
     });
     
     navigate(`/payment?${queryParams.toString()}`);

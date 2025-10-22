@@ -206,6 +206,7 @@ const Book = () => {
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
   const [bookingComplete, setBookingComplete] = useState(false);
   const [whatsAppLink, setWhatsAppLink] = useState<string>('');
+  const [pointsUsed, setPointsUsed] = useState(0);
 
   // Fetch unavailable days when month changes
   useEffect(() => {
@@ -950,6 +951,9 @@ const Book = () => {
             showFriendCode={false}
             isPremiumOffer={isPremiumOffer}
             premiumOfferOriginalPrice={20} // Preço original de 2h captação
+            onPriceChange={(finalPrice, breakdown) => {
+              setPointsUsed(breakdown.pointsUsed || 0);
+            }}
           />
 
           <div className="space-y-3">
@@ -992,6 +996,7 @@ const Book = () => {
                   service_id: selectedBackendServiceId, // Use backend service ID
                   hours: selectedService === 'captacao' ? selectedHours.toString() : undefined,
                   reservation_id: reservationFromOffer?.id, // Incluir reservation_id se for oferta
+                  points_used: pointsUsed.toString(), // Add points used
                 });
                 navigate(`/payment?${queryParams.toString()}`);
               }}
