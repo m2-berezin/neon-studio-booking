@@ -11,6 +11,8 @@ import { useMessaging } from '@/hooks/useMessaging';
 import { ArrowLeft, CheckCircle, Copy, Smartphone, Building2, Tag } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 import { formatPrice } from '@/lib/utils';
 
@@ -35,6 +37,7 @@ const Payment = () => {
   const [isPlan180DayOffer, setIsPlan180DayOffer] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<'mbway' | 'transferencia' | 'revolut'>('mbway');
   const [pointsDiscount, setPointsDiscount] = useState(0);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   
   // Enable realtime sync
   useRealtimeSync();
@@ -826,6 +829,41 @@ const Payment = () => {
       <Card className="mb-6">
         <CardHeader>
           <CardTitle>Informações de Pagamento</CardTitle>
+          <div className="mt-4 p-4 bg-muted/50 rounded-lg border border-border">
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Ao pagar o sinal de 15€ confirmas a reserva da sessão.
+              Reagendamento gratuito até 72 horas antes. No-show ou cancelamento com menos de 24h = sinal retido. O sinal será deduzido do total pago no dia da sessão.{' '}
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <button className="text-primary hover:underline font-medium">
+                    Consulta os termos completos
+                  </button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Política de Sinais e Cancelamento</AlertDialogTitle>
+                    <AlertDialogDescription asChild>
+                      <div className="space-y-4 text-sm text-foreground">
+                        <p>O pagamento de 15€ serve como sinal/garantia para a reserva da sessão.</p>
+                        
+                        <p>Reagendamento gratuito até 72 horas antes do início da sessão.</p>
+                        
+                        <p>Cancelamentos até 72 horas antes serão reembolsados integralmente.</p>
+                        
+                        <p>Cancelamentos ou no-show com menos de 24 horas de antecedência implicam a retenção do sinal (15€).</p>
+                        
+                        <p>Em caso de retenção do sinal, o cliente será notificado por chat da app e o valor retido será reconhecido contabilisticamente como receita.</p>
+                        
+                        <p>Força maior (doenças comprovadas, condições de segurança) será avaliada caso a caso e pode levar a reembolso ou reagendamento sem penalização.</p>
+                        
+                        <p className="font-medium">Para qualquer disputa, contacte ghostwayne777@hotmail.com ou chat da app.</p>
+                      </div>
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                </AlertDialogContent>
+              </AlertDialog>
+            </p>
+          </div>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* MBWay */}
@@ -906,7 +944,59 @@ const Payment = () => {
             </ol>
           </div>
 
-          <Button onClick={handlePaymentConfirmation} disabled={loading} className="w-full bg-green-600 hover:bg-green-700 text-white" size="lg">
+          {/* Terms and Conditions Checkbox */}
+          <div className="flex items-start space-x-2 pt-2">
+            <Checkbox 
+              id="terms" 
+              checked={termsAccepted}
+              onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
+            />
+            <label
+              htmlFor="terms"
+              className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+            >
+              Li e aceito os{' '}
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <button 
+                    className="text-primary hover:underline font-medium"
+                    onClick={(e) => e.preventDefault()}
+                  >
+                    Termos de Reserva
+                  </button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Política de Sinais e Cancelamento</AlertDialogTitle>
+                    <AlertDialogDescription asChild>
+                      <div className="space-y-4 text-sm text-foreground">
+                        <p>O pagamento de 15€ serve como sinal/garantia para a reserva da sessão.</p>
+                        
+                        <p>Reagendamento gratuito até 72 horas antes do início da sessão.</p>
+                        
+                        <p>Cancelamentos até 72 horas antes serão reembolsados integralmente.</p>
+                        
+                        <p>Cancelamentos ou no-show com menos de 24 horas de antecedência implicam a retenção do sinal (15€).</p>
+                        
+                        <p>Em caso de retenção do sinal, o cliente será notificado por chat da app e o valor retido será reconhecido contabilisticamente como receita.</p>
+                        
+                        <p>Força maior (doenças comprovadas, condições de segurança) será avaliada caso a caso e pode levar a reembolso ou reagendamento sem penalização.</p>
+                        
+                        <p className="font-medium">Para qualquer disputa, contacte ghostwayne777@hotmail.com ou chat da app.</p>
+                      </div>
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                </AlertDialogContent>
+              </AlertDialog>
+            </label>
+          </div>
+
+          <Button 
+            onClick={handlePaymentConfirmation} 
+            disabled={loading || !termsAccepted} 
+            className="w-full bg-green-600 hover:bg-green-700 text-white disabled:opacity-50 disabled:cursor-not-allowed" 
+            size="lg"
+          >
             {loading ? <>
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
                 A processar...

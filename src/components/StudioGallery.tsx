@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import studio1 from '@/assets/studio-1.jpg';
 import studio2 from '@/assets/studio-2.jpg';
 import studio3 from '@/assets/studio-3.jpg';
 import studio4 from '@/assets/studio-4.jpg';
 import studio5 from '@/assets/studio-5.jpg';
 
 const StudioGallery = () => {
-  const images = [studio1, studio2, studio3, studio4, studio5];
+  const images = [studio2, studio3, studio4, studio5];
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
