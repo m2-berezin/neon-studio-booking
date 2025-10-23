@@ -28,10 +28,10 @@ export const usePoints = () => {
     loadPoints();
     subscribeToPoints();
     
-    // Poll for points every 5 seconds to ensure UI stays in sync
+    // Poll for points every 10 seconds to ensure UI stays in sync
     const intervalId = setInterval(() => {
       loadPoints();
-    }, 5000);
+    }, 10000);
     
     return () => {
       clearInterval(intervalId);

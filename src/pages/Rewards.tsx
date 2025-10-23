@@ -392,9 +392,6 @@ const Rewards = () => {
       {/* Penalty Banner */}
       {hasActivePenalty() && penaltyEndDate && <PenaltyBanner penaltyEndDate={penaltyEndDate} className="mb-6" />}
 
-      {/* Referral System */}
-      <ReferralSystem className="mb-6" />
-
       {/* Voucher 15€ Section */}
       {voucherStatus && (
         <Alert className="border-primary bg-primary/10 mb-6">
