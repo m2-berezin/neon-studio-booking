@@ -798,25 +798,25 @@ const Payment = () => {
         </CardHeader>
         <CardContent>
           <RadioGroup value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as 'mbway' | 'transferencia' | 'revolut')}>
-            <div className="space-y-3">
-              <div className="flex items-center space-x-2">
+            <div className="space-y-4">
+              <div className="flex items-center space-x-3">
                 <RadioGroupItem value="mbway" id="mbway" />
-                <Label htmlFor="mbway" className="flex items-center gap-2 cursor-pointer">
-                  <Smartphone className="h-4 w-4 text-primary" />
+                <Label htmlFor="mbway" className="flex items-center gap-2 cursor-pointer text-base">
+                  <Smartphone className="h-5 w-5 text-primary" />
                   <span>MB Way</span>
                 </Label>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-3">
                 <RadioGroupItem value="transferencia" id="transferencia" />
-                <Label htmlFor="transferencia" className="flex items-center gap-2 cursor-pointer">
-                  <Building2 className="h-4 w-4 text-primary" />
+                <Label htmlFor="transferencia" className="flex items-center gap-2 cursor-pointer text-base">
+                  <Building2 className="h-5 w-5 text-primary" />
                   <span>Transferência Bancária</span>
                 </Label>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-3">
                 <RadioGroupItem value="revolut" id="revolut" />
-                <Label htmlFor="revolut" className="flex items-center gap-2 cursor-pointer">
-                  <Building2 className="h-4 w-4 text-primary" />
+                <Label htmlFor="revolut" className="flex items-center gap-2 cursor-pointer text-base">
+                  <Building2 className="h-5 w-5 text-primary" />
                   <span>Revolut</span>
                 </Label>
               </div>

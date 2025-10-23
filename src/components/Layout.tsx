@@ -106,7 +106,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
       {/* Navigation - Only show if user is authenticated */}
       {user && (
         <nav className="fixed bottom-0 left-0 right-0 bg-card/80 backdrop-blur-md border-t border-border z-50">
-          <div className="flex justify-evenly items-center py-3 px-2">
+          <div className="flex justify-around items-center py-3 px-4">
             {allNavItems.map((item) => {
               const isActive = item.path === '/admin/dashboard' 
                 ? location.pathname.startsWith('/admin')
@@ -115,7 +115,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
                 <button
                   key={item.path}
                   onClick={() => navigate(item.path)}
-                  className={`flex flex-col items-center justify-center gap-1 p-2 rounded-lg transition-all min-w-[60px] ${
+                  className={`flex flex-col items-center justify-center gap-1 p-2 rounded-lg transition-all flex-1 max-w-[80px] ${
                     isActive 
                       ? 'text-primary' 
                       : 'text-muted-foreground hover:text-foreground'
@@ -123,7 +123,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
                 >
                   {item.isLogo ? (
                     <div className="flex items-center justify-center w-full">
-                      <span className={`text-2xl font-bold leading-none ${isActive ? 'neon-title' : 'neon-title'}`}>
+                      <span className={`text-2xl font-bold leading-none ${isActive ? 'neon-title' : 'neon-title'}`} style={{ fontFamily: 'Times New Roman, serif' }}>
                         {item.label}
                       </span>
                     </div>
