@@ -867,7 +867,7 @@ const Payment = () => {
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground mb-3">Utiliza este IBAN para transferência bancária nacional ou internacional</p>
-                <p className="text-xs text-muted-foreground font-medium">Enviar comprovativo por mensagem chat da app</p>
+                <p className="text-xs text-muted-foreground font-bold">Enviar comprovativo por mensagem chat da app</p>
               </div>
             </div>
           )}
