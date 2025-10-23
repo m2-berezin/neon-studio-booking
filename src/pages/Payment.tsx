@@ -904,8 +904,8 @@ const Payment = () => {
             <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
               <li>Faz o pagamento do sinal (15€) usando um método de pagamento à tua escolha.</li>
               <li>Clica em "Já Paguei" após realizares o pagamento.</li>
-              <li>Aguarda a confirmação do pagamento. (normalmente 1h-6h, serás notificado)</li>
-              <li>O valor restante é pago no dia. Pagamento a dinheiro ou outro método de pagamento à tua escolha.</li>
+              <li>Aguarda a confirmação do pagamento. Serás notificado.</li>
+              <li>O valor restante é pago no dia da reserva. Pagamento a dinheiro ou outro método de pagamento à tua escolha.</li>
             </ol>
           </div>
 
