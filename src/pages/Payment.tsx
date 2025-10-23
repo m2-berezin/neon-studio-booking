@@ -922,27 +922,18 @@ const Payment = () => {
                 </AlertDialogTrigger>
                 <AlertDialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Política de Reservas e Sinal</AlertDialogTitle>
+                    <AlertDialogTitle>Política de Sinais e Cancelamento</AlertDialogTitle>
                     <AlertDialogDescription asChild>
                       <div className="space-y-4 text-sm text-foreground">
                         <p>O pagamento de 15€ serve como sinal/garantia para a reserva da sessão.</p>
                         
-                        <p>O sinal não é reembolsável em dinheiro, mas sim em crédito interno (💎), equivalente a 3750 💎.</p>
+                        <p>Reagendamento gratuito até 72 horas antes do início da sessão.</p>
                         
-                        <p>O crédito (💎) pode ser usado como desconto em reservas futuras de serviços presenciais.</p>
+                        <p>Cancelamentos até 72 horas antes serão reembolsados integralmente.</p>
                         
-                        <p><strong>Em caso de cancelamento, o cliente poderá:</strong></p>
+                        <p>Cancelamentos ou no-show com menos de 24 horas de antecedência implicam a retenção do sinal (15€).</p>
                         
-                        <ul className="list-disc list-inside pl-4 space-y-1">
-                          <li>Reagendar a sessão até 72 horas antes, sem penalização, ou</li>
-                          <li>Receber os 15 € em crédito interno 💎.</li>
-                        </ul>
-                        
-                        <p>Os 💎 não têm valor monetário e não são convertíveis em dinheiro.</p>
-                        
-                        <p><strong>Validade do crédito:</strong> 2 meses a partir da data de atribuição.</p>
-                        
-                        <p>Cancelamentos ou no-show com menos de 24 horas de antecedência implicam a retenção do sinal (15€) sem atribuição de crédito.</p>
+                        <p>Em caso de retenção do sinal, o cliente será notificado por chat da app e o valor retido será reconhecido contabilisticamente como receita.</p>
                         
                         <p>Força maior (doenças comprovadas, condições de segurança) será avaliada caso a caso e pode levar a reembolso ou reagendamento sem penalização.</p>
                         
@@ -985,27 +976,18 @@ const Payment = () => {
                 </AlertDialogTrigger>
                 <AlertDialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Política de Reservas e Sinal</AlertDialogTitle>
+                    <AlertDialogTitle>Política de Sinais e Cancelamento</AlertDialogTitle>
                     <AlertDialogDescription asChild>
                       <div className="space-y-4 text-sm text-foreground">
                         <p>O pagamento de 15€ serve como sinal/garantia para a reserva da sessão.</p>
                         
-                        <p>O sinal não é reembolsável em dinheiro, mas sim em crédito interno (💎), equivalente a 3750 💎.</p>
+                        <p>Reagendamento gratuito até 72 horas antes do início da sessão.</p>
                         
-                        <p>O crédito (💎) pode ser usado como desconto em reservas futuras de serviços presenciais.</p>
+                        <p>Cancelamentos até 72 horas antes serão reembolsados integralmente.</p>
                         
-                        <p><strong>Em caso de cancelamento, o cliente poderá:</strong></p>
+                        <p>Cancelamentos ou no-show com menos de 24 horas de antecedência implicam a retenção do sinal (15€).</p>
                         
-                        <ul className="list-disc list-inside pl-4 space-y-1">
-                          <li>Reagendar a sessão até 72 horas antes, sem penalização, ou</li>
-                          <li>Receber os 15 € em crédito interno 💎.</li>
-                        </ul>
-                        
-                        <p>Os 💎 não têm valor monetário e não são convertíveis em dinheiro.</p>
-                        
-                        <p><strong>Validade do crédito:</strong> 2 meses a partir da data de atribuição.</p>
-                        
-                        <p>Cancelamentos ou no-show com menos de 24 horas de antecedência implicam a retenção do sinal (15€) sem atribuição de crédito.</p>
+                        <p>Em caso de retenção do sinal, o cliente será notificado por chat da app e o valor retido será reconhecido contabilisticamente como receita.</p>
                         
                         <p>Força maior (doenças comprovadas, condições de segurança) será avaliada caso a caso e pode levar a reembolso ou reagendamento sem penalização.</p>
                         
@@ -1022,7 +1004,6 @@ const Payment = () => {
                   </div>
                 </AlertDialogContent>
               </AlertDialog>
-              , incluindo que o sinal de 15€ não é reembolsável em dinheiro e será convertido em crédito interno (💎) em caso de cancelamento.
             </label>
           </div>
 
