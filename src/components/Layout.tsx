@@ -115,16 +115,18 @@ const Layout = ({ children }: { children: ReactNode }) => {
                 <button
                   key={item.path}
                   onClick={() => navigate(item.path)}
-                  className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-all ${
+                  className={`flex flex-col items-center justify-center gap-1 p-2 rounded-lg transition-all min-w-[60px] ${
                     isActive 
                       ? 'text-primary' 
                       : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
                   {item.isLogo ? (
-                    <span className={`text-2xl font-bold ${isActive ? 'neon-title' : 'neon-title'}`}>
-                      {item.label}
-                    </span>
+                    <div className="flex items-center justify-center w-full">
+                      <span className={`text-2xl font-bold leading-none ${isActive ? 'neon-title' : 'neon-title'}`}>
+                        {item.label}
+                      </span>
+                    </div>
                   ) : (
                     <>
                       {item.icon === 'question' ? (

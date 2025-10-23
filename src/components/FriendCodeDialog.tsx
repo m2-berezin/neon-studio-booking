@@ -6,13 +6,18 @@ import { useFriendCode } from '@/hooks/useFriendCode';
 import { useAuth } from '@/contexts/AuthContext';
 
 export const FriendCodeDialog = () => {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const { applyFriendCode, loading, appliedFriendCode } = useFriendCode();
   const [open, setOpen] = useState(false);
   const [code, setCode] = useState('');
   const [hasChecked, setHasChecked] = useState(false);
 
   useEffect(() => {
+    // Don't show for admins
+    if (isAdmin()) {
+      return;
+    }
+
     // Only check once per component mount
     if (user && !hasChecked) {
       setHasChecked(true);
@@ -33,7 +38,7 @@ export const FriendCodeDialog = () => {
         console.log('[FRIEND CODE DIALOG] Not showing dialog');
       }
     }
-  }, [user, hasChecked, appliedFriendCode]);
+  }, [user, hasChecked, appliedFriendCode, isAdmin]);
 
   const handleClose = () => {
     if (user) {
