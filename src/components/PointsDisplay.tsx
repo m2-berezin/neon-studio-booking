@@ -74,7 +74,7 @@ export const PointsDisplay = () => {
                 <Input
                   value={myFriendCode}
                   readOnly
-                  className="text-center text-lg font-bold tracking-wider"
+                  className="text-center text-sm font-bold tracking-wide"
                 />
                 <Button
                   onClick={handleCopyCode}
