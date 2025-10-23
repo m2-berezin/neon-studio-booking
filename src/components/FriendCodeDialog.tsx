@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -8,18 +7,14 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export const FriendCodeDialog = () => {
   const { user } = useAuth();
-  const location = useLocation();
   const { applyFriendCode, loading, appliedFriendCode } = useFriendCode();
   const [open, setOpen] = useState(false);
   const [code, setCode] = useState('');
   const [hasChecked, setHasChecked] = useState(false);
 
-  // Don't show dialog in admin routes
-  const isAdminRoute = location.pathname.startsWith('/admin');
-
   useEffect(() => {
     // Only check once per component mount
-    if (user && !hasChecked && !isAdminRoute) {
+    if (user && !hasChecked) {
       setHasChecked(true);
       
       const dialogShown = localStorage.getItem(`friend_code_dialog_shown_${user.id}`);
@@ -30,7 +25,6 @@ export const FriendCodeDialog = () => {
       // Only show if:
       // 1. Never shown before in localStorage
       // 2. User hasn't applied a code yet
-      // 3. Not in admin route
       if (!dialogShown && !appliedFriendCode) {
         console.log('[FRIEND CODE DIALOG] Showing dialog and marking as shown');
         setOpen(true);
@@ -39,7 +33,7 @@ export const FriendCodeDialog = () => {
         console.log('[FRIEND CODE DIALOG] Not showing dialog');
       }
     }
-  }, [user, hasChecked, appliedFriendCode, isAdminRoute]);
+  }, [user, hasChecked, appliedFriendCode]);
 
   const handleClose = () => {
     if (user) {
