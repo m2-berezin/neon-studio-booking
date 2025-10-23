@@ -829,41 +829,6 @@ const Payment = () => {
       <Card className="mb-6">
         <CardHeader>
           <CardTitle>Informações de Pagamento</CardTitle>
-          <div className="mt-4 p-4 bg-muted/50 rounded-lg border border-border">
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Ao pagar o sinal de 15€ confirmas a reserva da sessão.
-              Reagendamento gratuito até 72 horas antes. No-show ou cancelamento com menos de 24h = sinal retido. O sinal será deduzido do total pago no dia da sessão.{' '}
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <button className="text-primary hover:underline font-medium">
-                    Consulta os termos completos
-                  </button>
-                </AlertDialogTrigger>
-                <AlertDialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Política de Sinais e Cancelamento</AlertDialogTitle>
-                    <AlertDialogDescription asChild>
-                      <div className="space-y-4 text-sm text-foreground">
-                        <p>O pagamento de 15€ serve como sinal/garantia para a reserva da sessão.</p>
-                        
-                        <p>Reagendamento gratuito até 72 horas antes do início da sessão.</p>
-                        
-                        <p>Cancelamentos até 72 horas antes serão reembolsados integralmente.</p>
-                        
-                        <p>Cancelamentos ou no-show com menos de 24 horas de antecedência implicam a retenção do sinal (15€).</p>
-                        
-                        <p>Em caso de retenção do sinal, o cliente será notificado por chat da app e o valor retido será reconhecido contabilisticamente como receita.</p>
-                        
-                        <p>Força maior (doenças comprovadas, condições de segurança) será avaliada caso a caso e pode levar a reembolso ou reagendamento sem penalização.</p>
-                        
-                        <p className="font-medium">Para qualquer disputa, contacte ghostwayne777@hotmail.com ou chat da app.</p>
-                      </div>
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                </AlertDialogContent>
-              </AlertDialog>
-            </p>
-          </div>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* MBWay */}
@@ -944,6 +909,50 @@ const Payment = () => {
             </ol>
           </div>
 
+          {/* Disclaimer */}
+          <div className="p-4 bg-muted/50 rounded-lg border border-border">
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Ao pagar o sinal de 15€ confirmas a reserva da sessão.
+              Reagendamento gratuito até 72 horas antes. No-show ou cancelamento com menos de 24h = sinal retido. O sinal será deduzido do total pago no dia da sessão.{' '}
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <button className="text-primary hover:underline font-medium">
+                    Consulta os termos completos
+                  </button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Política de Sinais e Cancelamento</AlertDialogTitle>
+                    <AlertDialogDescription asChild>
+                      <div className="space-y-4 text-sm text-foreground">
+                        <p>O pagamento de 15€ serve como sinal/garantia para a reserva da sessão.</p>
+                        
+                        <p>Reagendamento gratuito até 72 horas antes do início da sessão.</p>
+                        
+                        <p>Cancelamentos até 72 horas antes serão reembolsados integralmente.</p>
+                        
+                        <p>Cancelamentos ou no-show com menos de 24 horas de antecedência implicam a retenção do sinal (15€).</p>
+                        
+                        <p>Em caso de retenção do sinal, o cliente será notificado por chat da app e o valor retido será reconhecido contabilisticamente como receita.</p>
+                        
+                        <p>Força maior (doenças comprovadas, condições de segurança) será avaliada caso a caso e pode levar a reembolso ou reagendamento sem penalização.</p>
+                        
+                        <p className="font-medium">Para qualquer disputa, contacte ghostwayne777@hotmail.com ou chat da app.</p>
+                      </div>
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <div className="flex justify-end mt-4">
+                    <AlertDialogTrigger asChild>
+                      <Button className="bg-primary hover:bg-primary/90">
+                        Compreendi
+                      </Button>
+                    </AlertDialogTrigger>
+                  </div>
+                </AlertDialogContent>
+              </AlertDialog>
+            </p>
+          </div>
+
           {/* Terms and Conditions Checkbox */}
           <div className="flex items-start space-x-2 pt-2">
             <Checkbox 
@@ -986,6 +995,13 @@ const Payment = () => {
                       </div>
                     </AlertDialogDescription>
                   </AlertDialogHeader>
+                  <div className="flex justify-end mt-4">
+                    <AlertDialogTrigger asChild>
+                      <Button className="bg-primary hover:bg-primary/90">
+                        Compreendi
+                      </Button>
+                    </AlertDialogTrigger>
+                  </div>
                 </AlertDialogContent>
               </AlertDialog>
             </label>
