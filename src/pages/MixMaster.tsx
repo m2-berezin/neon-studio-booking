@@ -171,10 +171,9 @@ const MixMaster = () => {
 
   const fileRequirements = [
     "Todos os ficheiros devidamente identificados",
-    "Ficheiros de áudio em 24-bit/48kHz ou superior",
     "Remover limiting, compressão pesada e plugins como reverbs e delays das stems",
     "Organizar faixas por instrumento/elemento",
-    "Escrever notas específicas",
+    "Escrever notas/indicações específicas",
     "Enviar 1/2 faixas de referência se pretender"
   ];
 
