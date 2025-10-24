@@ -915,42 +915,6 @@ const Payment = () => {
               <span className="block">O sinal confirma a tua reserva.</span>
               <span className="block">Cancelamentos com menos de 24 h ou não comparência implicam retenção do sinal.</span>
               <span className="block">Reagendamentos até 72 h antes são gratuitos.</span>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <button className="text-primary hover:underline font-medium block mt-1">
-                    Consulta os termos completos ▸
-                  </button>
-                </AlertDialogTrigger>
-                <AlertDialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Política de Sinais e Cancelamento</AlertDialogTitle>
-                    <AlertDialogDescription asChild>
-                      <div className="space-y-4 text-sm text-foreground">
-                        <p>O pagamento de 15€ serve como sinal/garantia para a reserva da sessão.</p>
-                        
-                        <p>Reagendamento gratuito até 72 horas antes do início da sessão.</p>
-                        
-                        <p>Cancelamentos até 72 horas antes serão reembolsados integralmente.</p>
-                        
-                        <p>Cancelamentos ou no-show com menos de 24 horas de antecedência implicam a retenção do sinal (15€).</p>
-                        
-                        <p>Em caso de retenção do sinal, o cliente será notificado por chat da app e o valor retido será reconhecido contabilisticamente como receita.</p>
-                        
-                        <p>Força maior (doenças comprovadas, condições de segurança) será avaliada caso a caso e pode levar a reembolso ou reagendamento sem penalização.</p>
-                        
-                        <p className="font-medium">Para qualquer disputa, contacte ghostwayne777@hotmail.com ou chat da app.</p>
-                      </div>
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <div className="flex justify-end mt-4">
-                    <AlertDialogTrigger asChild>
-                      <Button className="bg-primary hover:bg-primary/90">
-                        Compreendi
-                      </Button>
-                    </AlertDialogTrigger>
-                  </div>
-                </AlertDialogContent>
-              </AlertDialog>
             </p>
           </div>
 
@@ -972,14 +936,14 @@ const Payment = () => {
                     className="text-primary hover:underline font-medium"
                     onClick={(e) => e.preventDefault()}
                   >
-                    Termos de Reserva
+                    termos de reserva
                   </button>
                 </AlertDialogTrigger>
                 <AlertDialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Política de Sinais e Cancelamento</AlertDialogTitle>
+                    <AlertDialogTitle className="text-center text-xl">Política de Sinais e Cancelamento</AlertDialogTitle>
                     <AlertDialogDescription asChild>
-                      <div className="space-y-4 text-sm text-foreground">
+                      <div className="space-y-4 text-sm text-foreground pt-4">
                         <p>O pagamento de 15€ serve como sinal/garantia para a reserva da sessão.</p>
                         
                         <p>Reagendamento gratuito até 72 horas antes do início da sessão.</p>
