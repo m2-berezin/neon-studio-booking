@@ -911,13 +911,14 @@ const Payment = () => {
 
           {/* Disclaimer */}
           <div className="p-4 bg-muted/50 rounded-lg border border-border">
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Ao pagar o sinal de 15€ confirmas a reserva da sessão.
-              Reagendamento gratuito até 72 horas antes. No-show ou cancelamento com menos de 24h = sinal retido. O sinal será deduzido do total pago no dia da sessão.{' '}
+            <p className="text-sm text-muted-foreground leading-relaxed space-y-1">
+              <span className="block">O sinal confirma a tua reserva.</span>
+              <span className="block">Cancelamentos com menos de 24 h ou não comparência implicam retenção do sinal.</span>
+              <span className="block">Reagendamentos até 72 h antes são gratuitos.</span>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <button className="text-primary hover:underline font-medium">
-                    Consulta os termos completos
+                  <button className="text-primary hover:underline font-medium block mt-1">
+                    Consulta os termos completos ▸
                   </button>
                 </AlertDialogTrigger>
                 <AlertDialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
