@@ -902,10 +902,10 @@ const Payment = () => {
           <div className="space-y-2">
             <h3 className="font-semibold">Instruções:</h3>
             <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
-              <li>Faz o pagamento do sinal (15€) usando um método de pagamento à tua escolha.</li>
-              <li>Clica em "Já Paguei" após realizares o pagamento.</li>
-              <li>Aguarda a confirmação do pagamento. Serás notificado.</li>
-              <li>O valor restante é pago no dia da reserva. Pagamento a dinheiro ou outro método de pagamento à tua escolha.</li>
+              <li>Faz o pagamento do sinal (15 €) por um método à tua escolha.</li>
+              <li>Clica em "Já Paguei" depois de o realizares.</li>
+              <li>Aguarda confirmação — serás notificado.</li>
+              <li>O restante é pago no dia da sessão (em dinheiro ou outro método).</li>
             </ol>
           </div>
 
