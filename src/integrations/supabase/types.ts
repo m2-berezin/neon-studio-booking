@@ -1313,6 +1313,7 @@ export type Database = {
     Functions: {
       abandon_offer: { Args: { p_reservation_id: string }; Returns: boolean }
       admin_approve_payment: { Args: { p_payment_id: string }; Returns: string }
+      admin_delete_test_user: { Args: { p_user_id: string }; Returns: boolean }
       admin_hide_project: {
         Args: { p_project_id: string; p_project_type: string }
         Returns: boolean
