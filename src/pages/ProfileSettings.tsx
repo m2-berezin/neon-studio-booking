@@ -6,6 +6,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useNotificationSettings } from '@/hooks/useNotificationSettings';
@@ -15,7 +25,8 @@ const ProfileSettings = () => {
   const {
     user,
     profile,
-    updateProfile
+    updateProfile,
+    signOut
   } = useAuth();
   const {
     toast
@@ -25,6 +36,7 @@ const ProfileSettings = () => {
   const [changingPassword, setChangingPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   
   // Scroll to top when page loads
   useEffect(() => {
@@ -116,6 +128,33 @@ const ProfileSettings = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.rpc('delete_own_account');
+
+      if (error) throw error;
+
+      toast({
+        title: 'Conta Eliminada',
+        description: 'A tua conta foi eliminada permanentemente.'
+      });
+
+      // Sign out and redirect to home
+      await signOut();
+      navigate('/');
+    } catch (error: any) {
+      toast({
+        title: 'Erro',
+        description: error.message || 'Falha ao eliminar a conta',
+        variant: 'destructive'
+      });
+    } finally {
+      setLoading(false);
+      setShowDeleteDialog(false);
     }
   };
   if (!user || !profile) {
@@ -353,10 +392,12 @@ const ProfileSettings = () => {
           <CardTitle className="text-destructive">Zona de Perigo</CardTitle>
         </CardHeader>
         <CardContent>
-          <Button variant="destructive" onClick={() => toast({
-          title: 'Funcionalidade em Desenvolvimento',
-          description: 'Para apagar a conta, contacta o suporte.'
-        })} className="w-full">
+          <Button 
+            variant="destructive" 
+            onClick={() => setShowDeleteDialog(true)} 
+            className="w-full"
+            disabled={loading}
+          >
             Apagar Conta
           </Button>
           <p className="text-xs text-muted-foreground mt-2">
@@ -364,6 +405,39 @@ const ProfileSettings = () => {
           </p>
         </CardContent>
       </Card>
+
+      {/* Delete Account Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Tens a certeza absoluta?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. Isto irá eliminar permanentemente a tua conta
+              e remover todos os teus dados dos nossos servidores, incluindo:
+              <ul className="list-disc list-inside mt-2 space-y-1">
+                <li>Todas as tuas reservas</li>
+                <li>Todos os teus projetos</li>
+                <li>Todas as tuas mensagens</li>
+                <li>Todos os teus pontos e recompensas</li>
+                <li>A tua subscrição (se ativa)</li>
+              </ul>
+              <p className="mt-3 font-semibold">
+                Depois de eliminar a conta, poderás criar uma nova com as mesmas credenciais.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={loading}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteAccount}
+              disabled={loading}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {loading ? 'A eliminar...' : 'Sim, eliminar conta'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>;
 };
 export default ProfileSettings;

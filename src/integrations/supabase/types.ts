@@ -1461,6 +1461,7 @@ export type Database = {
         Args: { p_payment_id: string }
         Returns: boolean
       }
+      delete_own_account: { Args: never; Returns: boolean }
       generate_referral_code: { Args: { p_user_id: string }; Returns: string }
       get_active_bookings_count: { Args: never; Returns: number }
       get_active_reservations: {
