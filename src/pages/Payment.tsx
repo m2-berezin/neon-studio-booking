@@ -607,6 +607,21 @@ const Payment = () => {
 
       if (paymentId) {
         console.log('[PAYMENT BOOKING] ✅ Payment request created:', paymentId);
+        
+        // Create notification for the user
+        try {
+          await supabase
+            .from('notifications')
+            .insert({
+              user_id: user.id,
+              title: 'Pedido Enviado',
+              body: 'Reserva de sessão pendente de verificação de pagamento. Aguarde aprovação do administrador.',
+              read: false
+            });
+        } catch (notifError) {
+          console.error('Error creating notification:', notifError);
+          // Don't fail the whole process if notification fails
+        }
       }
       if (paymentError) {
         console.error('Payment error:', paymentError);
