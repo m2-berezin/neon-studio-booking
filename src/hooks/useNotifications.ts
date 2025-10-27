@@ -24,17 +24,18 @@ export const useNotifications = () => {
     
     setLoading(true);
     try {
+      // Load all notifications (read and unread)
       const { data, error } = await (supabase as any)
         .from('notifications')
         .select('*')
         .eq('user_id', user.id)
-        .eq('read', false)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
       setNotifications((data || []) as Notification[]);
-      setUnreadCount(data?.length || 0);
+      // Count only unread notifications
+      setUnreadCount(data?.filter(n => !n.read).length || 0);
     } catch (error) {
       console.error('Error loading notifications:', error);
     } finally {
@@ -51,7 +52,10 @@ export const useNotifications = () => {
 
       if (error) throw error;
 
-      setNotifications(prev => prev.filter(n => n.id !== notificationId));
+      // Update the notification in the list instead of removing it
+      setNotifications(prev => prev.map(n => 
+        n.id === notificationId ? { ...n, read: true } : n
+      ));
       setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (error) {
       console.error('Error marking notification as read:', error);
@@ -75,13 +79,43 @@ export const useNotifications = () => {
 
       if (error) throw error;
 
-      setNotifications([]);
+      // Mark all notifications as read in the list instead of clearing it
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
       setUnreadCount(0);
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
       toast({
         title: 'Erro',
         description: 'Não foi possível marcar todas as notificações como lidas',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const deleteNotification = async (notificationId: string) => {
+    try {
+      const { error } = await (supabase as any)
+        .from('notifications')
+        .delete()
+        .eq('id', notificationId);
+
+      if (error) throw error;
+
+      // Remove notification from list
+      setNotifications(prev => prev.filter(n => n.id !== notificationId));
+      // Update unread count if it was unread
+      setNotifications(prev => {
+        const notification = prev.find(n => n.id === notificationId);
+        if (notification && !notification.read) {
+          setUnreadCount(count => Math.max(0, count - 1));
+        }
+        return prev.filter(n => n.id !== notificationId);
+      });
+    } catch (error) {
+      console.error('Error deleting notification:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível eliminar a notificação',
         variant: 'destructive',
       });
     }
@@ -139,5 +173,6 @@ export const useNotifications = () => {
     loadNotifications,
     markAsRead,
     markAllAsRead,
+    deleteNotification,
   };
 };

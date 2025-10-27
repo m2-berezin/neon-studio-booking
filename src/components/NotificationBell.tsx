@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Bell, Check, CheckCheck } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Bell, Check, CheckCheck, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,10 +10,14 @@ import { useNotifications } from '@/hooks/useNotifications';
 import { formatDistanceToNow } from 'date-fns';
 import { pt } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
+import { cn } from '@/lib/utils';
 
 export const NotificationBell = () => {
-  const { notifications, unreadCount, loading, markAsRead, markAllAsRead } = useNotifications();
+  const { notifications, unreadCount, loading, markAsRead, markAllAsRead, deleteNotification } = useNotifications();
   const [open, setOpen] = useState(false);
+  const [swipedNotificationId, setSwipedNotificationId] = useState<string | null>(null);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const navigate = useNavigate();
 
   const handleNotificationClick = async (notificationId: string, isRead: boolean, title: string, body: string) => {
@@ -39,6 +43,36 @@ export const NotificationBell = () => {
 
   const handleMarkAllAsRead = async () => {
     await markAllAsRead();
+  };
+
+  const handleDelete = async (notificationId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    await deleteNotification(notificationId);
+    setSwipedNotificationId(null);
+  };
+
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent, notificationId: string) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = (notificationId: string) => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    
+    if (isLeftSwipe) {
+      setSwipedNotificationId(notificationId);
+    } else {
+      setSwipedNotificationId(null);
+    }
   };
 
   return (
@@ -97,46 +131,54 @@ export const NotificationBell = () => {
               ) : (
                 <div className="space-y-0">
                   {notifications.map((notification, index) => (
-                    <div key={notification.id}>
+                    <div key={notification.id} className="relative overflow-hidden">
                       <div
-                        className={`p-4 cursor-pointer transition-colors hover:bg-muted/50 ${
-                          !notification.read ? 'bg-primary/5 border-l-4 border-l-primary' : ''
-                        }`}
-                        onClick={() => handleNotificationClick(notification.id, notification.read, notification.title, notification.body)}
+                        className={cn(
+                          "relative transition-transform duration-200",
+                          swipedNotificationId === notification.id && "translate-x-[-80px]"
+                        )}
+                        onTouchStart={onTouchStart}
+                        onTouchMove={(e) => onTouchMove(e, notification.id)}
+                        onTouchEnd={() => onTouchEnd(notification.id)}
                       >
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <h4 className={`text-sm font-medium truncate ${
-                                !notification.read ? 'text-foreground' : 'text-muted-foreground'
-                              }`}>
-                                {notification.title}
-                              </h4>
-                              {!notification.read && (
-                                <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0" />
-                              )}
+                        <div
+                          className={`p-4 cursor-pointer transition-colors hover:bg-muted/50 ${
+                            !notification.read ? 'bg-primary/5 border-l-4 border-l-primary' : ''
+                          }`}
+                          onClick={() => handleNotificationClick(notification.id, notification.read, notification.title, notification.body)}
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <h4 className={`text-sm font-medium truncate ${
+                                  !notification.read ? 'text-foreground' : 'text-muted-foreground'
+                                }`}>
+                                  {notification.title}
+                                </h4>
+                                {!notification.read && (
+                                  <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0" />
+                                )}
+                              </div>
+                              <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                                {notification.body}
+                              </p>
+                              <p className="text-xs text-muted-foreground mt-2">
+                                {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true, locale: pt })}
+                              </p>
                             </div>
-                            <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                              {notification.body}
-                            </p>
-                            <p className="text-xs text-muted-foreground mt-2">
-                              {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true, locale: pt })}
-                            </p>
                           </div>
-                          {!notification.read && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                markAsRead(notification.id);
-                              }}
-                            >
-                              <Check className="h-3 w-3" />
-                            </Button>
-                          )}
                         </div>
+                      </div>
+                      {/* Delete button revealed on swipe */}
+                      <div className="absolute right-0 top-0 h-full w-[80px] flex items-center justify-center bg-destructive">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-full w-full text-destructive-foreground hover:bg-destructive/90 hover:text-destructive-foreground"
+                          onClick={(e) => handleDelete(notification.id, e)}
+                        >
+                          <Trash2 className="h-5 w-5" />
+                        </Button>
                       </div>
                       {index < notifications.length - 1 && <Separator />}
                     </div>

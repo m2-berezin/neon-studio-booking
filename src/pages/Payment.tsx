@@ -913,7 +913,7 @@ const Payment = () => {
           <div className="p-4 bg-muted/50 rounded-lg border border-border">
             <p className="text-sm text-muted-foreground leading-relaxed space-y-1">
               <span className="block">O sinal confirma a tua reserva.</span>
-              <span className="block">Cancelamentos com menos de 24 h ou não comparência implicam retenção do sinal.</span>
+              <span className="block">Cancelamentos com menos de 72 horas de antecedência ou No-Show implicam a retenção do sinal (15€).</span>
               <span className="block">Reagendamentos até 72 h antes são gratuitos.</span>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
@@ -932,7 +932,7 @@ const Payment = () => {
                         
                         <p>Cancelamentos até 72 horas antes serão reembolsados integralmente.</p>
                         
-                        <p>Cancelamentos ou no-show com menos de 24 horas de antecedência implicam a retenção do sinal (15€).</p>
+                        <p>Cancelamentos com menos de 72 horas de antecedência ou No-Show implicam a retenção do sinal (15€).</p>
                         
                         <p>Em caso de retenção do sinal, o cliente será notificado por chat da app e o valor retido será reconhecido contabilisticamente como receita.</p>
                         
@@ -986,7 +986,7 @@ const Payment = () => {
                         
                         <p>Cancelamentos até 72 horas antes serão reembolsados integralmente.</p>
                         
-                        <p>Cancelamentos ou no-show com menos de 24 horas de antecedência implicam a retenção do sinal (15€).</p>
+                        <p>Cancelamentos com menos de 72 horas de antecedência ou No-Show implicam a retenção do sinal (15€).</p>
                         
                         <p>Em caso de retenção do sinal, o cliente será notificado por chat da app e o valor retido será reconhecido contabilisticamente como receita.</p>
                         

@@ -144,7 +144,7 @@ const StudioInfo = () => {
             
             <div>
               <h4 className="font-medium mb-2">Política de Não Comparência</h4>
-              <p className="text-sm text-muted-foreground">Faltar à sessão sem aviso resulta na perda do valor do sinal e num período de penalização de 3 meses onde as recompensas não podem ser utilizadas.</p>
+              <p className="text-sm text-muted-foreground">Cancelamentos com menos de 72 horas de antecedência ou No-Show implicam a retenção do sinal (15€).</p>
             </div>
 
             <div>
