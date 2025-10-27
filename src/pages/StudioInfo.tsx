@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { MapPin, Clock, Phone, MessageCircle, ExternalLink, AlertTriangle, CheckCircle, Calendar, Music, Headphones, Mic, Settings, ArrowLeft } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { MapPin, Clock, Phone, MessageCircle, ExternalLink, AlertTriangle, CheckCircle, Calendar, Music, Headphones, Mic, Settings, ArrowLeft, HelpCircle, Info, Mail } from 'lucide-react';
 import StudioGallery from '@/components/StudioGallery';
 
 const StudioInfo = () => {
@@ -181,18 +182,67 @@ const StudioInfo = () => {
       </Card>
 
 
-      {/* Contact Footer */}
-      <Card className="mt-8 border-primary/20 bg-primary/5">
-        <CardContent className="p-6 text-center">
-          <h3 className="font-semibold text-foreground mb-2">Dúvidas?</h3>
-          <p className="text-sm text-muted-foreground mb-4">
-            Algum problema? Entra em contacto comigo.
-          </p>
-          <div className="flex justify-center">
-            <Button variant="outline" onClick={() => window.open(whatsappLink, '_blank')} className="border-green-600 text-green-600 hover:bg-green-50">
-              <MessageCircle className="h-4 w-4 mr-2" />
-              WhatsApp
-            </Button>
+      {/* Info Tabs */}
+      <Card className="mt-8">
+        <CardContent className="p-6">
+          <Tabs defaultValue="info" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="info">
+                <Info className="h-4 w-4 mr-2" />
+                Info
+              </TabsTrigger>
+              <TabsTrigger value="faq">
+                <HelpCircle className="h-4 w-4 mr-2" />
+                FAQ's
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="info" className="mt-4">
+              <div className="text-center p-8">
+                <p className="text-muted-foreground">
+                  Consulta as informações acima sobre localização, horários e políticas do estúdio.
+                </p>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="faq" className="mt-4">
+              <div className="text-center p-8">
+                <p className="text-muted-foreground">
+                  FAQ's em breve...
+                </p>
+              </div>
+            </TabsContent>
+          </Tabs>
+
+          <Separator className="my-6" />
+
+          {/* Navigation Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+            <Card 
+              className="cursor-pointer hover:border-primary/50 transition-colors"
+              onClick={() => navigate('/about')}
+            >
+              <CardContent className="p-4 flex items-center gap-3">
+                <Info className="h-5 w-5 text-primary" />
+                <div className="flex-1">
+                  <h4 className="font-medium">Sobre</h4>
+                  <p className="text-xs text-muted-foreground">Conhece a história do 7T7Studios</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card 
+              className="cursor-pointer hover:border-primary/50 transition-colors"
+              onClick={() => navigate('/contact')}
+            >
+              <CardContent className="p-4 flex items-center gap-3">
+                <Mail className="h-5 w-5 text-primary" />
+                <div className="flex-1">
+                  <h4 className="font-medium">Contactos</h4>
+                  <p className="text-xs text-muted-foreground">Entra em contacto connosco</p>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </CardContent>
       </Card>
