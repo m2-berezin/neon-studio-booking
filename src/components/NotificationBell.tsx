@@ -48,7 +48,7 @@ export const NotificationBell = () => {
   const handleDelete = async (notificationId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     await deleteNotification(notificationId);
-    setSwipedNotificationId(null);
+    setSwipedNotificationId(null); // Reset swipe state after delete
   };
 
   const minSwipeDistance = 50;

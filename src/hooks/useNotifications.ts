@@ -94,6 +94,10 @@ export const useNotifications = () => {
 
   const deleteNotification = async (notificationId: string) => {
     try {
+      // First find if the notification is unread before deleting
+      const notification = notifications.find(n => n.id === notificationId);
+      const wasUnread = notification && !notification.read;
+
       const { error } = await (supabase as any)
         .from('notifications')
         .delete()
@@ -103,14 +107,11 @@ export const useNotifications = () => {
 
       // Remove notification from list
       setNotifications(prev => prev.filter(n => n.id !== notificationId));
+      
       // Update unread count if it was unread
-      setNotifications(prev => {
-        const notification = prev.find(n => n.id === notificationId);
-        if (notification && !notification.read) {
-          setUnreadCount(count => Math.max(0, count - 1));
-        }
-        return prev.filter(n => n.id !== notificationId);
-      });
+      if (wasUnread) {
+        setUnreadCount(prev => Math.max(0, prev - 1));
+      }
     } catch (error) {
       console.error('Error deleting notification:', error);
       toast({
