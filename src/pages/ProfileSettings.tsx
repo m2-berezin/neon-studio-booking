@@ -143,9 +143,9 @@ const ProfileSettings = () => {
         description: 'A tua conta foi eliminada permanentemente.'
       });
 
-      // Sign out and redirect to home
+      // Sign out and redirect to auth page
       await signOut();
-      navigate('/');
+      navigate('/auth');
     } catch (error: any) {
       toast({
         title: 'Erro',
