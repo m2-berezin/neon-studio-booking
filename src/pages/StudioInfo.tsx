@@ -86,7 +86,7 @@ const StudioInfo = () => {
               <p className="text-foreground font-medium mb-2">{studioLocation}</p>
               <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                 <p className="text-xs text-blue-700">
-                  A morada exata será disponibilizada após pagamento da sessão
+                  Morada exata será disponibilizada após pagamento da sessão
                 </p>
               </div>
             </div>
