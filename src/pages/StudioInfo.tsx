@@ -1,15 +1,18 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MapPin, Clock, Phone, MessageCircle, ExternalLink, AlertTriangle, CheckCircle, Calendar, Music, Headphones, Mic, Settings, ArrowLeft, HelpCircle, Info, Mail } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { MapPin, Clock, Phone, MessageCircle, ExternalLink, AlertTriangle, CheckCircle, Calendar, Music, Headphones, Mic, Settings, ArrowLeft, Instagram, Mail } from 'lucide-react';
 import StudioGallery from '@/components/StudioGallery';
 
 const StudioInfo = () => {
   const navigate = useNavigate();
+  const [aboutOpen, setAboutOpen] = useState(false);
+  const [faqOpen, setFaqOpen] = useState(false);
+  const [contactOpen, setContactOpen] = useState(false);
   
   // Scroll to top when page loads
   useEffect(() => {
@@ -182,70 +185,122 @@ const StudioInfo = () => {
       </Card>
 
 
-      {/* Info Tabs */}
-      <Card className="mt-8">
-        <CardContent className="p-6">
-          <Tabs defaultValue="info" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="info">
-                <Info className="h-4 w-4 mr-2" />
-                Info
-              </TabsTrigger>
-              <TabsTrigger value="faq">
-                <HelpCircle className="h-4 w-4 mr-2" />
-                FAQ's
-              </TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="info" className="mt-4">
-              <div className="text-center p-8">
-                <p className="text-muted-foreground">
-                  Consulta as informações acima sobre localização, horários e políticas do estúdio.
-                </p>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="faq" className="mt-4">
-              <div className="text-center p-8">
-                <p className="text-muted-foreground">
-                  FAQ's em breve...
-                </p>
-              </div>
-            </TabsContent>
-          </Tabs>
+      {/* Footer Links */}
+      <div className="mt-12 pb-6 text-center border-t pt-6">
+        <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+          <button 
+            onClick={() => setAboutOpen(true)}
+            className="hover:text-foreground transition-colors hover:underline"
+          >
+            Sobre
+          </button>
+          <span>/</span>
+          <button 
+            onClick={() => setFaqOpen(true)}
+            className="hover:text-foreground transition-colors hover:underline"
+          >
+            FAQ's
+          </button>
+          <span>/</span>
+          <button 
+            onClick={() => setContactOpen(true)}
+            className="hover:text-foreground transition-colors hover:underline"
+          >
+            Contactos
+          </button>
+        </div>
+      </div>
 
-          <Separator className="my-6" />
-
-          {/* Navigation Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-            <Card 
-              className="cursor-pointer hover:border-primary/50 transition-colors"
-              onClick={() => navigate('/about')}
-            >
-              <CardContent className="p-4 flex items-center gap-3">
-                <Info className="h-5 w-5 text-primary" />
-                <div className="flex-1">
-                  <h4 className="font-medium">Sobre</h4>
-                  <p className="text-xs text-muted-foreground">Conhece a história do 7T7Studios</p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card 
-              className="cursor-pointer hover:border-primary/50 transition-colors"
-              onClick={() => navigate('/contact')}
-            >
-              <CardContent className="p-4 flex items-center gap-3">
-                <Mail className="h-5 w-5 text-primary" />
-                <div className="flex-1">
-                  <h4 className="font-medium">Contactos</h4>
-                  <p className="text-xs text-muted-foreground">Entra em contacto connosco</p>
-                </div>
-              </CardContent>
-            </Card>
+      {/* Sobre Dialog */}
+      <Dialog open={aboutOpen} onOpenChange={setAboutOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Sobre 7T7Studios</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-foreground leading-relaxed">
+              7T7Studios foi criada por <span className="font-semibold">Ghost Wayne</span>. Um rapper, produtor, 
+              engenheiro de som, compositor, que dedicou a sua vida a aperfeiçoar a sua arte.
+            </p>
+            <p className="text-foreground leading-relaxed">
+              Agora com o seu espaço permite-nos criar a nossa música, e dispõe do seu conhecimento 
+              adquirido, para nos ajudar a alcançar os nossos objetivos.
+            </p>
+            <p className="text-foreground leading-relaxed">
+              Procura mais sobre Ghost Wayne e segue nas redes sociais <span className="font-semibold">@ghostwayne_</span>
+            </p>
+            <div className="pt-2">
+              <Button 
+                onClick={() => window.open('https://instagram.com/ghostwayne_', '_blank')}
+                className="gap-2"
+              >
+                <Instagram className="h-4 w-4" />
+                Seguir @ghostwayne_
+              </Button>
+            </div>
           </div>
-        </CardContent>
-      </Card>
+        </DialogContent>
+      </Dialog>
+
+      {/* FAQ's Dialog */}
+      <Dialog open={faqOpen} onOpenChange={setFaqOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>FAQ's</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-muted-foreground">
+              FAQ's em breve...
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Contactos Dialog */}
+      <Dialog open={contactOpen} onOpenChange={setContactOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Contactos</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div>
+              <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+                <MessageCircle className="h-5 w-5 text-green-600" />
+                WhatsApp
+              </h4>
+              <p className="text-muted-foreground mb-3 text-sm">
+                Contacta-nos diretamente via WhatsApp para respostas rápidas
+              </p>
+              <Button 
+                onClick={() => window.open(whatsappLink, '_blank')}
+                className="border-green-600 text-green-600 hover:bg-green-50"
+                variant="outline"
+              >
+                <MessageCircle className="h-4 w-4 mr-2" />
+                Abrir WhatsApp
+              </Button>
+            </div>
+
+            <Separator />
+
+            <div>
+              <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+                <Mail className="h-5 w-5 text-primary" />
+                Email
+              </h4>
+              <p className="text-muted-foreground mb-3 text-sm">
+                Envia-nos um email para questões mais detalhadas
+              </p>
+              <a 
+                href="mailto:ghostwayne777@hotmail.com"
+                className="text-primary hover:underline font-medium"
+              >
+                ghostwayne777@hotmail.com
+              </a>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>;
 };
 export default StudioInfo;
