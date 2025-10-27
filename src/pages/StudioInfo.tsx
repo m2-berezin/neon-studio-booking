@@ -223,15 +223,15 @@ const StudioInfo = () => {
               engenheiro de som, compositor, que dedicou a sua vida a aperfeiçoar a sua arte.
             </p>
             <p className="text-foreground leading-relaxed">
-              Agora com o seu espaço permite-nos criar a nossa música, e dispõe do seu conhecimento 
-              adquirido, para nos ajudar a alcançar os nossos objetivos.
+              Agora com o seu espaço, permite-nos criar a nossa música, e dispõe do seu conhecimento 
+              adquirido ao longo do seu trajeto profissional/pessoal, para nos ajudar a alcançar os nossos objetivos.
             </p>
             <p className="text-foreground leading-relaxed">
-              Procura mais sobre Ghost Wayne e segue nas redes sociais <span className="font-semibold">@ghostwayne_</span>
+              Sabe mais sobre Ghost Wayne e segue nas redes sociais <span className="font-semibold">@ghostwayne_</span>
             </p>
             <div className="pt-2">
               <Button 
-                onClick={() => window.open('https://instagram.com/ghostwayne_', '_blank')}
+                onClick={() => window.open('https://www.instagram.com/ghostwayne_', '_blank')}
                 className="gap-2"
               >
                 <Instagram className="h-4 w-4" />
