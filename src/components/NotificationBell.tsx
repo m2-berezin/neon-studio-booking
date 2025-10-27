@@ -134,7 +134,7 @@ export const NotificationBell = () => {
                     <div key={notification.id} className="relative overflow-hidden">
                       <div
                         className={cn(
-                          "relative transition-transform duration-200",
+                          "relative transition-transform duration-200 bg-background",
                           swipedNotificationId === notification.id && "translate-x-[-80px]"
                         )}
                         onTouchStart={onTouchStart}
@@ -169,8 +169,8 @@ export const NotificationBell = () => {
                           </div>
                         </div>
                       </div>
-                      {/* Delete button revealed on swipe */}
-                      <div className="absolute right-0 top-0 h-full w-[80px] flex items-center justify-center bg-destructive">
+                      {/* Delete button revealed on swipe - positioned behind the notification */}
+                      <div className="absolute right-0 top-0 h-full w-[80px] flex items-center justify-center bg-destructive -z-10">
                         <Button
                           variant="ghost"
                           size="sm"
