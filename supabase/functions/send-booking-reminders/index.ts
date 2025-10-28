@@ -58,8 +58,8 @@ Deno.serve(async (req) => {
           .from('notifications')
           .select('id')
           .eq('user_id', booking.user_id)
-          .ilike('body', `%${booking.id}%`)
           .ilike('body', '%3 dias%')
+          .gte('created_at', new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString())
           .single();
 
         if (check72hError && check72hError.code !== 'PGRST116') {
@@ -80,7 +80,7 @@ Deno.serve(async (req) => {
             user_id: booking.user_id,
             role: 'user',
             title: 'Lembrete de Reserva',
-            body: `Tens sessão agendada para daqui a 3 dias! Caso queiras reagendar, manda mensagem no chat ao Ghost! (ID: ${booking.id})`,
+            body: 'Tens sessão agendada para daqui a 3 dias! Caso queiras reagendar, manda mensagem no chat ao Ghost!',
             read: false,
           });
 
@@ -122,8 +122,8 @@ Deno.serve(async (req) => {
           .from('notifications')
           .select('id')
           .eq('user_id', booking.user_id)
-          .ilike('body', `%${booking.id}%`)
           .ilike('body', '%amanhã%')
+          .gte('created_at', new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString())
           .single();
 
         if (check24hError && check24hError.code !== 'PGRST116') {
@@ -144,7 +144,7 @@ Deno.serve(async (req) => {
             user_id: booking.user_id,
             role: 'user',
             title: 'Lembrete de Reserva',
-            body: `A tua sessão é já amanhã! Até já 🦇 (ID: ${booking.id})`,
+            body: 'A tua sessão é já amanhã! Até já 🦇',
             read: false,
           });
 
