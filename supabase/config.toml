@@ -3,3 +3,5 @@ project_id = "esuascsrlfdbcpikzvlq"
 [functions.send-mixmaster-email]
 verify_jwt = false
 
+[functions.send-booking-reminders]
+verify_jwt = false
