@@ -269,16 +269,10 @@ const ProfileSettings = () => {
             <div>
               <Label>Lembretes de Reservas</Label>
               <p className="text-sm text-muted-foreground">
-                Notificação uma semana antes da tua reserva
+                Notificação 72 horas antes da tua reserva
               </p>
             </div>
             <Switch checked={notificationSettings.bookingReminders} onCheckedChange={() => toggleSetting('bookingReminders')} />
-          </div>
-
-          <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-            <p className="text-sm text-red-800">
-              ⚠️ As notificações por email foram removidas conforme solicitado.
-            </p>
           </div>
         </CardContent>
       </Card>
