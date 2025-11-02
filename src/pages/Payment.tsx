@@ -283,6 +283,21 @@ const Payment = () => {
           return;
         }
 
+        // Create notification for the user
+        try {
+          await supabase
+            .from('notifications')
+            .insert({
+              user_id: user.id,
+              title: 'Pedido Enviado',
+              body: 'Subscrição pendente de verificação de pagamento. Aguarda aprovação do administrador.',
+              read: false
+            });
+        } catch (notifError) {
+          console.error('Error creating notification:', notifError);
+          // Don't fail the whole process if notification fails
+        }
+
         toast({
           title: 'Pedido Enviado ✅',
           description: 'Subscrição pendente de verificação de pagamento. Aguarda aprovação do administrador.',
@@ -451,6 +466,21 @@ const Payment = () => {
         }
         
         await sendMessage(ADMIN_ID, messageContent);
+
+        // Create notification for the user
+        try {
+          await supabase
+            .from('notifications')
+            .insert({
+              user_id: user.id,
+              title: 'Pedido Enviado',
+              body: 'Reserva de sessão pendente de verificação de pagamento. Aguarde aprovação do administrador.',
+              read: false
+            });
+        } catch (notifError) {
+          console.error('Error creating notification:', notifError);
+          // Don't fail the whole process if notification fails
+        }
 
         toast({
           title: 'Pedido Enviado ✅',
