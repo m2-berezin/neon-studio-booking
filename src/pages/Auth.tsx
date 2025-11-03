@@ -323,18 +323,6 @@ const Auth = () => {
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? 'A iniciar sessão...' : 'Iniciar Sessão'}
               </Button>
-              
-              <div className="mt-4 text-center">
-                <Button 
-                  type="button" 
-                  variant="link" 
-                  className="text-sm text-muted-foreground hover:text-primary"
-                  onClick={handleResendConfirmation}
-                  disabled={loading}
-                >
-                  Não recebeste o email de confirmação? Reenviar
-                </Button>
-              </div>
             </form>
           </TabsContent>
           
