@@ -256,63 +256,63 @@ const StudioInfo = () => {
           <div className="py-4">
             <Accordion type="single" collapsible className="w-full">
               <AccordionItem value="item-1">
-                <AccordionTrigger>Fiz uma reserva, e agora?</AccordionTrigger>
+                <AccordionTrigger className="text-left text-sm">Fiz uma reserva, e agora?</AccordionTrigger>
                 <AccordionContent>
                   Todas as reservas dependem da confirmação de pagamento. Na tua tab Projetos, tens informação sobre as sessões confirmadas, e as sessões que aguardam confirmação. Serás notificado quando a sessão for aceite/recusada pelo Ghost.
                 </AccordionContent>
               </AccordionItem>
 
               <AccordionItem value="item-2">
-                <AccordionTrigger>A minha sessão foi recusada, porquê?</AccordionTrigger>
+                <AccordionTrigger className="text-left text-sm">A minha sessão foi recusada, porquê?</AccordionTrigger>
                 <AccordionContent>
                   Se a tua sessão foi recusada não foi um erro. Experimenta marcar para outra hora nesse dia, ou até mesmo, um outro dia. Se o problema persistir, contacta o Ghost pelo chat da app!
                 </AccordionContent>
               </AccordionItem>
 
               <AccordionItem value="item-3">
-                <AccordionTrigger>A reserva foi recusada mas eu já paguei o sinal, e agora?</AccordionTrigger>
+                <AccordionTrigger className="text-left text-sm">A reserva foi recusada mas eu já paguei o sinal, e agora?</AccordionTrigger>
                 <AccordionContent>
                   Experimenta marcar para outro dia/hora, clica em já paguei (pois o valor do sinal já está pago), e aguarda confirmação. Caso não tenciones agendar, envia mensagem ao Ghost pelo chat da app a pedir o reembolso.
                 </AccordionContent>
               </AccordionItem>
 
               <AccordionItem value="item-4">
-                <AccordionTrigger>Métodos de Pagamento?</AccordionTrigger>
+                <AccordionTrigger className="text-left text-sm">Métodos de Pagamento?</AccordionTrigger>
                 <AccordionContent>
                   Aceitamos pagamentos através de: MB WAY / Revolut / Transferência bancária / Paypal / Crypto
                 </AccordionContent>
               </AccordionItem>
 
               <AccordionItem value="item-5">
-                <AccordionTrigger>Enviei o meu projeto para Mix&Master e esqueci me de uns ficheiros, e agora?</AccordionTrigger>
+                <AccordionTrigger className="text-left text-sm">Enviei o meu projeto para Mix&Master e esqueci me de uns ficheiros, e agora?</AccordionTrigger>
                 <AccordionContent>
                   Envia mensagem no chat da app ao Ghost a explicar o sucedido, e envia juntamente o link para download com o que faltava.
                 </AccordionContent>
               </AccordionItem>
 
               <AccordionItem value="item-6">
-                <AccordionTrigger>Pretendo gravar um Cover, o valor é o mesmo?</AccordionTrigger>
+                <AccordionTrigger className="text-left text-sm">Pretendo gravar um Cover, o valor é o mesmo?</AccordionTrigger>
                 <AccordionContent>
                   Para covers, marca sessão apenas para Captação, com o número de horas que achares necessário. Dependendo do conceito/duração do cover, o valor da mix&master é ajustado. (em média ronda os 20€)
                 </AccordionContent>
               </AccordionItem>
 
               <AccordionItem value="item-7">
-                <AccordionTrigger>Posso levar guitarra para gravar e cantar por cima?</AccordionTrigger>
+                <AccordionTrigger className="text-left text-sm">Posso levar guitarra para gravar e cantar por cima?</AccordionTrigger>
                 <AccordionContent>
                   Sim podes, reserva a tua sessão e após confirmação envia mensagem ao Ghost no chat da app a falar um pouco sobre o teu projeto para ele ter tudo pronto para quando chegares! Atenção: o estúdio dispõe apenas de interface de audio, não tem amplificador/pedais. Nestes casos são usados plugins para emular os efeitos pretendidos.
                 </AccordionContent>
               </AccordionItem>
 
               <AccordionItem value="item-8">
-                <AccordionTrigger>Somos 2 pessoas no projeto, o valor é o mesmo?</AccordionTrigger>
+                <AccordionTrigger className="text-left text-sm">Somos 2 pessoas no projeto, o valor é o mesmo?</AccordionTrigger>
                 <AccordionContent>
                   Sim, o valor é igual. Atenção ao número de horas de captação, talvez 3h para 2 pessoas, o pack de 70€ possa não chegar. Caso precisem de mais, reservem apenas sessão de Captação com o número de horas pretendidas, e depois a Mix & Master é cobrada à parte (40€).
                 </AccordionContent>
               </AccordionItem>
 
               <AccordionItem value="item-9">
-                <AccordionTrigger>Posso levar videomaker para fazer um vlog? / Posso fazer videoclip no estúdio?</AccordionTrigger>
+                <AccordionTrigger className="text-left text-sm">Posso levar videomaker para fazer um vlog? / Posso fazer videoclip no estúdio?</AccordionTrigger>
                 <AccordionContent>
                   Sim, dependendo do conceito, número de pessoas, e dia, podes sim agendar uma "sessão" para com esse objetivo. Envia mensagem ao Ghost no chat da app ANTES DE RESERVAR A SESSÂO para falarem sobre os detalhes.
                 </AccordionContent>
