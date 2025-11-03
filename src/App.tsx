@@ -28,6 +28,7 @@ import AdminMessages from "@/pages/AdminMessages";
 import AdminSubscriptions from "@/pages/AdminSubscriptions";
 import AdminProjects from "@/pages/AdminProjects";
 import AdminReferrals from "@/pages/AdminReferrals";
+import AdminBilling from "@/pages/AdminBilling";
 import StudioInfo from "@/pages/StudioInfo";
 import MixMaster from "./pages/MixMaster";
 import Payment from "./pages/Payment";
@@ -85,6 +86,7 @@ const App = () => {
                 {/* Admin Routes - AdminLayout is already inside each page */}
             <Route path="/admin/bookings" element={<AdminBookings />} />
             <Route path="/admin/payments" element={<AdminPayments />} />
+            <Route path="/admin/billing" element={<AdminBilling />} />
             <Route path="/admin/messages" element={<AdminMessages />} />
             <Route path="/admin/subscriptions" element={<AdminSubscriptions />} />
             <Route path="/admin/projects" element={<AdminProjects />} />

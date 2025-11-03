@@ -631,7 +631,7 @@ const AdminDashboard = () => {
       bgColor: 'bg-green-500/10',
     },
     {
-      title: 'Receita Mensal',
+      title: 'Faturação',
       value: formatPrice(stats.monthlyRevenue),
       icon: TrendingUp,
       color: 'text-purple-500',
@@ -673,8 +673,8 @@ const AdminDashboard = () => {
       {/* Stats Grid - Asymmetric Mobile Layout */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
         {statCards.map((stat, index) => {
-          const isClickable = index === 0 || index === 3; // Total de Reservas or Receita Mensal
-          const navPath = index === 0 ? '/admin/bookings' : '/admin/payments';
+          const isClickable = index === 0 || index === 3; // Total de Reservas or Faturação
+          const navPath = index === 0 ? '/admin/bookings' : '/admin/billing';
           
           return (
             <Card 
