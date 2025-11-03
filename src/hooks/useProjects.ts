@@ -175,41 +175,8 @@ export const useProjects = () => {
           is_mixmaster: false,
         }));
       
-      // Load pending Mix & Master projects
-      // @ts-ignore - Type inference issue with payment_requests query
-      const { data: pendingMixData, error: pendingMixError } = await supabase
-        .from('payment_requests')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('request_type', 'reservation')
-        .eq('status', 'pending')
-        .order('created_at', { ascending: false });
-
-      if (pendingMixError) throw pendingMixError;
-      
-      const pendingMixProjects: Project[] = (pendingMixData || []).map((mix: any) => {
-        const hasCaptacao = (mix.service_name || '').toLowerCase().includes('capta');
-        
-        return {
-          id: mix.id,
-          title: mix.service_name || 'Mix & Master',
-          description: 'Aguardando Confirmação',
-          address: hasCaptacao ? 'Rua Abade Correia da Serra 20A, 2865-207 Fernão Ferro' : '',
-          date_day: mix.starts_at || mix.created_at,
-          start_time: mix.starts_at || mix.created_at,
-          end_time: mix.ends_at || mix.created_at,
-          status: 'pending',
-          user_id: user.id,
-          created_at: mix.created_at,
-          is_mixmaster: true,
-          is_booking: false,
-          transfer_link: mix.transfer_link,
-          note: mix.note,
-        };
-      });
-      
-      // Combine pending projects
-      const allPendingProjects = [...pendingBookingProjects, ...pendingMixProjects].sort(
+      // Combine pending projects (only bookings - Mix&Master pending are not shown here)
+      const allPendingProjects = [...pendingBookingProjects].sort(
         (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       );
       
