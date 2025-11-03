@@ -129,20 +129,6 @@ const Projects = () => {
 
                     <CardContent>
                       <div className="space-y-3">
-                        {project.address && (
-                          <div className="flex items-start gap-2 text-sm">
-                            <Folder className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                            <a 
-                              href="https://maps.google.com/?q=Rua+Abade+Correia+da+Serra+20A,+2865-207+Fernão+Ferro"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-muted-foreground hover:text-primary transition-colors underline cursor-pointer"
-                            >
-                              {project.address}
-                            </a>
-                          </div>
-                        )}
-
                         <div className="flex items-center gap-2 text-sm">
                           <Clock className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                           <span className="font-medium text-foreground">
