@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, Clock, Euro, User } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, Euro, User, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { format } from 'date-fns';
+import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { pt } from 'date-fns/locale';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface BookingWithProfile {
   id: string;
@@ -24,8 +25,11 @@ const AdminBilling = () => {
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
   const [bookings, setBookings] = useState<BookingWithProfile[]>([]);
+  const [allBookings, setAllBookings] = useState<BookingWithProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalRevenue, setTotalRevenue] = useState(0);
+  const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
+  const [selectedYear, setSelectedYear] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isAdmin()) {
@@ -68,6 +72,7 @@ const AdminBilling = () => {
           })
         );
 
+        setAllBookings(bookingsWithProfiles);
         setBookings(bookingsWithProfiles);
 
         // Calculate total revenue
@@ -85,6 +90,59 @@ const AdminBilling = () => {
 
     fetchBookings();
   }, []);
+
+  // Filter bookings when month/year changes
+  useEffect(() => {
+    if (!selectedMonth || !selectedYear) {
+      setBookings(allBookings);
+      const total = allBookings.reduce(
+        (sum, booking) => sum + (booking.price_eur_snapshot || 0),
+        0
+      );
+      setTotalRevenue(total);
+      return;
+    }
+
+    const monthNum = parseInt(selectedMonth);
+    const yearNum = parseInt(selectedYear);
+    
+    const filtered = allBookings.filter(booking => {
+      const bookingDate = new Date(booking.starts_at);
+      return bookingDate.getMonth() + 1 === monthNum && bookingDate.getFullYear() === yearNum;
+    });
+
+    setBookings(filtered);
+    
+    const total = filtered.reduce(
+      (sum, booking) => sum + (booking.price_eur_snapshot || 0),
+      0
+    );
+    setTotalRevenue(total);
+  }, [selectedMonth, selectedYear, allBookings]);
+
+  const handleClearFilter = () => {
+    setSelectedMonth(null);
+    setSelectedYear(null);
+  };
+
+  // Generate available years (from 2020 to current year + 1)
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: currentYear - 2019 + 2 }, (_, i) => (2020 + i).toString());
+  
+  const months = [
+    { value: '1', label: 'Janeiro' },
+    { value: '2', label: 'Fevereiro' },
+    { value: '3', label: 'Março' },
+    { value: '4', label: 'Abril' },
+    { value: '5', label: 'Maio' },
+    { value: '6', label: 'Junho' },
+    { value: '7', label: 'Julho' },
+    { value: '8', label: 'Agosto' },
+    { value: '9', label: 'Setembro' },
+    { value: '10', label: 'Outubro' },
+    { value: '11', label: 'Novembro' },
+    { value: '12', label: 'Dezembro' },
+  ];
 
   const formatPrice = (price: number) => {
     return `${price.toFixed(2)}€`;
@@ -108,13 +166,58 @@ const AdminBilling = () => {
           Faturação Total
         </h1>
         <p className="text-muted-foreground mb-4">
-          Histórico de todas as reservas confirmadas
+          Histórico de {selectedMonth && selectedYear ? 'reservas do período selecionado' : 'todas as reservas confirmadas'}
         </p>
+
+        {/* Month/Year Filter */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
+          <Select value={selectedMonth || ''} onValueChange={(value) => setSelectedMonth(value || null)}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Selecionar mês" />
+            </SelectTrigger>
+            <SelectContent>
+              {months.map((month) => (
+                <SelectItem key={month.value} value={month.value}>
+                  {month.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={selectedYear || ''} onValueChange={(value) => setSelectedYear(value || null)}>
+            <SelectTrigger className="w-[140px]">
+              <SelectValue placeholder="Selecionar ano" />
+            </SelectTrigger>
+            <SelectContent>
+              {years.map((year) => (
+                <SelectItem key={year} value={year}>
+                  {year}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {(selectedMonth || selectedYear) && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleClearFilter}
+              className="gap-2"
+            >
+              <X className="h-4 w-4" />
+              Limpar
+            </Button>
+          )}
+        </div>
         
         {/* Total Revenue Card */}
         <Card className="max-w-md mx-auto">
           <CardHeader>
-            <CardTitle className="text-sm text-muted-foreground">Receita Total</CardTitle>
+            <CardTitle className="text-sm text-muted-foreground">
+              {selectedMonth && selectedYear 
+                ? `Receita - ${months.find(m => m.value === selectedMonth)?.label} ${selectedYear}`
+                : 'Receita Total'}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-center gap-2 text-3xl font-bold text-accent">
