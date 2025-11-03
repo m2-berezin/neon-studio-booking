@@ -473,7 +473,7 @@ const Rewards = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Star className="w-5 h-5 text-primary flex-shrink-0" />
-                  Compra 2h de gravação, ganha + 1h grátis
+                  Compra 2h de Gravação, Ganha + 1h Grátis
                 </CardTitle>
                 <CardDescription className="min-h-[40px]">
                   {recordingOffer.description || `3 horas totais de gravação por apenas €20`}
