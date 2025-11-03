@@ -27,6 +27,7 @@ const AdminBilling = () => {
   const [bookings, setBookings] = useState<BookingWithProfile[]>([]);
   const [allBookings, setAllBookings] = useState<BookingWithProfile[]>([]);
   const [loading, setLoading] = useState(true);
+  const [monthlyRevenue, setMonthlyRevenue] = useState(0);
   const [totalRevenue, setTotalRevenue] = useState(0);
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
   const [selectedYear, setSelectedYear] = useState<string | null>(null);
@@ -93,13 +94,16 @@ const AdminBilling = () => {
 
   // Filter bookings when month/year changes
   useEffect(() => {
+    // Calculate total revenue from all bookings
+    const total = allBookings.reduce(
+      (sum, booking) => sum + (booking.price_eur_snapshot || 0),
+      0
+    );
+    setTotalRevenue(total);
+
     if (!selectedMonth || !selectedYear) {
       setBookings(allBookings);
-      const total = allBookings.reduce(
-        (sum, booking) => sum + (booking.price_eur_snapshot || 0),
-        0
-      );
-      setTotalRevenue(total);
+      setMonthlyRevenue(0);
       return;
     }
 
@@ -113,11 +117,11 @@ const AdminBilling = () => {
 
     setBookings(filtered);
     
-    const total = filtered.reduce(
+    const monthly = filtered.reduce(
       (sum, booking) => sum + (booking.price_eur_snapshot || 0),
       0
     );
-    setTotalRevenue(total);
+    setMonthlyRevenue(monthly);
   }, [selectedMonth, selectedYear, allBookings]);
 
   const handleClearFilter = () => {
@@ -125,9 +129,11 @@ const AdminBilling = () => {
     setSelectedYear(null);
   };
 
-  // Generate available years (from 2020 to current year + 1)
+  // Generate available years (from 2025 to current year + 1)
   const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: currentYear - 2019 + 2 }, (_, i) => (2020 + i).toString());
+  const startYear = 2025;
+  const endYear = Math.max(currentYear + 1, startYear);
+  const years = Array.from({ length: endYear - startYear + 1 }, (_, i) => (startYear + i).toString());
   
   const months = [
     { value: '1', label: 'Janeiro' },
@@ -168,6 +174,45 @@ const AdminBilling = () => {
         <p className="text-muted-foreground mb-4">
           Histórico de {selectedMonth && selectedYear ? 'reservas do período selecionado' : 'todas as reservas confirmadas'}
         </p>
+        
+        {/* Revenue Cards */}
+        <div className="max-w-md mx-auto space-y-4 mb-6">
+          {selectedMonth && selectedYear && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm text-muted-foreground">
+                  Receita Mensal - {months.find(m => m.value === selectedMonth)?.label} {selectedYear}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-center gap-2 text-3xl font-bold text-accent">
+                  <Euro className="h-8 w-8" />
+                  <span>{formatPrice(monthlyRevenue)}</span>
+                </div>
+                <p className="text-sm text-muted-foreground mt-2">
+                  {bookings.length} {bookings.length === 1 ? 'sessão confirmada' : 'sessões confirmadas'}
+                </p>
+              </CardContent>
+            </Card>
+          )}
+          
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm text-muted-foreground">
+                Receita Total
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-center gap-2 text-3xl font-bold text-accent">
+                <Euro className="h-8 w-8" />
+                <span>{formatPrice(totalRevenue)}</span>
+              </div>
+              <p className="text-sm text-muted-foreground mt-2">
+                {allBookings.length} {allBookings.length === 1 ? 'sessão confirmada' : 'sessões confirmadas'}
+              </p>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Month/Year Filter */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
@@ -209,26 +254,6 @@ const AdminBilling = () => {
             </Button>
           )}
         </div>
-        
-        {/* Total Revenue Card */}
-        <Card className="max-w-md mx-auto">
-          <CardHeader>
-            <CardTitle className="text-sm text-muted-foreground">
-              {selectedMonth && selectedYear 
-                ? `Receita - ${months.find(m => m.value === selectedMonth)?.label} ${selectedYear}`
-                : 'Receita Total'}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-center gap-2 text-3xl font-bold text-accent">
-              <Euro className="h-8 w-8" />
-              <span>{formatPrice(totalRevenue)}</span>
-            </div>
-            <p className="text-sm text-muted-foreground mt-2">
-              {bookings.length} {bookings.length === 1 ? 'sessão confirmada' : 'sessões confirmadas'}
-            </p>
-          </CardContent>
-        </Card>
       </div>
 
       {loading ? (

@@ -168,14 +168,20 @@ const AdminDashboard = () => {
 
       const clientsCount = (activeUsersCount as number) || 0;
 
-      // Load total revenue from all confirmed bookings
+      // Load monthly revenue from current month's confirmed bookings
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+
       const { data: confirmedBookings, error: revenueError } = await supabase
         .from('bookings')
         .select('price_eur_snapshot')
-        .eq('status', 'confirmed');
+        .eq('status', 'confirmed')
+        .gte('starts_at', startOfMonth.toISOString())
+        .lte('starts_at', endOfMonth.toISOString());
 
       if (revenueError) {
-        console.error('Error loading total revenue:', revenueError);
+        console.error('Error loading monthly revenue:', revenueError);
       }
 
       const totalRevenue = (confirmedBookings || []).reduce(
