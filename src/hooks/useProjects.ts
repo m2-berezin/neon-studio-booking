@@ -34,6 +34,7 @@ export const useProjects = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
+  const [pendingProjects, setPendingProjects] = useState<Project[]>([]);
 
   useEffect(() => {
     if (user) {
@@ -79,6 +80,17 @@ export const useProjects = () => {
         .order('created_at', { ascending: false });
 
       if (bookingsError) throw bookingsError;
+      
+      // Load pending bookings (awaiting confirmation)
+      const { data: pendingBookingsData, error: pendingBookingsError } = await supabase
+        .from('bookings')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('status', 'pending')
+        .eq('hidden_from_client', false)
+        .order('created_at', { ascending: false });
+
+      if (pendingBookingsError) throw pendingBookingsError;
       
       // Load Mix & Master projects
       // @ts-ignore - RPC exists in DB
@@ -143,14 +155,74 @@ export const useProjects = () => {
       console.log('[PROJECTS] ✅ Mapped mix projects:', mixProjects.length);
       console.log('[PROJECTS] ✅ Mapped booking projects:', bookingProjects.length);
       
-      // Combine and sort by created_at
+      // Map pending bookings
+      const pendingBookingProjects: Project[] = (pendingBookingsData || [])
+        .filter((booking: any) => {
+          const serviceName = booking.service_name_snapshot || '';
+          return !serviceName.toLowerCase().includes('mix') && !serviceName.toLowerCase().includes('master');
+        })
+        .map((booking: any) => ({
+          id: booking.id,
+          title: booking.service_name_snapshot || 'Sessão de Estúdio',
+          description: 'Aguardando Confirmação',
+          address: 'Rua Abade Correia da Serra 20A, 2865-207 Fernão Ferro',
+          date_day: booking.starts_at,
+          start_time: booking.starts_at,
+          end_time: booking.ends_at,
+          status: 'pending',
+          user_id: booking.user_id,
+          created_at: booking.created_at,
+          is_mixmaster: false,
+        }));
+      
+      // Load pending Mix & Master projects
+      // @ts-ignore - Type inference issue with payment_requests query
+      const { data: pendingMixData, error: pendingMixError } = await supabase
+        .from('payment_requests')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('request_type', 'reservation')
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false });
+
+      if (pendingMixError) throw pendingMixError;
+      
+      const pendingMixProjects: Project[] = (pendingMixData || []).map((mix: any) => {
+        const hasCaptacao = (mix.service_name || '').toLowerCase().includes('capta');
+        
+        return {
+          id: mix.id,
+          title: mix.service_name || 'Mix & Master',
+          description: 'Aguardando Confirmação',
+          address: hasCaptacao ? 'Rua Abade Correia da Serra 20A, 2865-207 Fernão Ferro' : '',
+          date_day: mix.starts_at || mix.created_at,
+          start_time: mix.starts_at || mix.created_at,
+          end_time: mix.ends_at || mix.created_at,
+          status: 'pending',
+          user_id: user.id,
+          created_at: mix.created_at,
+          is_mixmaster: true,
+          is_booking: false,
+          transfer_link: mix.transfer_link,
+          note: mix.note,
+        };
+      });
+      
+      // Combine pending projects
+      const allPendingProjects = [...pendingBookingProjects, ...pendingMixProjects].sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+      
+      // Combine and sort confirmed projects by created_at
       const allProjects = [...bookingProjects, ...mixProjects].sort(
         (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       );
       
-      console.log('[PROJECTS] ✅ Total projects to display:', allProjects.length);
+      console.log('[PROJECTS] ✅ Total confirmed projects:', allProjects.length);
+      console.log('[PROJECTS] ✅ Total pending projects:', allPendingProjects.length);
       
       setProjects(allProjects);
+      setPendingProjects(allPendingProjects);
     } catch (error: any) {
       console.error('Error loading projects:', error);
       toast({
@@ -202,6 +274,7 @@ export const useProjects = () => {
     loading,
     uploading,
     projects,
+    pendingProjects,
     currentProject,
     loadProjects,
     loadProject,

@@ -21,7 +21,7 @@ import {
 
 const Projects = () => {
   const { user } = useAuth();
-  const { loading, projects, deleteProject } = useProjects();
+  const { loading, projects, pendingProjects, deleteProject } = useProjects();
   const navigate = useNavigate();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
@@ -98,17 +98,95 @@ const Projects = () => {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
           <p className="text-muted-foreground">A carregar sessões...</p>
         </div>
-      ) : projects.length === 0 ? (
-        <div className="text-center py-8">
-          <Folder className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-foreground mb-2">Nenhuma sessão confirmada</h3>
-          <p className="text-muted-foreground">
-            Faz uma reserva para começar!
-          </p>
-        </div>
       ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {projects.map((project) => (
+        <>
+          {/* Pending Projects Section */}
+          {pendingProjects.length > 0 && (
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
+                <Clock className="w-6 h-6 text-yellow-500" />
+                Aguardando Confirmação
+              </h2>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {pendingProjects.map((project) => (
+                  <Card
+                    key={project.id}
+                    className="studio-card hover:shadow-lg transition-all relative border-yellow-500/30"
+                  >
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-lg">
+                        {project.is_mixmaster ? (
+                          <FileAudio className="w-5 h-5 text-yellow-500" />
+                        ) : (
+                          <Clock className="w-5 h-5 text-yellow-500" />
+                        )}
+                        {project.title}
+                      </CardTitle>
+                      <CardDescription className="text-sm text-yellow-600 dark:text-yellow-400 font-medium">
+                        {project.description}
+                      </CardDescription>
+                    </CardHeader>
+
+                    <CardContent>
+                      <div className="space-y-3">
+                        {project.address && (
+                          <div className="flex items-start gap-2 text-sm">
+                            <Folder className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                            <a 
+                              href="https://maps.google.com/?q=Rua+Abade+Correia+da+Serra+20A,+2865-207+Fernão+Ferro"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-muted-foreground hover:text-primary transition-colors underline cursor-pointer"
+                            >
+                              {project.address}
+                            </a>
+                          </div>
+                        )}
+
+                        <div className="flex items-center gap-2 text-sm">
+                          <Clock className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                          <span className="font-medium text-foreground">
+                            {formatDate(project.date_day)}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-sm">
+                          <Clock className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                          <span className="text-foreground">
+                            {formatTime(project.start_time)} - {formatTime(project.end_time)}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                          <Badge variant="outline" className="text-xs border-yellow-500 text-yellow-600 dark:text-yellow-400">
+                            Pendente
+                          </Badge>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Confirmed Projects Section */}
+          {projects.length === 0 && pendingProjects.length === 0 ? (
+            <div className="text-center py-8">
+              <Folder className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-foreground mb-2">Nenhuma sessão</h3>
+              <p className="text-muted-foreground">
+                Faz uma reserva para começar!
+              </p>
+            </div>
+          ) : projects.length > 0 ? (
+            <>
+              <h2 className="text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
+                <CheckCircle className="w-6 h-6 text-green-500" />
+                Sessões Confirmadas
+              </h2>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {projects.map((project) => (
             <Card
               key={project.id}
               className="studio-card hover:shadow-lg transition-all relative"
@@ -190,8 +268,11 @@ const Projects = () => {
                 </div>
               </CardContent>
             </Card>
-          ))}
-        </div>
+                ))}
+              </div>
+            </>
+          ) : null}
+        </>
       )}
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
