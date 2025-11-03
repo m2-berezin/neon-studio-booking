@@ -31,13 +31,16 @@ const SplashScreen = ({ onComplete }: SplashScreenProps) => {
     <div className="fixed inset-0 bg-background z-50 flex items-center justify-center transition-opacity duration-300">
       <div className="text-center">
         <h1 
-          className="text-6xl font-bold text-primary mb-2"
+          className="text-6xl font-bold text-primary mb-2 flex items-baseline justify-center"
           style={{ 
             fontFamily: 'Georgia, serif',
-            textShadow: '0 0 20px rgba(255, 255, 255, 0.3), 0 0 40px rgba(255, 255, 255, 0.2)'
+            textShadow: '0 0 20px rgba(255, 255, 255, 0.3), 0 0 40px rgba(255, 255, 255, 0.2)',
+            letterSpacing: '0.05em'
           }}
         >
-          7T7
+          <span style={{ verticalAlign: 'baseline' }}>7</span>
+          <span style={{ verticalAlign: 'baseline' }}>T</span>
+          <span style={{ verticalAlign: 'baseline' }}>7</span>
         </h1>
         <p className="text-xl text-muted-foreground">Studios</p>
       </div>
