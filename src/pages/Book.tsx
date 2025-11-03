@@ -215,6 +215,96 @@ const Book = () => {
     fetchUnavailableDays(month, year);
   }, [currentMonth, fetchUnavailableDays]);
 
+  // Listen for changes in temporary time blocks and admin days off
+  useEffect(() => {
+    console.log('📡 [REALTIME] Setting up subscription for temporary_time_blocks and admin_days_off');
+    
+    const channel = supabase
+      .channel('booking-calendar-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'temporary_time_blocks',
+        },
+        async (payload) => {
+          console.log('📡 [REALTIME] Temporary time block changed:', payload);
+          
+          // Refresh unavailable days for current month
+          const month = currentMonth.getMonth() + 1;
+          const year = currentMonth.getFullYear();
+          await fetchUnavailableDays(month, year);
+          
+          // If a date is selected, refetch its time slots
+          if (selectedDate) {
+            console.log('📡 [REALTIME] Refetching time slots for selected date');
+            const unavailableSlots = await fetchBookingsForDate(selectedDate);
+            
+            const service = services.find(s => s.id === selectedService);
+            let sessionDuration = 120;
+            
+            if (reservationFromOffer) {
+              sessionDuration = isPremiumOffer ? 120 : 180;
+            } else if (service?.id === 'captacao') {
+              sessionDuration = selectedHours * 60;
+            } else if (service?.id === 'captacao_mixmaster') {
+              sessionDuration = 180;
+            } else {
+              sessionDuration = service?.duration || 120;
+            }
+            
+            const slots = generateTimeSlots(selectedDate, sessionDuration, unavailableSlots);
+            setTimeSlots(slots);
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'admin_days_off',
+        },
+        async (payload) => {
+          console.log('📡 [REALTIME] Admin days off changed:', payload);
+          
+          // Refresh unavailable days for current month
+          const month = currentMonth.getMonth() + 1;
+          const year = currentMonth.getFullYear();
+          await fetchUnavailableDays(month, year);
+          
+          // If a date is selected, refetch its time slots
+          if (selectedDate) {
+            console.log('📡 [REALTIME] Refetching time slots for selected date');
+            const unavailableSlots = await fetchBookingsForDate(selectedDate);
+            
+            const service = services.find(s => s.id === selectedService);
+            let sessionDuration = 120;
+            
+            if (reservationFromOffer) {
+              sessionDuration = isPremiumOffer ? 120 : 180;
+            } else if (service?.id === 'captacao') {
+              sessionDuration = selectedHours * 60;
+            } else if (service?.id === 'captacao_mixmaster') {
+              sessionDuration = 180;
+            } else {
+              sessionDuration = service?.duration || 120;
+            }
+            
+            const slots = generateTimeSlots(selectedDate, sessionDuration, unavailableSlots);
+            setTimeSlots(slots);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      console.log('📡 [REALTIME] Unsubscribing from booking calendar updates');
+      supabase.removeChannel(channel);
+    };
+  }, [selectedDate, currentMonth, selectedService, selectedHours, reservationFromOffer, isPremiumOffer, fetchUnavailableDays, fetchBookingsForDate, generateTimeSlots]);
+
   // Handle service selection
   const handleServiceSelect = (serviceId: string) => {
     setSelectedService(serviceId);
