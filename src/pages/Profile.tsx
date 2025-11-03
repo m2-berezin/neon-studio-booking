@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, Music, Award, User, Settings, LogOut, Shield, Mail, Phone, ArrowLeft, Receipt } from 'lucide-react';
+import { Calendar, Music, Award, User, Settings, LogOut, Shield, Mail, Phone, ArrowLeft, Receipt, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -129,12 +129,28 @@ const Profile = () => {
 
         {/* Subscription Renewal */}
         <div className="mt-4 pt-4 border-t border-border/20">
-          <div className="flex items-center gap-2 text-sm">
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-            <span className="text-muted-foreground">
-              Renovação de subscrição a dia {renewalDate ? format(new Date(renewalDate), 'dd/MM/yyyy') : 'N/A'}
-            </span>
-          </div>
+          {renewalDate ? (
+            <div className="flex items-center gap-2 text-sm">
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <span className="text-muted-foreground">
+                Renovação de subscrição a dia {format(new Date(renewalDate), 'dd/MM/yyyy')}
+              </span>
+            </div>
+          ) : (
+            <div 
+              className="flex items-center justify-between cursor-pointer tap-target group"
+              onClick={() => navigate('/?tab=4')}
+            >
+              <div className="flex items-center gap-2 text-sm">
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+                <span className="text-muted-foreground">Não Subscrito</span>
+              </div>
+              <div className="flex items-center gap-1 text-accent group-hover:text-accent/80">
+                <span className="text-sm font-medium">subscrever agora</span>
+                <ArrowRight className="h-4 w-4" />
+              </div>
+            </div>
+          )}
         </div>
 
       </div>
