@@ -277,44 +277,44 @@ const StudioInfo = () => {
               </AccordionItem>
 
               <AccordionItem value="item-4">
-                <AccordionTrigger>Enviei o meu projeto para Mix&Master e esqueci me de uns ficheiros, o que fazer?</AccordionTrigger>
-                <AccordionContent>
-                  Envia mensagem no chat da app ao Ghost a explicar o sucedido, e envia juntamente o link para download com o que faltava.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-5">
-                <AccordionTrigger>Que Métodos de Pagamento aceitam?</AccordionTrigger>
+                <AccordionTrigger>Métodos de Pagamento?</AccordionTrigger>
                 <AccordionContent>
                   Aceitamos pagamentos através de: MB WAY / Revolut / Transferência bancária / Paypal / Crypto
                 </AccordionContent>
               </AccordionItem>
 
-              <AccordionItem value="item-6">
-                <AccordionTrigger>Posso levar videomaker para vlog? / Posso fazer videoclip no estudio?</AccordionTrigger>
+              <AccordionItem value="item-5">
+                <AccordionTrigger>Enviei o meu projeto para Mix&Master e esqueci me de uns ficheiros, e agora?</AccordionTrigger>
                 <AccordionContent>
-                  Sim, dependendo do conceito, número de pessoas, e dia, podes sim agendar uma "sessão" para com esse objetivo. Envia mensagem ao Ghost no chat da app ANTES DE RESERVAR A SESSÂO para falarem sobre os detalhes.
+                  Envia mensagem no chat da app ao Ghost a explicar o sucedido, e envia juntamente o link para download com o que faltava.
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="item-6">
+                <AccordionTrigger>Pretendo gravar um Cover, o valor é o mesmo?</AccordionTrigger>
+                <AccordionContent>
+                  Para covers, marca sessão apenas para Captação, com o número de horas que achares necessário. Dependendo do conceito/duração do cover, o valor da mix&master é ajustado. (em média ronda os 20€)
                 </AccordionContent>
               </AccordionItem>
 
               <AccordionItem value="item-7">
-                <AccordionTrigger>Posso levar a minha guitarra para gravar e cantar por cima?</AccordionTrigger>
+                <AccordionTrigger>Posso levar guitarra para gravar e cantar por cima?</AccordionTrigger>
                 <AccordionContent>
                   Sim podes, reserva a tua sessão e após confirmação envia mensagem ao Ghost no chat da app a falar um pouco sobre o teu projeto para ele ter tudo pronto para quando chegares! Atenção: o estúdio dispõe apenas de interface de audio, não tem amplificador/pedais. Nestes casos são usados plugins para emular os efeitos pretendidos.
                 </AccordionContent>
               </AccordionItem>
 
               <AccordionItem value="item-8">
-                <AccordionTrigger>Posso ir gravar um Cover? O valor é o mesmo?</AccordionTrigger>
+                <AccordionTrigger>Somos 2 pessoas no projeto, o valor é o mesmo?</AccordionTrigger>
                 <AccordionContent>
-                  Para covers, marca sessão apenas para Captação, com o número de horas que achares necessário. Dependendo do conceito/duração do cover, o valor da mix&master é ajustado. (em média ronda os 20€)
+                  Sim, o valor é igual. Atenção ao número de horas de captação, talvez 3h para 2 pessoas, o pack de 70€ possa não chegar. Caso precisem de mais, reservem apenas sessão de Captação com o número de horas pretendidas, e depois a Mix & Master é cobrada à parte (40€).
                 </AccordionContent>
               </AccordionItem>
 
               <AccordionItem value="item-9">
-                <AccordionTrigger>Quem vai cantar sou eu e um amigo, o valor é o mesmo?</AccordionTrigger>
+                <AccordionTrigger>Posso levar videomaker para fazer um vlog? / Posso fazer videoclip no estúdio?</AccordionTrigger>
                 <AccordionContent>
-                  Sim, o valor é igual. Atenção ao número de horas de captação, talvez 3h para 2 pessoas, o pack de 70€ possa não chegar. Caso precisem de mais, reservem apenas sessão de Captação com o número de horas pretendidas, e depois a Mix & Master é cobrada à parte (40€).
+                  Sim, dependendo do conceito, número de pessoas, e dia, podes sim agendar uma "sessão" para com esse objetivo. Envia mensagem ao Ghost no chat da app ANTES DE RESERVAR A SESSÂO para falarem sobre os detalhes.
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
