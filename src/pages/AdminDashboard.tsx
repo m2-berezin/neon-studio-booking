@@ -168,21 +168,26 @@ const AdminDashboard = () => {
 
       const clientsCount = (activeUsersCount as number) || 0;
 
-      // Load monthly revenue using RPC function
-      const { data: monthlyRevenueData, error: revenueError } = await supabase
-        .rpc('get_monthly_revenue' as any);
+      // Load total revenue from all confirmed bookings
+      const { data: confirmedBookings, error: revenueError } = await supabase
+        .from('bookings')
+        .select('price_eur_snapshot')
+        .eq('status', 'confirmed');
 
       if (revenueError) {
-        console.error('Error loading monthly revenue:', revenueError);
+        console.error('Error loading total revenue:', revenueError);
       }
 
-      const monthlyRevenue = Number(monthlyRevenueData) || 0;
+      const totalRevenue = (confirmedBookings || []).reduce(
+        (sum, booking) => sum + (booking.price_eur_snapshot || 0),
+        0
+      );
 
       setStats({
         totalBookings: bookingsCount || 0,
         pendingPayments: pendingCount || 0,
         activeClients: clientsCount || 0,
-        monthlyRevenue,
+        monthlyRevenue: totalRevenue,
       });
 
       setRecentPayments(mappedPayments);
