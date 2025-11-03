@@ -1,4 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { ZoomIn, ZoomOut, X } from 'lucide-react';
 import studio2 from '@/assets/studio-2.jpg';
 import studio3 from '@/assets/studio-3.jpg';
 import studio4 from '@/assets/studio-4.jpg';
@@ -9,6 +12,8 @@ const StudioGallery = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [autoPlayEnabled, setAutoPlayEnabled] = useState(true);
+  const [isZoomOpen, setIsZoomOpen] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(1);
   const touchStartX = useRef<number>(0);
   const touchEndX = useRef<number>(0);
   const autoPlayTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -87,6 +92,24 @@ const StudioGallery = () => {
     resetAutoPlayTimer();
   };
 
+  const handleImageClick = () => {
+    setIsZoomOpen(true);
+    setZoomLevel(1);
+  };
+
+  const handleZoomIn = () => {
+    setZoomLevel((prev) => Math.min(prev + 0.5, 3));
+  };
+
+  const handleZoomOut = () => {
+    setZoomLevel((prev) => Math.max(prev - 0.5, 1));
+  };
+
+  const handleCloseZoom = () => {
+    setIsZoomOpen(false);
+    setZoomLevel(1);
+  };
+
   // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
@@ -99,10 +122,11 @@ const StudioGallery = () => {
   return (
     <div className="mt-4">
       <div 
-        className="relative w-full aspect-[4/3] overflow-hidden rounded-lg bg-muted touch-pan-y"
+        className="relative w-full aspect-[4/3] overflow-hidden rounded-lg bg-muted touch-pan-y cursor-pointer"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
+        onClick={handleImageClick}
       >
         {images.map((image, index) => (
           <img
@@ -139,6 +163,56 @@ const StudioGallery = () => {
       <p className="text-sm text-muted-foreground mt-3 text-center">
         O estúdio dispõe de Ar Condicionado.
       </p>
+
+      {/* Zoom Dialog */}
+      <Dialog open={isZoomOpen} onOpenChange={setIsZoomOpen}>
+        <DialogContent className="max-w-5xl w-[95vw] h-[90vh] p-0">
+          <div className="relative w-full h-full flex items-center justify-center bg-black/95">
+            {/* Close button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-4 right-4 z-10 text-white hover:bg-white/20"
+              onClick={handleCloseZoom}
+            >
+              <X className="h-6 w-6" />
+            </Button>
+
+            {/* Zoom controls */}
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex gap-2">
+              <Button
+                variant="secondary"
+                size="icon"
+                onClick={handleZoomOut}
+                disabled={zoomLevel <= 1}
+              >
+                <ZoomOut className="h-5 w-5" />
+              </Button>
+              <Button
+                variant="secondary"
+                size="icon"
+                onClick={handleZoomIn}
+                disabled={zoomLevel >= 3}
+              >
+                <ZoomIn className="h-5 w-5" />
+              </Button>
+            </div>
+
+            {/* Zoomable image */}
+            <div className="overflow-auto w-full h-full flex items-center justify-center p-4">
+              <img
+                src={images[currentIndex]}
+                alt={`Vista do estúdio ${currentIndex + 1}`}
+                className="transition-transform duration-200 max-w-none"
+                style={{
+                  transform: `scale(${zoomLevel})`,
+                  transformOrigin: 'center center'
+                }}
+              />
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
