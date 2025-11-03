@@ -129,7 +129,7 @@ const StudioInfo = () => {
                 <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="font-medium text-sm">3+ Dias de Antecedência</p>
-                  <p className="text-xs text-muted-foreground">Reagendamento sem custos extras</p>
+                  <p className="text-xs text-muted-foreground">Reagendamento sem custos extras ou reembolso total</p>
                 </div>
               </div>
               
@@ -137,7 +137,7 @@ const StudioInfo = () => {
                 <AlertTriangle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="font-medium text-sm">Menos de 3 Dias</p>
-                  <p className="text-xs text-muted-foreground">O valor do sinal não é reembolsável</p>
+                  <p className="text-xs text-muted-foreground">O valor do sinal não é reembolsável. Reagendamento sob consulta. Contacta o Ghost pelo chat da app.</p>
                 </div>
               </div>
 
@@ -159,7 +159,7 @@ const StudioInfo = () => {
             <div>
               <h4 className="font-medium mb-2">Situações de Emergência</h4>
               <p className="text-sm text-muted-foreground">
-                Em caso de emergências contacta imediatamente. Consideração varia de caso a caso.
+                Em caso de emergências contacta imediatamente. Consideração caso a caso.
               </p>
             </div>
           </CardContent>
