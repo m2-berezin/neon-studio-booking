@@ -1164,6 +1164,39 @@ export type Database = {
         }
         Relationships: []
       }
+      temporary_time_blocks: {
+        Row: {
+          blocked_end_time: string
+          blocked_start_time: string
+          created_at: string
+          end_date: string
+          id: string
+          is_active: boolean
+          reason: string | null
+          start_date: string
+        }
+        Insert: {
+          blocked_end_time: string
+          blocked_start_time: string
+          created_at?: string
+          end_date: string
+          id?: string
+          is_active?: boolean
+          reason?: string | null
+          start_date: string
+        }
+        Update: {
+          blocked_end_time?: string
+          blocked_start_time?: string
+          created_at?: string
+          end_date?: string
+          id?: string
+          is_active?: boolean
+          reason?: string | null
+          start_date?: string
+        }
+        Relationships: []
+      }
       unavailable_slots: {
         Row: {
           created_at: string
@@ -1313,7 +1346,18 @@ export type Database = {
     Functions: {
       abandon_offer: { Args: { p_reservation_id: string }; Returns: boolean }
       admin_approve_payment: { Args: { p_payment_id: string }; Returns: string }
+      admin_create_time_block: {
+        Args: {
+          p_blocked_end_time: string
+          p_blocked_start_time: string
+          p_end_date: string
+          p_reason?: string
+          p_start_date: string
+        }
+        Returns: string
+      }
       admin_delete_test_user: { Args: { p_user_id: string }; Returns: boolean }
+      admin_delete_time_block: { Args: { p_id: string }; Returns: undefined }
       admin_hide_project: {
         Args: { p_project_id: string; p_project_type: string }
         Returns: boolean
@@ -1534,6 +1578,7 @@ export type Database = {
         Args: { p_date: string }
         Returns: {
           ends_at: string
+          reason: string
           starts_at: string
         }[]
       }
