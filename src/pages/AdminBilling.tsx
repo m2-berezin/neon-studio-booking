@@ -16,6 +16,7 @@ interface BookingWithProfile {
   price_eur_snapshot: number;
   service_name_snapshot: string;
   user_id: string;
+  status: string;
   profiles: {
     full_name: string;
   };
@@ -46,11 +47,10 @@ const AdminBilling = () => {
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        // First, fetch all confirmed bookings
+        // First, fetch all bookings (any status)
         const { data: bookingsData, error: bookingsError } = await supabase
           .from('bookings')
-          .select('id, starts_at, ends_at, price_eur_snapshot, service_name_snapshot, user_id')
-          .eq('status', 'confirmed')
+          .select('id, starts_at, ends_at, price_eur_snapshot, service_name_snapshot, user_id, status')
           .order('starts_at', { ascending: false });
 
         if (bookingsError) throw bookingsError;
@@ -152,6 +152,40 @@ const AdminBilling = () => {
 
   const formatPrice = (price: number) => {
     return `${price.toFixed(2)}€`;
+  };
+
+  const handleStatusChange = async (bookingId: string, newStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .update({ status: newStatus })
+        .eq('id', bookingId);
+
+      if (error) throw error;
+
+      // Update local state
+      const updatedAllBookings = allBookings.map(b => 
+        b.id === bookingId ? { ...b, status: newStatus } : b
+      );
+      setAllBookings(updatedAllBookings);
+      
+      const updatedBookings = bookings.map(b => 
+        b.id === bookingId ? { ...b, status: newStatus } : b
+      );
+      setBookings(updatedBookings);
+    } catch (error) {
+      console.error('Error updating booking status:', error);
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    const statusMap: { [key: string]: string } = {
+      'confirmed': 'Confirmado',
+      'deposit_retained': 'Sinal Retido',
+      'free_rescheduled': 'Reagendamento Gratuito',
+      'cancelled': 'Cancelado'
+    };
+    return statusMap[status] || 'Confirmado';
   };
 
   return (
@@ -270,35 +304,50 @@ const AdminBilling = () => {
         <div className="space-y-3">
           {bookings.map((booking) => (
             <div key={booking.id} className="studio-card">
-              <div className="space-y-2">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 space-y-1">
-                    <div className="flex items-center gap-2 text-sm mb-2">
-                      <User className="h-4 w-4 text-accent flex-shrink-0" />
-                      <span className="text-accent font-semibold">
-                        {booking.profiles.full_name}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                      <span className="text-foreground font-medium">
-                        {format(new Date(booking.starts_at), 'dd/MM/yyyy', { locale: pt })}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <Clock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                      <span className="text-muted-foreground">
-                        {format(new Date(booking.starts_at), 'HH:mm')} - {format(new Date(booking.ends_at), 'HH:mm')}
-                      </span>
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      {booking.service_name_snapshot}
-                    </div>
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1 space-y-2">
+                  <div className="flex items-center gap-2 text-sm mb-2">
+                    <User className="h-4 w-4 text-accent flex-shrink-0" />
+                    <span className="text-accent font-semibold">
+                      {booking.profiles.full_name}
+                    </span>
                   </div>
-                  <div className="flex items-center gap-1 text-accent font-semibold whitespace-nowrap">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                    <span className="text-foreground font-medium">
+                      {format(new Date(booking.starts_at), 'dd/MM/yyyy', { locale: pt })}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Clock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                    <span className="text-muted-foreground">
+                      {format(new Date(booking.starts_at), 'HH:mm')} - {format(new Date(booking.ends_at), 'HH:mm')}
+                    </span>
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {booking.service_name_snapshot}
+                  </div>
+                  <div className="flex items-center gap-1 text-accent font-semibold pt-2">
                     <Euro className="h-4 w-4" />
                     <span>{formatPrice(booking.price_eur_snapshot || 0)}</span>
                   </div>
+                </div>
+                
+                <div className="flex flex-col items-end gap-2 min-w-[180px]">
+                  <Select 
+                    value={booking.status} 
+                    onValueChange={(value) => handleStatusChange(booking.id, value)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="confirmed">Confirmado</SelectItem>
+                      <SelectItem value="deposit_retained">Sinal Retido</SelectItem>
+                      <SelectItem value="free_rescheduled">Reagendamento Gratuito</SelectItem>
+                      <SelectItem value="cancelled">Cancelado</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </div>
