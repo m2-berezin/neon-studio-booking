@@ -18,6 +18,7 @@ import ProjectDetail from "./pages/ProjectDetail";
 import Messages from "./pages/Messages";
 import Profile from "./pages/Profile";
 import ProfileSettings from "./pages/ProfileSettings";
+import Billing from "./pages/Billing";
 import Auth from "./pages/Auth";
 import Admin from "@/pages/Admin";
 import AdminPayments from "@/pages/AdminPayments";
@@ -76,6 +77,7 @@ const App = () => {
                 <Route path="/messages" element={<Messages />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/profile/settings" element={<ProfileSettings />} />
+                <Route path="/billing" element={<Billing />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/admin" element={<Admin />} />
                 <Route path="/studio-info" element={<StudioInfo />} />

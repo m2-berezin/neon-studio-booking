@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, Music, Award, User, Settings, LogOut, Shield, Mail, Phone, ArrowLeft } from 'lucide-react';
+import { Calendar, Music, Award, User, Settings, LogOut, Shield, Mail, Phone, ArrowLeft, Receipt } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -50,6 +50,10 @@ const Profile = () => {
     label: 'Definições',
     icon: Settings,
     path: '/profile/settings'
+  }, {
+    label: 'Faturação',
+    icon: Receipt,
+    path: '/billing'
   }];
   const handleSignOut = async () => {
     setLoading(true);
