@@ -2,9 +2,9 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Textarea } from '@/components/ui/textarea';
 import { Send, ArrowLeft, Paperclip, X, Download, Image as ImageIcon, Music } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -381,21 +381,24 @@ const Messages = () => {
               size="icon"
               onClick={() => fileInputRef.current?.click()}
               disabled={uploading}
+              className="self-end"
             >
               <Paperclip className="h-4 w-4" />
             </Button>
-            <Input 
+            <Textarea 
               value={newMessage} 
               onChange={e => setNewMessage(e.target.value)} 
-              onKeyPress={handleKeyPress} 
+              onKeyDown={handleKeyPress} 
               placeholder="Escreve a tua mensagem..." 
-              className="flex-1"
+              className="flex-1 min-h-[40px] max-h-[120px] resize-none"
               disabled={uploading}
+              rows={1}
             />
             <Button 
               onClick={handleSendMessage} 
               size="icon"
               disabled={uploading || (!newMessage.trim() && !selectedFile)}
+              className="self-end"
             >
               <Send className="h-4 w-4" />
             </Button>
