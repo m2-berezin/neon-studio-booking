@@ -45,7 +45,7 @@ const StudioInfo = () => {
   }, {
     icon: <Headphones className="h-5 w-5" />,
     title: "Acompanhamento",
-    description: "Apenas são permitidas mais 3 pessoas para além do artista."
+    description: "Apenas são permitidas mais 3 pessoas no estúdio para além do artista."
   }];
   const prepChecklist = [{
     category: "Before You Arrive",
