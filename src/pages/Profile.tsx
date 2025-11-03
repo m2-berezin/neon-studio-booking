@@ -139,14 +139,14 @@ const Profile = () => {
           ) : (
             <div 
               className="flex items-center justify-between cursor-pointer tap-target group"
-              onClick={() => navigate('/?tab=4')}
+              onClick={() => navigate('/subscriptions')}
             >
               <div className="flex items-center gap-2 text-sm">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
                 <span className="text-muted-foreground">Não Subscrito</span>
               </div>
               <div className="flex items-center gap-1 text-accent group-hover:text-accent/80">
-                <span className="text-sm font-medium">subscrever agora</span>
+                <span className="text-sm font-medium">Subscrever Agora</span>
                 <ArrowRight className="h-4 w-4" />
               </div>
             </div>
