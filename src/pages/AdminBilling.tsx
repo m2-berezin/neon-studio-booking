@@ -30,7 +30,7 @@ const AdminBilling = () => {
   const [monthlyRevenue, setMonthlyRevenue] = useState(0);
   const [totalRevenue, setTotalRevenue] = useState(0);
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
-  const [selectedYear, setSelectedYear] = useState<string | null>(null);
+  const [selectedYear, setSelectedYear] = useState<string | null>(new Date().getFullYear().toString());
 
   useEffect(() => {
     if (!isAdmin()) {
