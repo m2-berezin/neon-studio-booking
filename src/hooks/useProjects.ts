@@ -92,6 +92,21 @@ export const useProjects = () => {
 
       if (pendingBookingsError) throw pendingBookingsError;
       
+      // Load pending reservations (awaiting payment approval)
+      const { data: pendingReservationsData, error: pendingReservationsError } = await supabase
+        .from('reservations')
+        .select(`
+          *,
+          services (
+            name
+          )
+        `)
+        .eq('user_id', user.id)
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false });
+
+      if (pendingReservationsError) throw pendingReservationsError;
+      
       // Load Mix & Master projects
       // @ts-ignore - RPC exists in DB
       const { data: mixmasterData, error: mixmasterError } = await supabase
@@ -175,8 +190,30 @@ export const useProjects = () => {
           is_mixmaster: false,
         }));
       
+      // Map pending reservations  
+      const pendingReservationProjects: Project[] = (pendingReservationsData || []).map((reservation: any) => {
+        const serviceName = reservation.services?.name || 'Sessão de Estúdio';
+        const hasCaptacao = serviceName.toLowerCase().includes('capta');
+        const isMixMaster = serviceName.toLowerCase().includes('mix');
+        
+        return {
+          id: reservation.id,
+          title: serviceName,
+          description: 'Aguardando Confirmação',
+          address: hasCaptacao ? 'Rua Abade Correia da Serra 20A, 2865-207 Fernão Ferro' : '',
+          date_day: reservation.starts_at || reservation.created_at,
+          start_time: reservation.starts_at || reservation.created_at,
+          end_time: reservation.ends_at || reservation.created_at,
+          status: 'pending',
+          user_id: user.id,
+          created_at: reservation.created_at,
+          is_mixmaster: isMixMaster,
+          is_booking: false,
+        };
+      });
+      
       // Combine pending projects (only bookings - Mix&Master pending are not shown here)
-      const allPendingProjects = [...pendingBookingProjects].sort(
+      const allPendingProjects = [...pendingBookingProjects, ...pendingReservationProjects].sort(
         (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       );
       
