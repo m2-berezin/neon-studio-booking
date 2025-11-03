@@ -47,10 +47,11 @@ const AdminBilling = () => {
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        // First, fetch all bookings (any status)
+        // First, fetch all bookings (any status) that are not hidden from admin
         const { data: bookingsData, error: bookingsError } = await supabase
           .from('bookings')
-          .select('id, starts_at, ends_at, price_eur_snapshot, service_name_snapshot, user_id, status')
+          .select('id, starts_at, ends_at, price_eur_snapshot, service_name_snapshot, user_id, status, hidden_from_admin')
+          .eq('hidden_from_admin', false)
           .order('starts_at', { ascending: false });
 
         if (bookingsError) throw bookingsError;
@@ -75,13 +76,6 @@ const AdminBilling = () => {
 
         setAllBookings(bookingsWithProfiles);
         setBookings(bookingsWithProfiles);
-
-        // Calculate total revenue
-        const total = bookingsWithProfiles.reduce(
-          (sum, booking) => sum + (booking.price_eur_snapshot || 0),
-          0
-        );
-        setTotalRevenue(total);
       } catch (error) {
         console.error('Error fetching bookings:', error);
       } finally {
@@ -92,11 +86,22 @@ const AdminBilling = () => {
     fetchBookings();
   }, []);
 
+  // Calculate revenue based on booking status
+  const calculateBookingRevenue = (booking: BookingWithProfile) => {
+    if (booking.status === 'deposit_retained') {
+      return 15; // Fixed 15€ for deposit retained
+    } else if (booking.status === 'cancelled') {
+      return 0; // No revenue for cancelled
+    } else {
+      return booking.price_eur_snapshot || 0; // Full price for confirmed
+    }
+  };
+
   // Filter bookings when month/year changes
   useEffect(() => {
-    // Calculate total revenue from all bookings
+    // Calculate total revenue from all bookings based on status
     const total = allBookings.reduce(
-      (sum, booking) => sum + (booking.price_eur_snapshot || 0),
+      (sum, booking) => sum + calculateBookingRevenue(booking),
       0
     );
     setTotalRevenue(total);
@@ -118,7 +123,7 @@ const AdminBilling = () => {
     setBookings(filtered);
     
     const monthly = filtered.reduce(
-      (sum, booking) => sum + (booking.price_eur_snapshot || 0),
+      (sum, booking) => sum + calculateBookingRevenue(booking),
       0
     );
     setMonthlyRevenue(monthly);
@@ -156,23 +161,40 @@ const AdminBilling = () => {
 
   const handleStatusChange = async (bookingId: string, newStatus: string) => {
     try {
-      const { error } = await supabase
-        .from('bookings')
-        .update({ status: newStatus })
-        .eq('id', bookingId);
+      if (newStatus === 'deleted') {
+        // Hide booking from admin view
+        const { error } = await supabase
+          .from('bookings')
+          .update({ hidden_from_admin: true })
+          .eq('id', bookingId);
 
-      if (error) throw error;
+        if (error) throw error;
 
-      // Update local state
-      const updatedAllBookings = allBookings.map(b => 
-        b.id === bookingId ? { ...b, status: newStatus } : b
-      );
-      setAllBookings(updatedAllBookings);
-      
-      const updatedBookings = bookings.map(b => 
-        b.id === bookingId ? { ...b, status: newStatus } : b
-      );
-      setBookings(updatedBookings);
+        // Remove from local state
+        const updatedAllBookings = allBookings.filter(b => b.id !== bookingId);
+        setAllBookings(updatedAllBookings);
+        
+        const updatedBookings = bookings.filter(b => b.id !== bookingId);
+        setBookings(updatedBookings);
+      } else {
+        const { error } = await supabase
+          .from('bookings')
+          .update({ status: newStatus })
+          .eq('id', bookingId);
+
+        if (error) throw error;
+
+        // Update local state
+        const updatedAllBookings = allBookings.map(b => 
+          b.id === bookingId ? { ...b, status: newStatus } : b
+        );
+        setAllBookings(updatedAllBookings);
+        
+        const updatedBookings = bookings.map(b => 
+          b.id === bookingId ? { ...b, status: newStatus } : b
+        );
+        setBookings(updatedBookings);
+      }
     } catch (error) {
       console.error('Error updating booking status:', error);
     }
@@ -182,7 +204,6 @@ const AdminBilling = () => {
     const statusMap: { [key: string]: string } = {
       'confirmed': 'Confirmado',
       'deposit_retained': 'Sinal Retido',
-      'free_rescheduled': 'Reagendamento Gratuito',
       'cancelled': 'Cancelado'
     };
     return statusMap[status] || 'Confirmado';
@@ -329,7 +350,7 @@ const AdminBilling = () => {
                   </div>
                   <div className="flex items-center gap-1 text-accent font-semibold pt-2">
                     <Euro className="h-4 w-4" />
-                    <span>{formatPrice(booking.price_eur_snapshot || 0)}</span>
+                    <span>{formatPrice(calculateBookingRevenue(booking))}</span>
                   </div>
                 </div>
                 
@@ -344,8 +365,8 @@ const AdminBilling = () => {
                     <SelectContent>
                       <SelectItem value="confirmed">Confirmado</SelectItem>
                       <SelectItem value="deposit_retained">Sinal Retido</SelectItem>
-                      <SelectItem value="free_rescheduled">Reagendamento Gratuito</SelectItem>
                       <SelectItem value="cancelled">Cancelado</SelectItem>
+                      <SelectItem value="deleted">Eliminar</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
