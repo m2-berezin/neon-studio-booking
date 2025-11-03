@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, Music, Award, User, Settings, LogOut, Shield, Mail, Phone, ArrowLeft, Receipt, ArrowRight } from 'lucide-react';
+import { Calendar, Music, Award, User, Settings, LogOut, Shield, Mail, Phone, ArrowLeft, Receipt, ArrowRight, Pencil, Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -20,6 +21,8 @@ const Profile = () => {
   } = useToast();
   const [loading, setLoading] = useState(false);
   const [renewalDate, setRenewalDate] = useState<string | null>(null);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editedName, setEditedName] = useState(profile?.full_name || '');
   
   // Scroll to top when page loads
   useEffect(() => {
@@ -72,6 +75,37 @@ const Profile = () => {
     }
     setLoading(false);
   };
+
+  const handleSaveName = async () => {
+    if (!editedName.trim()) {
+      toast({
+        title: 'Erro',
+        description: 'O nome não pode estar vazio.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    try {
+      await updateProfile({ full_name: editedName.trim() });
+      setIsEditingName(false);
+      toast({
+        title: 'Nome atualizado',
+        description: 'O teu nome foi atualizado com sucesso.'
+      });
+    } catch (error) {
+      toast({
+        title: 'Erro',
+        description: 'Falha ao atualizar o nome. Tenta novamente.',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditedName(profile?.full_name || '');
+    setIsEditingName(false);
+  };
   if (!user || !profile) {
     return <div className="flex items-center justify-center min-h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -99,9 +133,47 @@ const Profile = () => {
         <div className="flex items-center space-x-4">
           
           <div className="flex-1">
-            <h2 className="text-xl font-bold text-foreground">
-              {profile.full_name || 'No name provided'}
-            </h2>
+            {isEditingName ? (
+              <div className="flex items-center gap-2 mb-2">
+                <Input
+                  value={editedName}
+                  onChange={(e) => setEditedName(e.target.value)}
+                  className="text-xl font-bold"
+                  placeholder="Digite seu nome"
+                  autoFocus
+                />
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={handleSaveName}
+                  className="shrink-0"
+                >
+                  <Check className="h-4 w-4 text-green-500" />
+                </Button>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={handleCancelEdit}
+                  className="shrink-0"
+                >
+                  <X className="h-4 w-4 text-destructive" />
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 mb-2">
+                <h2 className="text-xl font-bold text-foreground">
+                  {profile.full_name || 'No name provided'}
+                </h2>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={() => setIsEditingName(true)}
+                  className="h-8 w-8 shrink-0"
+                >
+                  <Pencil className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                </Button>
+              </div>
+            )}
             <div className="flex items-center gap-2 mb-1">
               <span className="text-muted-foreground capitalize">{profile.role} Membro</span>
               {profile.role === 'admin' && <Shield className="h-4 w-4 text-primary" />}
