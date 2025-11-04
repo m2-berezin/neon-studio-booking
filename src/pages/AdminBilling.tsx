@@ -67,6 +67,7 @@ const AdminBilling = () => {
 
             return {
               ...booking,
+              status: booking.status || 'confirmed', // Default to confirmed if no status
               profiles: {
                 full_name: profile?.full_name || 'Cliente Desconhecido'
               }
