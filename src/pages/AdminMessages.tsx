@@ -380,15 +380,16 @@ const AdminMessages = () => {
         {selectedUserId && (
           <div className="fixed inset-0 z-[100] bg-background flex flex-col">
             <Card className="flex-1 flex flex-col rounded-none border-x-0 border-t-0">
-              <div className="p-4 border-b flex items-center gap-3">
+              <div className="p-3 border-b flex items-center gap-3">
                 <Button
                   variant="ghost"
-                  size="icon"
+                  size="sm"
                   onClick={() => setSelectedUserId(null)}
+                  className="h-8 w-8 p-0"
                 >
-                  <X className="h-5 w-5" />
+                  <X className="h-4 w-4" />
                 </Button>
-                <h2 className="font-semibold flex-1">
+                <h2 className="text-sm font-semibold flex-1">
                   {threads.find((t) => t.user_id === selectedUserId)?.user_name || 'Cliente'}
                 </h2>
               </div>
@@ -470,7 +471,7 @@ const AdminMessages = () => {
                 )}
               </ScrollArea>
 
-              <div className="p-4 border-t space-y-2 bg-background">
+              <div className="p-3 border-t space-y-2 bg-background">
                 {selectedFile && (
                   <div className="flex items-center gap-2 bg-muted p-2 rounded">
                     {selectedFile.type.startsWith('image/') ? (
@@ -495,7 +496,7 @@ const AdminMessages = () => {
                   </div>
                 )}
                 
-                <div className="flex gap-2">
+                <div className="flex gap-2 items-end">
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -507,10 +508,10 @@ const AdminMessages = () => {
                   <Button
                     type="button"
                     variant="outline"
-                    size="icon"
+                    size="sm"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={uploading}
-                    className="shrink-0"
+                    className="h-9 w-9 p-0 shrink-0"
                   >
                     <Paperclip className="h-4 w-4" />
                   </Button>
@@ -533,9 +534,9 @@ const AdminMessages = () => {
                   <Button 
                     type="button"
                     onClick={handleSendMessage} 
-                    size="icon"
+                    size="sm"
                     disabled={uploading || (!newMessage.trim() && !selectedFile)}
-                    className="shrink-0"
+                    className="h-9 w-9 p-0 shrink-0"
                   >
                     <Send className="h-4 w-4" />
                   </Button>

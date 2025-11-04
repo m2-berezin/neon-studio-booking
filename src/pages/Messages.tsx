@@ -189,6 +189,7 @@ const Messages = () => {
       toast.error('Erro ao enviar mensagem');
     }
   };
+
   useEffect(() => {
     if (user) {
       loadMessages();
@@ -207,7 +208,6 @@ const Messages = () => {
         table: 'messages',
         filter: `thread_id=eq.${threadId}`
       }, () => {
-        // Reload to reflect read status changes
         loadMessages();
       }).subscribe();
       return () => {
@@ -215,7 +215,7 @@ const Messages = () => {
       };
     }
   }, [user?.id]);
-  // Scroll to bottom when messages change
+
   useEffect(() => {
     if (messages.length > 0) {
       setTimeout(() => {
@@ -223,10 +223,10 @@ const Messages = () => {
       }, 100);
     }
   }, [messages]);
+
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Check file type
       const allowedTypes = ['image/', 'audio/mp3', 'audio/mpeg'];
       const isAllowed = allowedTypes.some(type => file.type.startsWith(type) || file.type === type);
       
@@ -235,7 +235,6 @@ const Messages = () => {
         return;
       }
       
-      // Check file size (10MB max)
       if (file.size > 10 * 1024 * 1024) {
         toast.error('O ficheiro é muito grande (máximo 10MB)');
         return;
@@ -254,12 +253,10 @@ const Messages = () => {
       fileInputRef.current.value = '';
     }
     
-    // Reset textarea height
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
     }
     
-    // Scroll to bottom after sending
     setTimeout(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, 100);
@@ -267,44 +264,47 @@ const Messages = () => {
     await markThreadAsRead();
   };
 
-  // Auto-resize textarea
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
       textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
     }
   }, [newMessage]);
+
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
   };
+
   if (!user) return null;
-  return <div className="container mx-auto p-6 max-w-4xl">
-      <div className="mb-4">
-        <Button variant="ghost" onClick={() => navigate('/?tab=7')} className="gap-2">
-          <ArrowLeft className="h-4 w-4" />
-          Voltar
-        </Button>
-      </div>
-      
-      <h1 className="text-3xl font-bold mb-6">Mensagens</h1>
-      
-      <Card className="flex flex-col h-[600px]">
-        <div className="p-4 border-b">
-          <h2 className="font-semibold">Chat com Ghost Wayne 🦇 </h2>
+
+  return (
+    <div className="h-screen flex flex-col">
+      <Card className="flex flex-col h-full rounded-none border-x-0 border-t-0">
+        <div className="p-3 border-b flex items-center gap-2">
+          <Button variant="ghost" size="sm" onClick={() => navigate('/?tab=7')} className="h-8 w-8 p-0">
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <h2 className="text-sm font-semibold">Ghost Wayne 🦇</h2>
         </div>
 
         <ScrollArea className="flex-1 p-4">
-          {loading ? <div className="text-center text-muted-foreground">A carregar...</div> : messages.length === 0 ? <div className="text-center text-muted-foreground">Sem mensagens</div> : <div className="space-y-4">
+          {loading ? (
+            <div className="text-center text-muted-foreground">A carregar...</div>
+          ) : messages.length === 0 ? (
+            <div className="text-center text-muted-foreground">Sem mensagens</div>
+          ) : (
+            <div className="space-y-4">
               {messages.map(msg => {
-            const isSender = msg.sender_id === user.id;
-            const hasAttachment = msg.attachment_url;
-            const isImage = msg.attachment_type?.startsWith('image/');
-            const isAudio = msg.attachment_type?.startsWith('audio/');
-            
-            return <div key={msg.id} className={`flex ${isSender ? 'justify-end' : 'justify-start'}`}>
+                const isSender = msg.sender_id === user.id;
+                const hasAttachment = msg.attachment_url;
+                const isImage = msg.attachment_type?.startsWith('image/');
+                const isAudio = msg.attachment_type?.startsWith('audio/');
+                
+                return (
+                  <div key={msg.id} className={`flex ${isSender ? 'justify-end' : 'justify-start'}`}>
                     <div className={`max-w-[70%] rounded-lg px-4 py-2 ${isSender ? 'bg-primary text-primary-foreground' : 'bg-muted text-foreground'}`}>
                       <p className="text-sm">
                         {renderMessageWithLinks(msg.message)}
@@ -347,18 +347,20 @@ const Messages = () => {
                       
                       <p className="text-xs opacity-70 mt-1">
                         {new Date(msg.timestamp).toLocaleTimeString('pt-PT', {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
                       </p>
                     </div>
-                  </div>;
-          })}
+                  </div>
+                );
+              })}
               <div ref={messagesEndRef} />
-            </div>}
+            </div>
+          )}
         </ScrollArea>
 
-        <div className="p-4 border-t">
+        <div className="p-3 border-t">
           {selectedFile && (
             <div className="mb-2 flex items-center gap-2 bg-muted p-2 rounded">
               {selectedFile.type.startsWith('image/') ? (
@@ -382,7 +384,7 @@ const Messages = () => {
             </div>
           )}
           
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-end">
             <input
               ref={fileInputRef}
               type="file"
@@ -392,10 +394,10 @@ const Messages = () => {
             />
             <Button
               variant="outline"
-              size="icon"
+              size="sm"
               onClick={() => fileInputRef.current?.click()}
               disabled={uploading}
-              className="self-end"
+              className="h-9 w-9 p-0 shrink-0"
             >
               <Paperclip className="h-4 w-4" />
             </Button>
@@ -412,15 +414,18 @@ const Messages = () => {
             />
             <Button 
               onClick={handleSendMessage} 
-              size="icon"
+              size="sm"
               disabled={uploading || (!newMessage.trim() && !selectedFile)}
-              className="self-end"
+              className="h-9 w-9 p-0 shrink-0"
             >
               <Send className="h-4 w-4" />
             </Button>
           </div>
         </div>
       </Card>
-    </div>;
+    </div>
+  );
 };
+
 export default Messages;
+
