@@ -481,225 +481,211 @@ export const DaysOffManager = () => {
         </AccordionItem>
       </Accordion>
 
-      {/* Time Blocks List */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Horários Temporários Criados</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {timeBlocks.filter(block => block.is_active).length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
-              <AlertCircle className="h-12 w-12 mb-2" />
-              <p>Nenhum horário temporário criado</p>
-            </div>
-          ) : (
-            <>
-              {/* Desktop Table */}
-              <div className="hidden md:block">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Período</TableHead>
-                      <TableHead>Horas Bloqueadas</TableHead>
-                      <TableHead>Motivo</TableHead>
-                      <TableHead>Estado</TableHead>
-                      <TableHead className="text-right">Ações</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {timeBlocks.filter(block => block.is_active).map((block) => (
-                      <TableRow key={block.id}>
-                        <TableCell>
-                          {format(new Date(block.start_date), 'dd/MM/yyyy', { locale: pt })} - {format(new Date(block.end_date), 'dd/MM/yyyy', { locale: pt })}
-                        </TableCell>
-                        <TableCell>
-                          {block.blocked_start_time.substring(0, 5)} - {block.blocked_end_time.substring(0, 5)}
-                        </TableCell>
-                        <TableCell>{block.reason || '-'}</TableCell>
-                        <TableCell>
-                          <Badge variant={block.is_active ? 'default' : 'secondary'}>
-                            {block.is_active ? 'Ativo' : 'Inativo'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {block.is_active && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDeleteTimeBlock(block.id)}
-                              disabled={loading}
-                            >
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-
-              {/* Mobile Cards */}
-              <div className="md:hidden space-y-4">
-                {timeBlocks.filter(block => block.is_active).map((block) => (
-                  <Card key={block.id} className="p-4">
-                    <div className="space-y-3">
-                      <div className="flex items-start justify-between">
-                        <div className="space-y-1 flex-1">
-                          <div className="text-sm font-medium">Período</div>
-                          <div className="text-sm text-muted-foreground">
-                            {format(new Date(block.start_date), 'dd/MM/yyyy', { locale: pt })} - {format(new Date(block.end_date), 'dd/MM/yyyy', { locale: pt })}
-                          </div>
-                        </div>
+      {/* Time Blocks List - Only show if there are active items */}
+      {timeBlocks.filter(block => block.is_active).length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Horários Temporários Criados</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {/* Desktop Table */}
+            <div className="hidden md:block">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Período</TableHead>
+                    <TableHead>Horas Bloqueadas</TableHead>
+                    <TableHead>Motivo</TableHead>
+                    <TableHead>Estado</TableHead>
+                    <TableHead className="text-right">Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {timeBlocks.filter(block => block.is_active).map((block) => (
+                    <TableRow key={block.id}>
+                      <TableCell>
+                        {format(new Date(block.start_date), 'dd/MM/yyyy', { locale: pt })} - {format(new Date(block.end_date), 'dd/MM/yyyy', { locale: pt })}
+                      </TableCell>
+                      <TableCell>
+                        {block.blocked_start_time.substring(0, 5)} - {block.blocked_end_time.substring(0, 5)}
+                      </TableCell>
+                      <TableCell>{block.reason || '-'}</TableCell>
+                      <TableCell>
                         <Badge variant={block.is_active ? 'default' : 'secondary'}>
                           {block.is_active ? 'Ativo' : 'Inativo'}
                         </Badge>
-                      </div>
-                      
-                      <div className="space-y-1">
-                        <div className="text-sm font-medium">Horas Bloqueadas</div>
-                        <div className="text-sm text-muted-foreground">
-                          {block.blocked_start_time.substring(0, 5)} - {block.blocked_end_time.substring(0, 5)}
-                        </div>
-                      </div>
-
-                      {block.reason && (
-                        <div className="space-y-1">
-                          <div className="text-sm font-medium">Motivo</div>
-                          <div className="text-sm text-muted-foreground">{block.reason}</div>
-                        </div>
-                      )}
-
-                      {block.is_active && (
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => handleDeleteTimeBlock(block.id)}
-                          disabled={loading}
-                          className="w-full mt-2"
-                        >
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          Eliminar
-                        </Button>
-                      )}
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Days Off List */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Dias de Folga Marcados</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {daysOff.filter(day => day.is_active).length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
-              <AlertCircle className="h-12 w-12 mb-2" />
-              <p>Nenhum dia de folga marcado</p>
-            </div>
-          ) : (
-            <>
-              {/* Desktop Table */}
-              <div className="hidden md:block">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Data/Hora de Início</TableHead>
-                      <TableHead>Data/Hora de Fim</TableHead>
-                      <TableHead>Motivo</TableHead>
-                      <TableHead>Estado</TableHead>
-                      <TableHead className="text-right">Ações</TableHead>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {block.is_active && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteTimeBlock(block.id)}
+                            disabled={loading}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        )}
+                      </TableCell>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {daysOff.filter(day => day.is_active).map((dayOff) => (
-                      <TableRow key={dayOff.id}>
-                        <TableCell>
-                          {format(new Date(dayOff.start_date), 'dd/MM/yyyy HH:mm', { locale: pt })}
-                        </TableCell>
-                        <TableCell>
-                          {format(new Date(dayOff.end_date), 'dd/MM/yyyy HH:mm', { locale: pt })}
-                        </TableCell>
-                        <TableCell>{dayOff.reason || '-'}</TableCell>
-                        <TableCell>
-                          <Badge variant={dayOff.is_active ? 'default' : 'secondary'}>
-                            {dayOff.is_active ? 'Ativo' : 'Inativo'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {dayOff.is_active && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleRevert(dayOff.id)}
-                              disabled={loading}
-                            >
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
 
-              {/* Mobile Cards */}
-              <div className="md:hidden space-y-4">
-                {daysOff.filter(day => day.is_active).map((dayOff) => (
-                  <Card key={dayOff.id} className="p-4">
-                    <div className="space-y-3">
-                      <div className="flex items-start justify-between">
-                        <div className="space-y-1 flex-1">
-                          <div className="text-sm font-medium">Início</div>
-                          <div className="text-sm text-muted-foreground">
-                            {format(new Date(dayOff.start_date), 'dd/MM/yyyy HH:mm', { locale: pt })}
-                          </div>
+            {/* Mobile Cards */}
+            <div className="md:hidden space-y-4">
+              {timeBlocks.filter(block => block.is_active).map((block) => (
+                <Card key={block.id} className="p-4">
+                  <div className="space-y-3">
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-1 flex-1">
+                        <div className="text-sm font-medium">Período</div>
+                        <div className="text-sm text-muted-foreground">
+                          {format(new Date(block.start_date), 'dd/MM/yyyy', { locale: pt })} - {format(new Date(block.end_date), 'dd/MM/yyyy', { locale: pt })}
                         </div>
+                      </div>
+                      <Badge variant={block.is_active ? 'default' : 'secondary'}>
+                        {block.is_active ? 'Ativo' : 'Inativo'}
+                      </Badge>
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <div className="text-sm font-medium">Horas Bloqueadas</div>
+                      <div className="text-sm text-muted-foreground">
+                        {block.blocked_start_time.substring(0, 5)} - {block.blocked_end_time.substring(0, 5)}
+                      </div>
+                    </div>
+
+                    {block.reason && (
+                      <div className="space-y-1">
+                        <div className="text-sm font-medium">Motivo</div>
+                        <div className="text-sm text-muted-foreground">{block.reason}</div>
+                      </div>
+                    )}
+
+                    {block.is_active && (
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleDeleteTimeBlock(block.id)}
+                        disabled={loading}
+                        className="w-full mt-2"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Eliminar
+                      </Button>
+                    )}
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Days Off List - Only show if there are active items */}
+      {daysOff.filter(day => day.is_active).length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Dias de Folga Marcados</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {/* Desktop Table */}
+            <div className="hidden md:block">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Data/Hora de Início</TableHead>
+                    <TableHead>Data/Hora de Fim</TableHead>
+                    <TableHead>Motivo</TableHead>
+                    <TableHead>Estado</TableHead>
+                    <TableHead className="text-right">Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {daysOff.filter(day => day.is_active).map((dayOff) => (
+                    <TableRow key={dayOff.id}>
+                      <TableCell>
+                        {format(new Date(dayOff.start_date), 'dd/MM/yyyy HH:mm', { locale: pt })}
+                      </TableCell>
+                      <TableCell>
+                        {format(new Date(dayOff.end_date), 'dd/MM/yyyy HH:mm', { locale: pt })}
+                      </TableCell>
+                      <TableCell>{dayOff.reason || '-'}</TableCell>
+                      <TableCell>
                         <Badge variant={dayOff.is_active ? 'default' : 'secondary'}>
                           {dayOff.is_active ? 'Ativo' : 'Inativo'}
                         </Badge>
-                      </div>
-                      
-                      <div className="space-y-1">
-                        <div className="text-sm font-medium">Fim</div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {dayOff.is_active && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleRevert(dayOff.id)}
+                            disabled={loading}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Mobile Cards */}
+            <div className="md:hidden space-y-4">
+              {daysOff.filter(day => day.is_active).map((dayOff) => (
+                <Card key={dayOff.id} className="p-4">
+                  <div className="space-y-3">
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-1 flex-1">
+                        <div className="text-sm font-medium">Início</div>
                         <div className="text-sm text-muted-foreground">
-                          {format(new Date(dayOff.end_date), 'dd/MM/yyyy HH:mm', { locale: pt })}
+                          {format(new Date(dayOff.start_date), 'dd/MM/yyyy HH:mm', { locale: pt })}
                         </div>
                       </div>
-
-                      {dayOff.reason && (
-                        <div className="space-y-1">
-                          <div className="text-sm font-medium">Motivo</div>
-                          <div className="text-sm text-muted-foreground">{dayOff.reason}</div>
-                        </div>
-                      )}
-
-                      {dayOff.is_active && (
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => handleRevert(dayOff.id)}
-                          disabled={loading}
-                          className="w-full mt-2"
-                        >
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          Reverter
-                        </Button>
-                      )}
+                      <Badge variant={dayOff.is_active ? 'default' : 'secondary'}>
+                        {dayOff.is_active ? 'Ativo' : 'Inativo'}
+                      </Badge>
                     </div>
-                  </Card>
-                ))}
-              </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
+                    
+                    <div className="space-y-1">
+                      <div className="text-sm font-medium">Fim</div>
+                      <div className="text-sm text-muted-foreground">
+                        {format(new Date(dayOff.end_date), 'dd/MM/yyyy HH:mm', { locale: pt })}
+                      </div>
+                    </div>
+
+                    {dayOff.reason && (
+                      <div className="space-y-1">
+                        <div className="text-sm font-medium">Motivo</div>
+                        <div className="text-sm text-muted-foreground">{dayOff.reason}</div>
+                      </div>
+                    )}
+
+                    {dayOff.is_active && (
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleRevert(dayOff.id)}
+                        disabled={loading}
+                        className="w-full mt-2"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Reverter
+                      </Button>
+                    )}
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

@@ -236,7 +236,6 @@ const ReferralCodeStats = () => {
                   <div className="flex items-center gap-1">
                     <Users className="h-4 w-4 text-primary" />
                     <span className="font-medium">{stat.times_used}</span>
-                    <span className="text-muted-foreground">usos</span>
                   </div>
                   {stat.active_rewards > 0 && (
                     <div className="flex items-center gap-1 text-green-600">
