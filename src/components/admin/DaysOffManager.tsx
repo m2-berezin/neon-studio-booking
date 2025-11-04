@@ -7,6 +7,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
@@ -261,212 +262,224 @@ export const DaysOffManager = () => {
   return (
     <div className="space-y-6">
       {/* Mark Day Off Form */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Marcar Dia de Folga</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Start Date */}
-            <div className="space-y-2">
-              <Label>Data de Início</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      'w-full justify-start text-left font-normal',
-                      !startDate && 'text-muted-foreground'
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {startDate ? format(startDate, 'PPP', { locale: pt }) : 'Seleciona a data'}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={startDate}
-                    onSelect={setStartDate}
-                    initialFocus
-                    className="pointer-events-auto"
+      <Accordion type="single" collapsible className="w-full">
+        <AccordionItem value="day-off">
+          <Card>
+            <AccordionTrigger className="px-6 py-4 hover:no-underline">
+              <CardTitle className="text-lg">Marcar Dia de Folga</CardTitle>
+            </AccordionTrigger>
+            <AccordionContent>
+              <CardContent className="space-y-4 pt-0">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Start Date */}
+                  <div className="space-y-2">
+                    <Label>Data de Início</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            'w-full justify-start text-left font-normal',
+                            !startDate && 'text-muted-foreground'
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {startDate ? format(startDate, 'PPP', { locale: pt }) : 'Seleciona a data'}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={startDate}
+                          onSelect={setStartDate}
+                          initialFocus
+                          className="pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+
+                  {/* Start Time */}
+                  <div className="space-y-2">
+                    <Label>Hora de Início</Label>
+                    <Input
+                      type="time"
+                      value={startTime}
+                      onChange={(e) => setStartTime(e.target.value)}
+                    />
+                  </div>
+
+                  {/* End Date */}
+                  <div className="space-y-2">
+                    <Label>Data de Fim</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            'w-full justify-start text-left font-normal',
+                            !endDate && 'text-muted-foreground'
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {endDate ? format(endDate, 'PPP', { locale: pt }) : 'Seleciona a data'}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={endDate}
+                          onSelect={setEndDate}
+                          initialFocus
+                          className="pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+
+                  {/* End Time */}
+                  <div className="space-y-2">
+                    <Label>Hora de Fim</Label>
+                    <Input
+                      type="time"
+                      value={endTime}
+                      onChange={(e) => setEndTime(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                {/* Reason */}
+                <div className="space-y-2">
+                  <Label>Motivo (opcional)</Label>
+                  <Input
+                    placeholder="Ex: Férias, Feriado, Manutenção..."
+                    value={reason}
+                    onChange={(e) => setReason(e.target.value)}
                   />
-                </PopoverContent>
-              </Popover>
-            </div>
+                </div>
 
-            {/* Start Time */}
-            <div className="space-y-2">
-              <Label>Hora de Início</Label>
-              <Input
-                type="time"
-                value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
-              />
-            </div>
-
-            {/* End Date */}
-            <div className="space-y-2">
-              <Label>Data de Fim</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      'w-full justify-start text-left font-normal',
-                      !endDate && 'text-muted-foreground'
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {endDate ? format(endDate, 'PPP', { locale: pt }) : 'Seleciona a data'}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={endDate}
-                    onSelect={setEndDate}
-                    initialFocus
-                    className="pointer-events-auto"
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            {/* End Time */}
-            <div className="space-y-2">
-              <Label>Hora de Fim</Label>
-              <Input
-                type="time"
-                value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
-              />
-            </div>
-          </div>
-
-          {/* Reason */}
-          <div className="space-y-2">
-            <Label>Motivo (opcional)</Label>
-            <Input
-              placeholder="Ex: Férias, Feriado, Manutenção..."
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-            />
-          </div>
-
-          <Button 
-            onClick={handleMarkOff} 
-            disabled={loading || !startDate || !endDate}
-            className="w-full"
-          >
-            {loading ? 'A processar...' : 'Marcar Dia de Folga'}
-          </Button>
-        </CardContent>
-      </Card>
+                <Button 
+                  onClick={handleMarkOff} 
+                  disabled={loading || !startDate || !endDate}
+                  className="w-full"
+                >
+                  {loading ? 'A processar...' : 'Marcar Dia de Folga'}
+                </Button>
+              </CardContent>
+            </AccordionContent>
+          </Card>
+        </AccordionItem>
+      </Accordion>
 
       {/* Temporary Time Blocks Form */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Horário Temporário</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Start Date */}
-            <div className="space-y-2">
-              <Label>Data de Início</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      'w-full justify-start text-left font-normal',
-                      !blockStartDate && 'text-muted-foreground'
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {blockStartDate ? format(blockStartDate, 'PPP', { locale: pt }) : 'Seleciona a data'}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={blockStartDate}
-                    onSelect={setBlockStartDate}
-                    initialFocus
-                    className="pointer-events-auto"
+      <Accordion type="single" collapsible className="w-full">
+        <AccordionItem value="time-block">
+          <Card>
+            <AccordionTrigger className="px-6 py-4 hover:no-underline">
+              <CardTitle className="text-lg">Horário Temporário</CardTitle>
+            </AccordionTrigger>
+            <AccordionContent>
+              <CardContent className="space-y-4 pt-0">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Start Date */}
+                  <div className="space-y-2">
+                    <Label>Data de Início</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            'w-full justify-start text-left font-normal',
+                            !blockStartDate && 'text-muted-foreground'
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {blockStartDate ? format(blockStartDate, 'PPP', { locale: pt }) : 'Seleciona a data'}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={blockStartDate}
+                          onSelect={setBlockStartDate}
+                          initialFocus
+                          className="pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+
+                  {/* Start Time */}
+                  <div className="space-y-2">
+                    <Label>Hora de Início</Label>
+                    <Input
+                      type="time"
+                      value={blockStartTime}
+                      onChange={(e) => setBlockStartTime(e.target.value)}
+                    />
+                  </div>
+
+                  {/* End Date */}
+                  <div className="space-y-2">
+                    <Label>Data de Fim</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            'w-full justify-start text-left font-normal',
+                            !blockEndDate && 'text-muted-foreground'
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {blockEndDate ? format(blockEndDate, 'PPP', { locale: pt }) : 'Seleciona a data'}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={blockEndDate}
+                          onSelect={setBlockEndDate}
+                          initialFocus
+                          className="pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+
+                  {/* End Time */}
+                  <div className="space-y-2">
+                    <Label>Hora de Fim</Label>
+                    <Input
+                      type="time"
+                      value={blockEndTime}
+                      onChange={(e) => setBlockEndTime(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                {/* Reason */}
+                <div className="space-y-2">
+                  <Label>Motivo (opcional)</Label>
+                  <Input
+                    placeholder="Ex: Reunião, Pausa almoço, Indisponibilidade temporária..."
+                    value={blockReason}
+                    onChange={(e) => setBlockReason(e.target.value)}
                   />
-                </PopoverContent>
-              </Popover>
-            </div>
+                </div>
 
-            {/* Start Time */}
-            <div className="space-y-2">
-              <Label>Hora de Início</Label>
-              <Input
-                type="time"
-                value={blockStartTime}
-                onChange={(e) => setBlockStartTime(e.target.value)}
-              />
-            </div>
-
-            {/* End Date */}
-            <div className="space-y-2">
-              <Label>Data de Fim</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      'w-full justify-start text-left font-normal',
-                      !blockEndDate && 'text-muted-foreground'
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {blockEndDate ? format(blockEndDate, 'PPP', { locale: pt }) : 'Seleciona a data'}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={blockEndDate}
-                    onSelect={setBlockEndDate}
-                    initialFocus
-                    className="pointer-events-auto"
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            {/* End Time */}
-            <div className="space-y-2">
-              <Label>Hora de Fim</Label>
-              <Input
-                type="time"
-                value={blockEndTime}
-                onChange={(e) => setBlockEndTime(e.target.value)}
-              />
-            </div>
-          </div>
-
-          {/* Reason */}
-          <div className="space-y-2">
-            <Label>Motivo (opcional)</Label>
-            <Input
-              placeholder="Ex: Reunião, Pausa almoço, Indisponibilidade temporária..."
-              value={blockReason}
-              onChange={(e) => setBlockReason(e.target.value)}
-            />
-          </div>
-
-          <Button 
-            onClick={handleCreateTimeBlock} 
-            disabled={loading || !blockStartDate || !blockEndDate}
-            className="w-full"
-          >
-            {loading ? 'A processar...' : 'Criar Horário Temporário'}
-          </Button>
-        </CardContent>
-      </Card>
+                <Button 
+                  onClick={handleCreateTimeBlock} 
+                  disabled={loading || !blockStartDate || !blockEndDate}
+                  className="w-full"
+                >
+                  {loading ? 'A processar...' : 'Criar Horário Temporário'}
+                </Button>
+              </CardContent>
+            </AccordionContent>
+          </Card>
+        </AccordionItem>
+      </Accordion>
 
       {/* Time Blocks List */}
       <Card>
@@ -474,7 +487,7 @@ export const DaysOffManager = () => {
           <CardTitle>Horários Temporários Criados</CardTitle>
         </CardHeader>
         <CardContent>
-          {timeBlocks.length === 0 ? (
+          {timeBlocks.filter(block => block.is_active).length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
               <AlertCircle className="h-12 w-12 mb-2" />
               <p>Nenhum horário temporário criado</p>
@@ -494,7 +507,7 @@ export const DaysOffManager = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {timeBlocks.map((block) => (
+                    {timeBlocks.filter(block => block.is_active).map((block) => (
                       <TableRow key={block.id}>
                         <TableCell>
                           {format(new Date(block.start_date), 'dd/MM/yyyy', { locale: pt })} - {format(new Date(block.end_date), 'dd/MM/yyyy', { locale: pt })}
@@ -528,7 +541,7 @@ export const DaysOffManager = () => {
 
               {/* Mobile Cards */}
               <div className="md:hidden space-y-4">
-                {timeBlocks.map((block) => (
+                {timeBlocks.filter(block => block.is_active).map((block) => (
                   <Card key={block.id} className="p-4">
                     <div className="space-y-3">
                       <div className="flex items-start justify-between">
@@ -584,7 +597,7 @@ export const DaysOffManager = () => {
           <CardTitle>Dias de Folga Marcados</CardTitle>
         </CardHeader>
         <CardContent>
-          {daysOff.length === 0 ? (
+          {daysOff.filter(day => day.is_active).length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
               <AlertCircle className="h-12 w-12 mb-2" />
               <p>Nenhum dia de folga marcado</p>
@@ -604,7 +617,7 @@ export const DaysOffManager = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {daysOff.map((dayOff) => (
+                    {daysOff.filter(day => day.is_active).map((dayOff) => (
                       <TableRow key={dayOff.id}>
                         <TableCell>
                           {format(new Date(dayOff.start_date), 'dd/MM/yyyy HH:mm', { locale: pt })}
@@ -638,7 +651,7 @@ export const DaysOffManager = () => {
 
               {/* Mobile Cards */}
               <div className="md:hidden space-y-4">
-                {daysOff.map((dayOff) => (
+                {daysOff.filter(day => day.is_active).map((dayOff) => (
                   <Card key={dayOff.id} className="p-4">
                     <div className="space-y-3">
                       <div className="flex items-start justify-between">
