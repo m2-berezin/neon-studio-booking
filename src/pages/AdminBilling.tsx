@@ -8,6 +8,16 @@ import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { pt } from 'date-fns/locale';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface BookingWithProfile {
   id: string;
@@ -32,6 +42,8 @@ const AdminBilling = () => {
   const [totalRevenue, setTotalRevenue] = useState(0);
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
   const [selectedYear, setSelectedYear] = useState<string | null>(new Date().getFullYear().toString());
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [bookingToDelete, setBookingToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isAdmin()) {
@@ -161,43 +173,57 @@ const AdminBilling = () => {
   };
 
   const handleStatusChange = async (bookingId: string, newStatus: string) => {
+    if (newStatus === 'deleted') {
+      setBookingToDelete(bookingId);
+      setDeleteDialogOpen(true);
+      return;
+    }
+
     try {
-      if (newStatus === 'deleted') {
-        // Hide booking from admin view
-        const { error } = await supabase
-          .from('bookings')
-          .update({ hidden_from_admin: true })
-          .eq('id', bookingId);
+      const { error } = await supabase
+        .from('bookings')
+        .update({ status: newStatus })
+        .eq('id', bookingId);
 
-        if (error) throw error;
+      if (error) throw error;
 
-        // Remove from local state
-        const updatedAllBookings = allBookings.filter(b => b.id !== bookingId);
-        setAllBookings(updatedAllBookings);
-        
-        const updatedBookings = bookings.filter(b => b.id !== bookingId);
-        setBookings(updatedBookings);
-      } else {
-        const { error } = await supabase
-          .from('bookings')
-          .update({ status: newStatus })
-          .eq('id', bookingId);
-
-        if (error) throw error;
-
-        // Update local state
-        const updatedAllBookings = allBookings.map(b => 
-          b.id === bookingId ? { ...b, status: newStatus } : b
-        );
-        setAllBookings(updatedAllBookings);
-        
-        const updatedBookings = bookings.map(b => 
-          b.id === bookingId ? { ...b, status: newStatus } : b
-        );
-        setBookings(updatedBookings);
-      }
+      // Update local state
+      const updatedAllBookings = allBookings.map(b => 
+        b.id === bookingId ? { ...b, status: newStatus } : b
+      );
+      setAllBookings(updatedAllBookings);
+      
+      const updatedBookings = bookings.map(b => 
+        b.id === bookingId ? { ...b, status: newStatus } : b
+      );
+      setBookings(updatedBookings);
     } catch (error) {
       console.error('Error updating booking status:', error);
+    }
+  };
+
+  const confirmDelete = async () => {
+    if (!bookingToDelete) return;
+
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .update({ hidden_from_admin: true })
+        .eq('id', bookingToDelete);
+
+      if (error) throw error;
+
+      // Remove from local state
+      const updatedAllBookings = allBookings.filter(b => b.id !== bookingToDelete);
+      setAllBookings(updatedAllBookings);
+      
+      const updatedBookings = bookings.filter(b => b.id !== bookingToDelete);
+      setBookings(updatedBookings);
+      
+      setDeleteDialogOpen(false);
+      setBookingToDelete(null);
+    } catch (error) {
+      console.error('Error deleting booking:', error);
     }
   };
 
@@ -376,6 +402,21 @@ const AdminBilling = () => {
           ))}
         </div>
       )}
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Tens a certeza que pretendes eliminar?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação irá remover a sessão da lista de faturação.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setBookingToDelete(null)}>Não</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete}>Sim</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
