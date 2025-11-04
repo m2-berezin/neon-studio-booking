@@ -43,6 +43,7 @@ interface DashboardStats {
   pendingPayments: number;
   activeClients: number;
   monthlyRevenue: number;
+  activeSubscriptions: number;
 }
 
 interface RecentPayment {
@@ -120,6 +121,7 @@ const AdminDashboard = () => {
     pendingPayments: 0,
     activeClients: 0,
     monthlyRevenue: 0,
+    activeSubscriptions: 0,
   });
   const [recentPayments, setRecentPayments] = useState<RecentPayment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -190,11 +192,16 @@ const AdminDashboard = () => {
         0
       );
 
+      // Load active subscriptions count
+      // Note: Subscriptions system not yet implemented, defaulting to 0
+      const subscriptionsCount = 0;
+
       setStats({
         totalBookings: bookingsCount || 0,
         pendingPayments: pendingCount || 0,
         activeClients: clientsCount || 0,
         monthlyRevenue: totalRevenue,
+        activeSubscriptions: subscriptionsCount,
       });
 
       setRecentPayments(mappedPayments);
@@ -645,7 +652,7 @@ const AdminDashboard = () => {
     },
     {
       title: 'Subscrições',
-      value: '💳',
+      value: stats.activeSubscriptions,
       icon: CreditCard,
       color: 'text-pink-500',
       bgColor: 'bg-pink-500/10',

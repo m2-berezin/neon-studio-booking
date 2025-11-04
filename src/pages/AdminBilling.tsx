@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, Clock, Euro, User, X } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, Euro, User, X, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -9,6 +9,7 @@ import { pt } from 'date-fns/locale';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -391,12 +392,35 @@ const AdminBilling = () => {
                   </div>
                 </div>
                 
-                <div className="flex flex-col items-end gap-2 min-w-[180px]">
+                <div className="flex items-center gap-2">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                      >
+                        <FileText className="h-4 w-4" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-80">
+                      <div className="space-y-2">
+                        <h4 className="font-medium text-sm">Nota</h4>
+                        <Textarea
+                          placeholder="Adicionar nota..."
+                          value={bookingNotes[booking.id] || ''}
+                          onChange={(e) => handleNoteChange(booking.id, e.target.value)}
+                          className="min-h-[80px] text-sm"
+                        />
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                  
                   <Select 
                     value={booking.status} 
                     onValueChange={(value) => handleStatusChange(booking.id, value)}
                   >
-                    <SelectTrigger className="w-full">
+                    <SelectTrigger className="w-[180px]">
                       <SelectValue>
                         {getStatusLabel(booking.status)}
                       </SelectValue>
@@ -408,14 +432,6 @@ const AdminBilling = () => {
                     </SelectContent>
                   </Select>
                 </div>
-              </div>
-              <div className="mt-3">
-                <Textarea
-                  placeholder="Adicionar nota..."
-                  value={bookingNotes[booking.id] || ''}
-                  onChange={(e) => handleNoteChange(booking.id, e.target.value)}
-                  className="min-h-[60px] text-sm"
-                />
               </div>
             </div>
           ))}
