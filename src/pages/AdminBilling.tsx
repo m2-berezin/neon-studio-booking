@@ -387,7 +387,9 @@ const AdminBilling = () => {
                     onValueChange={(value) => handleStatusChange(booking.id, value)}
                   >
                     <SelectTrigger className="w-full">
-                      <SelectValue />
+                      <SelectValue>
+                        {getStatusLabel(booking.status)}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="confirmed">Confirmado</SelectItem>
