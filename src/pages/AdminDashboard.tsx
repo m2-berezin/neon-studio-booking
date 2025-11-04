@@ -680,8 +680,8 @@ const AdminDashboard = () => {
   ];
 
   return (
-    <div className="space-y-4 md:space-y-6 p-2 md:p-4 lg:p-6">
-      <div className="space-y-1 md:space-y-2">
+    <div className="space-y-4 md:space-y-6">
+      <div className="space-y-1 md:space-y-2 p-2 md:p-4 lg:p-6 pb-0">
         <h1 className="text-2xl md:text-3xl font-bold">Bem-vindo ao Dashboard</h1>
         <p className="text-sm md:text-base text-muted-foreground">
           Visão geral das operações do estúdio
@@ -694,22 +694,24 @@ const AdminDashboard = () => {
           markNotificationsRead();
         }
       }}>
-        <TabsList className="grid w-full grid-cols-5 max-w-full lg:max-w-4xl overflow-x-auto">
-          <TabsTrigger value="overview" className="text-xs md:text-sm">Visão Geral</TabsTrigger>
-          <TabsTrigger value="messages" className="relative text-xs md:text-sm">
-            Mensagens
-            {unreadCount > 0 && (
-              <Badge className="ml-1 md:ml-2 h-4 w-4 md:h-5 md:w-5 p-0 flex items-center justify-center text-xs">
-                {unreadCount}
-              </Badge>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="daysoff" className="text-xs md:text-sm">Days Off</TabsTrigger>
-          <TabsTrigger value="referrals" className="text-xs md:text-sm">Referrals</TabsTrigger>
-          <TabsTrigger value="shout" className="text-xs md:text-sm">SHOUT</TabsTrigger>
-        </TabsList>
+        <div className="sticky top-0 z-30 bg-background border-b border-border pb-2">
+          <TabsList className="grid w-full grid-cols-5 max-w-full lg:max-w-4xl overflow-x-auto mx-2 md:mx-4 lg:mx-6">
+            <TabsTrigger value="overview" className="text-xs md:text-sm">Visão Geral</TabsTrigger>
+            <TabsTrigger value="messages" className="relative text-xs md:text-sm">
+              Mensagens
+              {unreadCount > 0 && (
+                <Badge className="ml-1 md:ml-2 h-4 w-4 md:h-5 md:w-5 p-0 flex items-center justify-center text-xs">
+                  {unreadCount}
+                </Badge>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="daysoff" className="text-xs md:text-sm">Days Off</TabsTrigger>
+            <TabsTrigger value="referrals" className="text-xs md:text-sm">Referrals</TabsTrigger>
+            <TabsTrigger value="shout" className="text-xs md:text-sm">SHOUT</TabsTrigger>
+          </TabsList>
+        </div>
 
-        <TabsContent value="overview" className="space-y-4 md:space-y-6 mt-4 md:mt-6">
+        <TabsContent value="overview" className="space-y-4 md:space-y-6 mt-4 md:mt-6 p-2 md:p-4 lg:p-6 pt-4">
 
       {/* Stats Grid - Asymmetric Mobile Layout */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
@@ -793,7 +795,7 @@ const AdminDashboard = () => {
 
         </TabsContent>
 
-        <TabsContent value="messages" className="space-y-4 md:space-y-6 mt-4 md:mt-6">
+        <TabsContent value="messages" className="space-y-4 md:space-y-6 mt-4 md:mt-6 p-2 md:p-4 lg:p-6 pt-4">
           {!selectedUserId ? (
             /* Lista de conversas */
             <div className="max-w-full md:max-w-4xl mx-auto px-2 md:px-0">
@@ -1016,15 +1018,15 @@ const AdminDashboard = () => {
           )}
         </TabsContent>
 
-        <TabsContent value="daysoff" className="space-y-6 mt-6">
+        <TabsContent value="daysoff" className="space-y-6 mt-6 p-2 md:p-4 lg:p-6 pt-4">
           <DaysOffManager />
         </TabsContent>
 
-        <TabsContent value="referrals" className="space-y-6 mt-6">
+        <TabsContent value="referrals" className="space-y-6 mt-6 p-2 md:p-4 lg:p-6 pt-4">
           <ReferralCodeStats />
         </TabsContent>
 
-        <TabsContent value="shout" className="space-y-6 mt-6">
+        <TabsContent value="shout" className="space-y-6 mt-6 p-2 md:p-4 lg:p-6 pt-4">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
