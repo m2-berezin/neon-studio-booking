@@ -193,8 +193,16 @@ const AdminDashboard = () => {
       );
 
       // Load active subscriptions count
-      // Note: Subscriptions system not yet implemented, defaulting to 0
-      const subscriptionsCount = 0;
+      const { data: activeSubscriptions, error: subscriptionsError } = await supabase
+        .from('subscriptions')
+        .select('id', { count: 'exact', head: true })
+        .eq('is_active', true);
+
+      if (subscriptionsError) {
+        console.error('Error fetching subscriptions:', subscriptionsError);
+      }
+
+      const subscriptionsCount = activeSubscriptions?.length || 0;
 
       setStats({
         totalBookings: bookingsCount || 0,
@@ -534,6 +542,18 @@ const AdminDashboard = () => {
           },
           () => {
             console.log('Novo pagamento aprovado, atualizando receita mensal');
+            loadDashboardData();
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'subscriptions'
+          },
+          () => {
+            console.log('Subscrição atualizada, recarregando dados');
             loadDashboardData();
           }
         )

@@ -398,13 +398,16 @@ const AdminBilling = () => {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8"
+                        className={`h-8 w-8 relative ${bookingNotes[booking.id] ? 'text-accent' : ''}`}
                       >
                         <FileText className="h-4 w-4" />
+                        {bookingNotes[booking.id] && (
+                          <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-accent" />
+                        )}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-80">
-                      <div className="space-y-2">
+                      <div className="space-y-3">
                         <h4 className="font-medium text-sm">Nota</h4>
                         <Textarea
                           placeholder="Adicionar nota..."
@@ -412,6 +415,13 @@ const AdminBilling = () => {
                           onChange={(e) => handleNoteChange(booking.id, e.target.value)}
                           className="min-h-[80px] text-sm"
                         />
+                        <Button 
+                          size="sm" 
+                          className="w-full"
+                          onClick={() => document.body.click()}
+                        >
+                          OK
+                        </Button>
                       </div>
                     </PopoverContent>
                   </Popover>
