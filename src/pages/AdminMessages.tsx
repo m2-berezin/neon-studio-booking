@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, MessageSquare, Paperclip, X, Download, Image as ImageIcon, Music } from 'lucide-react';
+import { Send, MessageSquare, Paperclip, X, Download, Image as ImageIcon, Music, Search } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { toast } from 'sonner';
@@ -62,6 +62,7 @@ const AdminMessages = () => {
   const [newMessage, setNewMessage] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -286,6 +287,11 @@ const AdminMessages = () => {
 
   if (!user) return null;
 
+  // Filter threads based on search query
+  const filteredThreads = threads.filter(thread =>
+    thread.user_name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <AdminLayout>
       <div className="p-4 md:p-6 max-w-4xl mx-auto">
@@ -293,16 +299,27 @@ const AdminMessages = () => {
           Mensagens 🦇
         </h1>
 
-        {threads.length === 0 ? (
+        {/* Search Input */}
+        <div className="relative mb-4">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Pesquisar por nome do cliente..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+
+        {filteredThreads.length === 0 ? (
           <Card className="p-8">
             <div className="text-center text-muted-foreground">
               <MessageSquare className="h-12 w-12 mx-auto mb-2 opacity-50" />
-              <p>Sem mensagens</p>
+              <p>{searchQuery ? 'Nenhum cliente encontrado com esse nome.' : 'Sem mensagens'}</p>
             </div>
           </Card>
         ) : (
           <div className="space-y-3">
-            {threads.map((thread) => (
+            {filteredThreads.map((thread) => (
               <Card 
                 key={thread.user_id}
                 className="p-4 cursor-pointer hover:bg-muted/50 transition-colors"

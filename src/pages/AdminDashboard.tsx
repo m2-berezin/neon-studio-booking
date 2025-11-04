@@ -655,13 +655,6 @@ const AdminDashboard = () => {
       path: '/admin/bookings',
     },
     {
-      title: 'Pagamentos Pendentes',
-      value: stats.pendingPayments,
-      icon: Clock,
-      color: 'text-yellow-500',
-      bgColor: 'bg-yellow-500/10',
-    },
-    {
       title: 'Clientes Ativos',
       value: stats.activeClients,
       icon: Users,
@@ -719,7 +712,7 @@ const AdminDashboard = () => {
         <TabsContent value="overview" className="space-y-4 md:space-y-6 mt-4 md:mt-6">
 
       {/* Stats Grid - Asymmetric Mobile Layout */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
         {statCards.map((stat, index) => {
           const isClickable = !!stat.path;
           
@@ -728,7 +721,7 @@ const AdminDashboard = () => {
               key={index} 
               className={`
                 ${index === 0 ? 'col-span-2 lg:col-span-1' : ''}
-                ${index === 4 ? 'col-span-2 lg:col-span-1' : ''}
+                ${index === 3 ? 'col-span-2 lg:col-span-1' : ''}
                 ${isClickable ? 'cursor-pointer hover:bg-muted/50 transition-colors' : ''}
               `}
               onClick={() => isClickable && stat.path && navigate(stat.path)}
