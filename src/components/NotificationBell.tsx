@@ -1,16 +1,25 @@
 import React, { useState, useRef } from 'react';
-import { Bell, Check, CheckCheck, Trash2 } from 'lucide-react';
+import { Bell, Check, CheckCheck, Trash2, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useNotifications } from '@/hooks/useNotifications';
 import { formatDistanceToNow } from 'date-fns';
 import { pt } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+
+interface SelectedNotification {
+  id: string;
+  title: string;
+  body: string;
+  created_at: string;
+  read: boolean;
+}
 
 export const NotificationBell = () => {
   const { notifications, unreadCount, loading, markAsRead, markAllAsRead, deleteNotification } = useNotifications();
@@ -18,27 +27,39 @@ export const NotificationBell = () => {
   const [swipedNotificationId, setSwipedNotificationId] = useState<string | null>(null);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [selectedNotification, setSelectedNotification] = useState<SelectedNotification | null>(null);
   const navigate = useNavigate();
 
-  const handleNotificationClick = async (notificationId: string, isRead: boolean, title: string, body: string) => {
-    if (!isRead) {
-      await markAsRead(notificationId);
-    }
-    
+  const handleNotificationClick = async (notification: SelectedNotification) => {
+    // Open dialog to show full message
+    setSelectedNotification(notification);
     setOpen(false);
+  };
+
+  const handleCloseDialog = async () => {
+    if (selectedNotification && !selectedNotification.read) {
+      await markAsRead(selectedNotification.id);
+    }
     
-    // Navigate to admin messages tab with client name if it's a new message notification
-    if (title === 'Recebeu uma mensagem') {
-      navigate('/admin/dashboard', { state: { openMessages: true, clientName: body } });
+    // Check if should navigate after closing dialog
+    if (selectedNotification) {
+      const { title, body } = selectedNotification;
+      
+      // Navigate to admin messages tab with client name if it's a new message notification
+      if (title === 'Recebeu uma mensagem') {
+        navigate('/admin/dashboard', { state: { openMessages: true, clientName: body } });
+      }
+      // Navigate to messages tab if it's a new message notification for regular users
+      else if (title === 'Nova mensagem') {
+        navigate('/messages');
+      }
+      // Navigate to projects tab if it's an approval/confirmation notification
+      else if (title.toLowerCase().includes('aprovad') || title.toLowerCase().includes('confirmad')) {
+        navigate('/projects');
+      }
     }
-    // Navigate to messages tab if it's a new message notification for regular users
-    else if (title === 'Nova mensagem') {
-      navigate('/messages');
-    }
-    // Navigate to projects tab if it's an approval/confirmation notification
-    else if (title.toLowerCase().includes('aprovad') || title.toLowerCase().includes('confirmad')) {
-      navigate('/projects');
-    }
+    
+    setSelectedNotification(null);
   };
 
   const handleMarkAllAsRead = async () => {
@@ -145,7 +166,13 @@ export const NotificationBell = () => {
                           className={`p-4 cursor-pointer transition-colors hover:bg-muted/50 ${
                             !notification.read ? 'bg-primary/5 border-l-4 border-l-primary' : ''
                           }`}
-                          onClick={() => handleNotificationClick(notification.id, notification.read, notification.title, notification.body)}
+                          onClick={() => handleNotificationClick({
+                            id: notification.id,
+                            title: notification.title,
+                            body: notification.body,
+                            created_at: notification.created_at,
+                            read: notification.read
+                          })}
                         >
                           <div className="flex items-start justify-between gap-2">
                             <div className="flex-1 min-w-0">
@@ -189,6 +216,36 @@ export const NotificationBell = () => {
           </CardContent>
         </Card>
       </PopoverContent>
+      
+      {/* Dialog for full notification message */}
+      <Dialog open={selectedNotification !== null} onOpenChange={(open) => !open && handleCloseDialog()}>
+        <DialogContent className="max-w-md">
+          <DialogHeader className="relative">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute -left-2 -top-2"
+              onClick={handleCloseDialog}
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <DialogTitle className="text-center pt-2">
+              {selectedNotification?.title}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+              {selectedNotification?.body}
+            </p>
+            <p className="text-xs text-muted-foreground text-right">
+              {selectedNotification && formatDistanceToNow(new Date(selectedNotification.created_at), { 
+                addSuffix: true, 
+                locale: pt 
+              })}
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Popover>
   );
 };
