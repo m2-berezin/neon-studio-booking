@@ -26,7 +26,8 @@ import {
   X,
   Download,
   Image as ImageIcon,
-  Music
+  Music,
+  Search
 } from 'lucide-react';
 import { formatPrice } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -132,6 +133,7 @@ const AdminDashboard = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -655,13 +657,6 @@ const AdminDashboard = () => {
       path: '/admin/bookings',
     },
     {
-      title: 'Pagamentos Pendentes',
-      value: stats.pendingPayments,
-      icon: Clock,
-      color: 'text-yellow-500',
-      bgColor: 'bg-yellow-500/10',
-    },
-    {
       title: 'Clientes Ativos',
       value: stats.activeClients,
       icon: Users,
@@ -719,7 +714,7 @@ const AdminDashboard = () => {
         <TabsContent value="overview" className="space-y-4 md:space-y-6 mt-4 md:mt-6">
 
       {/* Stats Grid - Asymmetric Mobile Layout */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
         {statCards.map((stat, index) => {
           const isClickable = !!stat.path;
           
@@ -728,7 +723,7 @@ const AdminDashboard = () => {
               key={index} 
               className={`
                 ${index === 0 ? 'col-span-2 lg:col-span-1' : ''}
-                ${index === 4 ? 'col-span-2 lg:col-span-1' : ''}
+                ${index === 3 ? 'col-span-2 lg:col-span-1' : ''}
                 ${isClickable ? 'cursor-pointer hover:bg-muted/50 transition-colors' : ''}
               `}
               onClick={() => isClickable && stat.path && navigate(stat.path)}
@@ -749,55 +744,6 @@ const AdminDashboard = () => {
         })}
       </div>
 
-      {/* Recent Payment Requests */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <Bell className="h-5 w-5" />
-            Solicitações de Pagamento Recentes
-          </CardTitle>
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => navigate('/admin/payments')}
-          >
-            Ver Todas
-          </Button>
-        </CardHeader>
-        <CardContent>
-          {recentPayments.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <CheckCircle className="h-12 w-12 mx-auto mb-2 opacity-50" />
-              <p>Sem solicitações pendentes</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {recentPayments.map((payment) => (
-                <div 
-                  key={payment.id} 
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
-                  onClick={() => navigate('/admin/payments')}
-                >
-                  <div className="flex-1">
-                    <p className="font-medium">{payment.profiles.full_name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      Transferência Bancária • {format(new Date(payment.created_at), 'dd/MM/yyyy HH:mm')}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Badge variant="outline" className="bg-yellow-500/10 text-yellow-600 border-yellow-500/20">
-                      Pendente
-                    </Badge>
-                    <span className="font-bold text-lg">{formatPrice(payment.amount_eur)}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-
         </TabsContent>
 
         <TabsContent value="messages" className="space-y-4 md:space-y-6 mt-4 md:mt-6">
@@ -808,45 +754,69 @@ const AdminDashboard = () => {
                 Mensagens 🦇
               </h1>
               
-              {threads.length === 0 ? (
-                <Card className="p-6 md:p-8">
-                  <div className="text-center text-muted-foreground">
-                    <MessageSquare className="h-10 w-10 md:h-12 md:w-12 mx-auto mb-2 opacity-50" />
-                    <p className="text-sm md:text-base">Sem mensagens</p>
-                  </div>
-                </Card>
-              ) : (
-                <div className="space-y-2 md:space-y-3">
-                  {threads.map((thread) => (
-                      <Card 
-                        key={thread.user_id}
-                        className="p-3 md:p-4 cursor-pointer hover:bg-muted/50 transition-colors active:scale-98"
-                        onClick={() => {
-                          console.log('🖱️ Opening thread for:', thread.user_name);
-                          setSelectedUserId(thread.user_id);
-                          loadMessages(thread.user_id);
-                        }}
-                      >
-                        <div className="flex items-start justify-between gap-2 md:gap-3">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <h3 className="font-semibold text-base md:text-lg truncate">
-                                {thread.user_name}
-                              </h3>
+              {/* Search Input */}
+              <div className="relative mb-4">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Pesquisar por nome do cliente..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+              
+              {(() => {
+                // Filter threads based on search query
+                const filteredThreads = threads.filter(thread =>
+                  thread.user_name.toLowerCase().includes(searchQuery.toLowerCase())
+                );
+
+                if (filteredThreads.length === 0) {
+                  return (
+                    <Card className="p-6 md:p-8">
+                      <div className="text-center text-muted-foreground">
+                        <MessageSquare className="h-10 w-10 md:h-12 md:w-12 mx-auto mb-2 opacity-50" />
+                        <p className="text-sm md:text-base">
+                          {searchQuery ? 'Nenhum cliente encontrado com esse nome.' : 'Sem mensagens'}
+                        </p>
+                      </div>
+                    </Card>
+                  );
+                }
+
+                return (
+                  <div className="space-y-2 md:space-y-3">
+                    {filteredThreads.map((thread) => (
+                        <Card 
+                          key={thread.user_id}
+                          className="p-3 md:p-4 cursor-pointer hover:bg-muted/50 transition-colors active:scale-98"
+                          onClick={() => {
+                            console.log('🖱️ Opening thread for:', thread.user_name);
+                            setSelectedUserId(thread.user_id);
+                            loadMessages(thread.user_id);
+                          }}
+                        >
+                          <div className="flex items-start justify-between gap-2 md:gap-3">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <h3 className="font-semibold text-base md:text-lg truncate">
+                                  {thread.user_name}
+                                </h3>
+                              </div>
+                              <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground mb-1">
+                                <Paperclip className="h-3 w-3 shrink-0" />
+                                <span className="truncate">{thread.last_message}</span>
+                              </div>
+                              <p className="text-xs text-muted-foreground">
+                                {format(new Date(thread.last_timestamp), 'dd/MM/yyyy HH:mm')}
+                              </p>
                             </div>
-                            <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground mb-1">
-                              <Paperclip className="h-3 w-3 shrink-0" />
-                              <span className="truncate">{thread.last_message}</span>
-                            </div>
-                            <p className="text-xs text-muted-foreground">
-                              {format(new Date(thread.last_timestamp), 'dd/MM/yyyy HH:mm')}
-                            </p>
                           </div>
-                        </div>
-                      </Card>
-                  ))}
-                </div>
-              )}
+                        </Card>
+                    ))}
+                  </div>
+                );
+              })()}
             </div>
           ) : (
             /* Chat aberto */
