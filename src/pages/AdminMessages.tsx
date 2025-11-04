@@ -249,25 +249,12 @@ const AdminMessages = () => {
         fileInputRef.current.value = '';
       }
       
-      // Reset textarea height
-      if (textareaRef.current) {
-        textareaRef.current.style.height = 'auto';
-      }
-      
       toast.success('Mensagem enviada');
     } catch (error) {
       console.error('Error sending message:', error);
       toast.error('Erro ao enviar mensagem');
     }
   };
-
-  // Auto-resize textarea
-  useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
-    }
-  }, [newMessage]);
 
   useEffect(() => {
     if (user) {
@@ -309,22 +296,23 @@ const AdminMessages = () => {
   );
 
   return (
-    <AdminLayout>
-      <div className="p-4 md:p-6 max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6 flex items-center gap-2">
-          Mensagens 🦇
-        </h1>
+    <>
+      <AdminLayout>
+        <div className="p-4 md:p-6 max-w-4xl mx-auto">
+          <h1 className="text-3xl font-bold mb-6 flex items-center gap-2">
+            Mensagens 🦇
+          </h1>
 
-        {/* Search Input */}
-        <div className="relative mb-4">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Pesquisar por nome do cliente..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
-          />
-        </div>
+          {/* Search Input */}
+          <div className="relative mb-4">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Pesquisar por nome do cliente..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9"
+            />
+          </div>
 
         {filteredThreads.length === 0 ? (
           <Card className="p-8">
@@ -376,23 +364,26 @@ const AdminMessages = () => {
           </div>
         )}
 
-        {/* Chat interface - full screen */}
-        {selectedUserId && (
-          <div className="fixed inset-0 z-[100] bg-background flex flex-col">
-            <div className="flex-1 flex flex-col">
-              <div className="p-4 border-b flex items-center gap-3 bg-background sticky top-0 z-10">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setSelectedUserId(null)}
-                  className="h-9 w-9 p-0"
-                >
-                  <X className="h-5 w-5" />
-                </Button>
-                <h2 className="text-lg font-semibold flex-1">
-                  {threads.find((t) => t.user_id === selectedUserId)?.user_name || 'Cliente'}
-                </h2>
-              </div>
+        </div>
+      </AdminLayout>
+
+      {/* Chat interface - full screen overlay */}
+      {selectedUserId && (
+        <div className="fixed inset-0 z-[200] bg-background flex flex-col">
+          <div className="flex-1 flex flex-col">
+            <div className="p-4 border-b flex items-center gap-3 bg-background sticky top-0 z-10">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSelectedUserId(null)}
+                className="h-9 w-9 p-0"
+              >
+                <X className="h-5 w-5" />
+              </Button>
+              <h2 className="text-lg font-semibold flex-1">
+                {threads.find((t) => t.user_id === selectedUserId)?.user_name || 'Cliente'}
+              </h2>
+            </div>
 
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {messages.length === 0 ? (
@@ -530,10 +521,8 @@ const AdminMessages = () => {
                       }
                     }}
                     placeholder="Escreve a tua mensagem..."
-                    className="flex-1 resize-none overflow-y-auto"
-                    style={{ minHeight: '40px', maxHeight: '120px' }}
+                    className="flex-1"
                     disabled={uploading}
-                    rows={1}
                   />
                   <Button 
                     type="button"
@@ -549,9 +538,8 @@ const AdminMessages = () => {
             </div>
           </div>
         )}
-      </div>
-    </AdminLayout>
-  );
-};
+      </>
+    );
+  };
 
 export default AdminMessages;
