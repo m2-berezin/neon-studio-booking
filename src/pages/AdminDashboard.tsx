@@ -680,7 +680,7 @@ const AdminDashboard = () => {
   ];
 
   return (
-    <div className="space-y-4 md:space-y-6">
+    <div className="space-y-4 md:space-y-6 pb-24">
       <div className="space-y-1 md:space-y-2 p-2 md:p-4 lg:p-6 pb-0">
         <h1 className="text-2xl md:text-3xl font-bold">Bem-vindo ao Dashboard</h1>
         <p className="text-sm md:text-base text-muted-foreground">
@@ -694,7 +694,7 @@ const AdminDashboard = () => {
           markNotificationsRead();
         }
       }}>
-        <div className="sticky top-0 z-30 bg-background border-b border-border pb-2">
+        <div className="fixed bottom-16 left-0 right-0 z-40 bg-background border-t border-border pt-2 pb-2">
           <TabsList className="grid w-full grid-cols-5 max-w-full lg:max-w-4xl overflow-x-auto mx-2 md:mx-4 lg:mx-6">
             <TabsTrigger value="overview" className="text-xs md:text-sm">Visão Geral</TabsTrigger>
             <TabsTrigger value="messages" className="relative text-xs md:text-sm">
