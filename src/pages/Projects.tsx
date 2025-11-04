@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Folder, Clock, CheckCircle, FileText, Music, Zap, Trash2, FileAudio, ArrowLeft } from 'lucide-react';
+import { Folder, Clock, CheckCircle, FileText, Music, Zap, Trash2, FileAudio, ArrowLeft, CalendarClock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -239,17 +239,29 @@ const Projects = () => {
                       {getStatusLabel(project.status)}
                     </Badge>
                     
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => {
-                        setProjectToDelete(project.id);
-                        setDeleteDialogOpen(true);
-                      }}
-                      className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => navigate('/messages', { state: { predefinedMessage: 'Ghost preciso de reagendar a sessão' } })}
+                        className="h-8 px-2 text-xs gap-1"
+                      >
+                        <CalendarClock className="h-3 w-3" />
+                        Reagendar
+                      </Button>
+                      
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          setProjectToDelete(project.id);
+                          setDeleteDialogOpen(true);
+                        }}
+                        className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </CardContent>
