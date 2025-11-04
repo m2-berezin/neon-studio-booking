@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
-import { Users, Gift, Clock } from 'lucide-react';
+import { Users, Gift, Clock, Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface ReferralCodeStat {
@@ -20,6 +21,7 @@ const ReferralCodeStats = () => {
   const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<{ id: string; name: string } | null>(null);
   const [givingPoints, setGivingPoints] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -177,6 +179,11 @@ const ReferralCodeStats = () => {
     );
   }
 
+  // Filter stats based on search query
+  const filteredStats = stats.filter(stat => 
+    stat.full_name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <Card>
       <CardHeader>
@@ -186,11 +193,24 @@ const ReferralCodeStats = () => {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {stats.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Sem dados de códigos ainda.</p>
+        {/* Search Input */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Pesquisar por nome do cliente..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+
+        {filteredStats.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            {searchQuery ? 'Nenhum cliente encontrado com esse nome.' : 'Sem dados de códigos ainda.'}
+          </p>
         ) : (
           <div className="space-y-3">
-            {stats.map((stat) => (
+            {filteredStats.map((stat) => (
               <div
                 key={stat.user_id}
                 className="flex items-center justify-between p-4 rounded-lg border bg-card"

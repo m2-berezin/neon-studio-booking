@@ -627,6 +627,7 @@ const AdminDashboard = () => {
       icon: Calendar,
       color: 'text-blue-500',
       bgColor: 'bg-blue-500/10',
+      path: '/admin/bookings',
     },
     {
       title: 'Pagamentos Pendentes',
@@ -643,11 +644,20 @@ const AdminDashboard = () => {
       bgColor: 'bg-green-500/10',
     },
     {
+      title: 'Subscrições',
+      value: '💳',
+      icon: CreditCard,
+      color: 'text-pink-500',
+      bgColor: 'bg-pink-500/10',
+      path: '/admin/subscriptions',
+    },
+    {
       title: 'Faturação',
       value: formatPrice(stats.monthlyRevenue),
       icon: TrendingUp,
       color: 'text-purple-500',
       bgColor: 'bg-purple-500/10',
+      path: '/admin/billing',
     },
   ];
 
@@ -684,20 +694,19 @@ const AdminDashboard = () => {
         <TabsContent value="overview" className="space-y-4 md:space-y-6 mt-4 md:mt-6">
 
       {/* Stats Grid - Asymmetric Mobile Layout */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-6">
         {statCards.map((stat, index) => {
-          const isClickable = index === 0 || index === 3; // Total de Reservas or Faturação
-          const navPath = index === 0 ? '/admin/bookings' : '/admin/billing';
+          const isClickable = !!stat.path;
           
           return (
             <Card 
               key={index} 
               className={`
                 ${index === 0 ? 'col-span-2 lg:col-span-1' : ''}
-                ${index === 3 ? 'col-span-2 lg:col-span-1' : ''}
+                ${index === 4 ? 'col-span-2 lg:col-span-1' : ''}
                 ${isClickable ? 'cursor-pointer hover:bg-muted/50 transition-colors' : ''}
               `}
-              onClick={() => isClickable && navigate(navPath)}
+              onClick={() => isClickable && stat.path && navigate(stat.path)}
             >
               <CardContent className="p-4 md:p-6">
                 <div className="flex items-center justify-between">
@@ -763,24 +772,6 @@ const AdminDashboard = () => {
         </CardContent>
       </Card>
 
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg md:text-xl">Ações Rápidas</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4 md:space-y-6">
-          <div className="grid grid-cols-1 gap-3 md:gap-4 max-w-xs">
-            <Button
-              variant="outline"
-              className="h-16 md:h-20 flex flex-col gap-1 md:gap-2 hover:bg-primary/10 p-2"
-              onClick={() => navigate('/admin/subscriptions')}
-            >
-              <CreditCard className="h-5 w-5 md:h-6 md:w-6" />
-              <span className="text-xs md:text-sm font-medium text-center leading-tight">Subscrições</span>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
 
         </TabsContent>
 
