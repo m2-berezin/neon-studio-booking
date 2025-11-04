@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Textarea } from '@/components/ui/textarea';
 import { Send, MessageSquare, Paperclip, X, Download, Image as ImageIcon, Music, Search } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { AdminLayout } from '@/components/admin/AdminLayout';
@@ -65,6 +66,7 @@ const AdminMessages = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const loadThreads = async () => {
     if (!user) return;
@@ -246,12 +248,26 @@ const AdminMessages = () => {
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
+      
+      // Reset textarea height
+      if (textareaRef.current) {
+        textareaRef.current.style.height = 'auto';
+      }
+      
       toast.success('Mensagem enviada');
     } catch (error) {
       console.error('Error sending message:', error);
       toast.error('Erro ao enviar mensagem');
     }
   };
+
+  // Auto-resize textarea
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
+    }
+  }, [newMessage]);
 
   useEffect(() => {
     if (user) {
@@ -498,19 +514,21 @@ const AdminMessages = () => {
                   >
                     <Paperclip className="h-4 w-4" />
                   </Button>
-                  <Input
-                    type="text"
+                  <Textarea
+                    ref={textareaRef}
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
-                    onKeyPress={(e) => {
+                    onKeyDown={(e) => {
                       if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();
                         handleSendMessage();
                       }
                     }}
                     placeholder="Escreve a tua mensagem..."
-                    className="flex-1"
+                    className="flex-1 resize-none overflow-y-auto"
+                    style={{ minHeight: '40px', maxHeight: '120px' }}
                     disabled={uploading}
+                    rows={1}
                   />
                   <Button 
                     type="button"

@@ -64,6 +64,7 @@ const Messages = () => {
   const [uploading, setUploading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const markThreadAsRead = async () => {
     if (!user) return;
     try {
@@ -253,6 +254,11 @@ const Messages = () => {
       fileInputRef.current.value = '';
     }
     
+    // Reset textarea height
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+    }
+    
     // Scroll to bottom after sending
     setTimeout(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -260,6 +266,14 @@ const Messages = () => {
     
     await markThreadAsRead();
   };
+
+  // Auto-resize textarea
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
+    }
+  }, [newMessage]);
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -386,11 +400,13 @@ const Messages = () => {
               <Paperclip className="h-4 w-4" />
             </Button>
             <Textarea 
+              ref={textareaRef}
               value={newMessage} 
               onChange={e => setNewMessage(e.target.value)} 
               onKeyDown={handleKeyPress} 
               placeholder="Escreve a tua mensagem..." 
-              className="flex-1 min-h-[40px] max-h-[120px] resize-none"
+              className="flex-1 resize-none overflow-y-auto"
+              style={{ minHeight: '40px', maxHeight: '120px' }}
               disabled={uploading}
               rows={1}
             />
