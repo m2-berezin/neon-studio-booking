@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Euro, X } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, Euro, User, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { format } from 'date-fns';
+import { pt } from 'date-fns/locale';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { SwipeableBookingCard } from '@/components/SwipeableBookingCard';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -44,7 +44,6 @@ const AdminBilling = () => {
   const [selectedYear, setSelectedYear] = useState<string | null>(new Date().getFullYear().toString());
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [bookingToDelete, setBookingToDelete] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<string>('faturacao');
 
   useEffect(() => {
     if (!isAdmin()) {
@@ -99,11 +98,6 @@ const AdminBilling = () => {
 
     fetchBookings();
   }, []);
-
-  // Filter bookings by active tab
-  const filteredBookingsByTab = activeTab === 'retidos' 
-    ? bookings.filter(b => b.status === 'deposit_retained')
-    : bookings.filter(b => b.status !== 'deposit_retained');
 
   // Calculate revenue based on booking status
   const calculateBookingRevenue = (booking: BookingWithProfile) => {
@@ -240,17 +234,11 @@ const AdminBilling = () => {
   const getStatusLabel = (status: string) => {
     const statusMap: { [key: string]: string } = {
       'confirmed': 'Confirmado',
-      'deposit_retained': 'Retido (15€)',
+      'deposit_retained': 'Sinal Retido',
       'cancelled': 'Cancelado'
     };
     return statusMap[status] || 'Confirmado';
   };
-
-  // Calculate revenue for current tab
-  const currentTabRevenue = filteredBookingsByTab.reduce(
-    (sum, booking) => sum + calculateBookingRevenue(booking),
-    0
-  );
 
   return (
     <div className="space-y-6 p-4 md:p-6">
@@ -270,7 +258,7 @@ const AdminBilling = () => {
           Faturação Total
         </h1>
         <p className="text-muted-foreground mb-4">
-          Histórico de {selectedMonth && selectedYear ? 'reservas do período selecionado' : 'todas as reservas confirmadas'}
+          Histórico de {selectedMonth && selectedYear ? 'reservas do período selecionado' : 'todas as reservas'}
         </p>
         
         {/* Revenue Cards */}
@@ -288,7 +276,7 @@ const AdminBilling = () => {
                   <span>{formatPrice(monthlyRevenue)}</span>
                 </div>
                 <p className="text-sm text-muted-foreground mt-2">
-                  {bookings.length} {bookings.length === 1 ? 'sessão confirmada' : 'sessões confirmadas'}
+                  {bookings.length} {bookings.length === 1 ? 'sessão' : 'sessões'}
                 </p>
               </CardContent>
             </Card>
@@ -306,7 +294,7 @@ const AdminBilling = () => {
                 <span>{formatPrice(totalRevenue)}</span>
               </div>
               <p className="text-sm text-muted-foreground mt-2">
-                {allBookings.length} {allBookings.length === 1 ? 'sessão confirmada' : 'sessões confirmadas'}
+                {allBookings.length} {allBookings.length === 1 ? 'sessão' : 'sessões'}
               </p>
             </CardContent>
           </Card>
@@ -354,100 +342,72 @@ const AdminBilling = () => {
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 mb-6">
-          <TabsTrigger value="faturacao">Faturação</TabsTrigger>
-          <TabsTrigger value="retidos">Retidos</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="faturacao">
-          {loading ? (
-            <div className="flex items-center justify-center min-h-64">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            </div>
-          ) : filteredBookingsByTab.length === 0 ? (
-            <div className="studio-card text-center">
-              <p className="text-muted-foreground">
-                Ainda não há reservas nesta categoria.
-              </p>
-            </div>
-          ) : (
-            <>
-              <div className="text-center mb-4">
-                <Card className="max-w-md mx-auto">
-                  <CardContent className="pt-6">
-                    <div className="flex items-center justify-center gap-2 text-2xl font-bold text-accent">
-                      <Euro className="h-6 w-6" />
-                      <span>{formatPrice(currentTabRevenue)}</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      {filteredBookingsByTab.length} {filteredBookingsByTab.length === 1 ? 'sessão' : 'sessões'}
-                    </p>
-                  </CardContent>
-                </Card>
+      {loading ? (
+        <div className="flex items-center justify-center min-h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      ) : bookings.length === 0 ? (
+        <div className="studio-card text-center">
+          <p className="text-muted-foreground">
+            Ainda não há reservas.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {bookings.map((booking) => (
+            <div key={booking.id} className="studio-card">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1 space-y-2">
+                  <div className="flex items-center gap-2 text-sm mb-2">
+                    <User className="h-4 w-4 text-accent flex-shrink-0" />
+                    <span className="text-accent font-semibold">
+                      {booking.profiles.full_name}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                    <span className="text-foreground font-medium">
+                      {format(new Date(booking.starts_at), 'dd/MM/yyyy', { locale: pt })}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Clock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                    <span className="text-muted-foreground">
+                      {format(new Date(booking.starts_at), 'HH:mm')} - {format(new Date(booking.ends_at), 'HH:mm')}
+                    </span>
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {booking.service_name_snapshot}
+                  </div>
+                  <div className="flex items-center gap-1 text-accent font-semibold pt-2">
+                    <Euro className="h-4 w-4" />
+                    <span>{formatPrice(calculateBookingRevenue(booking))}</span>
+                  </div>
+                </div>
+                
+                <div className="flex flex-col items-end gap-2 min-w-[180px]">
+                  <Select 
+                    value={booking.status} 
+                    onValueChange={(value) => handleStatusChange(booking.id, value)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue>
+                        {getStatusLabel(booking.status)}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="confirmed">Confirmado</SelectItem>
+                      <SelectItem value="deposit_retained">Sinal Retido</SelectItem>
+                      <SelectItem value="cancelled">Cancelado</SelectItem>
+                      <SelectItem value="deleted">Eliminar</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-              <div className="space-y-3">
-                {filteredBookingsByTab.map((booking) => (
-                  <SwipeableBookingCard
-                    key={booking.id}
-                    booking={booking}
-                    onStatusChange={handleStatusChange}
-                    onMoveToRetained={handleMoveToRetained}
-                    calculateBookingRevenue={calculateBookingRevenue}
-                    formatPrice={formatPrice}
-                    getStatusLabel={getStatusLabel}
-                    showMoveButton={true}
-                  />
-                ))}
-              </div>
-            </>
-          )}
-        </TabsContent>
-
-        <TabsContent value="retidos">
-          {loading ? (
-            <div className="flex items-center justify-center min-h-64">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
-          ) : filteredBookingsByTab.length === 0 ? (
-            <div className="studio-card text-center">
-              <p className="text-muted-foreground">
-                Ainda não há sinais retidos.
-              </p>
-            </div>
-          ) : (
-            <>
-              <div className="text-center mb-4">
-                <Card className="max-w-md mx-auto">
-                  <CardContent className="pt-6">
-                    <div className="flex items-center justify-center gap-2 text-2xl font-bold text-accent">
-                      <Euro className="h-6 w-6" />
-                      <span>{formatPrice(currentTabRevenue)}</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      {filteredBookingsByTab.length} {filteredBookingsByTab.length === 1 ? 'sinal retido' : 'sinais retidos'}
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
-              <div className="space-y-3">
-                {filteredBookingsByTab.map((booking) => (
-                  <SwipeableBookingCard
-                    key={booking.id}
-                    booking={booking}
-                    onStatusChange={handleStatusChange}
-                    onMoveToRetained={handleMoveToRetained}
-                    calculateBookingRevenue={calculateBookingRevenue}
-                    formatPrice={formatPrice}
-                    getStatusLabel={getStatusLabel}
-                    showMoveButton={false}
-                  />
-                ))}
-              </div>
-            </>
-          )}
-        </TabsContent>
-      </Tabs>
+          ))}
+        </div>
+      )}
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
