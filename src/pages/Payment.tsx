@@ -957,9 +957,7 @@ const Payment = () => {
           {/* Disclaimer */}
           <div className="p-4 bg-muted/50 rounded-lg border border-border">
             <p className="text-sm text-muted-foreground leading-relaxed space-y-1">
-              <span className="block">O sinal confirma a tua reserva.</span>
-              <span className="block">Cancelamentos com menos de 72 horas de antecedência ou No-Show implicam a retenção do sinal (15€).</span>
-              <span className="block">Reagendamentos até 72 h antes são gratuitos.</span>
+              <span className="block">O sinal confirma a tua reserva. Cancelamentos com menos de 72 horas de antecedência ou No-Show implicam a retenção do sinal (15€). Reagendamentos até 72 horas antes são gratuitos.</span>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <button className="text-primary hover:underline font-medium block mt-1">

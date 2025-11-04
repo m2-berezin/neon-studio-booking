@@ -335,7 +335,7 @@ const StudioInfo = () => {
                 WhatsApp
               </h4>
               <p className="text-muted-foreground mb-3 text-sm">
-                Contacta diretamente via WhatsApp caso haja algum problema com o chat da app.
+                Contacta diretamente via WhatsApp <strong>caso haja algum problema com o chat da app</strong>.
               </p>
               <Button 
                 onClick={() => window.open(whatsappLink, '_blank')}

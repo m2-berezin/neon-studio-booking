@@ -8,6 +8,7 @@ import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -44,6 +45,7 @@ const AdminBilling = () => {
   const [selectedYear, setSelectedYear] = useState<string | null>(new Date().getFullYear().toString());
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [bookingToDelete, setBookingToDelete] = useState<string | null>(null);
+  const [bookingNotes, setBookingNotes] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
     if (!isAdmin()) {
@@ -54,6 +56,11 @@ const AdminBilling = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    // Load notes from localStorage
+    const savedNotes = localStorage.getItem('admin-booking-notes');
+    if (savedNotes) {
+      setBookingNotes(JSON.parse(savedNotes));
+    }
   }, []);
 
   useEffect(() => {
@@ -233,6 +240,12 @@ const AdminBilling = () => {
     return statusMap[status] || 'Confirmado';
   };
 
+  const handleNoteChange = (bookingId: string, note: string) => {
+    const updatedNotes = { ...bookingNotes, [bookingId]: note };
+    setBookingNotes(updatedNotes);
+    localStorage.setItem('admin-booking-notes', JSON.stringify(updatedNotes));
+  };
+
   return (
     <div className="space-y-6 p-4 md:p-6">
       <div className="mb-4">
@@ -395,6 +408,14 @@ const AdminBilling = () => {
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
+              <div className="mt-3">
+                <Textarea
+                  placeholder="Adicionar nota..."
+                  value={bookingNotes[booking.id] || ''}
+                  onChange={(e) => handleNoteChange(booking.id, e.target.value)}
+                  className="min-h-[60px] text-sm"
+                />
               </div>
             </div>
           ))}
