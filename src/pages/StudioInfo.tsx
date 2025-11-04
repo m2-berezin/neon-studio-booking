@@ -279,7 +279,7 @@ const StudioInfo = () => {
               <AccordionItem value="item-4">
                 <AccordionTrigger className="text-left text-[0.938rem]">Métodos de Pagamento?</AccordionTrigger>
                 <AccordionContent>
-                  Aceitamos pagamentos através de: MB WAY / Revolut / Transferência bancária. Paypal / Crypto também são aceites, envia mensagem ao Ghost no chat da app.
+                  Para pagamento do sinal aceitamos pagamentos através de: MB WAY / Revolut / Transferência bancária. Paypal / Crypto também são aceites, envia mensagem ao Ghost no chat da app. O valor restante é pago no dia da sessão, preferencialmente a dinheiro. Caso não seja possível, utiliza um dos métodos anteriores.
                 </AccordionContent>
               </AccordionItem>
 
