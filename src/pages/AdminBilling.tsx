@@ -1,15 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, Clock, Euro, User, X, MoveRight } from 'lucide-react';
+import { ArrowLeft, Euro, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { format, startOfMonth, endOfMonth } from 'date-fns';
-import { pt } from 'date-fns/locale';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useSwipeable } from 'react-swipeable';
+import { SwipeableBookingCard } from '@/components/SwipeableBookingCard';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -47,7 +45,6 @@ const AdminBilling = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [bookingToDelete, setBookingToDelete] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>('faturacao');
-  const [swipedBookingId, setSwipedBookingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isAdmin()) {
@@ -206,9 +203,6 @@ const AdminBilling = () => {
         b.id === bookingId ? { ...b, status: newStatus } : b
       );
       setBookings(updatedBookings);
-      
-      // Close swipe if open
-      setSwipedBookingId(null);
     } catch (error) {
       console.error('Error updating booking status:', error);
     }
@@ -393,91 +387,18 @@ const AdminBilling = () => {
                 </Card>
               </div>
               <div className="space-y-3">
-                {filteredBookingsByTab.map((booking) => {
-                  const swipeHandlers = useSwipeable({
-                    onSwipedLeft: () => setSwipedBookingId(booking.id),
-                    onSwipedRight: () => setSwipedBookingId(null),
-                    trackMouse: true,
-                    trackTouch: true,
-                  });
-
-                  return (
-                    <div 
-                      key={booking.id} 
-                      className="relative overflow-hidden"
-                      {...swipeHandlers}
-                    >
-                      {/* Background action button */}
-                      {swipedBookingId === booking.id && (
-                        <div className="absolute right-0 top-0 bottom-0 flex items-center justify-end bg-accent px-4">
-                          <Button
-                            onClick={() => handleMoveToRetained(booking.id)}
-                            className="gap-2 bg-accent hover:bg-accent/90 text-white"
-                          >
-                            <MoveRight className="h-4 w-4" />
-                            Mover
-                          </Button>
-                        </div>
-                      )}
-                      
-                      {/* Main card content */}
-                      <div 
-                        className="studio-card transition-transform duration-300"
-                        style={{
-                          transform: swipedBookingId === booking.id ? 'translateX(-100px)' : 'translateX(0)',
-                        }}
-                      >
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex-1 space-y-2">
-                            <div className="flex items-center gap-2 text-sm mb-2">
-                              <User className="h-4 w-4 text-accent flex-shrink-0" />
-                              <span className="text-accent font-semibold">
-                                {booking.profiles.full_name}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2 text-sm">
-                              <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                              <span className="text-foreground font-medium">
-                                {format(new Date(booking.starts_at), 'dd/MM/yyyy', { locale: pt })}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2 text-sm">
-                              <Clock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                              <span className="text-muted-foreground">
-                                {format(new Date(booking.starts_at), 'HH:mm')} - {format(new Date(booking.ends_at), 'HH:mm')}
-                              </span>
-                            </div>
-                            <div className="text-sm text-muted-foreground">
-                              {booking.service_name_snapshot}
-                            </div>
-                            <div className="flex items-center gap-1 text-accent font-semibold pt-2">
-                              <Euro className="h-4 w-4" />
-                              <span>{formatPrice(calculateBookingRevenue(booking))}</span>
-                            </div>
-                          </div>
-                          
-                          <div className="flex flex-col items-end gap-2 min-w-[180px]">
-                            <Select 
-                              value={booking.status} 
-                              onValueChange={(value) => handleStatusChange(booking.id, value)}
-                            >
-                              <SelectTrigger className="w-full">
-                                <SelectValue>
-                                  {getStatusLabel(booking.status)}
-                                </SelectValue>
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="confirmed">Confirmado</SelectItem>
-                                <SelectItem value="cancelled">Cancelado</SelectItem>
-                                <SelectItem value="deleted">Eliminar</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
+                {filteredBookingsByTab.map((booking) => (
+                  <SwipeableBookingCard
+                    key={booking.id}
+                    booking={booking}
+                    onStatusChange={handleStatusChange}
+                    onMoveToRetained={handleMoveToRetained}
+                    calculateBookingRevenue={calculateBookingRevenue}
+                    formatPrice={formatPrice}
+                    getStatusLabel={getStatusLabel}
+                    showMoveButton={true}
+                  />
+                ))}
               </div>
             </>
           )}
@@ -511,55 +432,16 @@ const AdminBilling = () => {
               </div>
               <div className="space-y-3">
                 {filteredBookingsByTab.map((booking) => (
-                  <div key={booking.id} className="studio-card">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1 space-y-2">
-                        <div className="flex items-center gap-2 text-sm mb-2">
-                          <User className="h-4 w-4 text-accent flex-shrink-0" />
-                          <span className="text-accent font-semibold">
-                            {booking.profiles.full_name}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm">
-                          <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                          <span className="text-foreground font-medium">
-                            {format(new Date(booking.starts_at), 'dd/MM/yyyy', { locale: pt })}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm">
-                          <Clock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                          <span className="text-muted-foreground">
-                            {format(new Date(booking.starts_at), 'HH:mm')} - {format(new Date(booking.ends_at), 'HH:mm')}
-                          </span>
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          {booking.service_name_snapshot}
-                        </div>
-                        <div className="flex items-center gap-1 text-accent font-semibold pt-2">
-                          <Euro className="h-4 w-4" />
-                          <span>{formatPrice(calculateBookingRevenue(booking))}</span>
-                        </div>
-                      </div>
-                      
-                      <div className="flex flex-col items-end gap-2 min-w-[180px]">
-                        <Select 
-                          value={booking.status} 
-                          onValueChange={(value) => handleStatusChange(booking.id, value)}
-                        >
-                          <SelectTrigger className="w-full">
-                            <SelectValue>
-                              {getStatusLabel(booking.status)}
-                            </SelectValue>
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="confirmed">Confirmado</SelectItem>
-                            <SelectItem value="cancelled">Cancelado</SelectItem>
-                            <SelectItem value="deleted">Eliminar</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  </div>
+                  <SwipeableBookingCard
+                    key={booking.id}
+                    booking={booking}
+                    onStatusChange={handleStatusChange}
+                    onMoveToRetained={handleMoveToRetained}
+                    calculateBookingRevenue={calculateBookingRevenue}
+                    formatPrice={formatPrice}
+                    getStatusLabel={getStatusLabel}
+                    showMoveButton={false}
+                  />
                 ))}
               </div>
             </>
