@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { Users, Gift, Clock } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface ReferralCodeStat {
   user_id: string;
@@ -9,11 +12,15 @@ interface ReferralCodeStat {
   code: string;
   times_used: number;
   active_rewards: number;
+  points_balance: number;
 }
 
 const ReferralCodeStats = () => {
   const [stats, setStats] = useState<ReferralCodeStat[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedUser, setSelectedUser] = useState<{ id: string; name: string } | null>(null);
+  const [givingPoints, setGivingPoints] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     loadStats();
@@ -38,6 +45,17 @@ const ReferralCodeStats = () => {
           event: '*',
           schema: 'public',
           table: 'referral_rewards',
+        },
+        () => {
+          loadStats();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'point_transactions',
         },
         () => {
           loadStats();
@@ -70,7 +88,7 @@ const ReferralCodeStats = () => {
       const userIds = codes?.map(c => c.user_id) || [];
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, full_name')
+        .select('id, full_name, points_balance')
         .in('id', userIds);
 
       if (profilesError) throw profilesError;
@@ -95,6 +113,7 @@ const ReferralCodeStats = () => {
           code: code.code,
           times_used: code.times_used || 0,
           active_rewards: activeRewardsCount,
+          points_balance: profile?.points_balance || 0,
         };
       }) || [];
 
@@ -103,6 +122,42 @@ const ReferralCodeStats = () => {
       console.error('Error loading referral code stats:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGivePoints = async (points: number) => {
+    if (!selectedUser) return;
+    
+    try {
+      setGivingPoints(true);
+
+      // Insert point transaction
+      const { error } = await supabase
+        .from('point_transactions')
+        .insert({
+          user_id: selectedUser.id,
+          amount: points,
+          transaction_type: 'admin_gift',
+          notes: `Presente do administrador: ${points}💎`,
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: 'Pontos oferecidos!',
+        description: `${points}💎 oferecidos a ${selectedUser.name}`,
+      });
+
+      setSelectedUser(null);
+    } catch (error) {
+      console.error('Error giving points:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível oferecer os pontos',
+        variant: 'destructive',
+      });
+    } finally {
+      setGivingPoints(false);
     }
   };
 
@@ -140,11 +195,24 @@ const ReferralCodeStats = () => {
                 key={stat.user_id}
                 className="flex items-center justify-between p-4 rounded-lg border bg-card"
               >
-                <div className="space-y-1">
-                  <p className="font-medium">{stat.full_name}</p>
-                  <p className="text-sm text-muted-foreground font-mono">{stat.code}</p>
+                <div className="flex items-center gap-2 flex-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                    onClick={() => setSelectedUser({ id: stat.user_id, name: stat.full_name })}
+                  >
+                    🎁
+                  </Button>
+                  <div className="space-y-1">
+                    <p className="font-medium">{stat.full_name}</p>
+                    <p className="text-sm text-muted-foreground font-mono">{stat.code}</p>
+                  </div>
                 </div>
-                <div className="flex gap-4 text-sm">
+                <div className="flex gap-4 text-sm items-center">
+                  <div className="flex items-center gap-1 font-medium text-primary">
+                    <span>{stat.points_balance}💎</span>
+                  </div>
                   <div className="flex items-center gap-1">
                     <Users className="h-4 w-4 text-primary" />
                     <span className="font-medium">{stat.times_used}</span>
@@ -175,6 +243,33 @@ const ReferralCodeStats = () => {
           </div>
         </div>
       </CardContent>
+
+      {/* Dialog for giving points */}
+      <Dialog open={selectedUser !== null} onOpenChange={(open) => !open && setSelectedUser(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Oferecer Pontos a {selectedUser?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 pt-4">
+            <p className="text-sm text-muted-foreground mb-4">
+              Selecione quantos pontos deseja oferecer:
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              {[250, 500, 1000, 1500, 2500].map((points) => (
+                <Button
+                  key={points}
+                  variant="outline"
+                  className="h-16 text-lg font-semibold"
+                  onClick={() => handleGivePoints(points)}
+                  disabled={givingPoints}
+                >
+                  {points}💎
+                </Button>
+              ))}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };

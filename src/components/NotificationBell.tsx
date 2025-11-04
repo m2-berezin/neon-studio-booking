@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Bell, Check, CheckCheck, Trash2, ArrowLeft } from 'lucide-react';
+import { Bell, Check, CheckCheck, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -220,16 +220,8 @@ export const NotificationBell = () => {
       {/* Dialog for full notification message */}
       <Dialog open={selectedNotification !== null} onOpenChange={(open) => !open && handleCloseDialog()}>
         <DialogContent className="max-w-md">
-          <DialogHeader className="relative">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute -left-2 -top-2"
-              onClick={handleCloseDialog}
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-            <DialogTitle className="text-center pt-2">
+          <DialogHeader>
+            <DialogTitle className="text-center">
               {selectedNotification?.title}
             </DialogTitle>
           </DialogHeader>
