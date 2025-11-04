@@ -101,9 +101,7 @@ const AdminBilling = () => {
 
   // Calculate revenue based on booking status
   const calculateBookingRevenue = (booking: BookingWithProfile) => {
-    if (booking.status === 'deposit_retained') {
-      return 15; // Fixed 15€ for deposit retained
-    } else if (booking.status === 'cancelled') {
+    if (booking.status === 'cancelled') {
       return 0; // No revenue for cancelled
     } else {
       return booking.price_eur_snapshot || 0; // Full price for confirmed
@@ -202,10 +200,6 @@ const AdminBilling = () => {
     }
   };
 
-  const handleMoveToRetained = async (bookingId: string) => {
-    await handleStatusChange(bookingId, 'deposit_retained');
-  };
-
   const confirmDelete = async () => {
     if (!bookingToDelete) return;
 
@@ -234,7 +228,6 @@ const AdminBilling = () => {
   const getStatusLabel = (status: string) => {
     const statusMap: { [key: string]: string } = {
       'confirmed': 'Confirmado',
-      'deposit_retained': 'Sinal Retido',
       'cancelled': 'Cancelado'
     };
     return statusMap[status] || 'Confirmado';
@@ -397,7 +390,6 @@ const AdminBilling = () => {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="confirmed">Confirmado</SelectItem>
-                      <SelectItem value="deposit_retained">Sinal Retido</SelectItem>
                       <SelectItem value="cancelled">Cancelado</SelectItem>
                       <SelectItem value="deleted">Eliminar</SelectItem>
                     </SelectContent>

@@ -46,6 +46,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
     { path: '/admin/bookings', icon: Calendar, label: 'Reservas' },
     { path: '/admin/subscriptions', icon: CreditCard, label: 'Subscrições' },
     { path: '/admin/referrals', icon: Users, label: 'Referrals' },
+    { path: '/admin/shout', icon: Bell, label: 'SHOUT' },
   ];
 
   return (

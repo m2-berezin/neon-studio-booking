@@ -29,6 +29,7 @@ import AdminSubscriptions from "@/pages/AdminSubscriptions";
 import AdminProjects from "@/pages/AdminProjects";
 import AdminReferrals from "@/pages/AdminReferrals";
 import AdminBilling from "@/pages/AdminBilling";
+import AdminShout from "@/pages/AdminShout";
 import StudioInfo from "@/pages/StudioInfo";
 import MixMaster from "./pages/MixMaster";
 import Payment from "./pages/Payment";
@@ -91,6 +92,7 @@ const App = () => {
             <Route path="/admin/subscriptions" element={<AdminSubscriptions />} />
             <Route path="/admin/projects" element={<AdminProjects />} />
             <Route path="/admin/referrals" element={<AdminReferrals />} />
+            <Route path="/admin/shout" element={<AdminShout />} />
                 
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
