@@ -193,16 +193,14 @@ const AdminDashboard = () => {
       );
 
       // Load active subscriptions count
-      const { data: activeSubscriptions, error: subscriptionsError } = await supabase
+      const { count: subscriptionsCount, error: subscriptionsError } = await supabase
         .from('subscriptions')
-        .select('id', { count: 'exact', head: true })
+        .select('*', { count: 'exact', head: true })
         .eq('is_active', true);
 
       if (subscriptionsError) {
         console.error('Error fetching subscriptions:', subscriptionsError);
       }
-
-      const subscriptionsCount = activeSubscriptions?.length || 0;
 
       setStats({
         totalBookings: bookingsCount || 0,

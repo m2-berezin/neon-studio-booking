@@ -8,8 +8,8 @@ import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -393,40 +393,38 @@ const AdminBilling = () => {
                 </div>
                 
                 <div className="flex items-center gap-2">
-                  <Popover>
-                    <PopoverTrigger asChild>
+                  <div className="flex items-center gap-1">
+                    {bookingNotes[booking.id] ? (
+                      <button
+                        onClick={() => {
+                          const newNote = prompt('Nota:', bookingNotes[booking.id]);
+                          if (newNote !== null) {
+                            handleNoteChange(booking.id, newNote);
+                          }
+                        }}
+                        className="text-sm text-foreground hover:text-accent transition-colors flex items-center gap-1"
+                      >
+                        <span>{bookingNotes[booking.id]}</span>
+                        <span>✍️</span>
+                      </button>
+                    ) : (
                       <Button
                         variant="ghost"
                         size="icon"
-                        className={`h-8 w-8 relative ${bookingNotes[booking.id] ? 'text-accent' : ''}`}
+                        className="h-8 w-8"
+                        onClick={() => {
+                          const newNote = prompt('Adicionar nota:');
+                          if (newNote) {
+                            handleNoteChange(booking.id, newNote);
+                          }
+                        }}
                       >
                         <FileText className="h-4 w-4" />
-                        {bookingNotes[booking.id] && (
-                          <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-accent" />
-                        )}
                       </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-80">
-                      <div className="space-y-3">
-                        <h4 className="font-medium text-sm">Nota</h4>
-                        <Textarea
-                          placeholder="Adicionar nota..."
-                          value={bookingNotes[booking.id] || ''}
-                          onChange={(e) => handleNoteChange(booking.id, e.target.value)}
-                          className="min-h-[80px] text-sm"
-                        />
-                        <Button 
-                          size="sm" 
-                          className="w-full"
-                          onClick={() => document.body.click()}
-                        >
-                          OK
-                        </Button>
-                      </div>
-                    </PopoverContent>
-                  </Popover>
+                    )}
+                  </div>
                   
-                  <Select 
+                  <Select
                     value={booking.status} 
                     onValueChange={(value) => handleStatusChange(booking.id, value)}
                   >
