@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, Clock, Euro, User, X, FileText, Search } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, Euro, User, X, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
@@ -48,7 +47,6 @@ const AdminBilling = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [bookingToDelete, setBookingToDelete] = useState<string | null>(null);
   const [bookingNotes, setBookingNotes] = useState<{ [key: string]: string }>({});
-  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     if (!isAdmin()) {
@@ -309,17 +307,6 @@ const AdminBilling = () => {
           </Card>
         </div>
 
-        {/* Search Input */}
-        <div className="relative max-w-md mx-auto mb-6">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Pesquisar por nome do cliente..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
-          />
-        </div>
-
         {/* Month/Year Filter */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
           <Select value={selectedMonth || ''} onValueChange={(value) => setSelectedMonth(value || null)}>
@@ -366,25 +353,15 @@ const AdminBilling = () => {
         <div className="flex items-center justify-center min-h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
-      ) : (() => {
-        // Filter bookings based on search query
-        const filteredBookings = bookings.filter(booking =>
-          booking.profiles.full_name.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-
-        if (filteredBookings.length === 0) {
-          return (
-            <div className="studio-card text-center">
-              <p className="text-muted-foreground">
-                {searchQuery ? 'Nenhum cliente encontrado com esse nome.' : 'Ainda não há reservas.'}
-              </p>
-            </div>
-          );
-        }
-
-        return (
-          <div className="space-y-3">
-            {filteredBookings.map((booking) => (
+      ) : bookings.length === 0 ? (
+        <div className="studio-card text-center">
+          <p className="text-muted-foreground">
+            Ainda não há reservas.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {bookings.map((booking) => (
             <div key={booking.id} className="studio-card">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 space-y-2">
@@ -465,10 +442,9 @@ const AdminBilling = () => {
                 </div>
               </div>
             </div>
-            ))}
-          </div>
-        );
-      })()}
+          ))}
+        </div>
+      )}
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>

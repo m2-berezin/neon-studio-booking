@@ -241,6 +241,7 @@ const ReferralCodeStats = () => {
                     <div className="flex items-center gap-1 text-green-600">
                       <Gift className="h-4 w-4" />
                       <span className="font-medium">{stat.active_rewards}</span>
+                      <span>descontos ativos</span>
                     </div>
                   )}
                 </div>
