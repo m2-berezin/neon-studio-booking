@@ -34,6 +34,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { toast as sonnerToast } from 'sonner';
 import { DaysOffManager } from '@/components/admin/DaysOffManager';
 import ReferralCodeStats from '@/components/admin/ReferralCodeStats';
+import { ShoutForm } from '@/components/admin/ShoutForm';
 
 import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 
@@ -665,7 +666,7 @@ const AdminDashboard = () => {
           markNotificationsRead();
         }
       }}>
-        <TabsList className="grid w-full grid-cols-4 max-w-full lg:max-w-3xl overflow-x-auto">
+        <TabsList className="grid w-full grid-cols-5 max-w-full lg:max-w-4xl overflow-x-auto">
           <TabsTrigger value="overview" className="text-xs md:text-sm">Visão Geral</TabsTrigger>
           <TabsTrigger value="messages" className="relative text-xs md:text-sm">
             Mensagens
@@ -677,6 +678,7 @@ const AdminDashboard = () => {
           </TabsTrigger>
           <TabsTrigger value="daysoff" className="text-xs md:text-sm">Days Off</TabsTrigger>
           <TabsTrigger value="referrals" className="text-xs md:text-sm">Referrals</TabsTrigger>
+          <TabsTrigger value="shout" className="text-xs md:text-sm">SHOUT</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4 md:space-y-6 mt-4 md:mt-6">
@@ -1011,6 +1013,23 @@ const AdminDashboard = () => {
 
         <TabsContent value="referrals" className="space-y-6 mt-6">
           <ReferralCodeStats />
+        </TabsContent>
+
+        <TabsContent value="shout" className="space-y-6 mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Bell className="h-5 w-5" />
+                Enviar Notificação Broadcast
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Envia uma notificação para todos os clientes registados
+              </p>
+            </CardHeader>
+            <CardContent>
+              <ShoutForm />
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
