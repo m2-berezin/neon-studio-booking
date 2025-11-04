@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Calendar, Clock, Euro } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { format } from 'date-fns';
+import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { pt } from 'date-fns/locale';
 
 interface Booking {
@@ -19,7 +20,10 @@ const Billing = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [allBookings, setAllBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedMonth, setSelectedMonth] = useState<string>('all');
+  const [availableMonths, setAvailableMonths] = useState<string[]>([]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -38,7 +42,19 @@ const Billing = () => {
           .order('starts_at', { ascending: false });
 
         if (error) throw error;
+        
+        setAllBookings(data || []);
         setBookings(data || []);
+        
+        // Extract unique months from bookings
+        const months = new Set<string>();
+        data?.forEach(booking => {
+          const date = new Date(booking.starts_at);
+          const monthKey = format(date, 'yyyy-MM');
+          months.add(monthKey);
+        });
+        
+        setAvailableMonths(Array.from(months).sort().reverse());
       } catch (error) {
         console.error('Error fetching bookings:', error);
       } finally {
@@ -48,6 +64,18 @@ const Billing = () => {
 
     fetchBookings();
   }, [user]);
+
+  useEffect(() => {
+    if (selectedMonth === 'all') {
+      setBookings(allBookings);
+    } else {
+      const filtered = allBookings.filter(booking => {
+        const bookingMonth = format(new Date(booking.starts_at), 'yyyy-MM');
+        return bookingMonth === selectedMonth;
+      });
+      setBookings(filtered);
+    }
+  }, [selectedMonth, allBookings]);
 
   const formatPrice = (price: number) => {
     return `${price.toFixed(2)}€`;
@@ -74,6 +102,26 @@ const Billing = () => {
           Histórico de reservas confirmadas
         </p>
       </div>
+
+      {/* Month Filter */}
+      {availableMonths.length > 0 && (
+        <div className="mb-6">
+          <label className="text-sm font-medium mb-2 block">Filtrar por Mês</label>
+          <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Selecione o mês" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os meses</SelectItem>
+              {availableMonths.map(month => (
+                <SelectItem key={month} value={month}>
+                  {format(new Date(month + '-01'), 'MMMM yyyy', { locale: pt })}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
 
       {loading ? (
         <div className="flex items-center justify-center min-h-64">
