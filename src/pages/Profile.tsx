@@ -53,10 +53,6 @@ const Profile = () => {
     label: 'Definições',
     icon: Settings,
     path: '/profile/settings'
-  }, {
-    label: 'Faturação',
-    icon: Receipt,
-    path: '/billing'
   }];
   const handleSignOut = async () => {
     setLoading(true);

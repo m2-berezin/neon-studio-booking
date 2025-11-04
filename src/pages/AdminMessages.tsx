@@ -376,29 +376,32 @@ const AdminMessages = () => {
           </div>
         )}
 
-        {/* Chat modal/overlay - mobile optimized */}
+        {/* Chat interface - full screen */}
         {selectedUserId && (
           <div className="fixed inset-0 z-[100] bg-background flex flex-col">
-            <Card className="flex-1 flex flex-col rounded-none border-x-0 border-t-0">
-              <div className="p-3 border-b flex items-center gap-3">
+            <div className="flex-1 flex flex-col">
+              <div className="p-4 border-b flex items-center gap-3 bg-background sticky top-0 z-10">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setSelectedUserId(null)}
-                  className="h-8 w-8 p-0"
+                  className="h-9 w-9 p-0"
                 >
-                  <X className="h-4 w-4" />
+                  <X className="h-5 w-5" />
                 </Button>
-                <h2 className="text-sm font-semibold flex-1">
+                <h2 className="text-lg font-semibold flex-1">
                   {threads.find((t) => t.user_id === selectedUserId)?.user_name || 'Cliente'}
                 </h2>
               </div>
 
-              <ScrollArea className="flex-1 p-4">
+              <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {messages.length === 0 ? (
-                  <div className="text-center text-muted-foreground">Sem mensagens</div>
+                  <div className="text-center text-muted-foreground py-8">
+                    <MessageSquare className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                    <p>Sem mensagens</p>
+                  </div>
                 ) : (
-                  <div className="space-y-4">
+                  <>
                     {messages.map((msg) => {
                       const isSender = msg.sender_id === user.id;
                       const hasAttachment = msg.attachment_url;
@@ -411,31 +414,31 @@ const AdminMessages = () => {
                           className={`flex ${isSender ? 'justify-end' : 'justify-start'}`}
                         >
                           <div
-                            className={`max-w-[85%] md:max-w-[70%] rounded-lg px-4 py-2 ${
+                            className={`max-w-[75%] rounded-2xl px-4 py-3 ${
                               isSender
-                                ? 'bg-primary text-primary-foreground'
-                                : 'bg-muted text-foreground'
+                                ? 'bg-primary text-primary-foreground rounded-br-sm'
+                                : 'bg-muted text-foreground rounded-bl-sm'
                             }`}
                           >
-                            <p className="text-sm break-words">
+                            <p className="text-sm break-words leading-relaxed">
                               {renderMessageWithLinks(msg.message)}
                             </p>
                             
                             {hasAttachment && (
-                              <div className="mt-2">
+                              <div className="mt-3">
                                 {isImage && (
                                   <div className="relative">
                                     <img 
                                       src={msg.attachment_url} 
                                       alt={msg.attachment_name || 'Imagem'} 
-                                      className="rounded max-w-full max-h-64 object-contain cursor-pointer"
+                                      className="rounded-lg max-w-full max-h-64 object-contain cursor-pointer"
                                       onClick={() => window.open(msg.attachment_url, '_blank')}
                                     />
                                   </div>
                                 )}
                                 
                                 {isAudio && (
-                                  <div className="flex items-center gap-2 bg-background/20 rounded p-2">
+                                  <div className="flex items-center gap-2 bg-background/20 rounded-lg p-2">
                                     <Music className="h-4 w-4" />
                                     <audio controls className="max-w-full">
                                       <source src={msg.attachment_url} type={msg.attachment_type || 'audio/mpeg'} />
@@ -448,7 +451,7 @@ const AdminMessages = () => {
                                   download={msg.attachment_name}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="flex items-center gap-1 text-xs mt-1 opacity-70 hover:opacity-100"
+                                  className="flex items-center gap-1 text-xs mt-2 opacity-70 hover:opacity-100"
                                 >
                                   <Download className="h-3 w-3" />
                                   {msg.attachment_name}
@@ -456,7 +459,7 @@ const AdminMessages = () => {
                               </div>
                             )}
                             
-                            <p className="text-xs opacity-70 mt-1">
+                            <p className="text-xs opacity-60 mt-2">
                               {new Date(msg.timestamp).toLocaleTimeString('pt-PT', {
                                 hour: '2-digit',
                                 minute: '2-digit',
@@ -467,17 +470,17 @@ const AdminMessages = () => {
                       );
                     })}
                     <div ref={messagesEndRef} />
-                  </div>
+                  </>
                 )}
-              </ScrollArea>
+              </div>
 
-              <div className="p-3 border-t space-y-2 bg-background">
+              <div className="p-4 border-t space-y-3 bg-background sticky bottom-0">
                 {selectedFile && (
-                  <div className="flex items-center gap-2 bg-muted p-2 rounded">
+                  <div className="flex items-center gap-2 bg-muted p-3 rounded-lg">
                     {selectedFile.type.startsWith('image/') ? (
-                      <ImageIcon className="h-4 w-4 flex-shrink-0" />
+                      <ImageIcon className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
                     ) : (
-                      <Music className="h-4 w-4 flex-shrink-0" />
+                      <Music className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
                     )}
                     <span className="text-sm flex-1 truncate">{selectedFile.name}</span>
                     <Button
@@ -490,6 +493,7 @@ const AdminMessages = () => {
                           fileInputRef.current.value = '';
                         }
                       }}
+                      className="h-8 w-8 p-0"
                     >
                       <X className="h-4 w-4" />
                     </Button>
@@ -508,12 +512,12 @@ const AdminMessages = () => {
                   <Button
                     type="button"
                     variant="outline"
-                    size="sm"
+                    size="icon"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={uploading}
-                    className="h-9 w-9 p-0 shrink-0"
+                    className="h-11 w-11 flex-shrink-0"
                   >
-                    <Paperclip className="h-4 w-4" />
+                    <Paperclip className="h-5 w-5" />
                   </Button>
                   <Textarea
                     ref={textareaRef}
@@ -534,15 +538,15 @@ const AdminMessages = () => {
                   <Button 
                     type="button"
                     onClick={handleSendMessage} 
-                    size="sm"
+                    size="icon"
                     disabled={uploading || (!newMessage.trim() && !selectedFile)}
-                    className="h-9 w-9 p-0 shrink-0"
+                    className="h-11 w-11 flex-shrink-0"
                   >
-                    <Send className="h-4 w-4" />
+                    <Send className="h-5 w-5" />
                   </Button>
                 </div>
               </div>
-            </Card>
+            </div>
           </div>
         )}
       </div>

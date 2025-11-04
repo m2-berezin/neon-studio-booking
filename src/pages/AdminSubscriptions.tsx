@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -13,7 +14,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
-import { Loader2, Check, RefreshCw, X } from "lucide-react";
+import { Loader2, Check, RefreshCw, X, ArrowLeft } from "lucide-react";
 import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 
 interface Subscription {
@@ -27,6 +28,7 @@ interface Subscription {
 }
 
 export default function AdminSubscriptions() {
+  const navigate = useNavigate();
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -126,6 +128,17 @@ export default function AdminSubscriptions() {
 
   return (
     <div className="space-y-6">
+      <div className="mb-4">
+        <Button
+          variant="ghost"
+          onClick={() => navigate('/admin')}
+          className="gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Voltar ao Dashboard
+        </Button>
+      </div>
+
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Subscrições</h1>
         <Button onClick={loadSubscriptions} variant="outline">

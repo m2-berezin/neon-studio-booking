@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,7 +10,7 @@ import { useAdmin } from '@/hooks/useAdmin';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
-import { Calendar, Clock, User, AlertTriangle, Edit, Shield, Trash2 } from 'lucide-react';
+import { Calendar, Clock, User, AlertTriangle, Edit, Shield, Trash2, ArrowLeft } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -37,6 +38,7 @@ interface Booking {
 }
 
 const AdminBookings = () => {
+  const navigate = useNavigate();
   const { isAdmin } = useAuth();
   const { toast } = useToast();
   
@@ -221,6 +223,17 @@ const AdminBookings = () => {
 
   return (
     <div className="space-y-6">
+      <div className="mb-4">
+        <Button
+          variant="ghost"
+          onClick={() => navigate('/admin')}
+          className="gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Voltar ao Dashboard
+        </Button>
+      </div>
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold mb-2">Gerir Reservas</h1>
