@@ -75,9 +75,13 @@ const Auth = () => {
       });
     } else {
       toast({
-        title: 'Verifica o teu email',
-        description: 'Enviámos um link de confirmação para completar o registo.',
+        title: 'Conta criada com sucesso!',
+        description: 'Já podes iniciar sessão.',
       });
+      setEmail('');
+      setPassword('');
+      setFullName('');
+      setPhone('');
     }
     setLoading(false);
   };
