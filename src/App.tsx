@@ -30,6 +30,8 @@ import AdminProjects from "@/pages/AdminProjects";
 import AdminReferrals from "@/pages/AdminReferrals";
 import AdminBilling from "@/pages/AdminBilling";
 import AdminShout from "@/pages/AdminShout";
+import AdminClients from "@/pages/AdminClients";
+import AdminClientBilling from "@/pages/AdminClientBilling";
 import StudioInfo from "@/pages/StudioInfo";
 import MixMaster from "./pages/MixMaster";
 import Payment from "./pages/Payment";
@@ -93,6 +95,8 @@ const App = () => {
             <Route path="/admin/projects" element={<AdminProjects />} />
             <Route path="/admin/referrals" element={<AdminReferrals />} />
             <Route path="/admin/shout" element={<AdminShout />} />
+            <Route path="/admin/clients" element={<AdminClients />} />
+            <Route path="/admin/client-billing/:clientId" element={<AdminClientBilling />} />
                 
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />

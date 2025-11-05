@@ -660,6 +660,7 @@ const AdminDashboard = () => {
       icon: Users,
       color: 'text-green-500',
       bgColor: 'bg-green-500/10',
+      path: '/admin/clients',
     },
     {
       title: 'Subscrições',
