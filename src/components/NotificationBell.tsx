@@ -31,9 +31,29 @@ export const NotificationBell = () => {
   const navigate = useNavigate();
 
   const handleNotificationClick = async (notification: SelectedNotification) => {
-    // Open dialog to show full message
-    setSelectedNotification(notification);
-    setOpen(false);
+    // Only open dialog if notification body is longer than 92 characters
+    if (notification.body.length > 92) {
+      setSelectedNotification(notification);
+      setOpen(false);
+    } else {
+      // Mark as read without opening dialog
+      if (!notification.read) {
+        await markAsRead(notification.id);
+      }
+      
+      // Navigate directly based on notification type
+      const { title, body } = notification;
+      
+      if (title === 'Recebeu uma mensagem') {
+        navigate('/admin/dashboard', { state: { openMessages: true, clientName: body } });
+      } else if (title === 'Nova mensagem') {
+        navigate('/messages');
+      } else if (title.toLowerCase().includes('aprovad') || title.toLowerCase().includes('confirmad')) {
+        navigate('/projects');
+      }
+      
+      setOpen(false);
+    }
   };
 
   const handleCloseDialog = async () => {
