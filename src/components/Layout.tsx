@@ -77,8 +77,26 @@ const Layout = ({ children }: { children: ReactNode }) => {
         {/* Logo - Center */}
         <div className="absolute left-1/2 transform -translate-x-1/2">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Times New Roman, serif' }}>7T7</h1>
-            <p className="text-xs text-muted-foreground -mt-1">Studios</p>
+            <h1 
+              className="text-2xl font-bold text-white" 
+              style={{ 
+                fontFamily: 'Georgia, serif',
+                textShadow: '0 0 20px rgba(255, 255, 255, 0.3), 0 0 40px rgba(255, 255, 255, 0.2)',
+                letterSpacing: '0.1em'
+              }}
+            >
+              7T7
+            </h1>
+            <p 
+              className="text-sm text-white -mt-1" 
+              style={{ 
+                fontFamily: 'Georgia, serif',
+                textShadow: '0 0 20px rgba(255, 255, 255, 0.3)',
+                letterSpacing: '0.15em'
+              }}
+            >
+              Studios
+            </p>
             {subscription?.is_active && (
               <div className="flex justify-center mt-1.5">
                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold neon-title">
