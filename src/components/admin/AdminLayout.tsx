@@ -55,7 +55,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
       <aside 
         className={`${
           sidebarOpen ? 'w-64' : 'w-20'
-        } bg-card border-r border-border transition-all duration-300 flex flex-col fixed h-full z-50`}
+        } bg-card border-r border-border transition-all duration-300 flex flex-col fixed h-full z-50 md:block hidden`}
       >
         {/* Header */}
         <div className="p-4 border-b border-border flex items-center justify-between">
@@ -125,19 +125,29 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
       </aside>
 
       {/* Main Content */}
-      <div className={`flex-1 ${sidebarOpen ? 'ml-64' : 'ml-20'} transition-all duration-300`}>
+      <div className={`flex-1 ${sidebarOpen ? 'md:ml-64' : 'md:ml-20'} transition-all duration-300`}>
         {/* Top Bar */}
         <header className="bg-card border-b border-border p-4 flex items-center justify-between sticky top-0 z-40">
-          <h2 className="text-xl font-semibold">
-            {menuItems.find(item => item.path === location.pathname)?.label || 'Admin'}
-          </h2>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="md:hidden"
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+            <h2 className="text-lg md:text-xl font-semibold">
+              {menuItems.find(item => item.path === location.pathname)?.label || 'Admin'}
+            </h2>
+          </div>
           <div className="flex items-center gap-4">
             <NotificationBell />
           </div>
         </header>
 
         {/* Page Content */}
-        <main className="p-6">
+        <main className="p-4 md:p-6">
           {children}
         </main>
       </div>
