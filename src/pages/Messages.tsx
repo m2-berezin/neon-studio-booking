@@ -282,13 +282,14 @@ const Messages = () => {
   if (!user) return null;
 
   return (
-    <div className="h-screen flex flex-col">
-      <Card className="flex flex-col h-full rounded-none border-x-0 border-t-0">
-        <div className="p-3 border-b flex items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={() => navigate('/?tab=7')} className="h-8 w-8 p-0">
+    <div className="h-[100dvh] flex flex-col bg-background">
+      <Card className="flex flex-col h-full rounded-none border-0">
+        <div className="p-3 border-b flex items-center gap-3">
+          <Button variant="outline" size="sm" onClick={() => navigate('/?tab=7')} className="gap-1.5 rounded-full px-3">
             <ArrowLeft className="h-4 w-4" />
+            <span className="text-sm">Voltar</span>
           </Button>
-          <h2 className="text-sm font-semibold">Ghost Wayne 🦇</h2>
+          <h2 className="text-sm font-semibold flex-1 text-center pr-10">Ghost Wayne 🦇</h2>
         </div>
 
         <ScrollArea className="flex-1 p-4">
