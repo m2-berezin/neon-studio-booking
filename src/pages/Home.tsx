@@ -24,15 +24,16 @@ const Home = () => {
     gradient: true
   }, {
     title: 'Beats Exclusivos',
-    description: 'Beats personalizados premium criados exclusivamente para ti',
+    description: 'Beats personalizados premium',
     icon: Music,
     path: '/beats',
     gradient: true
   }, {
     title: 'Subscrições',
-    description: 'Subscreve para teres descontos em serviços e obter ofertas exclusivas!',
+    description: 'Obtém descontos nos serviços',
     icon: CreditCard,
-    path: '/subscriptions'
+    path: '/subscriptions',
+    gradient: true
   }];
   
   return (
