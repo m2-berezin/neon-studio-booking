@@ -1024,14 +1024,6 @@ const Book = () => {
                   }
                 </span>
               </div>
-              {reservationFromOffer && (
-                <div className="flex justify-between border-t pt-3 mt-3">
-                  <span className="text-muted-foreground font-semibold">Preço Total:</span>
-                  <span className="font-bold text-primary">
-                    {formatPrice(reservationFromOffer.price_eur_snapshot)}
-                  </span>
-                </div>
-              )}
             </div>
           </Card>
 
