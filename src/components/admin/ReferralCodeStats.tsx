@@ -209,40 +209,30 @@ const ReferralCodeStats = () => {
             {searchQuery ? 'Nenhum cliente encontrado com esse nome.' : 'Sem dados de códigos ainda.'}
           </p>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-2">
             {filteredStats.map((stat) => (
               <div
                 key={stat.user_id}
-                className="flex items-center justify-between p-4 rounded-lg border bg-card"
+                className="flex items-center gap-3 p-3 rounded-lg border bg-card"
               >
-                <div className="flex items-center gap-2 flex-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0"
-                    onClick={() => setSelectedUser({ id: stat.user_id, name: stat.full_name })}
-                  >
-                    🎁
-                  </Button>
-                  <div className="space-y-1">
-                    <p className="font-medium">{stat.full_name}</p>
-                    <p className="text-sm text-muted-foreground font-mono">{stat.code}</p>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0 shrink-0"
+                  onClick={() => setSelectedUser({ id: stat.user_id, name: stat.full_name })}
+                >
+                  🎁
+                </Button>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline gap-2">
+                    <p className="font-medium truncate">{stat.full_name}</p>
+                    <span className="text-sm font-medium text-primary shrink-0">{stat.points_balance}💎</span>
                   </div>
+                  <p className="text-xs text-muted-foreground font-mono uppercase">{stat.code}</p>
                 </div>
-                <div className="flex gap-4 text-sm items-center">
-                  <div className="flex items-center gap-1 font-medium text-primary">
-                    <span>{stat.points_balance}💎</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Users className="h-4 w-4 text-primary" />
-                    <span className="font-medium">{stat.times_used}</span>
-                  </div>
-                  {stat.active_rewards > 0 && (
-                    <div className="flex items-center gap-1 text-green-600">
-                      <Gift className="h-4 w-4" />
-                      <span className="font-medium">{stat.active_rewards}</span>
-                    </div>
-                  )}
+                <div className="flex items-center gap-1 shrink-0 text-sm text-muted-foreground">
+                  <Users className="h-3.5 w-3.5" />
+                  <span>{stat.times_used}</span>
                 </div>
               </div>
             ))}
