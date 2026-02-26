@@ -1457,11 +1457,11 @@ export type Database = {
         Returns: string
       }
       create_reservation_mixmaster:
+        | { Args: { p_starts_at: string; p_user_id: string }; Returns: string }
         | {
             Args: { p_hours: number; p_starts_at: string; p_user_id: string }
             Returns: string
           }
-        | { Args: { p_starts_at: string; p_user_id: string }; Returns: string }
       create_subscription_payment_request:
         | {
             Args: {
@@ -1719,8 +1719,8 @@ export type Database = {
         Returns: undefined
       }
       is_admin:
-        | { Args: { uid: string }; Returns: boolean }
         | { Args: never; Returns: boolean }
+        | { Args: { uid: string }; Returns: boolean }
       list_active_services: {
         Args: never
         Returns: {
@@ -1783,6 +1783,16 @@ export type Database = {
               p_note?: string
               p_proof_url?: string
               p_reservation_id: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              p_amount_eur: number
+              p_currency?: string
+              p_note?: string
+              p_proof_url?: string
+              p_reservation_id: string
               p_voucher_id?: string
             }
             Returns: string
@@ -1823,16 +1833,6 @@ export type Database = {
               p_proof_url?: string
               p_reservation_id: string
               p_voucher_id?: string
-            }
-            Returns: string
-          }
-        | {
-            Args: {
-              p_amount_eur: number
-              p_currency?: string
-              p_note?: string
-              p_proof_url?: string
-              p_reservation_id: string
             }
             Returns: string
           }
