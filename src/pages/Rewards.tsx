@@ -578,55 +578,6 @@ const Rewards = () => {
         </section>
       )}
 
-      {/* Loyalty Rewards */}
-      <section>
-        <h2 className="text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
-          <Award className="w-6 h-6 text-primary" />
-          Recompensas de Fidelidade
-        </h2>
-        
-        <Card className="studio-card">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Gift className="w-5 h-5 text-primary" />
-              Mix&Master Grátis
-            </CardTitle>
-            <CardDescription>
-              Acumula pontos e ganha uma Mix&Master grátis
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="text-center p-6 bg-secondary/50 rounded-lg">
-                <p className="text-4xl font-bold text-primary mb-2">
-                  Pontos: {loyaltyPoints}/7
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {loyaltyPoints >= 7 
-                    ? 'Parabéns! Podes reclamar a tua Mix&Master grátis!' 
-                    : `Faltam ${7 - loyaltyPoints} pontos para a oferta Mix&Master`}
-                </p>
-              </div>
-              
-              <div className="flex flex-col items-center gap-4">
-                <p className="text-sm text-muted-foreground text-center">
-                  Ganha 1 ponto por cada serviço 'Captação 3h Mix & Master' ou 'Mix & Master' completado
-                </p>
-                <Button 
-                  onClick={handleLoyaltyRedeem}
-                  disabled={loyaltyPoints < 7 || hasActivePenalty()} 
-                  variant={loyaltyPoints >= 7 ? 'default' : 'outline'}
-                  size="lg"
-                  className="w-full sm:w-auto"
-                >
-                  {loyaltyPoints >= 7 ? 'Reclamar Oferta Mix&Master' : 'Não Disponível'}
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </section>
-
       {/* Info Footer */}
       <div className="text-center py-4">
         <p className="text-xs text-muted-foreground">
