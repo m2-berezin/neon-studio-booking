@@ -38,8 +38,9 @@ const Home = () => {
   
   return (
     <div 
-      className="flex-1 flex flex-col relative overflow-hidden"
+      className="flex flex-col relative overflow-hidden"
       style={{
+        height: 'calc(100dvh - 120px)',
         backgroundImage: `url(${starsBg})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
