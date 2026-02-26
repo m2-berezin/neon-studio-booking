@@ -22,7 +22,7 @@ const faqs: FaqItem[] = [
   },
   {
     question: '❌ Posso cancelar uma sessão?',
-    answer: 'Sim, podes cancelar até 72h antes da sessão sem qualquer custo. Após as 72h ou No-Show implicam a retenção do sinal (15€).',
+    answer: 'Sim, podes cancelar até 72h antes da sessão sem qualquer custo. Após as 72h ou No-Show cancelamentos implicam a retenção do sinal (15€).',
   },
   {
     question: '🎧 Como funciona o Mix & Master?',
