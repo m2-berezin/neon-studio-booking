@@ -60,64 +60,66 @@ const Layout = ({ children }: { children: ReactNode }) => {
       {/* Notification Handler */}
       <NotificationHandler />
       
-      {/* Header with Profile, Logo, and Logout */}
-      <header className="flex items-center justify-between py-6 px-4">
-        {/* Profile Icon - Left */}
-        {user && (
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => navigate('/profile')}
-            className="text-muted-foreground hover:text-foreground"
-          >
-            <User className="h-5 w-5" />
-          </Button>
-        )}
-        
-        {/* Logo - Center */}
-        <div className="absolute left-1/2 transform -translate-x-1/2">
-          <div className="text-center">
-            <h1 
-              className="text-2xl font-bold text-white" 
-              style={{ 
-                fontFamily: 'Georgia, serif',
-                textShadow: '0 0 20px rgba(255, 255, 255, 0.3), 0 0 40px rgba(255, 255, 255, 0.2)',
-                letterSpacing: '0.1em'
-              }}
+      {/* Header with Profile, Logo, and Logout - Hidden on Messages page */}
+      {location.pathname !== '/messages' && (
+        <header className="flex items-center justify-between py-6 px-4">
+          {/* Profile Icon - Left */}
+          {user && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => navigate('/profile')}
+              className="text-muted-foreground hover:text-foreground"
             >
-              7T7
-            </h1>
-            <p 
-              className="text-sm text-white -mt-1" 
-              style={{ 
-                fontFamily: 'Georgia, serif',
-                textShadow: '0 0 20px rgba(255, 255, 255, 0.3)',
-                letterSpacing: '0.15em'
-              }}
-            >
-              Studios
-            </p>
-            {subscription?.is_active && (
-              <div className="flex justify-center mt-1.5">
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold neon-title">
-                  {subscription.plan_type === 'X' ? 'PREMIUM+' : 'PREMIUM'}
-                </span>
-              </div>
-            )}
+              <User className="h-5 w-5" />
+            </Button>
+          )}
+          
+          {/* Logo - Center */}
+          <div className="absolute left-1/2 transform -translate-x-1/2">
+            <div className="text-center">
+              <h1 
+                className="text-2xl font-bold text-white" 
+                style={{ 
+                  fontFamily: 'Georgia, serif',
+                  textShadow: '0 0 20px rgba(255, 255, 255, 0.3), 0 0 40px rgba(255, 255, 255, 0.2)',
+                  letterSpacing: '0.1em'
+                }}
+              >
+                7T7
+              </h1>
+              <p 
+                className="text-sm text-white -mt-1" 
+                style={{ 
+                  fontFamily: 'Georgia, serif',
+                  textShadow: '0 0 20px rgba(255, 255, 255, 0.3)',
+                  letterSpacing: '0.15em'
+                }}
+              >
+                Studios
+              </p>
+              {subscription?.is_active && (
+                <div className="flex justify-center mt-1.5">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold neon-title">
+                    {subscription.plan_type === 'X' ? 'PREMIUM+' : 'PREMIUM'}
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-        
-        {/* Points and Notifications - Right */}
-        {user && (
-          <div className="flex items-center gap-2">
-            {!isAdmin() && <PointsDisplay />}
-            <NotificationBell />
-          </div>
-        )}
-      </header>
+          
+          {/* Points and Notifications - Right */}
+          {user && (
+            <div className="flex items-center gap-2">
+              {!isAdmin() && <PointsDisplay />}
+              <NotificationBell />
+            </div>
+          )}
+        </header>
+      )}
 
       {/* Main Content */}
-      <main className="flex-1 px-4 pb-20">
+      <main className={`flex-1 ${location.pathname === '/messages' ? 'px-0 pb-0' : 'px-4 pb-20'}`}>
         {children}
       </main>
 
