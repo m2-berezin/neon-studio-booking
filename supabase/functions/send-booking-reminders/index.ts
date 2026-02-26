@@ -158,6 +158,79 @@ Deno.serve(async (req) => {
       }
     }
 
+    // ======== Voucher availability notifications ========
+    console.log('🎫 Checking voucher availability for all users...');
+    let voucherNotificationsCreated = 0;
+
+    // Get all user profiles
+    const { data: allProfiles, error: profilesError } = await supabase
+      .from('profiles')
+      .select('id, last_voucher_at')
+      .eq('role', 'user');
+
+    if (profilesError) {
+      console.error('Error fetching profiles for voucher check:', profilesError);
+    } else if (allProfiles && allProfiles.length > 0) {
+      for (const profile of allProfiles) {
+        try {
+          // Check voucher status using RPC
+          const { data: voucherData, error: voucherError } = await supabase.rpc('get_voucher_status', {
+            p_user_id: profile.id
+          });
+
+          if (voucherError) {
+            console.error(`Error checking voucher for user ${profile.id}:`, voucherError);
+            continue;
+          }
+
+          const voucherStatus = voucherData as { available: boolean; days_left: number } | null;
+          
+          if (voucherStatus?.available) {
+            // Check if we already sent a voucher notification recently (within last 30 days)
+            const { data: existingVoucherNotif, error: checkVoucherError } = await supabase
+              .from('notifications')
+              .select('id')
+              .eq('user_id', profile.id)
+              .ilike('title', '%Voucher%')
+              .ilike('body', '%disponível%')
+              .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
+              .limit(1);
+
+            if (checkVoucherError) {
+              console.error(`Error checking voucher notification for user ${profile.id}:`, checkVoucherError);
+              continue;
+            }
+
+            if (existingVoucherNotif && existingVoucherNotif.length > 0) {
+              console.log(`Voucher notification already exists for user ${profile.id}, skipping`);
+              continue;
+            }
+
+            // Create voucher notification
+            const { error: insertError } = await supabase
+              .from('notifications')
+              .insert({
+                user_id: profile.id,
+                role: 'user',
+                title: 'Voucher de 15€ Disponível',
+                body: 'O teu voucher de 15€ está disponível para reivindicar! Vai às Recompensas para o reclamar. 🎉',
+                read: false,
+              });
+
+            if (insertError) {
+              console.error(`Error creating voucher notification for user ${profile.id}:`, insertError);
+              continue;
+            }
+
+            console.log(`✅ Voucher notification created for user ${profile.id}`);
+            voucherNotificationsCreated++;
+          }
+        } catch (err) {
+          console.error(`Error processing voucher for user ${profile.id}:`, err);
+        }
+      }
+    }
+
     const totalBookingsFound = (bookings72h?.length || 0) + (bookings24h?.length || 0);
     
     const summary = {
@@ -167,6 +240,7 @@ Deno.serve(async (req) => {
       reminders24h: bookings24h?.length || 0,
       notificationsCreated,
       notificationsSkipped,
+      voucherNotificationsCreated,
     };
 
     console.log('📊 Summary:', summary);

@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useNotificationSettings } from '@/hooks/useNotificationSettings';
 
 interface Notification {
   id: string;
@@ -12,19 +13,41 @@ interface Notification {
   created_at: string;
 }
 
+const isVoucherNotification = (n: Notification) =>
+  n.title.toLowerCase().includes('voucher');
+
+const isBookingReminderNotification = (n: Notification) =>
+  n.title.toLowerCase().includes('lembrete de reserva');
+
+const isMessageNotification = (n: Notification) =>
+  n.title.toLowerCase().includes('mensagem');
+
 export const useNotifications = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
+  const { settings } = useNotificationSettings();
+  const [allNotifications, setAllNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
+
+  // Filter notifications based on user settings
+  const notifications = useMemo(() => {
+    return allNotifications.filter(n => {
+      if (!settings.voucherAvailable && isVoucherNotification(n)) return false;
+      if (!settings.bookingReminders && isBookingReminderNotification(n)) return false;
+      if (!settings.newMessages && isMessageNotification(n)) return false;
+      return true;
+    });
+  }, [allNotifications, settings]);
+
+  const unreadCount = useMemo(() => {
+    return notifications.filter(n => !n.read).length;
+  }, [notifications]);
 
   const loadNotifications = async () => {
     if (!user) return;
     
     setLoading(true);
     try {
-      // Load all notifications (read and unread)
       const { data, error } = await (supabase as any)
         .from('notifications')
         .select('*')
@@ -32,10 +55,7 @@ export const useNotifications = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-
-      setNotifications((data || []) as Notification[]);
-      // Count only unread notifications
-      setUnreadCount(data?.filter(n => !n.read).length || 0);
+      setAllNotifications((data || []) as Notification[]);
     } catch (error) {
       console.error('Error loading notifications:', error);
     } finally {
@@ -52,11 +72,9 @@ export const useNotifications = () => {
 
       if (error) throw error;
 
-      // Update the notification in the list instead of removing it
-      setNotifications(prev => prev.map(n => 
+      setAllNotifications(prev => prev.map(n => 
         n.id === notificationId ? { ...n, read: true } : n
       ));
-      setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (error) {
       console.error('Error marking notification as read:', error);
       toast({
@@ -79,9 +97,7 @@ export const useNotifications = () => {
 
       if (error) throw error;
 
-      // Mark all notifications as read in the list instead of clearing it
-      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-      setUnreadCount(0);
+      setAllNotifications(prev => prev.map(n => ({ ...n, read: true })));
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
       toast({
@@ -94,9 +110,7 @@ export const useNotifications = () => {
 
   const deleteNotification = async (notificationId: string) => {
     try {
-      // First find if the notification is unread before deleting
-      const notification = notifications.find(n => n.id === notificationId);
-      const wasUnread = notification && !notification.read;
+      const notification = allNotifications.find(n => n.id === notificationId);
 
       const { error } = await (supabase as any)
         .from('notifications')
@@ -105,13 +119,7 @@ export const useNotifications = () => {
 
       if (error) throw error;
 
-      // Remove notification from list
-      setNotifications(prev => prev.filter(n => n.id !== notificationId));
-      
-      // Update unread count if it was unread
-      if (wasUnread) {
-        setUnreadCount(prev => Math.max(0, prev - 1));
-      }
+      setAllNotifications(prev => prev.filter(n => n.id !== notificationId));
     } catch (error) {
       console.error('Error deleting notification:', error);
       toast({
@@ -126,7 +134,6 @@ export const useNotifications = () => {
     if (user) {
       loadNotifications();
 
-      // Subscribe to realtime changes for notifications
       const notificationsChannel = supabase
         .channel('notifications-changes')
         .on(
@@ -143,7 +150,6 @@ export const useNotifications = () => {
         )
         .subscribe();
 
-      // Subscribe to realtime changes for messages
       const messagesChannel = supabase
         .channel('messages-badge-updates')
         .on(
