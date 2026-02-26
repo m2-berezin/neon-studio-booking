@@ -222,9 +222,33 @@ const AdminPayments = () => {
           }
         }
         
+        // Award 1500💎 for Mix & Master services
+        const serviceName = request.reservations?.service_name_snapshot || '';
+        const isMixMasterService = serviceName.includes('Mix & Master') || serviceName.includes('Mix&Master') || serviceName.includes('Captação 3h Mix');
+        
+        if (isMixMasterService && request.type !== 'subscription_request') {
+          try {
+            const { error: pointsError } = await supabase.rpc('award_points', {
+              p_user_id: request.user_id,
+              p_amount: 1500,
+              p_transaction_type: 'service_reward',
+            });
+            
+            if (pointsError) {
+              console.error('[ADMIN] ❌ Error awarding points:', pointsError);
+            } else {
+              console.log('[ADMIN] ✅ 1500💎 awarded to user for Mix & Master service');
+            }
+          } catch (pointsErr) {
+            console.error('[ADMIN] ❌ Error in points award process:', pointsErr);
+          }
+        }
+        
         toast({
           title: 'Reserva Aprovada',
-          description: 'A reserva foi aprovada e confirmada com sucesso.',
+          description: isMixMasterService 
+            ? 'Reserva aprovada e 1500💎 atribuídos ao cliente.' 
+            : 'A reserva foi aprovada e confirmada com sucesso.',
         });
       } else {
         console.log('Rejecting payment:', id);

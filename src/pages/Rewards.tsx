@@ -12,6 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import PenaltyBanner from '@/components/PenaltyBanner';
 import ReferralSystem from '@/components/ReferralSystem';
 import { formatPrice } from '@/lib/utils';
+import PointsCard from '@/components/PointsCard';
 interface Offer {
   id: string;
   name: string;
@@ -382,15 +383,15 @@ const Rewards = () => {
       
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold neon-title mb-2">
-          Recompensas do Estúdio
+          Recompensas
         </h1>
-        <p className="text-muted-foreground text-lg">
-          Ofertas especiais e recompensas para clientes regulares
-        </p>
       </div>
 
       {/* Penalty Banner */}
       {hasActivePenalty() && penaltyEndDate && <PenaltyBanner penaltyEndDate={penaltyEndDate} className="mb-6" />}
+
+      {/* 💎 Points Display Card */}
+      <PointsCard />
 
       {/* Voucher 15€ Section */}
       {voucherStatus && (
