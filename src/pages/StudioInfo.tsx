@@ -21,7 +21,7 @@ const StudioInfo = () => {
   }, []);
   
   const whatsappNumber = "+351934941263";
-  const studioLocation = "Pinhal do General, Seixal";
+  const studioLocation = "Quinta do Conde";
   const whatsappLink = `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}?text=Boas, estou com problemas na app, podes ajudar me?`;
   const houseRules = [{
     icon: <Clock className="h-5 w-5" />,
@@ -66,15 +66,6 @@ const StudioInfo = () => {
         </Button>
       </div>
       
-      {/* Header */}
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold neon-title mb-2">
-          Informações do Estúdio
-        </h1>
-        <p className="text-muted-foreground text-lg">
-          Tudo o que precisas de saber
-        </p>
-      </div>
 
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

@@ -117,7 +117,7 @@ const FaqChatBubble = () => {
         onClick={() => isOpen ? handleClose() : setIsOpen(true)}
         className={cn(
           "fixed bottom-24 right-4 z-[70] h-14 w-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-200",
-          "bg-primary text-primary-foreground hover:scale-105 active:scale-95",
+          "bg-transparent border border-border text-foreground hover:scale-105 active:scale-95 backdrop-blur-sm",
           isOpen && "hidden"
         )}
       >
