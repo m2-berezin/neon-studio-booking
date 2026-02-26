@@ -10,27 +10,23 @@ interface FaqItem {
 const faqs: FaqItem[] = [
   {
     question: '📍 Onde fica o estúdio?',
-    answer: 'O estúdio fica localizado em Lisboa. Após a reserva, receberás a morada exata por mensagem.',
+    answer: 'O estúdio fica localizado na Quinta do Conde. Após a reserva, a morada exata ficará disponível na tab Projetos.',
   },
   {
     question: '🕐 Horário de funcionamento?',
-    answer: 'Funcionamos de segunda a sábado, das 10h às 23h. Domingos sob consulta.',
+    answer: 'Aberto todos os dias, das 10h às 22h.',
   },
   {
     question: '💰 Quais são os preços?',
     answer: 'Os preços variam consoante o serviço. Consulta a página de reservas para ver todos os valores atualizados.',
   },
   {
-    question: '🎤 O que inclui uma sessão?',
-    answer: 'Cada sessão inclui uso do estúdio, engenheiro de som, e acesso a todo o equipamento profissional disponível.',
-  },
-  {
     question: '❌ Posso cancelar uma sessão?',
-    answer: 'Sim, podes cancelar até 24h antes da sessão sem qualquer custo. Cancelamentos tardios podem resultar em penalização.',
+    answer: 'Sim, podes cancelar até 72h antes da sessão sem qualquer custo. Após as 72h ou No-Show implicam a retenção do sinal (15€).',
   },
   {
     question: '🎧 Como funciona o Mix & Master?',
-    answer: 'Envia os teus ficheiros através da plataforma. Receberás o resultado final num prazo de 3 a 7 dias úteis.',
+    answer: 'Envia os teus ficheiros através da plataforma e envia mensagem ao Ghost no chat da app para mais informações.',
   },
 ];
 
@@ -97,7 +93,7 @@ const FaqChatBubble = () => {
                 <div className="space-y-2">
                   <div className="flex justify-start mb-3">
                     <div className="bg-muted text-foreground rounded-2xl rounded-bl-sm px-4 py-2.5 max-w-[85%]">
-                      <p className="text-sm">Olá! 👋 Como posso ajudar? Escolhe uma pergunta:</p>
+                      <p className="text-sm">Yoooo, como posso ajudar?🦇 Escolhe uma pergunta:</p>
                     </div>
                   </div>
                   {faqs.map((faq, i) => (
