@@ -56,7 +56,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
 
   // Show content immediately, handle auth state reactively
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className={`bg-background flex flex-col ${location.pathname === '/' ? 'h-[100dvh] overflow-hidden' : 'min-h-screen'}`}>
       {/* Notification Handler */}
       <NotificationHandler />
       
