@@ -7,6 +7,7 @@ import { NotificationBell } from '@/components/NotificationBell';
 import { Logo } from '@/components/Logo';
 import { NotificationHandler } from '@/components/NotificationHandler';
 import { PointsDisplay } from '@/components/PointsDisplay';
+import FaqChatBubble from '@/components/FaqChatBubble';
 
 const Layout = ({ children }: { children: ReactNode }) => {
   const location = useLocation();
@@ -125,45 +126,48 @@ const Layout = ({ children }: { children: ReactNode }) => {
 
       {/* Navigation - Only show if user is authenticated and not on Messages page */}
       {user && location.pathname !== '/messages' && (
-        <nav className="fixed bottom-0 left-0 right-0 bg-card/80 backdrop-blur-md border-t border-border z-50">
-          <div className="flex justify-around items-center py-3 px-4">
-            {allNavItems.map((item) => {
-              const isActive = item.path === '/admin/dashboard' 
-                ? location.pathname.startsWith('/admin')
-                : location.pathname === item.path;
-              return (
-                <button
-                  key={item.path}
-                  onClick={() => navigate(item.path)}
-                  className={`flex flex-col items-center justify-center gap-1 p-2 rounded-lg transition-all flex-1 max-w-[80px] ${
-                    isActive 
-                      ? 'text-primary' 
-                      : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  {item.isLogo ? (
-                    <div className="flex items-center justify-center w-full">
-                      <span className={`text-2xl font-bold leading-none ${isActive ? 'neon-title' : 'neon-title'}`} style={{ fontFamily: 'Times New Roman, serif' }}>
-                        {item.label}
-                      </span>
-                    </div>
-                  ) : (
-                    <>
-                      {item.icon === 'question' ? (
-                        <div className="w-5 h-5 flex items-center justify-center">
-                          <span className="text-[20px] leading-none font-bold" style={{ fontFamily: 'Times New Roman, serif' }}>?</span>
-                        </div>
-                      ) : (
-                        <item.icon className="w-5 h-5" />
-                      )}
-                      <span className="text-xs font-medium">{item.label}</span>
-                    </>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </nav>
+        <>
+          <nav className="fixed bottom-0 left-0 right-0 bg-card/80 backdrop-blur-md border-t border-border z-50">
+            <div className="flex justify-around items-center py-3 px-4">
+              {allNavItems.map((item) => {
+                const isActive = item.path === '/admin/dashboard' 
+                  ? location.pathname.startsWith('/admin')
+                  : location.pathname === item.path;
+                return (
+                  <button
+                    key={item.path}
+                    onClick={() => navigate(item.path)}
+                    className={`flex flex-col items-center justify-center gap-1 p-2 rounded-lg transition-all flex-1 max-w-[80px] ${
+                      isActive 
+                        ? 'text-primary' 
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    {item.isLogo ? (
+                      <div className="flex items-center justify-center w-full">
+                        <span className={`text-2xl font-bold leading-none ${isActive ? 'neon-title' : 'neon-title'}`} style={{ fontFamily: 'Times New Roman, serif' }}>
+                          {item.label}
+                        </span>
+                      </div>
+                    ) : (
+                      <>
+                        {item.icon === 'question' ? (
+                          <div className="w-5 h-5 flex items-center justify-center">
+                            <span className="text-[20px] leading-none font-bold" style={{ fontFamily: 'Times New Roman, serif' }}>?</span>
+                          </div>
+                        ) : (
+                          <item.icon className="w-5 h-5" />
+                        )}
+                        <span className="text-xs font-medium">{item.label}</span>
+                      </>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </nav>
+          {!isAdmin() && <FaqChatBubble />}
+        </>
       )}
     </div>
   );
