@@ -843,180 +843,165 @@ const AdminDashboard = () => {
                 </div>
               )}
             </div>
-          ) : (
-            /* Chat aberto */
-            <div className="max-w-full md:max-w-4xl mx-auto px-2 md:px-0">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="mb-3 md:mb-4"
-                onClick={() => setSelectedUserId(null)}
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                <span className="text-sm">Voltar às conversas</span>
-              </Button>
-
-              <Card className="flex flex-col h-[calc(100vh-16rem)] md:h-[600px]">
-                <div className="p-3 md:p-4 border-b">
-                  <h2 className="font-semibold text-sm md:text-base">
-                    {threads.find((t) => t.user_id === selectedUserId)?.user_name || 'Cliente'}
-                  </h2>
-                </div>
-
-                <ScrollArea className="flex-1 p-4">
-                  {messages.length === 0 ? (
-                    <div className="text-center text-muted-foreground">Sem mensagens</div>
-                  ) : (
-                    <div className="space-y-4">
-                      {messages.map((msg) => {
-                        const isSender = msg.sender_id === user?.id;
-                        const hasAttachment = msg.attachment_url;
-                        const isImage = msg.attachment_type?.startsWith('image/');
-                        const isAudio = msg.attachment_type?.startsWith('audio/');
-                        
-                        return (
-                          <div key={msg.id} className={`flex ${isSender ? 'justify-end' : 'justify-start'}`}>
-                            <div className="flex flex-col">
-                              {!isSender && msg.sender_name && (
-                                <p className="text-xs text-muted-foreground mb-1 px-1">
-                                  {msg.sender_name}
-                                </p>
-                              )}
-                              <div
-                                className={`max-w-[85%] md:max-w-[70%] rounded-lg px-4 py-2 ${
-                                  isSender
-                                    ? 'bg-primary text-primary-foreground'
-                                    : 'bg-muted text-foreground'
-                                }`}
-                              >
-                                <p className="text-sm break-words">
-                                  {renderMessageWithLinks(msg.message)}
-                                </p>
-                                
-                                {hasAttachment && (
-                                  <div className="mt-2">
-                                    {isImage && (
-                                      <div className="relative">
-                                        <img 
-                                          src={msg.attachment_url} 
-                                          alt={msg.attachment_name || 'Imagem'} 
-                                          className="rounded max-w-full max-h-64 object-contain cursor-pointer"
-                                          onClick={() => window.open(msg.attachment_url, '_blank')}
-                                        />
-                                      </div>
-                                    )}
-                                    
-                                    {isAudio && (
-                                      <div className="flex items-center gap-2 bg-background/20 rounded p-2">
-                                        <Music className="h-4 w-4" />
-                                        <audio controls className="max-w-full">
-                                          <source src={msg.attachment_url} type={msg.attachment_type || 'audio/mpeg'} />
-                                        </audio>
-                                      </div>
-                                    )}
-                                    
-                                    <a 
-                                      href={msg.attachment_url} 
-                                      download={msg.attachment_name}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="flex items-center gap-1 text-xs mt-1 opacity-70 hover:opacity-100"
-                                    >
-                                      <Download className="h-3 w-3" />
-                                      {msg.attachment_name}
-                                    </a>
-                                  </div>
-                                )}
-                                
-                                <p className="text-xs opacity-70 mt-1">
-                                  {new Date(msg.timestamp).toLocaleTimeString('pt-PT', {
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                  })}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                      <div ref={messagesEndRef} />
-                    </div>
-                  )}
-                </ScrollArea>
-
-                <div className="p-4 border-t space-y-2">
-                  {selectedFile && (
-                    <div className="flex items-center gap-2 bg-muted p-2 rounded">
-                      {selectedFile.type.startsWith('image/') ? (
-                        <ImageIcon className="h-4 w-4 flex-shrink-0" />
-                      ) : (
-                        <Music className="h-4 w-4 flex-shrink-0" />
-                      )}
-                      <span className="text-sm flex-1 truncate">{selectedFile.name}</span>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setSelectedFile(null);
-                          if (fileInputRef.current) {
-                            fileInputRef.current.value = '';
-                          }
-                        }}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  )}
-                  
-                  <div className="flex gap-2">
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*,audio/mp3,audio/mpeg"
-                      onChange={handleFileSelect}
-                      className="hidden"
-                      id="dashboard-file-input"
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="icon"
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={uploading}
-                      className="shrink-0"
-                    >
-                      <Paperclip className="h-4 w-4" />
-                    </Button>
-                    <Input
-                      type="text"
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      onKeyPress={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                          e.preventDefault();
-                          handleSendMessage();
-                        }
-                      }}
-                      placeholder="Escreve a tua mensagem..."
-                      className="flex-1"
-                      disabled={uploading}
-                    />
-                    <Button 
-                      type="button"
-                      onClick={handleSendMessage} 
-                      size="icon"
-                      disabled={uploading || (!newMessage.trim() && !selectedFile)}
-                      className="shrink-0"
-                    >
-                      <Send className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </Card>
-            </div>
-          )}
+          ) : null}
         </TabsContent>
+
+        {/* Immersive full-screen chat overlay */}
+        {selectedUserId && activeTab === 'messages' && (
+          <div className="fixed inset-0 z-[200] bg-background flex flex-col">
+            <div className="p-3 border-b flex items-center gap-3">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSelectedUserId(null)}
+                className="gap-1.5 rounded-full px-3"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                <span className="text-sm">Voltar</span>
+              </Button>
+              <h2 className="text-sm font-semibold flex-1 text-center pr-10">
+                {threads.find((t) => t.user_id === selectedUserId)?.user_name || 'Cliente'}
+              </h2>
+            </div>
+
+            <ScrollArea className="flex-1 p-4">
+              {messages.length === 0 ? (
+                <div className="text-center text-muted-foreground">Sem mensagens</div>
+              ) : (
+                <div className="space-y-4">
+                  {messages.map((msg) => {
+                    const isSender = msg.sender_id === user?.id;
+                    const hasAttachment = msg.attachment_url;
+                    const isImage = msg.attachment_type?.startsWith('image/');
+                    const isAudio = msg.attachment_type?.startsWith('audio/');
+                    
+                    return (
+                      <div key={msg.id} className={`flex ${isSender ? 'justify-end' : 'justify-start'}`}>
+                        <div className={`max-w-[70%] rounded-lg px-4 py-2 ${
+                          isSender
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-muted text-foreground'
+                        }`}>
+                          <p className="text-sm break-words">
+                            {renderMessageWithLinks(msg.message)}
+                          </p>
+                          
+                          {hasAttachment && (
+                            <div className="mt-2">
+                              {isImage && (
+                                <img 
+                                  src={msg.attachment_url} 
+                                  alt={msg.attachment_name || 'Imagem'} 
+                                  className="rounded max-w-full max-h-64 object-contain cursor-pointer"
+                                  onClick={() => window.open(msg.attachment_url, '_blank')}
+                                />
+                              )}
+                              
+                              {isAudio && (
+                                <div className="flex items-center gap-2 bg-background/20 rounded p-2">
+                                  <Music className="h-4 w-4" />
+                                  <audio controls className="max-w-full">
+                                    <source src={msg.attachment_url} type={msg.attachment_type || 'audio/mpeg'} />
+                                  </audio>
+                                </div>
+                              )}
+                              
+                              <a 
+                                href={msg.attachment_url} 
+                                download={msg.attachment_name}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1 text-xs mt-1 opacity-70 hover:opacity-100"
+                              >
+                                <Download className="h-3 w-3" />
+                                {msg.attachment_name}
+                              </a>
+                            </div>
+                          )}
+                          
+                          <p className="text-xs opacity-70 mt-1">
+                            {new Date(msg.timestamp).toLocaleTimeString('pt-PT', {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  <div ref={messagesEndRef} />
+                </div>
+              )}
+            </ScrollArea>
+
+            <div className="p-3 border-t">
+              {selectedFile && (
+                <div className="mb-2 flex items-center gap-2 bg-muted p-2 rounded">
+                  {selectedFile.type.startsWith('image/') ? (
+                    <ImageIcon className="h-4 w-4" />
+                  ) : (
+                    <Music className="h-4 w-4" />
+                  )}
+                  <span className="text-sm flex-1 truncate">{selectedFile.name}</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setSelectedFile(null);
+                      if (fileInputRef.current) {
+                        fileInputRef.current.value = '';
+                      }
+                    }}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+              
+              <div className="flex gap-2 items-end">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*,audio/mp3,audio/mpeg"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                  id="dashboard-file-input"
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  className="h-9 w-9 p-0 shrink-0"
+                >
+                  <Paperclip className="h-4 w-4" />
+                </Button>
+                <Input
+                  type="text"
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSendMessage();
+                    }
+                  }}
+                  placeholder="Escreve a tua mensagem..."
+                  className="flex-1"
+                  disabled={uploading}
+                />
+                <Button 
+                  onClick={handleSendMessage} 
+                  size="sm"
+                  disabled={uploading || (!newMessage.trim() && !selectedFile)}
+                  className="h-9 w-9 p-0 shrink-0"
+                >
+                  <Send className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
 
         <TabsContent value="daysoff" className="space-y-6 mt-6 p-2 md:p-4 lg:p-6 pt-4">
           <DaysOffManager />
