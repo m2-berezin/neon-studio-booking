@@ -28,17 +28,9 @@ const StudioInfo = () => {
     title: "Pontualidade",
     description: "Chega a horas. Atrasos podem resultar em sessões encurtadas."
   }, {
-    icon: <Music className="h-5 w-5" />,
-    title: "Respeita o Equipamento",
-    description: "Manuseia todo o equipamento com cuidado. Reporta qualquer problema imediatamente."
-  }, {
     icon: <Settings className="h-5 w-5" />,
     title: "PROIBIDO COMER",
     description: "Comida não é permitida no estúdio. É permitido fumar."
-  }, {
-    icon: <Phone className="h-5 w-5" />,
-    title: "Etiqueta do Telemóvel",
-    description: "Mantém os telemóveis em modo silencioso durante as sessões de gravação."
   }, {
     icon: <Mic className="h-5 w-5" />,
     title: "Conduta Profissional",
