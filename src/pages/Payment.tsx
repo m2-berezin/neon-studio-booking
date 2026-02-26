@@ -843,107 +843,83 @@ const Payment = () => {
         </CardHeader>
         <CardContent>
           <RadioGroup value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as 'mbway' | 'transferencia' | 'revolut')}>
-            <div className="space-y-4">
-              <div className="flex items-center space-x-3">
-                <RadioGroupItem value="mbway" id="mbway" />
-                <Label htmlFor="mbway" className="flex items-center gap-2 cursor-pointer text-base">
-                  <Smartphone className="h-5 w-5 text-primary" />
-                  <span>MB Way</span>
-                </Label>
+            <div className="space-y-3">
+              {/* MB Way */}
+              <div className="space-y-2">
+                <div className="flex items-center space-x-3">
+                  <RadioGroupItem value="mbway" id="mbway" />
+                  <Label htmlFor="mbway" className="flex items-center gap-2 cursor-pointer text-base">
+                    <Smartphone className="h-5 w-5" />
+                    <span>MBWAY</span>
+                  </Label>
+                </div>
+                {paymentMethod === 'mbway' && (
+                  <div className="ml-8 flex items-center gap-3">
+                    <span className="text-sm text-muted-foreground">Insira o numero</span>
+                    <div className="flex items-center gap-1 bg-muted/50 px-3 py-1.5 rounded-md">
+                      <span className="font-mono text-sm font-medium">{MBWAY_PHONE}</span>
+                      <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => copyToClipboard(MBWAY_PHONE, 'Número MB Way')}>
+                        <Copy className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
-              <div className="flex items-center space-x-3">
-                <RadioGroupItem value="transferencia" id="transferencia" />
-                <Label htmlFor="transferencia" className="flex items-center gap-2 cursor-pointer text-base">
-                  <Building2 className="h-5 w-5 text-primary" />
-                  <span>Transferência Bancária</span>
-                </Label>
+
+              {/* Transferência Bancária */}
+              <div className="space-y-2">
+                <div className="flex items-center space-x-3">
+                  <RadioGroupItem value="transferencia" id="transferencia" />
+                  <Label htmlFor="transferencia" className="flex items-center gap-2 cursor-pointer text-base">
+                    <Building2 className="h-5 w-5" />
+                    <span>Transferência Bancária</span>
+                  </Label>
+                </div>
+                {paymentMethod === 'transferencia' && (
+                  <div className="ml-8 space-y-2">
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm text-muted-foreground">IBAN</span>
+                      <div className="flex items-center gap-1 bg-muted/50 px-3 py-1.5 rounded-md">
+                        <span className="font-mono text-sm font-medium">{IBAN}</span>
+                        <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => copyToClipboard(IBAN, 'IBAN')}>
+                          <Copy className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    </div>
+                    <p className="text-sm font-medium text-orange-500">Enviar comprovativo por mensagem chat da app</p>
+                  </div>
+                )}
               </div>
-              <div className="flex items-center space-x-3">
-                <RadioGroupItem value="revolut" id="revolut" />
-                <Label htmlFor="revolut" className="flex items-center gap-2 cursor-pointer text-base">
-                  <Building2 className="h-5 w-5 text-primary" />
-                  <span>Revolut</span>
-                </Label>
+
+              {/* Revolut */}
+              <div className="space-y-2">
+                <div className="flex items-center space-x-3">
+                  <RadioGroupItem value="revolut" id="revolut" />
+                  <Label htmlFor="revolut" className="flex items-center gap-2 cursor-pointer text-base">
+                    <Building2 className="h-5 w-5" />
+                    <span>Revolut</span>
+                  </Label>
+                </div>
+                {paymentMethod === 'revolut' && (
+                  <div className="ml-8 flex items-center gap-3">
+                    <span className="text-sm text-muted-foreground">Revtag</span>
+                    <div className="flex items-center gap-1 bg-muted/50 px-3 py-1.5 rounded-md">
+                      <span className="font-mono text-sm font-medium">{REVOLUT_REVTAG}</span>
+                      <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => copyToClipboard(REVOLUT_REVTAG, 'Revtag')}>
+                        <Copy className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </RadioGroup>
         </CardContent>
       </Card>
 
-      {/* Payment Instructions */}
+      {/* Instructions */}
       <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>Informações de Pagamento</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* MBWay */}
-          {paymentMethod === 'mbway' && (
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <Smartphone className="h-5 w-5 text-primary" />
-                <h3 className="font-semibold text-lg">MB Way</h3>
-              </div>
-              
-              <div className="bg-gradient-to-br from-primary/5 to-primary/10 p-6 rounded-xl border-2 border-primary/20">
-                <div className="text-center">
-                  <p className="text-sm text-muted-foreground mb-2">Número de Telemóvel:</p>
-                  <div className="flex items-center justify-center gap-2">
-                    <span className="text-2xl font-bold font-mono">{MBWAY_PHONE}</span>
-                    <Button variant="ghost" size="sm" onClick={() => copyToClipboard(MBWAY_PHONE, 'Número MB Way')}>
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* IBAN */}
-          {paymentMethod === 'transferencia' && (
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <Building2 className="h-5 w-5 text-primary" />
-                <h3 className="font-semibold text-lg">Transferência Bancária</h3>
-              </div>
-              
-              <div className="bg-gradient-to-br from-secondary/5 to-secondary/10 p-4 rounded-xl border-2 border-secondary/20">
-                <p className="text-sm text-muted-foreground mb-2">IBAN:</p>
-                <div className="flex items-center justify-between gap-2 mb-2">
-                  <span className="font-mono text-sm md:text-base font-semibold break-all">{IBAN}</span>
-                  <Button variant="ghost" size="sm" onClick={() => copyToClipboard(IBAN, 'IBAN')} className="flex-shrink-0">
-                    <Copy className="h-4 w-4" />
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground mb-3">Utiliza este IBAN para transferência bancária nacional ou internacional</p>
-                <p className="text-xs text-orange-500 font-bold">Enviar comprovativo por mensagem chat da app</p>
-              </div>
-            </div>
-          )}
-
-          {/* Revolut */}
-          {paymentMethod === 'revolut' && (
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <Building2 className="h-5 w-5 text-primary" />
-                <h3 className="font-semibold text-lg">Revolut</h3>
-              </div>
-              
-              <div className="bg-gradient-to-br from-secondary/5 to-secondary/10 p-4 rounded-xl border-2 border-secondary/20">
-                <p className="text-sm text-muted-foreground mb-2">RevTag:</p>
-                <div className="flex items-center justify-between gap-2 mb-2">
-                  <span className="font-mono text-sm md:text-base font-semibold">{REVOLUT_REVTAG}</span>
-                  <Button variant="ghost" size="sm" onClick={() => copyToClipboard(REVOLUT_REVTAG, 'RevTag')} className="flex-shrink-0">
-                    <Copy className="h-4 w-4" />
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground">Utiliza este RevTag para enviar dinheiro via Revolut</p>
-              </div>
-            </div>
-          )}
-
-          <Separator />
-
-          {/* Instructions */}
+        <CardContent className="pt-6 space-y-4">
           <div className="space-y-2">
             <h3 className="font-semibold">Instruções:</h3>
             <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
