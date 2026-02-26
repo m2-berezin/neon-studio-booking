@@ -37,13 +37,13 @@ const Home = () => {
   
   return (
     <div 
-      className="min-h-screen flex flex-col relative"
+      className="flex flex-col relative overflow-hidden"
       style={{
+        height: 'calc(100dvh - 120px)',
         backgroundImage: `url(${starsBg})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
-        backgroundAttachment: 'fixed'
       }}
     >
       {/* Overlay para melhorar legibilidade */}
@@ -52,12 +52,12 @@ const Home = () => {
       {/* Welcome Section */}
       <div className="flex-1 flex items-center justify-center px-4 relative z-10">
         <div className="text-center max-w-4xl mx-auto w-full">
-          <div className="mb-12">
-            <h1 className="neon-heading mb-8">Bem-vindo ao Futuro.</h1>
+          <div className="mb-6">
+            <h1 className="neon-heading mb-4 text-xl md:text-3xl">Bem-vindo ao Futuro.</h1>
           </div>
 
-          {/* Service Cards Grid - Symmetrical Layout */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+          {/* Service Cards Grid */}
+          <div className="grid grid-cols-2 gap-3 max-w-2xl mx-auto">
             {services.map(service => (
               <ServiceCard 
                 key={service.title} 
