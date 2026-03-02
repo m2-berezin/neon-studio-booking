@@ -1,12 +1,22 @@
 import { useState } from 'react';
 import { usePoints } from '@/hooks/usePoints';
+import { useFriendCode } from '@/hooks/useFriendCode';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Copy } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const PointsCard = () => {
   const { pointsBalance, loading } = usePoints();
+  const { myFriendCode } = useFriendCode();
+  const { toast } = useToast();
   const [showDialog, setShowDialog] = useState(false);
+
+  const copyCode = () => {
+    navigator.clipboard.writeText(myFriendCode);
+    toast({ title: 'Copiado!', description: 'Código copiado para a área de transferência' });
+  };
 
   if (loading) {
     return <Skeleton className="h-36 w-full rounded-xl mb-4" />;
@@ -38,10 +48,18 @@ const PointsCard = () => {
             <DialogTitle className="text-xl text-center">Como ganhar 💎</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-2">
-            <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg">
+            <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg space-y-2">
               <p className="text-sm text-foreground text-center">
                 Convida amigos para a app! Por cada amigo ganhas <span className="font-semibold">2500💎</span>
               </p>
+              {myFriendCode && (
+                <div className="flex items-center gap-2 bg-background border border-border rounded-lg px-3 py-2">
+                  <span className="flex-1 text-sm font-mono font-semibold text-center tracking-wider">{myFriendCode}</span>
+                  <button onClick={copyCode} className="p-1 hover:bg-muted rounded transition-colors">
+                    <Copy className="h-4 w-4 text-muted-foreground" />
+                  </button>
+                </div>
+              )}
             </div>
             <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg">
               <p className="text-sm text-foreground text-center">
