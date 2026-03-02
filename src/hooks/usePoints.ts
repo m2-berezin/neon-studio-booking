@@ -31,7 +31,7 @@ export const usePoints = () => {
     // Poll for points every 10 seconds to ensure UI stays in sync
     const intervalId = setInterval(() => {
       loadPoints();
-    }, 10000);
+    }, 30000);
     
     return () => {
       clearInterval(intervalId);
