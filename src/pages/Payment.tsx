@@ -923,14 +923,15 @@ const Payment = () => {
           <div className="space-y-2">
             <h3 className="font-semibold">Instruções:</h3>
             <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
-              <li>Faz o pagamento do sinal (15 €) por um método à tua escolha.</li>
+              <li>Faz o pagamento {service === 'mixmaster' ? `do serviço (${formatPrice(parseFloat(price || '0'))})` : 'do sinal (15 €)'} por um método à tua escolha.</li>
               <li>Clica em "Já Paguei" depois de o realizares.</li>
               <li>Aguarda confirmação — serás notificado.</li>
-              <li>O restante é pago no dia da sessão (em dinheiro ou outro método).</li>
+              {service !== 'mixmaster' && <li>O restante é pago no dia da sessão (em dinheiro ou outro método).</li>}
             </ol>
           </div>
 
           {/* Disclaimer */}
+          {service !== 'mixmaster' && (
           <div className="p-4 bg-muted/50 rounded-lg border border-border">
             <p className="text-sm text-muted-foreground leading-relaxed space-y-1">
               <span className="block">O sinal confirma a tua reserva. Cancelamentos com menos de 72 horas de antecedência ou No-Show implicam a retenção do sinal (15€). Reagendamentos até 72 horas antes são gratuitos.</span>
@@ -972,6 +973,7 @@ const Payment = () => {
               </AlertDialog>
             </p>
           </div>
+          )}
 
           {/* Terms and Conditions Checkbox */}
           <div className="flex items-start space-x-2 pt-2">
