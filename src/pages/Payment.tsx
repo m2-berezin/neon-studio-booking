@@ -833,7 +833,7 @@ const Payment = () => {
 
                 {/* Points reward info for Mix & Master services */}
                 {(service === 'mixmaster' || (service === 'booking' && option === 'mix-master')) && (
-                  <div className="mt-3 rounded-lg bg-blue-600 px-4 py-2.5 text-center">
+                  <div className="mt-3 rounded-lg bg-blue-600/40 px-4 py-2.5 text-center">
                     <p className="text-sm font-medium text-white">
                       Ao efetuares esta reserva ganhas
                     </p>
@@ -867,7 +867,7 @@ const Payment = () => {
                 </div>
                 {paymentMethod === 'mbway' && (
                   <div className="ml-8 flex items-center gap-3">
-                    <span className="text-sm text-muted-foreground">Insira o numero</span>
+                    <span className="text-sm text-muted-foreground">Para o número</span>
                     <div className="flex items-center gap-1 bg-muted/50 px-3 py-1.5 rounded-md">
                       <span className="font-mono text-sm font-medium">{MBWAY_PHONE}</span>
                       <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => copyToClipboard(MBWAY_PHONE, 'Número MB Way')}>
