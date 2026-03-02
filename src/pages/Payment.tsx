@@ -833,9 +833,14 @@ const Payment = () => {
 
                 {/* Points reward info for Mix & Master services */}
                 {(service === 'mixmaster' || (service === 'booking' && option === 'mix-master')) && (
-                  <p className="text-sm font-medium text-orange-500 text-center pt-1">
-                    Ao efetuares esta reserva ganhas 1500💎
-                  </p>
+                  <div className="mt-3 rounded-lg bg-blue-600 px-4 py-2.5 text-center">
+                    <p className="text-sm font-medium text-white">
+                      Ao efetuares esta reserva ganhas
+                    </p>
+                    <p className="text-sm font-bold text-white">
+                      1500 💎
+                    </p>
+                  </div>
                 )}
               </>
             )}
