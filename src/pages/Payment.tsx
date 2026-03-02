@@ -942,50 +942,6 @@ const Payment = () => {
             </ol>
           </div>
 
-          {/* Disclaimer */}
-          {service !== 'mixmaster' && (
-          <div className="p-4 bg-muted/50 rounded-lg border border-border">
-            <p className="text-sm text-muted-foreground leading-relaxed space-y-1">
-              <span className="block">O sinal confirma a tua reserva. Cancelamentos com menos de 72 horas de antecedência ou No-Show implicam a retenção do sinal (15€). Reagendamentos até 72 horas antes são gratuitos.</span>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <button className="text-primary hover:underline font-medium block mt-1">
-                    Consulta os termos completos ▸
-                  </button>
-                </AlertDialogTrigger>
-                <AlertDialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Política de Sinais e Cancelamento</AlertDialogTitle>
-                    <AlertDialogDescription asChild>
-                      <div className="space-y-4 text-sm text-foreground">
-                        <p>O pagamento de 15€ serve como sinal/garantia para a reserva da sessão.</p>
-                        
-                        <p>Reagendamento gratuito até 72 horas antes do início da sessão.</p>
-                        
-                        <p>Cancelamentos até 72 horas antes serão reembolsados integralmente.</p>
-                        
-                        <p>Cancelamentos com menos de 72 horas de antecedência ou No-Show implicam a retenção do sinal (15€).</p>
-                        
-                        <p>Em caso de retenção do sinal, o cliente será notificado por chat da app e o valor retido será reconhecido contabilisticamente como receita.</p>
-                        
-                        <p>Força maior (doenças comprovadas, condições de segurança) será avaliada caso a caso e pode levar a reembolso ou reagendamento sem penalização.</p>
-                        
-                        <p className="font-medium">Para qualquer disputa, contacte ghostwayne777@hotmail.com ou chat da app.</p>
-                      </div>
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <div className="flex justify-end mt-4">
-                    <AlertDialogTrigger asChild>
-                      <Button className="bg-primary hover:bg-primary/90">
-                        Compreendi
-                      </Button>
-                    </AlertDialogTrigger>
-                  </div>
-                </AlertDialogContent>
-              </AlertDialog>
-            </p>
-          </div>
-          )}
 
           {/* Terms and Conditions Checkbox */}
           <div className="flex items-start space-x-2 pt-2">
@@ -1010,23 +966,30 @@ const Payment = () => {
                 </AlertDialogTrigger>
                 <AlertDialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Política de Sinais e Cancelamento</AlertDialogTitle>
+                    <AlertDialogTitle>{service === 'mixmaster' ? 'Termos do Serviço Mix & Master' : 'Política de Sinais e Cancelamento'}</AlertDialogTitle>
                     <AlertDialogDescription asChild>
-                      <div className="space-y-4 text-sm text-foreground">
-                        <p>O pagamento de 15€ serve como sinal/garantia para a reserva da sessão.</p>
-                        
-                        <p>Reagendamento gratuito até 72 horas antes do início da sessão.</p>
-                        
-                        <p>Cancelamentos até 72 horas antes serão reembolsados integralmente.</p>
-                        
-                        <p>Cancelamentos com menos de 72 horas de antecedência ou No-Show implicam a retenção do sinal (15€).</p>
-                        
-                        <p>Em caso de retenção do sinal, o cliente será notificado por chat da app e o valor retido será reconhecido contabilisticamente como receita.</p>
-                        
-                        <p>Força maior (doenças comprovadas, condições de segurança) será avaliada caso a caso e pode levar a reembolso ou reagendamento sem penalização.</p>
-                        
-                        <p className="font-medium">Para qualquer disputa, contacte ghostwayne777@hotmail.com ou chat da app.</p>
-                      </div>
+                      {service === 'mixmaster' ? (
+                        <div className="space-y-3 text-sm text-foreground">
+                          <p>O pagamento de 40€ corresponde ao valor do serviço de mixagem/masterização.</p>
+                          <p>O início do trabalho técnico ocorre após confirmação de pagamento e receção dos ficheiros finais do cliente.</p>
+                          <p>O serviço inclui até 5 revisões incluídas no valor acordado. Revisões adicionais poderão ter custo extra.</p>
+                          <p>Entende-se como revisão alterações criativas ou técnicas ao projeto original entregue. O envio de novos ficheiros, alterações estruturais significativas ou novas gravações não são consideradas revisões e poderão implicar novo orçamento, salvo substituições pontuais de vozes principais sem alteração estrutural da música.</p>
+                          <p>Após o início do trabalho técnico, não é possível solicitar reembolso.</p>
+                          <p>O serviço possui natureza artística e técnica. Diferenças de gosto pessoal não constituem fundamento para reembolso.</p>
+                          <p>O prazo estimado de entrega é de 4 a 7 dias úteis, podendo variar consoante a afluência de projetos no momento da receção.</p>
+                          <p className="font-medium">Para qualquer questão ou disputa, contacte-nos através do chat da app ou por email para: ghostwayne777@hotmail.com</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-3 text-sm text-foreground">
+                          <p>O pagamento de 15€ corresponde a um sinal/garantia da reserva e será deduzido ao valor final do serviço no dia da sessão.</p>
+                          <p>Reagendamento gratuito até 72 horas antes do início da sessão.</p>
+                          <p>Cancelamentos comunicados até 72 horas antes serão reembolsados integralmente pelo mesmo método de pagamento, no prazo máximo de 5 dias úteis.</p>
+                          <p>Cancelamentos com menos de 72 horas de antecedência ou não comparência (No-Show) implicam a retenção do sinal.</p>
+                          <p>Em caso de atraso superior a 15 minutos, a sessão poderá ser reduzida ou cancelada, podendo aplicar-se a política de retenção do sinal.</p>
+                          <p>Situações de força maior (doença comprovada ou condições de segurança) serão avaliadas caso a caso e poderão dar origem a reagendamento ou reembolso sem penalização.</p>
+                          <p className="font-medium">Para qualquer questão ou disputa, contacte-nos através do chat da app ou por email para: ghostwayne777@hotmail.com</p>
+                        </div>
+                      )}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <div className="flex justify-end mt-4">
