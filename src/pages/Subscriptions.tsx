@@ -185,39 +185,30 @@ const Subscriptions = () => {
     setTempPreferences(preferences);
     setEditingPreferences(true);
   };
-  return <div className="space-y-6">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-accent accent-glow mb-2">
-          Subscrições do Estúdio
+  return <div className="space-y-4">
+      <div className="text-center mb-4">
+        <h1 className="text-xl font-bold text-foreground mb-1">
+          Planos
         </h1>
-        <p className="text-muted-foreground">
+        <p className="text-xs text-muted-foreground">
           Escolhe um plano mensal que se adapte ao teu horário criativo
         </p>
       </div>
 
       {/* Current Subscription */}
-      {userSubscription && <Card className="studio-card border-primary">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CheckCircle className="w-5 h-5 text-primary" />
-              Subscrição Atual
-            </CardTitle>
-            <CardDescription>
-              O teu plano de subscrição ativo
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+      {userSubscription && <Card className="border-primary">
+          <CardContent className="p-4">
             <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-xl font-bold text-foreground">{userSubscription.plan}</h3>
-                <p className="text-muted-foreground">{userSubscription.hours_per_month} hours per month</p>
-                <p className="text-sm text-muted-foreground">
-                  Iniciado: {format(new Date(userSubscription.start_date), 'MMM d, yyyy')}
-                </p>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-primary" />
+                <div>
+                  <h3 className="text-sm font-bold text-foreground">{userSubscription.plan}</h3>
+                  <p className="text-xs text-muted-foreground">{userSubscription.hours_per_month}h/mês · Desde {format(new Date(userSubscription.start_date), 'MMM d, yyyy')}</p>
+                </div>
               </div>
               <div className="text-right">
-                <p className="text-2xl font-bold text-primary">{formatPrice(userSubscription.discounted_price)}</p>
-                <p className="text-sm text-muted-foreground line-through">{formatPrice(userSubscription.price)}</p>
+                <p className="text-base font-bold text-primary">{formatPrice(userSubscription.discounted_price)}</p>
+                <p className="text-xs text-muted-foreground line-through">{formatPrice(userSubscription.price)}</p>
               </div>
             </div>
           </CardContent>
@@ -225,37 +216,33 @@ const Subscriptions = () => {
 
       {/* Subscription Plans */}
       {!userSubscription && <section>
-          <h2 className="text-2xl font-bold text-foreground mb-4">Planos</h2>
-          <div className="grid md:grid-cols-2 gap-6">
-            {subscriptionPlans.map(plan => <Card key={plan.id} className={`studio-card relative ${plan.popular ? 'border-primary pt-8' : ''}`}>
-                {plan.popular && <div className="sticky top-0 z-10 flex justify-center mb-2">
-                    <Badge className="bg-primary text-primary-foreground">
+          <div className="grid grid-cols-1 gap-4">
+            {subscriptionPlans.map(plan => <Card key={plan.id} className={`relative ${plan.popular ? 'border-primary' : ''}`}>
+                {plan.popular && <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+                    <Badge className="bg-primary text-primary-foreground text-xs px-2 py-0.5">
                       Mais Popular
                     </Badge>
                   </div>}
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Star className="w-5 h-5 text-primary flex-shrink-0" />
-                    {plan.name}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="text-center">
-                      <div className="flex items-center justify-center gap-2">
-                        <span className="text-3xl font-bold text-primary">{formatPrice(plan.price)}</span>
-                      </div>
-                      <p className="text-sm text-muted-foreground">por mês</p>
+                <CardContent className={`p-4 ${plan.popular ? 'pt-5' : ''}`}>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Star className="w-4 h-4 text-primary flex-shrink-0" />
+                      <span className="font-semibold text-sm">{plan.name}</span>
                     </div>
                     
-                    <ul className="space-y-3">
-                      {plan.features.map((feature, index) => <li key={index} className="flex items-start gap-2 text-sm">
-                          <CheckCircle className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                          <span className="text-muted-foreground flex-1">{feature}</span>
+                    <div className="text-center">
+                      <span className="text-2xl font-bold text-primary">{formatPrice(plan.price)}</span>
+                      <p className="text-xs text-muted-foreground">por mês</p>
+                    </div>
+                    
+                    <ul className="space-y-2">
+                      {plan.features.map((feature, index) => <li key={index} className="flex items-start gap-2">
+                          <CheckCircle className="w-3.5 h-3.5 text-primary flex-shrink-0 mt-0.5" />
+                          <span className="text-xs text-muted-foreground">{feature}</span>
                         </li>)}
                     </ul>
                     
-                    <Button className="w-full" onClick={() => handleSubscribe(plan)} disabled={loading || activePlanType === plan.planType} variant={plan.popular ? 'default' : 'outline'}>
+                    <Button className="w-full" size="sm" onClick={() => handleSubscribe(plan)} disabled={loading || activePlanType === plan.planType} variant={plan.popular ? 'default' : 'outline'}>
                       {getButtonText(plan)}
                     </Button>
                   </div>
