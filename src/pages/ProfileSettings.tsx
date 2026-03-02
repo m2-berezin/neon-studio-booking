@@ -1,36 +1,24 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, User, Mail, Phone, Key, Bell, Save, Edit3, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, User, Key, Bell, Save, Edit3, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useNotificationSettings } from '@/hooks/useNotificationSettings';
 import { supabase } from '@/integrations/supabase/client';
+
 const ProfileSettings = () => {
   const navigate = useNavigate();
-  const {
-    user,
-    profile,
-    updateProfile,
-    signOut
-  } = useAuth();
-  const {
-    toast
-  } = useToast();
+  const { user, profile, updateProfile, signOut } = useAuth();
+  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [editingProfile, setEditingProfile] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
@@ -38,340 +26,184 @@ const ProfileSettings = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   
-  // Scroll to top when page loads
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
+  useEffect(() => { window.scrollTo(0, 0); }, []);
   
-  const [formData, setFormData] = useState({
-    full_name: profile?.full_name || '',
-    phone: profile?.phone || ''
-  });
-  const [passwordData, setPasswordData] = useState({
-    newPassword: '',
-    confirmPassword: ''
-  });
-  const {
-    settings: notificationSettings,
-    toggleSetting
-  } = useNotificationSettings();
-  const [appSettings, setAppSettings] = useState({
-    darkMode: false,
-    language: 'pt'
-  });
+  const [formData, setFormData] = useState({ full_name: profile?.full_name || '', phone: profile?.phone || '' });
+  const [passwordData, setPasswordData] = useState({ newPassword: '', confirmPassword: '' });
+  const { settings: notificationSettings, toggleSetting } = useNotificationSettings();
+
   const handleProfileUpdate = async () => {
     if (!profile) return;
     setLoading(true);
     try {
-      const {
-        error
-      } = await updateProfile({
-        full_name: formData.full_name,
-        phone: formData.phone
-      });
-      if (error) {
-        throw error;
-      }
+      const { error } = await updateProfile({ full_name: formData.full_name, phone: formData.phone });
+      if (error) throw error;
       setEditingProfile(false);
-      toast({
-        title: 'Perfil Atualizado',
-        description: 'As tuas informações foram atualizadas com sucesso.'
-      });
+      toast({ title: 'Perfil Atualizado' });
     } catch (error: any) {
-      toast({
-        title: 'Erro',
-        description: error.message || 'Falha ao atualizar o perfil',
-        variant: 'destructive'
-      });
-    } finally {
-      setLoading(false);
-    }
+      toast({ title: 'Erro', description: error.message || 'Falha ao atualizar', variant: 'destructive' });
+    } finally { setLoading(false); }
   };
+
   const handlePasswordChange = async () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast({
-        title: 'Erro',
-        description: 'As passwords não coincidem.',
-        variant: 'destructive'
-      });
+      toast({ title: 'Erro', description: 'As passwords não coincidem.', variant: 'destructive' });
       return;
     }
-
     if (passwordData.newPassword.length < 6) {
-      toast({
-        title: 'Erro',
-        description: 'A password deve ter pelo menos 6 caracteres.',
-        variant: 'destructive'
-      });
+      toast({ title: 'Erro', description: 'Mínimo 6 caracteres.', variant: 'destructive' });
       return;
     }
-
     setLoading(true);
     try {
-      const { error } = await supabase.auth.updateUser({
-        password: passwordData.newPassword
-      });
-
+      const { error } = await supabase.auth.updateUser({ password: passwordData.newPassword });
       if (error) throw error;
-
       setPasswordData({ newPassword: '', confirmPassword: '' });
       setChangingPassword(false);
-      toast({
-        title: 'Password Atualizada',
-        description: 'A tua password foi alterada com sucesso.'
-      });
+      toast({ title: 'Password Atualizada' });
     } catch (error: any) {
-      toast({
-        title: 'Erro',
-        description: error.message || 'Falha ao alterar a password',
-        variant: 'destructive'
-      });
-    } finally {
-      setLoading(false);
-    }
+      toast({ title: 'Erro', description: error.message, variant: 'destructive' });
+    } finally { setLoading(false); }
   };
 
   const handleDeleteAccount = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.rpc('delete_own_account');
-
+      const { error } = await supabase.rpc('delete_own_account');
       if (error) throw error;
-
-      toast({
-        title: 'Conta Eliminada',
-        description: 'A tua conta foi eliminada permanentemente.'
-      });
-
-      // Sign out and redirect to auth page
+      toast({ title: 'Conta Eliminada' });
       await signOut();
       navigate('/auth');
     } catch (error: any) {
-      toast({
-        title: 'Erro',
-        description: error.message || 'Falha ao eliminar a conta',
-        variant: 'destructive'
-      });
-    } finally {
-      setLoading(false);
-      setShowDeleteDialog(false);
-    }
+      toast({ title: 'Erro', description: error.message, variant: 'destructive' });
+    } finally { setLoading(false); setShowDeleteDialog(false); }
   };
+
   if (!user || !profile) {
-    return <div className="flex items-center justify-center min-h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>;
+    return <div className="flex items-center justify-center min-h-64"><div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div></div>;
   }
-  return <div className="container mx-auto p-4 max-w-2xl">
-      {/* Header */}
-      <div className="mb-6">
-        <Button variant="ghost" onClick={() => navigate('/profile')} className="mb-4">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Voltar ao Perfil
+
+  return (
+    <div className="max-w-lg mx-auto space-y-4">
+      <div className="mb-2">
+        <Button variant="ghost" size="sm" onClick={() => navigate('/profile')} className="gap-1.5">
+          <ArrowLeft className="h-4 w-4" /> Voltar ao Perfil
         </Button>
-        
-        <h1 className="text-3xl font-bold text-foreground mb-2">
-          Definições
-        </h1>
-        <p className="text-muted-foreground">
-          Gere as tuas preferências e informações da conta
-        </p>
+      </div>
+      
+      <div className="mb-4">
+        <h1 className="text-xl font-bold text-foreground mb-0.5">Definições</h1>
+        <p className="text-xs text-muted-foreground">Gere as tuas preferências e conta</p>
       </div>
 
       {/* Profile Information */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <User className="h-5 w-5" />
-            Informações do Perfil
+      <Card>
+        <CardHeader className="p-4 pb-2">
+          <CardTitle className="flex items-center gap-1.5 text-sm">
+            <User className="h-4 w-4" /> Informações do Perfil
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" value={user.email} disabled className="bg-muted" />
-            <p className="text-xs text-muted-foreground">
-              O email não pode ser alterado. Contacta o suporte se necessário.
-            </p>
+        <CardContent className="p-4 pt-0 space-y-3">
+          <div className="space-y-1">
+            <Label htmlFor="email" className="text-xs">Email</Label>
+            <Input id="email" value={user.email} disabled className="bg-muted h-8 text-xs" />
+            <p className="text-xs text-muted-foreground">Não pode ser alterado.</p>
           </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="full_name">Nome Completo</Label>
-            <div className="flex gap-2">
-              <Input id="full_name" value={formData.full_name} onChange={e => setFormData(prev => ({
-              ...prev,
-              full_name: e.target.value
-            }))} disabled={!editingProfile} placeholder="O teu nome completo" />
-              {!editingProfile && <Button variant="outline" size="sm" onClick={() => setEditingProfile(true)}>
-                  <Edit3 className="h-4 w-4" />
-                </Button>}
+          <div className="space-y-1">
+            <Label htmlFor="full_name" className="text-xs">Nome Completo</Label>
+            <div className="flex gap-1.5">
+              <Input id="full_name" value={formData.full_name} onChange={e => setFormData(prev => ({ ...prev, full_name: e.target.value }))}
+                disabled={!editingProfile} placeholder="O teu nome" className="h-8 text-xs" />
+              {!editingProfile && (
+                <Button variant="outline" size="sm" onClick={() => setEditingProfile(true)} className="h-8 w-8 p-0">
+                  <Edit3 className="h-3.5 w-3.5" />
+                </Button>
+              )}
             </div>
           </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="phone">Telefone</Label>
-            <div className="flex gap-2">
-              <Input id="phone" value={formData.phone} onChange={e => setFormData(prev => ({
-              ...prev,
-              phone: e.target.value
-            }))} disabled={!editingProfile} placeholder="+351 9XX XXX XXX" />
-            </div>
+          <div className="space-y-1">
+            <Label htmlFor="phone" className="text-xs">Telefone</Label>
+            <Input id="phone" value={formData.phone} onChange={e => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+              disabled={!editingProfile} placeholder="+351 9XX XXX XXX" className="h-8 text-xs" />
           </div>
-
-          {editingProfile && <div className="flex gap-2 pt-2">
-              <Button onClick={handleProfileUpdate} disabled={loading} size="sm">
-                <Save className="h-4 w-4 mr-2" />
-                {loading ? 'A guardar...' : 'Guardar'}
+          {editingProfile && (
+            <div className="flex gap-1.5 pt-1">
+              <Button onClick={handleProfileUpdate} disabled={loading} size="sm" className="text-xs h-7">
+                <Save className="h-3.5 w-3.5 mr-1" /> {loading ? 'A guardar...' : 'Guardar'}
               </Button>
-              <Button variant="outline" onClick={() => {
-            setEditingProfile(false);
-            setFormData({
-              full_name: profile?.full_name || '',
-              phone: profile?.phone || ''
-            });
-          }} size="sm">
+              <Button variant="outline" size="sm" className="text-xs h-7" onClick={() => { setEditingProfile(false); setFormData({ full_name: profile?.full_name || '', phone: profile?.phone || '' }); }}>
                 Cancelar
               </Button>
-            </div>}
+            </div>
+          )}
         </CardContent>
       </Card>
 
-      {/* Notification Settings */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Bell className="h-5 w-5" />
-            Notificações
+      {/* Notifications */}
+      <Card>
+        <CardHeader className="p-4 pb-2">
+          <CardTitle className="flex items-center gap-1.5 text-sm">
+            <Bell className="h-4 w-4" /> Notificações
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <Label>Mensagens Novas</Label>
-              <p className="text-sm text-muted-foreground">
-                Notificações quando recebes mensagens novas
-              </p>
+        <CardContent className="p-4 pt-0 space-y-3">
+          {[
+            { key: 'newMessages' as const, label: 'Mensagens Novas', desc: 'Notificações de mensagens novas' },
+            { key: 'voucherAvailable' as const, label: 'Voucher 15€', desc: 'Quando o voucher fica disponível' },
+            { key: 'bookingReminders' as const, label: 'Lembretes de Reservas', desc: '72h antes da tua reserva' },
+          ].map(item => (
+            <div key={item.key} className="flex items-center justify-between">
+              <div>
+                <Label className="text-xs">{item.label}</Label>
+                <p className="text-xs text-muted-foreground">{item.desc}</p>
+              </div>
+              <Switch checked={notificationSettings[item.key]} onCheckedChange={() => toggleSetting(item.key)} />
             </div>
-            <Switch checked={notificationSettings.newMessages} onCheckedChange={() => toggleSetting('newMessages')} />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <Label>Voucher de 15€ Disponível</Label>
-              <p className="text-sm text-muted-foreground">
-                Notificação quando o voucher de 15€ fica disponível
-              </p>
-            </div>
-            <Switch checked={notificationSettings.voucherAvailable} onCheckedChange={() => toggleSetting('voucherAvailable')} />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <Label>Lembretes de Reservas</Label>
-              <p className="text-sm text-muted-foreground">
-                Notificação 72 horas antes da tua reserva
-              </p>
-            </div>
-            <Switch checked={notificationSettings.bookingReminders} onCheckedChange={() => toggleSetting('bookingReminders')} />
-          </div>
+          ))}
         </CardContent>
       </Card>
-
-      {/* App Preferences */}
-      
 
       {/* Security */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Key className="h-5 w-5" />
-            Segurança
+      <Card>
+        <CardHeader className="p-4 pb-2">
+          <CardTitle className="flex items-center gap-1.5 text-sm">
+            <Key className="h-4 w-4" /> Segurança
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="p-4 pt-0">
           {!changingPassword ? (
-            <Button 
-              variant="outline" 
-              onClick={() => setChangingPassword(true)} 
-              className="w-full"
-            >
-              Alterar Password
-            </Button>
+            <Button variant="outline" onClick={() => setChangingPassword(true)} className="w-full text-xs h-8">Alterar Password</Button>
           ) : (
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="newPassword">Nova Password</Label>
+            <div className="space-y-3">
+              <div className="space-y-1">
+                <Label htmlFor="newPassword" className="text-xs">Nova Password</Label>
                 <div className="relative">
-                  <Input
-                    id="newPassword"
-                    type={showNewPassword ? "text" : "password"}
-                    value={passwordData.newPassword}
+                  <Input id="newPassword" type={showNewPassword ? "text" : "password"} value={passwordData.newPassword}
                     onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
-                    placeholder="Mínimo 6 caracteres"
-                    minLength={6}
-                    className="pr-10"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                    onClick={() => setShowNewPassword(!showNewPassword)}
-                  >
-                    {showNewPassword ? (
-                      <EyeOff className="h-4 w-4 text-muted-foreground" />
-                    ) : (
-                      <Eye className="h-4 w-4 text-muted-foreground" />
-                    )}
+                    placeholder="Mínimo 6 caracteres" className="pr-9 h-8 text-xs" />
+                  <Button type="button" variant="ghost" size="sm" className="absolute right-0 top-0 h-full px-2 hover:bg-transparent"
+                    onClick={() => setShowNewPassword(!showNewPassword)}>
+                    {showNewPassword ? <EyeOff className="h-3.5 w-3.5 text-muted-foreground" /> : <Eye className="h-3.5 w-3.5 text-muted-foreground" />}
                   </Button>
                 </div>
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirmar Password</Label>
+              <div className="space-y-1">
+                <Label htmlFor="confirmPassword" className="text-xs">Confirmar Password</Label>
                 <div className="relative">
-                  <Input
-                    id="confirmPassword"
-                    type={showConfirmPassword ? "text" : "password"}
-                    value={passwordData.confirmPassword}
+                  <Input id="confirmPassword" type={showConfirmPassword ? "text" : "password"} value={passwordData.confirmPassword}
                     onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                    placeholder="Repete a nova password"
-                    minLength={6}
-                    className="pr-10"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  >
-                    {showConfirmPassword ? (
-                      <EyeOff className="h-4 w-4 text-muted-foreground" />
-                    ) : (
-                      <Eye className="h-4 w-4 text-muted-foreground" />
-                    )}
+                    placeholder="Repete a password" className="pr-9 h-8 text-xs" />
+                  <Button type="button" variant="ghost" size="sm" className="absolute right-0 top-0 h-full px-2 hover:bg-transparent"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+                    {showConfirmPassword ? <EyeOff className="h-3.5 w-3.5 text-muted-foreground" /> : <Eye className="h-3.5 w-3.5 text-muted-foreground" />}
                   </Button>
                 </div>
               </div>
-
-              <div className="flex gap-2">
-                <Button 
-                  onClick={handlePasswordChange} 
-                  disabled={loading || !passwordData.newPassword || !passwordData.confirmPassword}
-                  size="sm"
-                >
-                  <Save className="h-4 w-4 mr-2" />
-                  {loading ? 'A guardar...' : 'Guardar Nova Password'}
+              <div className="flex gap-1.5">
+                <Button onClick={handlePasswordChange} disabled={loading || !passwordData.newPassword || !passwordData.confirmPassword} size="sm" className="text-xs h-7">
+                  <Save className="h-3.5 w-3.5 mr-1" /> {loading ? 'A guardar...' : 'Guardar'}
                 </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => {
-                    setChangingPassword(false);
-                    setPasswordData({ newPassword: '', confirmPassword: '' });
-                  }}
-                  size="sm"
-                >
+                <Button variant="outline" size="sm" className="text-xs h-7" onClick={() => { setChangingPassword(false); setPasswordData({ newPassword: '', confirmPassword: '' }); }}>
                   Cancelar
                 </Button>
               </div>
@@ -380,58 +212,37 @@ const ProfileSettings = () => {
         </CardContent>
       </Card>
 
-      {/* Account Actions */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="text-destructive">Zona de Perigo</CardTitle>
+      {/* Danger Zone */}
+      <Card>
+        <CardHeader className="p-4 pb-2">
+          <CardTitle className="text-sm text-destructive">Zona de Perigo</CardTitle>
         </CardHeader>
-        <CardContent>
-          <Button 
-            variant="destructive" 
-            onClick={() => setShowDeleteDialog(true)} 
-            className="w-full"
-            disabled={loading}
-          >
+        <CardContent className="p-4 pt-0">
+          <Button variant="destructive" onClick={() => setShowDeleteDialog(true)} className="w-full text-xs h-8" disabled={loading}>
             Apagar Conta
           </Button>
-          <p className="text-xs text-muted-foreground mt-2">
-            Esta ação é irreversível. Todos os dados serão permanentemente removidos.
-          </p>
+          <p className="text-xs text-muted-foreground mt-1.5">Ação irreversível. Todos os dados serão removidos.</p>
         </CardContent>
       </Card>
 
-      {/* Delete Account Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Tens a certeza absoluta?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta ação não pode ser desfeita. Isto irá eliminar permanentemente a tua conta
-              e remover todos os teus dados dos nossos servidores, incluindo:
-              <ul className="list-disc list-inside mt-2 space-y-1">
-                <li>Todas as tuas reservas</li>
-                <li>Todos os teus projetos</li>
-                <li>Todas as tuas mensagens</li>
-                <li>Todos os teus pontos e recompensas</li>
-                <li>A tua subscrição (se ativa)</li>
-              </ul>
-              <p className="mt-3 font-semibold">
-                Depois de eliminar a conta, poderás criar uma nova com as mesmas credenciais.
-              </p>
+            <AlertDialogTitle className="text-base">Tens a certeza absoluta?</AlertDialogTitle>
+            <AlertDialogDescription className="text-sm">
+              Isto irá eliminar permanentemente a tua conta e todos os dados.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={loading}>Cancelar</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDeleteAccount}
-              disabled={loading}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
+            <AlertDialogAction onClick={handleDeleteAccount} disabled={loading} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
               {loading ? 'A eliminar...' : 'Sim, eliminar conta'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>;
+    </div>
+  );
 };
+
 export default ProfileSettings;

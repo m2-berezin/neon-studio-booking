@@ -2,11 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { MapPin, Clock, Phone, MessageCircle, ExternalLink, AlertTriangle, CheckCircle, Calendar, Music, Headphones, Mic, Settings, ArrowLeft, Instagram, Mail } from 'lucide-react';
+import { MapPin, Clock, MessageCircle, AlertTriangle, CheckCircle, Calendar, Mic, Headphones, Settings, ArrowLeft, Instagram, Mail } from 'lucide-react';
 import StudioGallery from '@/components/StudioGallery';
 
 const StudioInfo = () => {
@@ -15,341 +14,218 @@ const StudioInfo = () => {
   const [faqOpen, setFaqOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
   
-  // Scroll to top when page loads
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
+  useEffect(() => { window.scrollTo(0, 0); }, []);
   
   const whatsappNumber = "+351934941263";
   const studioLocation = "Quinta do Conde";
   const whatsappLink = `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}?text=Boas, estou com problemas na app, podes ajudar me?`;
-  const houseRules = [{
-    icon: <Clock className="h-5 w-5" />,
-    title: "Pontualidade",
-    description: "Chega a horas. Atrasos podem resultar em sessões encurtadas."
-  }, {
-    icon: <Settings className="h-5 w-5" />,
-    title: "PROIBIDO COMER",
-    description: "Comida não é permitida no estúdio. É permitido fumar."
-  }, {
-    icon: <Mic className="h-5 w-5" />,
-    title: "Conduta Profissional",
-    description: "Mantém uma atmosfera profissional. Comportamento disruptivo não será tolerado."
-  }, {
-    icon: <Headphones className="h-5 w-5" />,
-    title: "Acompanhamento",
-    description: "Apenas são permitidas mais 3 pessoas no estúdio para além do artista."
-  }];
-  const prepChecklist = [{
-    category: "Before You Arrive",
-    items: ["Confirm your session time 24 hours in advance", "Prepare your tracks/stems in the requested format", "Bring reference tracks for mixing/mastering", "Write down specific notes or feedback for the engineer"]
-  }, {
-    category: "What to Bring",
-    items: ["Valid ID for entry", "USB drive or external hard drive", "Your own headphones (optional but recommended)", "Lyric sheets or chord progressions", "Any specific plugins or software requirements"]
-  }, {
-    category: "Technical Prep",
-    items: ["Ensure all files are properly labeled", "Audio files should be in 24-bit/48kHz or higher", "Remove any limiting or heavy compression from stems", "Organize tracks by instrument/element"]
-  }];
-  return <div className="container mx-auto p-6 max-w-4xl">
-      <div className="mb-4">
-        <Button variant="ghost" onClick={() => navigate('/?tab=7')} className="gap-2">
+
+  const houseRules = [
+    { icon: <Clock className="h-4 w-4" />, title: "Pontualidade", description: "Chega a horas. Atrasos podem resultar em sessões encurtadas." },
+    { icon: <Settings className="h-4 w-4" />, title: "PROIBIDO COMER", description: "Comida não é permitida no estúdio. É permitido fumar." },
+    { icon: <Mic className="h-4 w-4" />, title: "Conduta Profissional", description: "Mantém uma atmosfera profissional. Comportamento disruptivo não será tolerado." },
+    { icon: <Headphones className="h-4 w-4" />, title: "Acompanhamento", description: "Apenas são permitidas mais 3 pessoas no estúdio para além do artista." },
+  ];
+
+  return (
+    <div className="space-y-4 max-w-4xl mx-auto">
+      <div className="mb-2">
+        <Button variant="ghost" size="sm" onClick={() => navigate('/?tab=7')} className="gap-1.5">
           <ArrowLeft className="h-4 w-4" />
           Voltar
         </Button>
       </div>
-      
 
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Location */}
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <MapPin className="h-5 w-5 text-primary" />
+          <CardHeader className="p-4 pb-2">
+            <CardTitle className="flex items-center gap-2 text-sm">
+              <MapPin className="h-4 w-4 text-primary" />
               Localização
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="p-4 pt-0 space-y-3">
             <div>
-              <p className="text-foreground font-medium mb-2">{studioLocation}</p>
-              <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="text-xs text-blue-700">
-                  Morada exata será disponibilizada após pagamento da sessão
-                </p>
+              <p className="text-sm font-medium text-foreground mb-1.5">{studioLocation}</p>
+              <div className="p-2 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-xs text-blue-700">Morada exata disponibilizada após pagamento</p>
               </div>
             </div>
-            
             <Separator />
-            
             <div>
-              <h4 className="font-medium mb-2">Horários do Estúdio</h4>
-              <div className="space-y-1 text-sm">
-                <div className="flex justify-between">
-                  <span>Todos os dias:</span>
-                  <span>10:00 - 22:00</span>
-                </div>
+              <h4 className="font-medium text-sm mb-1">Horários</h4>
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>Todos os dias:</span>
+                <span>10:00 - 22:00</span>
               </div>
             </div>
-
             <Separator />
-
             <StudioGallery />
-
           </CardContent>
         </Card>
 
         {/* Cancellation Policy */}
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-primary" />
+          <CardHeader className="p-4 pb-2">
+            <CardTitle className="flex items-center gap-2 text-sm">
+              <Calendar className="h-4 w-4 text-primary" />
               Política de Cancelamento
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-3">
+          <CardContent className="p-4 pt-0 space-y-3">
+            <div className="space-y-2">
               <div className="flex items-start gap-2">
-                <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="font-medium text-sm">3+ Dias de Antecedência</p>
+                  <p className="font-medium text-xs">3+ Dias de Antecedência</p>
                   <p className="text-xs text-muted-foreground">Reagendamento sem custos extras ou reembolso total</p>
                 </div>
               </div>
-              
               <div className="flex items-start gap-2">
-                <AlertTriangle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
+                <AlertTriangle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="font-medium text-sm">Menos de 3 Dias</p>
-                  <p className="text-xs text-muted-foreground">O valor do sinal não é reembolsável. Reagendamento sob consulta. Contacta o Ghost pelo chat da app.</p>
+                  <p className="font-medium text-xs">Menos de 3 Dias</p>
+                  <p className="text-xs text-muted-foreground">Sinal não reembolsável. Reagendamento sob consulta.</p>
                 </div>
               </div>
-
-              <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <h5 className="font-medium text-blue-800 text-sm mb-1">Política de Reservas</h5>
-                <p className="text-xs text-blue-700">
-                  Sinal de 15€ obrigatório para reserva de sessão.
-                </p>
+              <div className="p-2 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="font-medium text-blue-800 text-xs mb-0.5">Política de Reservas</p>
+                <p className="text-xs text-blue-700">Sinal de 15€ obrigatório para reserva de sessão.</p>
               </div>
             </div>
-            
             <Separator />
-            
             <div>
-              <h4 className="font-medium mb-2">Política de Não Comparência</h4>
-              <p className="text-sm text-muted-foreground">Cancelamentos com menos de 72 horas de antecedência ou No-Show implicam a retenção do sinal (15€).</p>
+              <h4 className="font-medium text-xs mb-1">Política de Não Comparência</h4>
+              <p className="text-xs text-muted-foreground">Cancelamentos &lt;72h ou No-Show implicam retenção do sinal (15€).</p>
             </div>
-
             <div>
-              <h4 className="font-medium mb-2">Situações de Emergência</h4>
-              <p className="text-sm text-muted-foreground">
-                Em caso de emergências contacta imediatamente. Consideração caso a caso.
-              </p>
+              <h4 className="font-medium text-xs mb-1">Emergências</h4>
+              <p className="text-xs text-muted-foreground">Contacta imediatamente. Consideração caso a caso.</p>
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* House Rules */}
-      <Card className="mt-8">
-        <CardHeader>
-          <CardTitle>Regras do Estúdio</CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Segue estas regras para garantir um ambiente profissional e produtivo para todos.
-          </p>
+      <Card>
+        <CardHeader className="p-4 pb-2">
+          <CardTitle className="text-sm">Regras do Estúdio</CardTitle>
+          <p className="text-xs text-muted-foreground">Segue estas regras para um ambiente profissional.</p>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {houseRules.map((rule, index) => <div key={index} className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
-                <div className="text-primary mt-1">
-                  {rule.icon}
-                </div>
+        <CardContent className="p-4 pt-0">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            {houseRules.map((rule, index) => (
+              <div key={index} className="flex items-start gap-2 p-2.5 rounded-lg bg-muted/30">
+                <div className="text-primary mt-0.5">{rule.icon}</div>
                 <div>
-                  <h4 className="font-medium text-sm mb-1">{rule.title}</h4>
+                  <h4 className="font-medium text-xs mb-0.5">{rule.title}</h4>
                   <p className="text-xs text-muted-foreground">{rule.description}</p>
                 </div>
-              </div>)}
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>
 
-
       {/* Footer Links */}
-      <div className="mt-12 pb-6 text-center border-t pt-6">
-        <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-          <button 
-            onClick={() => setAboutOpen(true)}
-            className="hover:text-foreground transition-colors hover:underline"
-          >
-            Sobre
-          </button>
+      <div className="py-4 text-center border-t">
+        <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+          <button onClick={() => setAboutOpen(true)} className="hover:text-foreground transition-colors hover:underline">Sobre</button>
           <span>/</span>
-          <button 
-            onClick={() => setFaqOpen(true)}
-            className="hover:text-foreground transition-colors hover:underline"
-          >
-            FAQ's
-          </button>
+          <button onClick={() => setFaqOpen(true)} className="hover:text-foreground transition-colors hover:underline">FAQ's</button>
           <span>/</span>
-          <button 
-            onClick={() => setContactOpen(true)}
-            className="hover:text-foreground transition-colors hover:underline"
-          >
-            Contactos
-          </button>
+          <button onClick={() => setContactOpen(true)} className="hover:text-foreground transition-colors hover:underline">Contactos</button>
         </div>
       </div>
 
       {/* Sobre Dialog */}
       <Dialog open={aboutOpen} onOpenChange={setAboutOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Sobre 7T7Studios</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <p className="text-foreground leading-relaxed">
-              7T7Studios foi criada por <span className="font-semibold">Ghost Wayne</span>. Um rapper, produtor, 
-              engenheiro de som, compositor, que dedicou a sua vida a aperfeiçoar a sua arte.
-            </p>
-            <p className="text-foreground leading-relaxed">
-              Agora com o seu espaço, permite-nos criar a nossa música, e dispõe do seu conhecimento 
-              adquirido ao longo do seu trajeto profissional/pessoal, para nos ajudar a alcançar os nossos objetivos.
-            </p>
-            <p className="text-foreground leading-relaxed">
-              Sabe mais sobre Ghost Wayne e segue nas redes sociais <span className="font-semibold">@ghostwayne_</span>
-            </p>
-            <div className="pt-2">
-              <Button 
-                onClick={() => window.open('https://www.instagram.com/ghostwayne_', '_blank')}
-                className="gap-2"
-              >
-                <Instagram className="h-4 w-4" />
-                Seguir @ghostwayne_
-              </Button>
-            </div>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle className="text-base">Sobre 7T7Studios</DialogTitle></DialogHeader>
+          <div className="space-y-3 py-2 text-sm text-foreground leading-relaxed">
+            <p>7T7Studios foi criada por <span className="font-semibold">Ghost Wayne</span>. Um rapper, produtor, engenheiro de som, compositor, que dedicou a sua vida a aperfeiçoar a sua arte.</p>
+            <p>Agora com o seu espaço, permite-nos criar a nossa música, e dispõe do seu conhecimento para nos ajudar a alcançar os nossos objetivos.</p>
+            <p>Sabe mais sobre Ghost Wayne <span className="font-semibold">@ghostwayne_</span></p>
+            <Button size="sm" onClick={() => window.open('https://www.instagram.com/ghostwayne_', '_blank')} className="gap-1.5">
+              <Instagram className="h-3.5 w-3.5" />
+              Seguir @ghostwayne_
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
 
       {/* FAQ's Dialog */}
       <Dialog open={faqOpen} onOpenChange={setFaqOpen}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>FAQ's</DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
-            <Accordion type="single" collapsible className="w-full">
-              <AccordionItem value="item-1">
-                <AccordionTrigger className="text-left text-[0.938rem]">Fiz uma reserva, e agora?</AccordionTrigger>
-                <AccordionContent>
-                  Todas as reservas dependem da confirmação de pagamento. Na tua tab Projetos, tens informação sobre as sessões confirmadas, e as sessões que aguardam confirmação. Serás notificado quando a sessão for aceite/recusada pelo Ghost.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-2">
-                <AccordionTrigger className="text-left text-[0.938rem]">A minha sessão foi recusada, porquê?</AccordionTrigger>
-                <AccordionContent>
-                  Se a tua sessão foi recusada não foi um erro. Experimenta marcar para outra hora nesse dia, ou até mesmo, um outro dia. Se o problema persistir, contacta o Ghost pelo chat da app!
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-3">
-                <AccordionTrigger className="text-left text-[0.938rem]">A reserva foi recusada mas eu já paguei o sinal, e agora?</AccordionTrigger>
-                <AccordionContent>
-                  Experimenta marcar para outro dia/hora, clica em já paguei (pois o valor do sinal já está pago), e aguarda confirmação. Caso não tenciones reagendar, envia mensagem ao Ghost pelo chat da app a pedir o reembolso.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-4">
-                <AccordionTrigger className="text-left text-[0.938rem]">Métodos de Pagamento?</AccordionTrigger>
-                <AccordionContent>
-                  Para pagamento do sinal aceitamos pagamentos através de: MB WAY / Revolut / Transferência bancária. Paypal / Crypto também são aceites, envia mensagem ao Ghost no chat da app. O valor restante é pago no dia da sessão, preferencialmente a dinheiro. Caso não seja possível, utiliza um dos métodos anteriores.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-5">
-                <AccordionTrigger className="text-left text-[0.938rem]">Enviei o meu projeto para Mix&Master e esqueci me de uns ficheiros, e agora?</AccordionTrigger>
-                <AccordionContent>
-                  Envia mensagem no chat da app ao Ghost a explicar o sucedido. Envia juntamente o link para download com o que faltava.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-6">
-                <AccordionTrigger className="text-left text-[0.938rem]">Pretendo gravar um Cover, o valor é o mesmo?</AccordionTrigger>
-                <AccordionContent>
-                  Para covers, marca sessão apenas para Captação, com o número de horas que achares necessário. Dependendo do conceito/duração do cover, o valor da Mix&Master é ajustado. (em média ronda os 20€)
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-7">
-                <AccordionTrigger className="text-left text-[0.938rem]">Posso levar guitarra para gravar e cantar por cima?</AccordionTrigger>
-                <AccordionContent>
-                  Sim podes, reserva a tua sessão e após confirmação envia mensagem ao Ghost no chat da app a falar um pouco sobre o teu projeto para ele ter tudo pronto para quando chegares! Atenção: o estúdio dispõe apenas de interface de áudio, não tem amplificador/pedais. Nestes casos, são utilizados plugins para emular os efeitos pretendidos.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-8">
-                <AccordionTrigger className="text-left text-[0.938rem]">Somos 2 pessoas no projeto, o valor é o mesmo?</AccordionTrigger>
-                <AccordionContent>
-                  Sim, o valor é igual. Atenção ao número de horas de captação, analisem se 3h para 2 pessoas é suficiente. Caso precisem de mais, reservem apenas sessão de Captação com o número de horas pretendidas, e depois a Mix&Master é cobrada à parte (40€).
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-9">
-                <AccordionTrigger className="text-left text-[0.938rem]">Posso levar videomaker para fazer um vlog? / Posso fazer videoclip no estúdio?</AccordionTrigger>
-                <AccordionContent>
-                  Sim, dependendo do conceito e número de pessoas, podes agendar uma "sessão" com esse objetivo. Envia mensagem ao Ghost no chat da app ANTES DE RESERVAR A SESSÂO para falarem sobre os detalhes.
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          </div>
+        <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+          <DialogHeader><DialogTitle className="text-base">FAQ's</DialogTitle></DialogHeader>
+          <Accordion type="single" collapsible className="w-full">
+            <AccordionItem value="item-1">
+              <AccordionTrigger className="text-left text-xs">Fiz uma reserva, e agora?</AccordionTrigger>
+              <AccordionContent className="text-xs">Todas as reservas dependem da confirmação de pagamento. Na tua tab Projetos, tens informação sobre as sessões. Serás notificado quando aceite/recusada.</AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-2">
+              <AccordionTrigger className="text-left text-xs">A minha sessão foi recusada, porquê?</AccordionTrigger>
+              <AccordionContent className="text-xs">Experimenta marcar para outra hora/dia. Se persistir, contacta o Ghost pelo chat da app!</AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-3">
+              <AccordionTrigger className="text-left text-xs">Reserva recusada mas já paguei o sinal?</AccordionTrigger>
+              <AccordionContent className="text-xs">Reagenda e clica "já paguei". Caso não tenciones reagendar, pede reembolso pelo chat.</AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-4">
+              <AccordionTrigger className="text-left text-xs">Métodos de Pagamento?</AccordionTrigger>
+              <AccordionContent className="text-xs">MB WAY / Revolut / Transferência bancária. Paypal / Crypto via chat. Restante pago no dia, preferencialmente a dinheiro.</AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-5">
+              <AccordionTrigger className="text-left text-xs">Esqueci ficheiros no Mix&Master?</AccordionTrigger>
+              <AccordionContent className="text-xs">Envia mensagem no chat com o link do que faltava.</AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-6">
+              <AccordionTrigger className="text-left text-xs">Gravar um Cover, valor é o mesmo?</AccordionTrigger>
+              <AccordionContent className="text-xs">Marca apenas Captação. Mix&Master ajustada ao conceito (≈20€).</AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-7">
+              <AccordionTrigger className="text-left text-xs">Posso levar guitarra?</AccordionTrigger>
+              <AccordionContent className="text-xs">Sim! Envia mensagem ao Ghost após confirmação. O estúdio usa plugins para efeitos.</AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-8">
+              <AccordionTrigger className="text-left text-xs">Somos 2 pessoas, valor é o mesmo?</AccordionTrigger>
+              <AccordionContent className="text-xs">Sim. Avaliem se 3h para 2 é suficiente. Senão, reservem mais horas e Mix&Master à parte (40€).</AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-9">
+              <AccordionTrigger className="text-left text-xs">Posso levar videomaker/fazer videoclip?</AccordionTrigger>
+              <AccordionContent className="text-xs">Sim, dependendo do conceito. Envia mensagem ao Ghost ANTES de reservar.</AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </DialogContent>
       </Dialog>
 
       {/* Contactos Dialog */}
       <Dialog open={contactOpen} onOpenChange={setContactOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Contactos</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-6 py-4">
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle className="text-base">Contactos</DialogTitle></DialogHeader>
+          <div className="space-y-4 py-2">
             <div>
-              <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2">
-                <MessageCircle className="h-5 w-5 text-green-600" />
-                WhatsApp
+              <h4 className="font-semibold text-sm text-foreground mb-1.5 flex items-center gap-1.5">
+                <MessageCircle className="h-4 w-4 text-green-600" /> WhatsApp
               </h4>
-              <p className="text-muted-foreground mb-3 text-sm">
-                Contacta diretamente via WhatsApp <strong>caso haja algum problema com o chat da app</strong>.
-              </p>
-              <Button 
-                onClick={() => window.open(whatsappLink, '_blank')}
-                className="border-green-600 text-green-600 hover:bg-green-50"
-                variant="outline"
-              >
-                <MessageCircle className="h-4 w-4 mr-2" />
-                Abrir WhatsApp
+              <p className="text-xs text-muted-foreground mb-2">Contacta via WhatsApp caso haja problema com o chat.</p>
+              <Button size="sm" onClick={() => window.open(whatsappLink, '_blank')} className="border-green-600 text-green-600 hover:bg-green-50" variant="outline">
+                <MessageCircle className="h-3.5 w-3.5 mr-1.5" /> Abrir WhatsApp
               </Button>
             </div>
-
             <Separator />
-
             <div>
-              <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2">
-                <Mail className="h-5 w-5 text-primary" />
-                Email
+              <h4 className="font-semibold text-sm text-foreground mb-1.5 flex items-center gap-1.5">
+                <Mail className="h-4 w-4 text-primary" /> Email
               </h4>
-              <p className="text-muted-foreground mb-3 text-sm">
-                Envia um email para questões mais detalhadas.
-              </p>
-              <a 
-                href="mailto:ghostwayne777@hotmail.com"
-                className="text-primary hover:underline font-medium"
-              >
-                ghostwayne777@hotmail.com
-              </a>
+              <a href="mailto:ghostwayne777@hotmail.com" className="text-xs text-primary hover:underline font-medium">ghostwayne777@hotmail.com</a>
             </div>
           </div>
         </DialogContent>
       </Dialog>
-    </div>;
+    </div>
+  );
 };
+
 export default StudioInfo;
