@@ -274,7 +274,12 @@ const MixMaster = () => {
       {!isLoyaltyOffer && !isPlan180DayOffer && (
         <div className="flex items-center justify-center gap-4 mb-4 text-sm">
           <span className="text-muted-foreground">{formatPrice(40)} sem subscrição</span>
-          <span className="text-primary font-semibold">{formatPrice(34)} com subscrição</span>
+          <span 
+            className="text-primary font-semibold cursor-pointer hover:underline transition-all"
+            onClick={() => navigate('/subscriptions')}
+          >
+            {formatPrice(34)} com subscrição →
+          </span>
         </div>
       )}
 
