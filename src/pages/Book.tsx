@@ -736,40 +736,39 @@ const Book = () => {
                 <Card
                   key={service.id}
                   className={cn(
-                    "p-4 transition-shadow",
-                    isSelected && isCaptacao ? "border-primary" : "cursor-pointer hover:shadow-md"
+                    "p-3 transition-all",
+                    isSelected && isCaptacao ? "border-primary ring-1 ring-primary/30" : "cursor-pointer hover:border-primary/40"
                   )}
                   onClick={() => !isSelected && handleServiceSelect(service.id)}
                 >
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-primary/10 rounded-lg">
-                          <Music className="w-5 h-5 text-primary" />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-foreground">{service.name}</h3>
-                          <p className="text-sm text-muted-foreground">{service.description}</p>
-                        </div>
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-primary/10 rounded-lg shrink-0 mt-0.5">
+                        <Music className="w-4 h-4 text-primary" />
                       </div>
-                      <div className="text-right">
-                        <div className="space-y-1">
-                          <div className="flex flex-col">
-                            <p className="text-lg font-bold">{formatPrice(currentPrice)}</p>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <h3 className="font-semibold text-sm text-foreground leading-tight">{service.name}</h3>
+                            <p className="text-xs text-muted-foreground mt-0.5">{service.description}</p>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <p className="text-base font-bold">{formatPrice(currentPrice)}</p>
                             {service.subscriptionPrice && (
-                              <p className="text-lg font-bold text-primary">{formatPrice(service.subscriptionPrice)} <span className="text-xs text-muted-foreground">(com subscrição)</span></p>
+                              <>
+                                <p className="text-sm font-bold text-primary leading-tight">{formatPrice(service.subscriptionPrice)}</p>
+                                <p className="text-[10px] text-muted-foreground">(com subscrição)</p>
+                                <p className="text-[10px] text-green-600 mt-0.5">Poupe 15%</p>
+                              </>
                             )}
                           </div>
-                          {service.subscriptionPrice && (
-                            <p className="text-xs text-green-600">Poupe 15% com subscrição</p>
-                          )}
                         </div>
                       </div>
                     </div>
 
                     {/* Hour Selector for Captacao Service */}
                     {isSelected && isCaptacao && (
-                      <div className="border-t pt-4 space-y-3">
+                      <div className="border-t pt-3 space-y-3">
                         <div className="space-y-2">
                           <label className="text-sm font-medium">Número de Horas</label>
                           <Select
