@@ -84,7 +84,7 @@ const ReferralSystem = ({ className }: ReferralSystemProps) => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-primary">
           <Users className="h-5 w-5" />
-          Convida Amigos e Ganha 10€ de Desconto!
+          Convida Amigos e Ganha 5000💎 de Desconto!
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -93,7 +93,7 @@ const ReferralSystem = ({ className }: ReferralSystemProps) => {
           <div className="flex items-center gap-2 mb-3">
             <Gift className="h-5 w-5 text-accent" />
             <span className="text-sm font-medium">
-              Tu e o teu amigo ganham 💎 2500 pontos (10€ de desconto)!
+              Tu e o teu amigo ganham 💎 5000 pontos (10€ de desconto)!
             </span>
           </div>
           

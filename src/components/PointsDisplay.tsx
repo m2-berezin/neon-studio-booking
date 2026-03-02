@@ -58,7 +58,7 @@ export const PointsDisplay = () => {
           <DialogHeader>
             <DialogTitle className="text-2xl text-center">Como ganhar 💎</DialogTitle>
             <DialogDescription className="text-center text-base pt-4">
-              Ganha 💎 a convidar amigos para a app, por cada amigo ganhas 2500💎 que equivale a 10€ de desconto em reservas/serviços!
+              Ganha 💎 a convidar amigos para a app, por cada amigo ganhas 5000💎 que equivale a 10€ de desconto em reservas/serviços!
             </DialogDescription>
           </DialogHeader>
           

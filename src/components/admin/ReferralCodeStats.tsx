@@ -263,7 +263,7 @@ const ReferralCodeStats = () => {
               Selecione quantos pontos deseja oferecer:
             </p>
             <div className="grid grid-cols-2 gap-3">
-              {[500, 1000, 1500, 2500].map((points) => (
+              {[500, 1000, 1500, 2500, 5000].map((points) => (
                 <Button
                   key={points}
                   variant="outline"

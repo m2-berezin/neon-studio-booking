@@ -138,9 +138,9 @@ const Payment = () => {
           return;
         }
         
-        // Calculate points discount (2500 points = 10€)
+        // Calculate points discount (5000 points = 10€)
         if (pointsUsedParam > 0) {
-          const pointsInEuros = (pointsUsedParam / 250); // 250 points = 1€
+          const pointsInEuros = (pointsUsedParam / 500); // 500 points = 1€
           setPointsDiscount(pointsInEuros);
         } else {
           setPointsDiscount(0);

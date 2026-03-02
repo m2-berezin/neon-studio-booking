@@ -150,7 +150,7 @@ export const useFriendCode = () => {
       }
 
       toast({
-        title: `Ganhaste ${result.points_awarded || 2500} Pontos!`,
+        title: `Ganhaste ${result.points_awarded || 5000} Pontos!`,
         description: `Código aplicado! Tens ${result.expires_in_days || 30} dias para usar os pontos (10€ de desconto).`,
       });
 
