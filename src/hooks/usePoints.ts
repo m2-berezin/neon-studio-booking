@@ -132,11 +132,11 @@ export const usePoints = () => {
   };
 
   const getPointsInEuros = (points: number) => {
-    return points / 250; // 2500 points = 10€, so 250 points = 1€
+    return points / 500; // 5000 points = 10€, so 500 points = 1€
   };
 
   const getEurosInPoints = (euros: number) => {
-    return euros * 250; // 1€ = 250 points
+    return euros * 500; // 1€ = 500 points
   };
 
   return {

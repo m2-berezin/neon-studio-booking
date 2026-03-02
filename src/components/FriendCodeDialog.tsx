@@ -63,7 +63,7 @@ export const FriendCodeDialog = () => {
         <DialogHeader>
           <DialogTitle className="text-2xl text-center">Tens um código de amigo?</DialogTitle>
           <DialogDescription className="text-center">
-            Insere aqui e ganha 💎 2500 pontos (10€ de desconto)!
+            Insere aqui e ganha 💎 5000 pontos (10€ de desconto)!
           </DialogDescription>
         </DialogHeader>
         

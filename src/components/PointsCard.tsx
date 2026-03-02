@@ -50,7 +50,7 @@ const PointsCard = () => {
           <div className="space-y-4 pt-2">
             <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg space-y-2">
               <p className="text-sm text-foreground text-center">
-                Convida amigos para a app! Por cada amigo ganhas <span className="font-semibold">2500💎</span>
+                Convida amigos para a app! Por cada amigo ganhas <span className="font-semibold">5000💎</span>
               </p>
               {myFriendCode && (
                 <div className="flex items-center gap-2 bg-background border border-border rounded-lg px-3 py-2">
