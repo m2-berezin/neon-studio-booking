@@ -135,27 +135,21 @@ export const NotificationBell = () => {
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-0" align="end">
+      <PopoverContent className="w-72 p-0" align="end">
         <Card className="border-0 shadow-none">
-          <CardHeader className="pb-3">
+          <CardHeader className="p-3 pb-2">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-lg">Notificações</CardTitle>
+              <CardTitle className="text-sm">Notificações</CardTitle>
               {unreadCount > 0 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleMarkAllAsRead}
-                  disabled={loading}
-                  className="text-xs"
-                >
-                  <CheckCheck className="h-4 w-4 mr-1" />
-                  Marcar todas como lidas
+                <Button variant="ghost" size="sm" onClick={handleMarkAllAsRead} disabled={loading} className="text-xs h-6 px-1.5">
+                  <CheckCheck className="h-3.5 w-3.5 mr-1" />
+                  Marcar lidas
                 </Button>
               )}
             </div>
             {unreadCount > 0 && (
-              <p className="text-sm text-muted-foreground">
-                {unreadCount} notificação{unreadCount !== 1 ? 'ões' : ''} não lida{unreadCount !== 1 ? 's' : ''}
+              <p className="text-xs text-muted-foreground">
+                {unreadCount} não lida{unreadCount !== 1 ? 's' : ''}
               </p>
             )}
           </CardHeader>
