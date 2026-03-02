@@ -250,177 +250,137 @@ const MixMaster = () => {
   return (
     <div className="container mx-auto p-4 max-w-4xl">
       {/* Header */}
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold text-foreground mb-2 flex items-center justify-center gap-3">
-          <Music className="h-8 w-8 text-primary" />
+      <div className="text-center mb-4">
+        <h1 className="text-2xl font-bold text-foreground mb-1 flex items-center justify-center gap-2">
+          <Music className="h-6 w-6 text-primary" />
           Mix & Master
         </h1>
-        <p className="text-muted-foreground text-lg">
+        <p className="text-sm text-muted-foreground">
           Serviço profissional de mistura e masterização
         </p>
         {isLoyaltyOffer && (
-          <Badge className="mt-4 text-lg px-4 py-2 bg-primary/20 text-primary border-primary">
-            🎁 Oferta de Fidelidade Ativada - Mix&Master Grátis!
+          <Badge className="mt-3 text-sm px-3 py-1 bg-primary/20 text-primary border-primary">
+            🎁 Oferta de Fidelidade - Mix&Master Grátis!
           </Badge>
         )}
         {isPlan180DayOffer && (
-          <Badge className="mt-4 text-lg px-4 py-2 bg-primary/20 text-primary border-primary">
+          <Badge className="mt-3 text-sm px-3 py-1 bg-primary/20 text-primary border-primary">
             🎁 Oferta Plano S (180 dias) - Mix&Master Grátis!
           </Badge>
         )}
       </div>
 
-      {/* Pricing Options */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Escolhe a Tua Opção</CardTitle>
+      {/* Pricing Info - compact inline */}
+      {!isLoyaltyOffer && !isPlan180DayOffer && (
+        <div className="flex items-center justify-center gap-4 mb-4 text-sm">
+          <span className="text-muted-foreground">{formatPrice(40)} sem subscrição</span>
+          <span className="text-primary font-semibold">{formatPrice(34)} com subscrição</span>
+        </div>
+      )}
+
+      {/* Subscription Discount Info */}
+      {hasSubscription && subscriptionDiscountPercent > 0 && !isLoyaltyOffer && !isPlan180DayOffer && (
+        <div className="bg-primary/5 border border-primary/20 rounded-lg p-2.5 mb-4 text-center">
+          <p className="text-xs text-muted-foreground">
+            {subscriptionDiscountPercent === 10 
+              ? '10% desconto no primeiro mês' 
+              : '15% desconto com subscrição ativa'}
+          </p>
+        </div>
+      )}
+
+      {/* File Requirements */}
+      <Card className="mb-4">
+        <CardHeader className="pb-2 pt-4 px-4">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <FileAudio className="h-4 w-4" />
+            Antes de Enviar
+          </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 gap-4">
-            {pricingOptions.map((option) => (
+        <CardContent className="px-4 pb-4 pt-0">
+          <div className="space-y-2">
+            {fileRequirements.map((requirement, index) => (
+              <div key={index} className="flex items-start gap-2">
+                <CheckCircle className="h-3.5 w-3.5 text-green-500 mt-0.5 flex-shrink-0" />
+                <p className="text-xs text-muted-foreground">{requirement}</p>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Delivery Method - always visible */}
+      <Card className="mb-4" id="delivery-section">
+        <CardHeader className="pb-2 pt-4 px-4">
+          <CardTitle className="text-base">Método de Entrega</CardTitle>
+        </CardHeader>
+        <CardContent className="px-4 pb-4 pt-0">
+          <div className="grid grid-cols-1 gap-3">
+            {deliveryOptions.map((option) => (
               <div
                 key={option.id}
                 onClick={() => {
-                  setSelectedOption(option.id as '1project' | '2projects');
-                  // Automatically scroll to delivery method
-                  setTimeout(() => {
-                    const deliveryElement = document.getElementById('delivery-section');
-                    if (deliveryElement) {
-                      deliveryElement.scrollIntoView({ behavior: 'smooth' });
-                    }
-                  }, 100);
+                  setDeliveryMethod(option.id as any);
+                  if (!selectedOption) setSelectedOption('1project');
                 }}
-                className={`p-4 border rounded-lg cursor-pointer transition-all ${
-                  selectedOption === option.id
+                className={`p-3 border rounded-lg cursor-pointer transition-all ${
+                  deliveryMethod === option.id
                     ? 'border-primary bg-primary/5'
                     : 'border-border hover:border-primary/50'
                 }`}
               >
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-semibold">{option.title}</h3>
-                  {selectedOption === option.id && (
-                    <CheckCircle className="h-5 w-5 text-primary" />
-                  )}
-                </div>
-                <p className="text-sm text-muted-foreground mb-3">{option.description}</p>
-                
-                <div className="space-y-2">
-                  <div className="space-y-1">
-                    <div className="text-base font-medium text-muted-foreground">{formatPrice(40)} sem subscrição</div>
-                    <div className="text-2xl font-bold text-primary">{formatPrice(34)} com subscrição</div>
+                <div className="flex items-center gap-3">
+                  <div className="text-primary">{option.icon}</div>
+                  <div className="flex-1">
+                    <h3 className="font-medium text-sm">{option.title}</h3>
+                    <p className="text-xs text-muted-foreground">{option.description}</p>
                   </div>
-                  {option.hasSubscription && (
-                    <Badge variant="secondary" className="text-xs">
-                      Com Subscrição
-                    </Badge>
+                  {deliveryMethod === option.id && (
+                    <CheckCircle className="h-4 w-4 text-primary" />
                   )}
                 </div>
               </div>
             ))}
           </div>
-          
-          {/* Subscription Discount Info */}
-          {hasSubscription && subscriptionDiscountPercent > 0 && (
-            <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
-              <p className="text-xs text-blue-800 font-medium">
-                ℹ️ {subscriptionDiscountPercent === 10 
-                  ? 'O primeiro mês tem 10% de desconto nos serviços' 
-                  : 'Desconto de 15% aplicado pela subscrição ativa'}
-              </p>
+
+          {/* Delivery Method Content */}
+          {deliveryMethod === 'link' && (
+            <div className="mt-4 space-y-3">
+              <Label htmlFor="transfer-link" className="text-sm">Link de Transferência</Label>
+              <Input
+                id="transfer-link"
+                placeholder="Cola aqui o teu link do SwissTransfer/WeTransfer"
+                value={transferLink}
+                onChange={(e) => setTransferLink(e.target.value)}
+              />
             </div>
+          )}
+
+          {deliveryMethod && (
+            <div className="mt-4">
+              <Label htmlFor="project-notes" className="text-sm">Notas do Projecto (Opcional)</Label>
+              <Textarea
+                id="project-notes"
+                placeholder="Cola aqui 1/2 links de youtube/spotify como referências para a mix."
+                value={projectNotes}
+                onChange={(e) => setProjectNotes(e.target.value)}
+                className="mt-1.5"
+                rows={3}
+              />
+            </div>
+          )}
+          
+          {deliveryMethod && (
+            <Button 
+              onClick={handleProceedToPayment}
+              className="w-full mt-4"
+            >
+              <CreditCard className="h-4 w-4 mr-2" />
+              Pagar Agora
+            </Button>
           )}
         </CardContent>
       </Card>
-
-      {/* File Requirements */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileAudio className="h-5 w-5" />
-            Antes de Enviar
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {fileRequirements.map((requirement, index) => (
-              <div key={index} className="flex items-start gap-2">
-                <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                <p className="text-sm text-muted-foreground">{requirement}</p>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Delivery Method */}
-      {selectedOption && (
-        <Card className="mb-8" id="delivery-section">
-          <CardHeader>
-            <CardTitle>Método de Entrega</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {deliveryOptions.map((option) => (
-                <div
-                  key={option.id}
-                  onClick={() => setDeliveryMethod(option.id as any)}
-                  className={`p-4 border rounded-lg cursor-pointer transition-all ${
-                    deliveryMethod === option.id
-                      ? 'border-primary bg-primary/5'
-                      : 'border-border hover:border-primary/50'
-                  }`}
-                >
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="text-primary">{option.icon}</div>
-                    <h3 className="font-semibold">{option.title}</h3>
-                    {deliveryMethod === option.id && (
-                      <CheckCircle className="h-5 w-5 text-primary ml-auto" />
-                    )}
-                  </div>
-                  <p className="text-sm text-muted-foreground">{option.description}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Delivery Method Content */}
-            {deliveryMethod === 'link' && (
-              <div className="mt-6 space-y-4">
-                <Label htmlFor="transfer-link">Link de Transferência</Label>
-                <Input
-                  id="transfer-link"
-                  placeholder="Cola aqui o teu link do SwissTransfer/WeTransfer"
-                  value={transferLink}
-                  onChange={(e) => setTransferLink(e.target.value)}
-                  className="mt-2"
-                />
-              </div>
-            )}
-
-            {deliveryMethod && (
-              <div className="mt-6">
-                <Label htmlFor="project-notes">Notas do Projecto (Opcional)</Label>
-                <Textarea
-                  id="project-notes"
-                  placeholder="Cola aqui 1/2 links de youtube/spotify como referências para a mix que estás à procura."
-                  value={projectNotes}
-                  onChange={(e) => setProjectNotes(e.target.value)}
-                  className="mt-2"
-                />
-              </div>
-            )}
-            
-            {deliveryMethod && (
-              <Button 
-                onClick={handleProceedToPayment}
-                className="w-full mt-6"
-              >
-                <CreditCard className="h-4 w-4 mr-2" />
-                Pagar Agora
-              </Button>
-            )}
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 };
