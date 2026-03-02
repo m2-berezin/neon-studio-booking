@@ -38,6 +38,7 @@ const Payment = () => {
   const [paymentMethod, setPaymentMethod] = useState<'mbway' | 'transferencia' | 'revolut'>('mbway');
   const [pointsDiscount, setPointsDiscount] = useState(0);
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [termsDialogOpen, setTermsDialogOpen] = useState(false);
   
   // Enable realtime sync
   useRealtimeSync();
@@ -950,59 +951,57 @@ const Payment = () => {
               checked={termsAccepted}
               onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
             />
-            <label
-              htmlFor="terms"
-              className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-            >
-              Li e aceito os{' '}
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <button 
-                    className="text-primary hover:underline font-medium"
-                    onClick={(e) => e.preventDefault()}
-                  >
-                    Termos de Reserva
-                  </button>
-                </AlertDialogTrigger>
-                <AlertDialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>{service === 'mixmaster' ? 'Termos do Serviço Mix & Master' : 'Política de Sinais e Cancelamento'}</AlertDialogTitle>
-                    <AlertDialogDescription asChild>
-                      {service === 'mixmaster' ? (
-                        <div className="space-y-3 text-sm text-foreground">
-                          <p>O pagamento de 40€ corresponde ao valor do serviço de mixagem/masterização.</p>
-                          <p>O início do trabalho técnico ocorre após confirmação de pagamento e receção dos ficheiros finais do cliente.</p>
-                          <p>O serviço inclui até 5 revisões incluídas no valor acordado. Revisões adicionais poderão ter custo extra.</p>
-                          <p>Entende-se como revisão alterações criativas ou técnicas ao projeto original entregue. O envio de novos ficheiros, alterações estruturais significativas ou novas gravações não são consideradas revisões e poderão implicar novo orçamento, salvo substituições pontuais de vozes principais sem alteração estrutural da música.</p>
-                          <p>Após o início do trabalho técnico, não é possível solicitar reembolso.</p>
-                          <p>O serviço possui natureza artística e técnica. Diferenças de gosto pessoal não constituem fundamento para reembolso.</p>
-                          <p>O prazo estimado de entrega é de 4 a 7 dias úteis, podendo variar consoante a afluência de projetos no momento da receção.</p>
-                          <p className="font-medium">Para qualquer questão ou disputa, contacte-nos através do chat da app ou por email para: ghostwayne777@hotmail.com</p>
-                        </div>
-                      ) : (
-                        <div className="space-y-3 text-sm text-foreground">
-                          <p>O pagamento de 15€ corresponde a um sinal/garantia da reserva e será deduzido ao valor final do serviço no dia da sessão.</p>
-                          <p>Reagendamento gratuito até 72 horas antes do início da sessão.</p>
-                          <p>Cancelamentos comunicados até 72 horas antes serão reembolsados integralmente pelo mesmo método de pagamento, no prazo máximo de 5 dias úteis.</p>
-                          <p>Cancelamentos com menos de 72 horas de antecedência ou não comparência (No-Show) implicam a retenção do sinal.</p>
-                          <p>Em caso de atraso superior a 15 minutos, a sessão poderá ser reduzida ou cancelada, podendo aplicar-se a política de retenção do sinal.</p>
-                          <p>Situações de força maior (doença comprovada ou condições de segurança) serão avaliadas caso a caso e poderão dar origem a reagendamento ou reembolso sem penalização.</p>
-                          <p className="font-medium">Para qualquer questão ou disputa, contacte-nos através do chat da app ou por email para: ghostwayne777@hotmail.com</p>
-                        </div>
-                      )}
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <div className="flex justify-end mt-4">
-                    <AlertDialogTrigger asChild>
-                      <Button className="bg-primary hover:bg-primary/90">
-                        Compreendi
-                      </Button>
-                    </AlertDialogTrigger>
-                  </div>
-                </AlertDialogContent>
-              </AlertDialog>
-            </label>
+            <span className="text-sm leading-none cursor-pointer">
+              <label htmlFor="terms">Li e aceito os </label>
+              <button 
+                type="button"
+                className="text-primary hover:underline font-medium"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setTermsDialogOpen(true);
+                }}
+              >
+                Termos de Reserva
+              </button>
+            </span>
           </div>
+
+          <AlertDialog open={termsDialogOpen} onOpenChange={setTermsDialogOpen}>
+            <AlertDialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+              <AlertDialogHeader>
+                <AlertDialogTitle>{service === 'mixmaster' ? 'Termos do Serviço Mix & Master' : 'Política de Sinais e Cancelamento'}</AlertDialogTitle>
+                <AlertDialogDescription asChild>
+                  {service === 'mixmaster' ? (
+                    <div className="space-y-3 text-sm text-foreground">
+                      <p>O pagamento de 40€ corresponde ao valor do serviço de mixagem/masterização.</p>
+                      <p>O início do trabalho técnico ocorre após confirmação de pagamento e receção dos ficheiros finais do cliente.</p>
+                      <p>O serviço inclui até 5 revisões incluídas no valor acordado. Revisões adicionais poderão ter custo extra.</p>
+                      <p>Entende-se como revisão alterações criativas ou técnicas ao projeto original entregue. O envio de novos ficheiros, alterações estruturais significativas ou novas gravações não são consideradas revisões e poderão implicar novo orçamento, salvo substituições pontuais de vozes principais sem alteração estrutural da música.</p>
+                      <p>Após o início do trabalho técnico, não é possível solicitar reembolso.</p>
+                      <p>O serviço possui natureza artística e técnica. Diferenças de gosto pessoal não constituem fundamento para reembolso.</p>
+                      <p>O prazo estimado de entrega é de 4 a 7 dias úteis, podendo variar consoante a afluência de projetos no momento da receção.</p>
+                      <p className="font-medium">Para qualquer questão ou disputa, contacte-nos através do chat da app ou por email para: ghostwayne777@hotmail.com</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3 text-sm text-foreground">
+                      <p>O pagamento de 15€ corresponde a um sinal/garantia da reserva e será deduzido ao valor final do serviço no dia da sessão.</p>
+                      <p>Reagendamento gratuito até 72 horas antes do início da sessão.</p>
+                      <p>Cancelamentos comunicados até 72 horas antes serão reembolsados integralmente pelo mesmo método de pagamento, no prazo máximo de 5 dias úteis.</p>
+                      <p>Cancelamentos com menos de 72 horas de antecedência ou não comparência (No-Show) implicam a retenção do sinal.</p>
+                      <p>Em caso de atraso superior a 15 minutos, a sessão poderá ser reduzida ou cancelada, podendo aplicar-se a política de retenção do sinal.</p>
+                      <p>Situações de força maior (doença comprovada ou condições de segurança) serão avaliadas caso a caso e poderão dar origem a reagendamento ou reembolso sem penalização.</p>
+                      <p className="font-medium">Para qualquer questão ou disputa, contacte-nos através do chat da app ou por email para: ghostwayne777@hotmail.com</p>
+                    </div>
+                  )}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <div className="flex justify-end mt-4">
+                <Button onClick={() => setTermsDialogOpen(false)} className="bg-primary hover:bg-primary/90">
+                  Compreendi
+                </Button>
+              </div>
+            </AlertDialogContent>
+          </AlertDialog>
 
           <Button 
             onClick={handlePaymentConfirmation} 
