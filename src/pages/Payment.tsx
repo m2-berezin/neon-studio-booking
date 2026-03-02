@@ -704,24 +704,24 @@ const Payment = () => {
   if (!hasRequiredParams) {
     return null;
   }
-  return <div className="container mx-auto p-4 max-w-2xl">
+  return <div className="container mx-auto px-4 py-6 max-w-lg">
       {/* Header */}
-      <div className="mb-6">
-        <Button variant="ghost" onClick={() => window.history.back()} className="mb-4">
+      <div className="mb-5">
+        <Button variant="ghost" onClick={() => window.history.back()} className="mb-3 -ml-2">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Voltar
         </Button>
         
-        <h1 className="text-3xl font-bold text-foreground mb-2">
+        <h1 className="text-2xl font-bold text-foreground mb-1">
           Finalizar Pagamento
         </h1>
-        <p className="text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           Confirma os detalhes e realiza o pagamento
         </p>
       </div>
 
       {/* Order Summary */}
-      <Card className="mb-6">
+      <Card className="mb-4">
         <CardHeader>
           <CardTitle>
             {service === 'subscription' ? `Detalhes do ${serviceTitle}` : 'Resumo do Pedido'}
@@ -830,6 +830,13 @@ const Payment = () => {
                   }
                 </span>
                 </div>
+
+                {/* Points reward info for Mix & Master services */}
+                {(service === 'mixmaster' || (service === 'booking' && option === 'mix-master')) && (
+                  <p className="text-sm font-medium text-orange-500 text-center pt-1">
+                    Ao efetuares esta reserva ganhas 1500💎
+                  </p>
+                )}
               </>
             )}
           </div>
@@ -837,7 +844,7 @@ const Payment = () => {
       </Card>
 
       {/* Payment Method Selection */}
-      <Card className="mb-6">
+      <Card className="mb-4">
         <CardHeader>
           <CardTitle>Método de Pagamento</CardTitle>
         </CardHeader>
@@ -918,7 +925,7 @@ const Payment = () => {
       </Card>
 
       {/* Instructions */}
-      <Card className="mb-6">
+      <Card className="mb-4">
         <CardContent className="pt-6 space-y-4">
           <div className="space-y-2">
             <h3 className="font-semibold">Instruções:</h3>
@@ -1047,12 +1054,12 @@ const Payment = () => {
       </Card>
 
       {/* Security Notice */}
-      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+      <div className="bg-muted/50 border border-border rounded-lg p-3">
         <div className="flex items-start gap-2">
-          <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
+          <CheckCircle className="h-4 w-4 text-primary mt-0.5" />
           <div>
-            <h4 className="font-medium text-green-800">Pagamento Seguro</h4>
-            <p className="text-sm text-green-700 mt-1">
+            <h4 className="font-medium text-foreground text-sm">Pagamento Seguro</h4>
+            <p className="text-xs text-muted-foreground mt-0.5">
               Os teus dados estão protegidos. Todos os pagamentos são processados de forma segura.
             </p>
           </div>
