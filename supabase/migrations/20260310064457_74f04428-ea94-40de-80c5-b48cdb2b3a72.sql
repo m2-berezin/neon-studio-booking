@@ -1,0 +1,1 @@
+UPDATE public.reservations SET price_eur_snapshot = 30.00 WHERE id = 'ff93b9e6-06c8-4970-abcf-10be2894e4fc';
