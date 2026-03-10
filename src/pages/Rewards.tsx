@@ -428,6 +428,61 @@ const Rewards = () => {
           )}
         </p>
       </div>
+      {/* 180-Day Offer Choice Dialog for Plan S */}
+      <Dialog open={show180DayChoiceDialog} onOpenChange={setShow180DayChoiceDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-center text-lg">Escolhe a tua oferta</DialogTitle>
+            <DialogDescription className="text-center text-xs">
+              Como queres usar a tua oferta de 180 dias?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 mt-2">
+            {/* Option 1: Mix & Master only (free) */}
+            <button
+              onClick={() => handleClaim180DayOffer('mixmaster')}
+              disabled={claiming180DayOffer}
+              className="w-full p-4 border border-border rounded-lg hover:border-primary/50 hover:bg-primary/5 transition-all text-left"
+            >
+              <div className="flex items-start gap-3">
+                <div className="p-2 rounded-full bg-primary/10 mt-0.5">
+                  <Music className="h-5 w-5 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-sm text-foreground">Mix & Master</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Envia os teus ficheiros para mix e master profissional</p>
+                  <Badge className="mt-2 bg-green-500/10 text-green-600 border-green-500/20 hover:bg-green-500/10">
+                    GRÁTIS
+                  </Badge>
+                </div>
+              </div>
+            </button>
+
+            {/* Option 2: Captação 3h + Mix & Master (30€) */}
+            <button
+              onClick={() => handleClaim180DayOffer('mixmaster_with_captacao')}
+              disabled={claiming180DayOffer}
+              className="w-full p-4 border border-border rounded-lg hover:border-primary/50 hover:bg-primary/5 transition-all text-left"
+            >
+              <div className="flex items-start gap-3">
+                <div className="p-2 rounded-full bg-accent/10 mt-0.5">
+                  <Mic className="h-5 w-5 text-accent" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-sm text-foreground">Captação 3h + Mix & Master</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Grava 3h em estúdio com mix & master oferecida</p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <Badge className="bg-accent/10 text-accent border-accent/20 hover:bg-accent/10">
+                      30€
+                    </Badge>
+                    <span className="text-xs text-muted-foreground">(Mix & Master oferecida)</span>
+                  </div>
+                </div>
+              </div>
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
