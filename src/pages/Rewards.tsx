@@ -195,24 +195,34 @@ const Rewards = () => {
     } finally { setClaimingVoucher(false); }
   };
 
-  const handleClaim180DayOffer = async () => {
+  const handleClaim180DayOffer = async (chosenType?: string) => {
     if (!user || !activePlanType || !plan180DayOffer?.eligible) return;
+    
+    // For Plan S, show choice dialog first
+    if (activePlanType === 'S' && !chosenType) {
+      setShow180DayChoiceDialog(true);
+      return;
+    }
+    
     setClaiming180DayOffer(true);
+    setShow180DayChoiceDialog(false);
     try {
-      const offerType = activePlanType === 'S' ? 'mixmaster' : 'captacao_mixmaster';
+      const offerType = chosenType || (activePlanType === 'S' ? 'mixmaster' : 'captacao_mixmaster');
       const { data: reservationId, error } = await supabase.rpc('claim_180day_offer' as any, {
         p_user_id: user.id, p_offer_type: offerType
       });
       if (error) throw error;
-      const offerName = activePlanType === 'S' ? 'Mix&Master' : 'Captação 3h + Mix&Master';
-      toast({
-        title: `Oferta ${offerName} ativada!`,
-        description: activePlanType === 'S' ? 'Redireccionando para Mix&Master...' : 'Redireccionando para o calendário...',
-      });
-      setTimeout(() => {
-        if (activePlanType === 'S') navigate(`/mix-master?plan180day=true&reservation=${reservationId}`);
-        else navigate(`/book?plan180day=true&reservation=${reservationId}`);
-      }, 500);
+      
+      if (offerType === 'mixmaster') {
+        toast({ title: 'Oferta Mix&Master ativada!', description: 'Redireccionando para Mix&Master...' });
+        setTimeout(() => { navigate(`/mix-master?plan180day=true&reservation=${reservationId}`); }, 500);
+      } else if (offerType === 'mixmaster_with_captacao') {
+        toast({ title: 'Oferta Captação 3h + Mix&Master ativada!', description: 'Redireccionando para o calendário...' });
+        setTimeout(() => { navigate(`/book?plan180day=true&reservation=${reservationId}`); }, 500);
+      } else {
+        toast({ title: 'Oferta Captação 3h + Mix&Master ativada!', description: 'Redireccionando para o calendário...' });
+        setTimeout(() => { navigate(`/book?plan180day=true&reservation=${reservationId}`); }, 500);
+      }
       await fetch180DayOfferEligibility();
     } catch (error: any) {
       toast({ title: 'Erro', description: error.message || 'Não foi possível reclamar a oferta', variant: 'destructive' });
