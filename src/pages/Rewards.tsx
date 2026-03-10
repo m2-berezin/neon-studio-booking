@@ -387,12 +387,12 @@ const Rewards = () => {
                     <p className="text-xs text-muted-foreground">Podes reclamar agora.</p>
                   </div>
                   <Button 
-                    onClick={handleClaim180DayOffer}
+                    onClick={() => handleClaim180DayOffer()}
                     disabled={claiming180DayOffer || hasActivePenalty()} 
                     className="w-full"
                     size="sm"
                   >
-                    {claiming180DayOffer ? 'A ativar...' : `Reclamar ${activePlanType === 'S' ? 'Mix&Master' : 'Captação 3h + Mix&Master'} Grátis`}
+                    {claiming180DayOffer ? 'A ativar...' : `Reclamar Oferta Grátis`}
                   </Button>
                 </div>
               ) : (
