@@ -1081,6 +1081,7 @@ const Book = () => {
                   hours: selectedService === 'captacao' ? selectedHours.toString() : undefined,
                   reservation_id: reservationFromOffer?.id, // Incluir reservation_id se for oferta
                   points_used: pointsUsed.toString(), // Add points used
+                  plan180DayOffer: isPlan180DayOffer ? 'true' : undefined,
                 });
                 navigate(`/payment?${queryParams.toString()}`);
               }}
