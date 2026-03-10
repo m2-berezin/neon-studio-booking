@@ -1027,11 +1027,20 @@ const Book = () => {
           </Card>
 
           <PriceSummary
-            services={selectedServiceDetails ? [selectedServiceDetails] : []}
+            services={isPlan180DayOffer && reservationFromOffer
+              ? [{
+                  id: reservationFromOffer.service_id,
+                  name: reservationFromOffer.service_name_snapshot || 'Captação 3h',
+                  type: 'captacao',
+                  base_price: reservationFromOffer.price_eur_snapshot || 0,
+                  description: ''
+                }]
+              : selectedServiceDetails ? [selectedServiceDetails] : []}
             bookingDate={selectedDate || undefined}
             showFriendCode={false}
             isPremiumOffer={isPremiumOffer}
-            premiumOfferOriginalPrice={20} // Preço original de 2h captação
+            premiumOfferOriginalPrice={20}
+            excludeVouchers={isPlan180DayOffer}
             onPriceChange={(finalPrice, breakdown) => {
               setPointsUsed(breakdown.pointsUsed || 0);
             }}
