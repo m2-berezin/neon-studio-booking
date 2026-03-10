@@ -1050,7 +1050,10 @@ const Book = () => {
                 }
 
                 const serviceName = services.find(s => s.id === selectedService)?.name || 'Serviço';
-                const bookingPrice = selectedService === 'captacao' ? getRecordingPrice() : selectedServiceDetails?.base_price || 0;
+                // For plan 180-day offers, use reservation snapshot price (30€ for captação only)
+                const bookingPrice = (isPlan180DayOffer && reservationFromOffer?.price_eur_snapshot != null)
+                  ? reservationFromOffer.price_eur_snapshot
+                  : selectedService === 'captacao' ? getRecordingPrice() : selectedServiceDetails?.base_price || 0;
                 
                 // Calculate correct end time based on session duration
                 let sessionEndTime: string;
