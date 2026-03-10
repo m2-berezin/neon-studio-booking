@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Gift, Star, Clock, Award, Ticket, ArrowLeft } from 'lucide-react';
+import { Gift, Star, Clock, Award, Ticket, ArrowLeft, Music, Mic } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useRewards } from '@/hooks/useRewards';
 import { useAuth } from '@/contexts/AuthContext';
@@ -52,6 +53,7 @@ const Rewards = () => {
     reason?: string;
   } | null>(null);
   const [claiming180DayOffer, setClaiming180DayOffer] = useState(false);
+  const [show180DayChoiceDialog, setShow180DayChoiceDialog] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -193,24 +195,34 @@ const Rewards = () => {
     } finally { setClaimingVoucher(false); }
   };
 
-  const handleClaim180DayOffer = async () => {
+  const handleClaim180DayOffer = async (chosenType?: string) => {
     if (!user || !activePlanType || !plan180DayOffer?.eligible) return;
+    
+    // For Plan S, show choice dialog first
+    if (activePlanType === 'S' && !chosenType) {
+      setShow180DayChoiceDialog(true);
+      return;
+    }
+    
     setClaiming180DayOffer(true);
+    setShow180DayChoiceDialog(false);
     try {
-      const offerType = activePlanType === 'S' ? 'mixmaster' : 'captacao_mixmaster';
+      const offerType = chosenType || (activePlanType === 'S' ? 'mixmaster' : 'captacao_mixmaster');
       const { data: reservationId, error } = await supabase.rpc('claim_180day_offer' as any, {
         p_user_id: user.id, p_offer_type: offerType
       });
       if (error) throw error;
-      const offerName = activePlanType === 'S' ? 'Mix&Master' : 'Captação 3h + Mix&Master';
-      toast({
-        title: `Oferta ${offerName} ativada!`,
-        description: activePlanType === 'S' ? 'Redireccionando para Mix&Master...' : 'Redireccionando para o calendário...',
-      });
-      setTimeout(() => {
-        if (activePlanType === 'S') navigate(`/mix-master?plan180day=true&reservation=${reservationId}`);
-        else navigate(`/book?plan180day=true&reservation=${reservationId}`);
-      }, 500);
+      
+      if (offerType === 'mixmaster') {
+        toast({ title: 'Oferta Mix&Master ativada!', description: 'Redireccionando para Mix&Master...' });
+        setTimeout(() => { navigate(`/mix-master?plan180day=true&reservation=${reservationId}`); }, 500);
+      } else if (offerType === 'mixmaster_with_captacao') {
+        toast({ title: 'Oferta Captação 3h + Mix&Master ativada!', description: 'Redireccionando para o calendário...' });
+        setTimeout(() => { navigate(`/book?plan180day=true&reservation=${reservationId}`); }, 500);
+      } else {
+        toast({ title: 'Oferta Captação 3h + Mix&Master ativada!', description: 'Redireccionando para o calendário...' });
+        setTimeout(() => { navigate(`/book?plan180day=true&reservation=${reservationId}`); }, 500);
+      }
       await fetch180DayOfferEligibility();
     } catch (error: any) {
       toast({ title: 'Erro', description: error.message || 'Não foi possível reclamar a oferta', variant: 'destructive' });
@@ -375,12 +387,12 @@ const Rewards = () => {
                     <p className="text-xs text-muted-foreground">Podes reclamar agora.</p>
                   </div>
                   <Button 
-                    onClick={handleClaim180DayOffer}
+                    onClick={() => handleClaim180DayOffer()}
                     disabled={claiming180DayOffer || hasActivePenalty()} 
                     className="w-full"
                     size="sm"
                   >
-                    {claiming180DayOffer ? 'A ativar...' : `Reclamar ${activePlanType === 'S' ? 'Mix&Master' : 'Captação 3h + Mix&Master'} Grátis`}
+                    {claiming180DayOffer ? 'A ativar...' : `Reclamar Oferta Grátis`}
                   </Button>
                 </div>
               ) : (
@@ -416,6 +428,61 @@ const Rewards = () => {
           )}
         </p>
       </div>
+      {/* 180-Day Offer Choice Dialog for Plan S */}
+      <Dialog open={show180DayChoiceDialog} onOpenChange={setShow180DayChoiceDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-center text-lg">Escolhe a tua oferta</DialogTitle>
+            <DialogDescription className="text-center text-xs">
+              Como queres usar a tua oferta de 180 dias?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 mt-2">
+            {/* Option 1: Mix & Master only (free) */}
+            <button
+              onClick={() => handleClaim180DayOffer('mixmaster')}
+              disabled={claiming180DayOffer}
+              className="w-full p-4 border border-border rounded-lg hover:border-primary/50 hover:bg-primary/5 transition-all text-left"
+            >
+              <div className="flex items-start gap-3">
+                <div className="p-2 rounded-full bg-primary/10 mt-0.5">
+                  <Music className="h-5 w-5 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-sm text-foreground">Mix & Master</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Envia os teus ficheiros para mix e master profissional</p>
+                  <Badge className="mt-2 bg-green-500/10 text-green-600 border-green-500/20 hover:bg-green-500/10">
+                    GRÁTIS
+                  </Badge>
+                </div>
+              </div>
+            </button>
+
+            {/* Option 2: Captação 3h + Mix & Master (30€) */}
+            <button
+              onClick={() => handleClaim180DayOffer('mixmaster_with_captacao')}
+              disabled={claiming180DayOffer}
+              className="w-full p-4 border border-border rounded-lg hover:border-primary/50 hover:bg-primary/5 transition-all text-left"
+            >
+              <div className="flex items-start gap-3">
+                <div className="p-2 rounded-full bg-accent/10 mt-0.5">
+                  <Mic className="h-5 w-5 text-accent" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-sm text-foreground">Captação 3h + Mix & Master</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Grava 3h em estúdio com mix & master oferecida</p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <Badge className="bg-accent/10 text-accent border-accent/20 hover:bg-accent/10">
+                      30€
+                    </Badge>
+                    <span className="text-xs text-muted-foreground">(Mix & Master oferecida)</span>
+                  </div>
+                </div>
+              </div>
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
