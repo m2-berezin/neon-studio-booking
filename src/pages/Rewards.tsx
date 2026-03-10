@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Gift, Star, Clock, Award, Ticket, ArrowLeft } from 'lucide-react';
+import { Gift, Star, Clock, Award, Ticket, ArrowLeft, Music, Mic } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useRewards } from '@/hooks/useRewards';
 import { useAuth } from '@/contexts/AuthContext';
