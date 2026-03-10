@@ -1027,11 +1027,20 @@ const Book = () => {
           </Card>
 
           <PriceSummary
-            services={selectedServiceDetails ? [selectedServiceDetails] : []}
+            services={isPlan180DayOffer && reservationFromOffer
+              ? [{
+                  id: reservationFromOffer.service_id,
+                  name: reservationFromOffer.service_name_snapshot || 'Captação 3h',
+                  type: 'captacao',
+                  base_price: reservationFromOffer.price_eur_snapshot || 0,
+                  description: ''
+                }]
+              : selectedServiceDetails ? [selectedServiceDetails] : []}
             bookingDate={selectedDate || undefined}
             showFriendCode={false}
             isPremiumOffer={isPremiumOffer}
-            premiumOfferOriginalPrice={20} // Preço original de 2h captação
+            premiumOfferOriginalPrice={20}
+            excludeVouchers={isPlan180DayOffer}
             onPriceChange={(finalPrice, breakdown) => {
               setPointsUsed(breakdown.pointsUsed || 0);
             }}
@@ -1050,7 +1059,10 @@ const Book = () => {
                 }
 
                 const serviceName = services.find(s => s.id === selectedService)?.name || 'Serviço';
-                const bookingPrice = selectedService === 'captacao' ? getRecordingPrice() : selectedServiceDetails?.base_price || 0;
+                // For plan 180-day offers, use reservation snapshot price (30€ for captação only)
+                const bookingPrice = (isPlan180DayOffer && reservationFromOffer?.price_eur_snapshot != null)
+                  ? reservationFromOffer.price_eur_snapshot
+                  : selectedService === 'captacao' ? getRecordingPrice() : selectedServiceDetails?.base_price || 0;
                 
                 // Calculate correct end time based on session duration
                 let sessionEndTime: string;
@@ -1078,6 +1090,7 @@ const Book = () => {
                   hours: selectedService === 'captacao' ? selectedHours.toString() : undefined,
                   reservation_id: reservationFromOffer?.id, // Incluir reservation_id se for oferta
                   points_used: pointsUsed.toString(), // Add points used
+                  plan180DayOffer: isPlan180DayOffer ? 'true' : undefined,
                 });
                 navigate(`/payment?${queryParams.toString()}`);
               }}
