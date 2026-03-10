@@ -53,6 +53,7 @@ const Rewards = () => {
     reason?: string;
   } | null>(null);
   const [claiming180DayOffer, setClaiming180DayOffer] = useState(false);
+  const [show180DayChoiceDialog, setShow180DayChoiceDialog] = useState(false);
 
   useEffect(() => {
     if (user) {
