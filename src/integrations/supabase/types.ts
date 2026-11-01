@@ -95,6 +95,24 @@ export type Database = {
         }
         Relationships: []
       }
+      blocked_users: {
+        Row: {
+          blocked_at: string
+          blocked_by: string | null
+          user_id: string
+        }
+        Insert: {
+          blocked_at?: string
+          blocked_by?: string | null
+          user_id: string
+        }
+        Update: {
+          blocked_at?: string
+          blocked_by?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       bookings: {
         Row: {
           created_at: string
@@ -951,6 +969,50 @@ export type Database = {
           },
         ]
       }
+      reschedule_requests: {
+        Row: {
+          booking_id: string
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          id: string
+          new_ends_at: string
+          new_starts_at: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          booking_id: string
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          id?: string
+          new_ends_at: string
+          new_starts_at: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          booking_id?: string
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          id?: string
+          new_ends_at?: string
+          new_starts_at?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reschedule_requests_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reservations: {
         Row: {
           created_at: string
@@ -960,6 +1022,7 @@ export type Database = {
           id: string
           offer_id: string | null
           price_eur_snapshot: number | null
+          reschedule_of_booking_id: string | null
           service_id: string
           service_name_snapshot: string | null
           starts_at: string | null
@@ -975,6 +1038,7 @@ export type Database = {
           id?: string
           offer_id?: string | null
           price_eur_snapshot?: number | null
+          reschedule_of_booking_id?: string | null
           service_id: string
           service_name_snapshot?: string | null
           starts_at?: string | null
@@ -990,6 +1054,7 @@ export type Database = {
           id?: string
           offer_id?: string | null
           price_eur_snapshot?: number | null
+          reschedule_of_booking_id?: string | null
           service_id?: string
           service_name_snapshot?: string | null
           starts_at?: string | null
@@ -1003,6 +1068,13 @@ export type Database = {
             columns: ["offer_id"]
             isOneToOne: false
             referencedRelation: "offers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservations_reschedule_of_booking_id_fkey"
+            columns: ["reschedule_of_booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
             referencedColumns: ["id"]
           },
           {
@@ -1383,6 +1455,10 @@ export type Database = {
         }
         Returns: string
       }
+      admin_decide_reschedule: {
+        Args: { p_accept: boolean; p_request_id: string }
+        Returns: string
+      }
       admin_delete_test_user: { Args: { p_user_id: string }; Returns: boolean }
       admin_delete_time_block: { Args: { p_id: string }; Returns: undefined }
       admin_hide_project: {
@@ -1406,6 +1482,10 @@ export type Database = {
         Returns: boolean
       }
       admin_revert_day_off: { Args: { p_id: string }; Returns: boolean }
+      admin_set_user_blocked: {
+        Args: { p_blocked: boolean; p_user_id: string }
+        Returns: undefined
+      }
       apply_friend_code_with_points: {
         Args: { p_code: string; p_user_id: string }
         Returns: Json
@@ -1868,6 +1948,14 @@ export type Database = {
             }
             Returns: string
           }
+      request_reschedule: {
+        Args: {
+          p_booking_id: string
+          p_new_ends_at: string
+          p_new_starts_at: string
+        }
+        Returns: string
+      }
       send_renewal_alerts: { Args: never; Returns: undefined }
       slugify: { Args: { txt: string }; Returns: string }
       subscribe_payment_request: {
