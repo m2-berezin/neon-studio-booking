@@ -161,6 +161,30 @@ export type Database = {
           },
         ]
       }
+      device_tokens: {
+        Row: {
+          created_at: string
+          platform: string
+          token: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          platform?: string
+          token: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          platform?: string
+          token?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       emails_log: {
         Row: {
           body: string
@@ -357,6 +381,7 @@ export type Database = {
           body: string
           created_at: string
           id: string
+          push_sent_at: string | null
           read: boolean
           role: string
           title: string
@@ -366,6 +391,7 @@ export type Database = {
           body: string
           created_at?: string
           id?: string
+          push_sent_at?: string | null
           read?: boolean
           role?: string
           title: string
@@ -375,6 +401,7 @@ export type Database = {
           body?: string
           created_at?: string
           id?: string
+          push_sent_at?: string | null
           read?: boolean
           role?: string
           title?: string
@@ -1519,6 +1546,7 @@ export type Database = {
         }[]
       }
       get_active_users_count: { Args: never; Returns: number }
+      get_admin_avatar: { Args: { p_admin_id: string }; Returns: string }
       get_admin_subscriptions: {
         Args: never
         Returns: {
@@ -1775,6 +1803,10 @@ export type Database = {
         Returns: boolean
       }
       redeem_loyalty_offer: { Args: { p_user_id: string }; Returns: boolean }
+      register_device_token: {
+        Args: { p_platform?: string; p_token: string }
+        Returns: undefined
+      }
       request_payment:
         | {
             Args: {
@@ -1851,6 +1883,7 @@ export type Database = {
         Returns: string
       }
       text_to_bytea: { Args: { data: string }; Returns: string }
+      unregister_device_token: { Args: { p_token: string }; Returns: undefined }
       urlencode:
         | { Args: { data: Json }; Returns: string }
         | {
