@@ -33,7 +33,7 @@ const generateICS = (booking: BookingCalendarRequest): string => {
     `DTEND:${endDate}`,
     `SUMMARY:Reserva: ${booking.client_name} - ${booking.service_name}`,
     `DESCRIPTION:Cliente: ${booking.client_name}\\nServiço: ${booking.service_name}\\n\\nReserva confirmada no sistema 7T7Studios`,
-    'LOCATION:7T7Studios, Pinhal do General, Seixal',
+    'LOCATION:7T7Studios, Rua Abade Correia da Serra 20A, 2865-207 Fernão Ferro',
     'STATUS:CONFIRMED',
     'SEQUENCE:0',
     'BEGIN:VALARM',
@@ -94,7 +94,7 @@ const handler = async (req: Request): Promise<Response> => {
       <p><strong>Serviço:</strong> ${bookingData.service_name}</p>
       <p><strong>📅 Data:</strong> ${dateStr}</p>
       <p><strong>🕐 Horário:</strong> ${timeStr}</p>
-      <p><strong>📍 Local:</strong> 7T7Studios, Pinhal do General, Seixal</p>
+      <p><strong>📍 Local:</strong> 7T7Studios, Rua Abade Correia da Serra 20A, 2865-207 Fernão Ferro</p>
       <hr />
       <p><em>Este email contém um convite de calendário (.ics) em anexo. Abre o anexo para adicionar o evento ao teu calendário iOS.</em></p>
       <p><small>Email enviado automaticamente pelo sistema 7T7Studios</small></p>

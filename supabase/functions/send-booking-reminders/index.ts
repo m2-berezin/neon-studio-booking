@@ -31,65 +31,65 @@ Deno.serve(async (req) => {
     let notificationsSkipped = 0;
 
     // Process 72-hour reminders
-    const reminder72h = new Date(now.getTime() + (72 * 60 * 60 * 1000));
-    const window72hStart = new Date(reminder72h.getTime() - (30 * 60 * 1000));
-    const window72hEnd = new Date(reminder72h.getTime() + (30 * 60 * 1000));
+    const reminder48h = new Date(now.getTime() + (48 * 60 * 60 * 1000));
+    const window48hStart = new Date(reminder48h.getTime() - (30 * 60 * 1000));
+    const window48hEnd = new Date(reminder48h.getTime() + (30 * 60 * 1000));
 
-    console.log(`Looking for 72h reminders between ${window72hStart.toISOString()} and ${window72hEnd.toISOString()}`);
+    console.log(`Looking for 48h reminders between ${window48hStart.toISOString()} and ${window48hEnd.toISOString()}`);
 
-    const { data: bookings72h, error: bookings72hError } = await supabase
+    const { data: bookings48h, error: bookings48hError } = await supabase
       .from('bookings')
       .select('id, user_id, starts_at, service_name_snapshot')
       .eq('status', 'confirmed')
-      .gte('starts_at', window72hStart.toISOString())
-      .lte('starts_at', window72hEnd.toISOString())
+      .gte('starts_at', window48hStart.toISOString())
+      .lte('starts_at', window48hEnd.toISOString())
       .not('hidden_from_client', 'eq', true);
 
-    if (bookings72hError) {
-      console.error('Error fetching 72h bookings:', bookings72hError);
-    } else if (bookings72h && bookings72h.length > 0) {
-      console.log(`Found ${bookings72h.length} booking(s) for 72h reminders`);
+    if (bookings48hError) {
+      console.error('Error fetching 48h bookings:', bookings48hError);
+    } else if (bookings48h && bookings48h.length > 0) {
+      console.log(`Found ${bookings48h.length} booking(s) for 48h reminders`);
 
-      for (const booking of bookings72h as Booking[]) {
-        console.log(`Processing 72h reminder for booking ${booking.id}`);
+      for (const booking of bookings48h as Booking[]) {
+        console.log(`Processing 48h reminder for booking ${booking.id}`);
 
-        // Check if 72h reminder already exists
-        const { data: existing72h, error: check72hError } = await supabase
+        // Check if 48h reminder already exists
+        const { data: existing48h, error: check48hError } = await supabase
           .from('notifications')
           .select('id')
           .eq('user_id', booking.user_id)
-          .ilike('body', '%3 dias%')
-          .gte('created_at', new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString())
+          .ilike('body', '%2 dias%')
+          .gte('created_at', new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString())
           .single();
 
-        if (check72hError && check72hError.code !== 'PGRST116') {
-          console.error(`Error checking 72h notification for booking ${booking.id}:`, check72hError);
+        if (check48hError && check48hError.code !== 'PGRST116') {
+          console.error(`Error checking 48h notification for booking ${booking.id}:`, check48hError);
           continue;
         }
 
-        if (existing72h) {
-          console.log(`72h notification already exists for booking ${booking.id}, skipping`);
+        if (existing48h) {
+          console.log(`48h notification already exists for booking ${booking.id}, skipping`);
           notificationsSkipped++;
           continue;
         }
 
-        // Create 72h reminder
-        const { error: notification72hError } = await supabase
+        // Create 48h reminder
+        const { error: notification48hError } = await supabase
           .from('notifications')
           .insert({
             user_id: booking.user_id,
             role: 'user',
             title: 'Lembrete de Reserva',
-            body: 'Tens sessão agendada para daqui a 3 dias! Caso queiras reagendar, manda mensagem no chat ao Ghost!',
+            body: 'Tens sessão agendada para daqui a 2 dias! Caso queiras reagendar, vai às tuas sessões em Projetos.',
             read: false,
           });
 
-        if (notification72hError) {
-          console.error(`Error creating 72h notification for booking ${booking.id}:`, notification72hError);
+        if (notification48hError) {
+          console.error(`Error creating 48h notification for booking ${booking.id}:`, notification48hError);
           continue;
         }
 
-        console.log(`✅ 72h notification created for booking ${booking.id}`);
+        console.log(`✅ 48h notification created for booking ${booking.id}`);
         notificationsCreated++;
       }
     }
@@ -231,12 +231,12 @@ Deno.serve(async (req) => {
       }
     }
 
-    const totalBookingsFound = (bookings72h?.length || 0) + (bookings24h?.length || 0);
+    const totalBookingsFound = (bookings48h?.length || 0) + (bookings24h?.length || 0);
     
     const summary = {
       message: 'Booking reminders processed',
       bookingsFound: totalBookingsFound,
-      reminders72h: bookings72h?.length || 0,
+      reminders48h: bookings48h?.length || 0,
       reminders24h: bookings24h?.length || 0,
       notificationsCreated,
       notificationsSkipped,
