@@ -213,8 +213,8 @@ Deno.serve(async (req) => {
               .insert({
                 user_id: profile.id,
                 role: 'user',
-                title: 'Voucher de 15€ Disponível',
-                body: 'O teu voucher de 15€ está disponível para reivindicar! Vai às Recompensas para o reclamar. 🎉',
+                title: 'Voucher de 10€ Disponível',
+                body: 'O teu voucher de 10€ está disponível para reivindicar! Vai às Recompensas para o reclamar. 🎉',
                 read: false,
               });
 
