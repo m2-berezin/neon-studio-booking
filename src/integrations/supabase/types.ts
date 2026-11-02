@@ -1592,6 +1592,7 @@ export type Database = {
       }
       admin_delete_test_user: { Args: { p_user_id: string }; Returns: boolean }
       admin_delete_time_block: { Args: { p_id: string }; Returns: undefined }
+      admin_get_client_email: { Args: { p_client_id: string }; Returns: string }
       admin_hide_project: {
         Args: { p_project_id: string; p_project_type: string }
         Returns: boolean
@@ -2010,6 +2011,7 @@ export type Database = {
           status: string
         }[]
       }
+      mark_chat_read: { Args: { p_other_user_id: string }; Returns: undefined }
       mark_notifications_as_read: {
         Args: { p_thread_id: string }
         Returns: boolean
