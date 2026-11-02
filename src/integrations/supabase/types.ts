@@ -14,6 +14,32 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_calendar_tokens: {
+        Row: {
+          created_at: string
+          token: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          token?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          token?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_calendar_tokens_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       admin_days_off: {
         Row: {
           created_at: string
@@ -394,11 +420,110 @@ export type Database = {
         }
         Relationships: []
       }
+      mixmaster_projects: {
+        Row: {
+          client_id: string
+          created_at: string
+          hidden_from_admin: boolean
+          id: string
+          payment_request_id: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          hidden_from_admin?: boolean
+          id?: string
+          payment_request_id?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          hidden_from_admin?: boolean
+          id?: string
+          payment_request_id?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mixmaster_projects_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mixmaster_projects_payment_request_id_fkey"
+            columns: ["payment_request_id"]
+            isOneToOne: true
+            referencedRelation: "payment_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mixmaster_steps: {
+        Row: {
+          author_id: string
+          created_at: string
+          file_name: string | null
+          file_path: string | null
+          id: string
+          kind: string
+          link: string | null
+          note: string | null
+          project_id: string
+          seen_at: string | null
+          version: number | null
+        }
+        Insert: {
+          author_id: string
+          created_at?: string
+          file_name?: string | null
+          file_path?: string | null
+          id?: string
+          kind: string
+          link?: string | null
+          note?: string | null
+          project_id: string
+          seen_at?: string | null
+          version?: number | null
+        }
+        Update: {
+          author_id?: string
+          created_at?: string
+          file_name?: string | null
+          file_path?: string | null
+          id?: string
+          kind?: string
+          link?: string | null
+          note?: string | null
+          project_id?: string
+          seen_at?: string | null
+          version?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mixmaster_steps_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "mixmaster_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           body: string
           created_at: string
           id: string
+          link: string | null
           push_sent_at: string | null
           read: boolean
           role: string
@@ -409,6 +534,7 @@ export type Database = {
           body: string
           created_at?: string
           id?: string
+          link?: string | null
           push_sent_at?: string | null
           read?: boolean
           role?: string
@@ -419,6 +545,7 @@ export type Database = {
           body?: string
           created_at?: string
           id?: string
+          link?: string | null
           push_sent_at?: string | null
           read?: boolean
           role?: string
@@ -1445,6 +1572,10 @@ export type Database = {
     Functions: {
       abandon_offer: { Args: { p_reservation_id: string }; Returns: boolean }
       admin_approve_payment: { Args: { p_payment_id: string }; Returns: string }
+      admin_create_mixmaster_project: {
+        Args: { p_client_id: string; p_title: string }
+        Returns: string
+      }
       admin_create_time_block: {
         Args: {
           p_blocked_end_time: string
@@ -1627,6 +1758,7 @@ export type Database = {
       }
       get_active_users_count: { Args: never; Returns: number }
       get_admin_avatar: { Args: { p_admin_id: string }; Returns: string }
+      get_admin_calendar_token: { Args: never; Returns: string }
       get_admin_subscriptions: {
         Args: never
         Returns: {
@@ -1882,6 +2014,21 @@ export type Database = {
         Args: { p_thread_id: string }
         Returns: boolean
       }
+      mixmaster_add_step: {
+        Args: {
+          p_file_name?: string
+          p_file_path?: string
+          p_kind: string
+          p_link?: string
+          p_note?: string
+          p_project_id: string
+        }
+        Returns: string
+      }
+      mixmaster_mark_seen: {
+        Args: { p_project_id: string; p_step_id?: string }
+        Returns: undefined
+      }
       redeem_loyalty_offer: { Args: { p_user_id: string }; Returns: boolean }
       register_device_token: {
         Args: { p_platform?: string; p_token: string }
@@ -1958,6 +2105,15 @@ export type Database = {
       }
       send_renewal_alerts: { Args: never; Returns: undefined }
       slugify: { Args: { txt: string }; Returns: string }
+      submit_mixmaster_project: {
+        Args: {
+          p_link?: string
+          p_note?: string
+          p_payment_id: string
+          p_title?: string
+        }
+        Returns: string
+      }
       subscribe_payment_request: {
         Args: { p_amount_eur: number; p_plan_type: string; p_user_id: string }
         Returns: string
