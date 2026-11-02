@@ -30,66 +30,67 @@ Deno.serve(async (req) => {
     let notificationsCreated = 0;
     let notificationsSkipped = 0;
 
-    // Process 72-hour reminders
-    const reminder48h = new Date(now.getTime() + (48 * 60 * 60 * 1000));
-    const window48hStart = new Date(reminder48h.getTime() - (30 * 60 * 1000));
-    const window48hEnd = new Date(reminder48h.getTime() + (30 * 60 * 1000));
+    // Process 3-day reminders, while rescheduling is still free
+    const reminder3d = new Date(now.getTime() + (72 * 60 * 60 * 1000));
+    const window3dStart = new Date(reminder3d.getTime() - (30 * 60 * 1000));
+    const window3dEnd = new Date(reminder3d.getTime() + (30 * 60 * 1000));
 
-    console.log(`Looking for 48h reminders between ${window48hStart.toISOString()} and ${window48hEnd.toISOString()}`);
+    console.log(`Looking for 3-day reminders between ${window3dStart.toISOString()} and ${window3dEnd.toISOString()}`);
 
-    const { data: bookings48h, error: bookings48hError } = await supabase
+    const { data: bookings3d, error: bookings3dError } = await supabase
       .from('bookings')
       .select('id, user_id, starts_at, service_name_snapshot')
       .eq('status', 'confirmed')
-      .gte('starts_at', window48hStart.toISOString())
-      .lte('starts_at', window48hEnd.toISOString())
+      .gte('starts_at', window3dStart.toISOString())
+      .lte('starts_at', window3dEnd.toISOString())
       .not('hidden_from_client', 'eq', true);
 
-    if (bookings48hError) {
-      console.error('Error fetching 48h bookings:', bookings48hError);
-    } else if (bookings48h && bookings48h.length > 0) {
-      console.log(`Found ${bookings48h.length} booking(s) for 48h reminders`);
+    if (bookings3dError) {
+      console.error('Error fetching 3-day bookings:', bookings3dError);
+    } else if (bookings3d && bookings3d.length > 0) {
+      console.log(`Found ${bookings3d.length} booking(s) for 3-day reminders`);
 
-      for (const booking of bookings48h as Booking[]) {
-        console.log(`Processing 48h reminder for booking ${booking.id}`);
+      for (const booking of bookings3d as Booking[]) {
+        console.log(`Processing 3-day reminder for booking ${booking.id}`);
 
-        // Check if 48h reminder already exists
-        const { data: existing48h, error: check48hError } = await supabase
+        // The link identifies the booking, so each one is only reminded once
+        const rescheduleLink = `/book?reschedule=${booking.id}`;
+        const { data: existing3d, error: check3dError } = await supabase
           .from('notifications')
           .select('id')
           .eq('user_id', booking.user_id)
-          .ilike('body', '%2 dias%')
-          .gte('created_at', new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString())
-          .single();
+          .eq('link', rescheduleLink)
+          .limit(1);
 
-        if (check48hError && check48hError.code !== 'PGRST116') {
-          console.error(`Error checking 48h notification for booking ${booking.id}:`, check48hError);
+        if (check3dError) {
+          console.error(`Error checking 3-day notification for booking ${booking.id}:`, check3dError);
           continue;
         }
 
-        if (existing48h) {
-          console.log(`48h notification already exists for booking ${booking.id}, skipping`);
+        if (existing3d && existing3d.length > 0) {
+          console.log(`3-day notification already exists for booking ${booking.id}, skipping`);
           notificationsSkipped++;
           continue;
         }
 
-        // Create 48h reminder
-        const { error: notification48hError } = await supabase
+        // Create 3-day reminder
+        const { error: notification3dError } = await supabase
           .from('notifications')
           .insert({
             user_id: booking.user_id,
             role: 'user',
             title: 'Lembrete de Reserva',
-            body: 'Tens sessão agendada para daqui a 2 dias! Caso queiras reagendar, vai às tuas sessões em Projetos.',
+            body: 'Tens sessão agendada para daqui a 3 dias! Caso precises de reagendar, trata disso hoje para não perderes o sinal dos 15€!',
+            link: rescheduleLink,
             read: false,
           });
 
-        if (notification48hError) {
-          console.error(`Error creating 48h notification for booking ${booking.id}:`, notification48hError);
+        if (notification3dError) {
+          console.error(`Error creating 3-day notification for booking ${booking.id}:`, notification3dError);
           continue;
         }
 
-        console.log(`✅ 48h notification created for booking ${booking.id}`);
+        console.log(`✅ 3-day notification created for booking ${booking.id}`);
         notificationsCreated++;
       }
     }
@@ -231,12 +232,12 @@ Deno.serve(async (req) => {
       }
     }
 
-    const totalBookingsFound = (bookings48h?.length || 0) + (bookings24h?.length || 0);
+    const totalBookingsFound = (bookings3d?.length || 0) + (bookings24h?.length || 0);
     
     const summary = {
       message: 'Booking reminders processed',
       bookingsFound: totalBookingsFound,
-      reminders48h: bookings48h?.length || 0,
+      reminders3d: bookings3d?.length || 0,
       reminders24h: bookings24h?.length || 0,
       notificationsCreated,
       notificationsSkipped,
