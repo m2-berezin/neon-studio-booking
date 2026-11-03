@@ -5,6 +5,9 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const ADMIN_ID = '6d9d1dc1-e16f-4f3d-a817-1591a1b27477';
+const SESSION_MESSAGE = 'Boas! Tudo pronto pra sessão de hoje?';
+
 interface Booking {
   id: string;
   user_id: string;
@@ -22,9 +25,25 @@ Deno.serve(async (req) => {
     console.log('🔔 Starting booking reminders check...');
 
     // Create Supabase client
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    if (!supabaseUrl || !supabaseServiceKey) {
+      throw new Error('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
+    }
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // One failed step doesn't stop the others, but the run is reported as failed
+    let errorCount = 0;
+    const reportError = (...details: unknown[]) => {
+      errorCount++;
+      console.error(...details);
+    };
+
+    // Ends cancelled subscriptions and takes back invite diamonds that weren't used in time
+    const { error: expirationsError } = await supabase.rpc('run_scheduled_expirations');
+    if (expirationsError) {
+      reportError('Error running scheduled expirations:', expirationsError);
+    }
 
     const now = new Date();
     let notificationsCreated = 0;
@@ -46,7 +65,7 @@ Deno.serve(async (req) => {
       .not('hidden_from_client', 'eq', true);
 
     if (bookings3dError) {
-      console.error('Error fetching 3-day bookings:', bookings3dError);
+      reportError('Error fetching 3-day bookings:', bookings3dError);
     } else if (bookings3d && bookings3d.length > 0) {
       console.log(`Found ${bookings3d.length} booking(s) for 3-day reminders`);
 
@@ -63,7 +82,7 @@ Deno.serve(async (req) => {
           .limit(1);
 
         if (check3dError) {
-          console.error(`Error checking 3-day notification for booking ${booking.id}:`, check3dError);
+          reportError(`Error checking 3-day notification for booking ${booking.id}:`, check3dError);
           continue;
         }
 
@@ -86,7 +105,7 @@ Deno.serve(async (req) => {
           });
 
         if (notification3dError) {
-          console.error(`Error creating 3-day notification for booking ${booking.id}:`, notification3dError);
+          reportError(`Error creating 3-day notification for booking ${booking.id}:`, notification3dError);
           continue;
         }
 
@@ -111,7 +130,7 @@ Deno.serve(async (req) => {
       .not('hidden_from_client', 'eq', true);
 
     if (bookings24hError) {
-      console.error('Error fetching 24h bookings:', bookings24hError);
+      reportError('Error fetching 24h bookings:', bookings24hError);
     } else if (bookings24h && bookings24h.length > 0) {
       console.log(`Found ${bookings24h.length} booking(s) for 24h reminders`);
 
@@ -128,7 +147,7 @@ Deno.serve(async (req) => {
           .single();
 
         if (check24hError && check24hError.code !== 'PGRST116') {
-          console.error(`Error checking 24h notification for booking ${booking.id}:`, check24hError);
+          reportError(`Error checking 24h notification for booking ${booking.id}:`, check24hError);
           continue;
         }
 
@@ -150,13 +169,66 @@ Deno.serve(async (req) => {
           });
 
         if (notification24hError) {
-          console.error(`Error creating 24h notification for booking ${booking.id}:`, notification24hError);
+          reportError(`Error creating 24h notification for booking ${booking.id}:`, notification24hError);
           continue;
         }
 
         console.log(`✅ 24h notification created for booking ${booking.id}`);
         notificationsCreated++;
+
       }
+    }
+
+    // ======== Message from the Ghost 2 hours before each session ========
+    // Half-open window, so a session on the boundary isn't caught by two hourly runs
+    const message2hStart = new Date(now.getTime() + (90 * 60 * 1000));
+    const message2hEnd = new Date(now.getTime() + (150 * 60 * 1000));
+    let sessionMessagesSent = 0;
+
+    const { data: bookings2h, error: bookings2hError } = await supabase
+      .from('bookings')
+      .select('id, user_id, starts_at, service_name_snapshot')
+      .eq('status', 'confirmed')
+      .gte('starts_at', message2hStart.toISOString())
+      .lt('starts_at', message2hEnd.toISOString())
+      .not('hidden_from_client', 'eq', true);
+
+    if (bookings2hError) {
+      reportError('Error fetching bookings for the 2h message:', bookings2hError);
+    }
+
+    for (const booking of (bookings2h ?? []) as Booking[]) {
+      const { data: existingMessage, error: existingMessageError } = await supabase
+        .from('messages')
+        .select('id')
+        .eq('sender_id', ADMIN_ID)
+        .eq('receiver_id', booking.user_id)
+        .eq('message', SESSION_MESSAGE)
+        .gte('timestamp', new Date(now.getTime() - (3 * 60 * 60 * 1000)).toISOString())
+        .limit(1);
+
+      if (existingMessageError) {
+        reportError(`Error checking 2h message for booking ${booking.id}:`, existingMessageError);
+        continue;
+      }
+
+      if (existingMessage && existingMessage.length > 0) continue;
+
+      const ids = [ADMIN_ID, booking.user_id].sort();
+      const { error: messageError } = await supabase.from('messages').insert({
+        thread_id: `${ids[0]}-${ids[1]}`,
+        sender_id: ADMIN_ID,
+        receiver_id: booking.user_id,
+        message: SESSION_MESSAGE,
+        timestamp: new Date().toISOString(),
+      });
+
+      if (messageError) {
+        reportError(`Error sending 2h message for booking ${booking.id}:`, messageError);
+        continue;
+      }
+
+      sessionMessagesSent++;
     }
 
     // ======== Voucher availability notifications ========
@@ -170,7 +242,7 @@ Deno.serve(async (req) => {
       .eq('role', 'user');
 
     if (profilesError) {
-      console.error('Error fetching profiles for voucher check:', profilesError);
+      reportError('Error fetching profiles for voucher check:', profilesError);
     } else if (allProfiles && allProfiles.length > 0) {
       for (const profile of allProfiles) {
         try {
@@ -180,25 +252,25 @@ Deno.serve(async (req) => {
           });
 
           if (voucherError) {
-            console.error(`Error checking voucher for user ${profile.id}:`, voucherError);
+            reportError(`Error checking voucher for user ${profile.id}:`, voucherError);
             continue;
           }
 
           const voucherStatus = voucherData as { available: boolean; days_left: number } | null;
           
           if (voucherStatus?.available) {
-            // Check if we already sent a voucher notification recently (within last 30 days)
+            // The welcome voucher is only announced once
             const { data: existingVoucherNotif, error: checkVoucherError } = await supabase
               .from('notifications')
               .select('id')
               .eq('user_id', profile.id)
               .ilike('title', '%Voucher%')
               .ilike('body', '%disponível%')
-              .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
+              .gte('created_at', new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString())
               .limit(1);
 
             if (checkVoucherError) {
-              console.error(`Error checking voucher notification for user ${profile.id}:`, checkVoucherError);
+              reportError(`Error checking voucher notification for user ${profile.id}:`, checkVoucherError);
               continue;
             }
 
@@ -214,12 +286,12 @@ Deno.serve(async (req) => {
                 user_id: profile.id,
                 role: 'user',
                 title: 'Voucher de 10€ Disponível',
-                body: 'O teu voucher de 10€ está disponível para reivindicar! Vai às Recompensas para o reclamar. 🎉',
+                body: 'O teu voucher de boas-vindas de 10€ está disponível para reivindicar nos primeiros 60 dias! Vai às Recompensas para o reclamar. 🎉',
                 read: false,
               });
 
             if (insertError) {
-              console.error(`Error creating voucher notification for user ${profile.id}:`, insertError);
+              reportError(`Error creating voucher notification for user ${profile.id}:`, insertError);
               continue;
             }
 
@@ -227,7 +299,7 @@ Deno.serve(async (req) => {
             voucherNotificationsCreated++;
           }
         } catch (err) {
-          console.error(`Error processing voucher for user ${profile.id}:`, err);
+          reportError(`Error processing voucher for user ${profile.id}:`, err);
         }
       }
     }
@@ -241,14 +313,16 @@ Deno.serve(async (req) => {
       reminders24h: bookings24h?.length || 0,
       notificationsCreated,
       notificationsSkipped,
+      sessionMessagesSent,
       voucherNotificationsCreated,
+      errors: errorCount,
     };
 
     console.log('📊 Summary:', summary);
 
     return new Response(
       JSON.stringify(summary),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: errorCount > 0 ? 500 : 200 }
     );
 
   } catch (error) {
