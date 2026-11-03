@@ -422,6 +422,7 @@ export type Database = {
       }
       mixmaster_projects: {
         Row: {
+          auto_accept_error: string | null
           client_id: string
           created_at: string
           hidden_from_admin: boolean
@@ -432,6 +433,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          auto_accept_error?: string | null
           client_id: string
           created_at?: string
           hidden_from_admin?: boolean
@@ -442,6 +444,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          auto_accept_error?: string | null
           client_id?: string
           created_at?: string
           hidden_from_admin?: boolean
@@ -1107,6 +1110,7 @@ export type Database = {
           new_starts_at: string
           status: string
           user_id: string
+          uses_plan_benefit: boolean
         }
         Insert: {
           booking_id: string
@@ -1118,6 +1122,7 @@ export type Database = {
           new_starts_at: string
           status?: string
           user_id: string
+          uses_plan_benefit?: boolean
         }
         Update: {
           booking_id?: string
@@ -1129,6 +1134,7 @@ export type Database = {
           new_starts_at?: string
           status?: string
           user_id?: string
+          uses_plan_benefit?: boolean
         }
         Relationships: [
           {
@@ -1351,8 +1357,61 @@ export type Database = {
           },
         ]
       }
+      subscription_savings: {
+        Row: {
+          created_at: string
+          discount_percent: number
+          full_price_eur: number
+          id: string
+          payment_request_id: string | null
+          plan_type: string
+          saved_eur: number
+          service_name: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          discount_percent: number
+          full_price_eur: number
+          id?: string
+          payment_request_id?: string | null
+          plan_type: string
+          saved_eur: number
+          service_name?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          discount_percent?: number
+          full_price_eur?: number
+          id?: string
+          payment_request_id?: string | null
+          plan_type?: string
+          saved_eur?: number
+          service_name?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_savings_payment_request_id_fkey"
+            columns: ["payment_request_id"]
+            isOneToOne: true
+            referencedRelation: "payment_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscription_savings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscriptions: {
         Row: {
+          cancel_at_period_end: boolean
+          canceled_at: string | null
           created_at: string
           end_date: string | null
           id: string
@@ -1365,6 +1424,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          cancel_at_period_end?: boolean
+          canceled_at?: string | null
           created_at?: string
           end_date?: string | null
           id?: string
@@ -1377,6 +1438,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          cancel_at_period_end?: boolean
+          canceled_at?: string | null
           created_at?: string
           end_date?: string | null
           id?: string
@@ -1613,6 +1676,14 @@ export type Database = {
         Args: { p_action: string; p_subscription_id: string }
         Returns: boolean
       }
+      admin_reschedule_booking: {
+        Args: {
+          p_booking_id: string
+          p_new_ends_at: string
+          p_new_starts_at: string
+        }
+        Returns: string
+      }
       admin_revert_day_off: { Args: { p_id: string }; Returns: boolean }
       admin_set_user_blocked: {
         Args: { p_blocked: boolean; p_user_id: string }
@@ -1639,7 +1710,16 @@ export type Database = {
       }
       backfill_referral_codes: { Args: never; Returns: undefined }
       backfill_welcome_messages: { Args: never; Returns: undefined }
+      booking_time_is_taken: {
+        Args: {
+          p_ends_at: string
+          p_ignore_booking_id: string
+          p_starts_at: string
+        }
+        Returns: boolean
+      }
       bytea_to_text: { Args: { data: string }; Returns: string }
+      cancel_my_subscription: { Args: never; Returns: string }
       captacao_mixmaster_options: {
         Args: never
         Returns: {
@@ -1745,6 +1825,10 @@ export type Database = {
         Returns: boolean
       }
       delete_own_account: { Args: never; Returns: Json }
+      friend_code_deadline: {
+        Args: { p_friend_code_use_id: string }
+        Returns: string
+      }
       generate_referral_code: { Args: { p_user_id: string }; Returns: string }
       get_active_bookings_count: { Args: never; Returns: number }
       get_active_reservations: {
@@ -2031,6 +2115,10 @@ export type Database = {
         Args: { p_project_id: string; p_step_id?: string }
         Returns: undefined
       }
+      plan_allows_late_reschedule: {
+        Args: { p_user_id: string }
+        Returns: boolean
+      }
       redeem_loyalty_offer: { Args: { p_user_id: string }; Returns: boolean }
       register_device_token: {
         Args: { p_platform?: string; p_token: string }
@@ -2105,6 +2193,7 @@ export type Database = {
         }
         Returns: string
       }
+      run_scheduled_expirations: { Args: never; Returns: undefined }
       send_renewal_alerts: { Args: never; Returns: undefined }
       slugify: { Args: { txt: string }; Returns: string }
       submit_mixmaster_project: {
