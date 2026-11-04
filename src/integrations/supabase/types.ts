@@ -453,6 +453,8 @@ export type Database = {
           brief: Json | null
           client_id: string
           created_at: string
+          final_payment_at: string | null
+          final_payment_eur: number | null
           hidden_from_admin: boolean
           id: string
           payment_request_id: string | null
@@ -466,6 +468,8 @@ export type Database = {
           brief?: Json | null
           client_id: string
           created_at?: string
+          final_payment_at?: string | null
+          final_payment_eur?: number | null
           hidden_from_admin?: boolean
           id?: string
           payment_request_id?: string | null
@@ -479,6 +483,8 @@ export type Database = {
           brief?: Json | null
           client_id?: string
           created_at?: string
+          final_payment_at?: string | null
+          final_payment_eur?: number | null
           hidden_from_admin?: boolean
           id?: string
           payment_request_id?: string | null
@@ -1757,6 +1763,10 @@ export type Database = {
       admin_receive_payment: {
         Args: { p_payment_id: string }
         Returns: boolean
+      }
+      admin_record_project_final_payment: {
+        Args: { p_amount: number; p_project_id: string }
+        Returns: undefined
       }
       admin_reject_payment: {
         Args: { p_payment_id: string; p_reason?: string }
