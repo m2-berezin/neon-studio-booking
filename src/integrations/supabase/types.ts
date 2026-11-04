@@ -94,6 +94,33 @@ export type Database = {
         }
         Relationships: []
       }
+      beat_catalog: {
+        Row: {
+          created_at: string
+          file_name: string | null
+          file_path: string
+          id: string
+          is_active: boolean
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          file_name?: string | null
+          file_path: string
+          id?: string
+          is_active?: boolean
+          title: string
+        }
+        Update: {
+          created_at?: string
+          file_name?: string | null
+          file_path?: string
+          id?: string
+          is_active?: boolean
+          title?: string
+        }
+        Relationships: []
+      }
       blackout_dates: {
         Row: {
           created_at: string
@@ -423,33 +450,39 @@ export type Database = {
       mixmaster_projects: {
         Row: {
           auto_accept_error: string | null
+          brief: Json | null
           client_id: string
           created_at: string
           hidden_from_admin: boolean
           id: string
           payment_request_id: string | null
+          service: string
           status: string
           title: string
           updated_at: string
         }
         Insert: {
           auto_accept_error?: string | null
+          brief?: Json | null
           client_id: string
           created_at?: string
           hidden_from_admin?: boolean
           id?: string
           payment_request_id?: string | null
+          service?: string
           status?: string
           title?: string
           updated_at?: string
         }
         Update: {
           auto_accept_error?: string | null
+          brief?: Json | null
           client_id?: string
           created_at?: string
           hidden_from_admin?: boolean
           id?: string
           payment_request_id?: string | null
+          service?: string
           status?: string
           title?: string
           updated_at?: string
@@ -929,12 +962,51 @@ export type Database = {
           },
         ]
       }
+      problem_reports: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          note: string | null
+          resolved_at: string | null
+          screenshot_path: string | null
+          user_id: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          resolved_at?: string | null
+          screenshot_path?: string | null
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          resolved_at?: string | null
+          screenshot_path?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "problem_reports_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
           created_at: string
           full_name: string | null
           id: string
+          instagram: string | null
           last_voucher_at: string | null
           penalty_until: string | null
           phone: string | null
@@ -947,6 +1019,7 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id: string
+          instagram?: string | null
           last_voucher_at?: string | null
           penalty_until?: string | null
           phone?: string | null
@@ -959,6 +1032,7 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
+          instagram?: string | null
           last_voucher_at?: string | null
           penalty_until?: string | null
           phone?: string | null
@@ -1664,6 +1738,14 @@ export type Database = {
       admin_delete_test_user: { Args: { p_user_id: string }; Returns: boolean }
       admin_delete_time_block: { Args: { p_id: string }; Returns: undefined }
       admin_get_client_email: { Args: { p_client_id: string }; Returns: string }
+      admin_get_client_referrals: {
+        Args: { p_client_id: string }
+        Returns: {
+          full_name: string
+          used_at: string
+          user_id: string
+        }[]
+      }
       admin_hide_project: {
         Args: { p_project_id: string; p_project_type: string }
         Returns: boolean
@@ -1775,9 +1857,21 @@ export type Database = {
         Returns: boolean
       }
       claim_voucher: { Args: { p_user_id: string }; Returns: string }
+      client_cancel_pending_request: {
+        Args: { p_reservation_id: string }
+        Returns: undefined
+      }
       client_delete_project: {
         Args: { p_booking_id: string }
         Returns: boolean
+      }
+      client_reschedule_pending_request: {
+        Args: {
+          p_new_ends_at: string
+          p_new_starts_at: string
+          p_reservation_id: string
+        }
+        Returns: undefined
       }
       create_booking_captacao: {
         Args: { p_hours: number; p_starts_at: string; p_user_id: string }
@@ -2127,10 +2221,22 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: boolean
       }
+      project_revision_limit: {
+        Args: { p_client_id: string; p_service: string }
+        Returns: number
+      }
       redeem_loyalty_offer: { Args: { p_user_id: string }; Returns: boolean }
       register_device_token: {
         Args: { p_platform?: string; p_token: string }
         Returns: undefined
+      }
+      report_problem: {
+        Args: {
+          p_category: string
+          p_note?: string
+          p_screenshot_path?: string
+        }
+        Returns: string
       }
       request_payment:
         | {
@@ -2204,12 +2310,32 @@ export type Database = {
       run_scheduled_expirations: { Args: never; Returns: undefined }
       send_renewal_alerts: { Args: never; Returns: undefined }
       slugify: { Args: { txt: string }; Returns: string }
+      submit_exclusive_beat_project: {
+        Args: {
+          p_brief: Json
+          p_note: string
+          p_payment_method: string
+          p_title: string
+        }
+        Returns: string
+      }
       submit_mixmaster_project: {
         Args: {
           p_link?: string
           p_note?: string
           p_payment_id: string
           p_title?: string
+        }
+        Returns: string
+      }
+      submit_studio_project: {
+        Args: {
+          p_brief: Json
+          p_link: string
+          p_note: string
+          p_payment_id: string
+          p_service: string
+          p_title: string
         }
         Returns: string
       }

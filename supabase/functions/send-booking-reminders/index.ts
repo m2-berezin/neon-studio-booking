@@ -7,6 +7,9 @@ const corsHeaders = {
 
 const ADMIN_ID = '6d9d1dc1-e16f-4f3d-a817-1591a1b27477';
 const SESSION_MESSAGE = 'Boas! Tudo pronto pra sessão de hoje?';
+const VOUCHER_AVAILABLE_TITLE = 'Voucher de 10€ Disponível';
+const VOUCHER_REMINDER_TITLE = 'O teu voucher de 10€ está a acabar';
+const VOUCHER_REMINDER_DAYS_LEFT = 15;
 
 interface Booking {
   id: string;
@@ -235,11 +238,12 @@ Deno.serve(async (req) => {
     console.log('🎫 Checking voucher availability for all users...');
     let voucherNotificationsCreated = 0;
 
-    // Get all user profiles
+    // Only accounts still within their first 60 days can claim it
     const { data: allProfiles, error: profilesError } = await supabase
       .from('profiles')
-      .select('id, last_voucher_at')
-      .eq('role', 'user');
+      .select('id')
+      .neq('role', 'admin')
+      .gte('created_at', new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString());
 
     if (profilesError) {
       reportError('Error fetching profiles for voucher check:', profilesError);
@@ -257,16 +261,17 @@ Deno.serve(async (req) => {
           }
 
           const voucherStatus = voucherData as { available: boolean; days_left: number } | null;
-          
+
           if (voucherStatus?.available) {
-            // The welcome voucher is only announced once
+            // Announced once, then one reminder when it's about to run out
+            const isReminder = voucherStatus.days_left <= VOUCHER_REMINDER_DAYS_LEFT;
+            const title = isReminder ? VOUCHER_REMINDER_TITLE : VOUCHER_AVAILABLE_TITLE;
+
             const { data: existingVoucherNotif, error: checkVoucherError } = await supabase
               .from('notifications')
               .select('id')
               .eq('user_id', profile.id)
-              .ilike('title', '%Voucher%')
-              .ilike('body', '%disponível%')
-              .gte('created_at', new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString())
+              .eq('title', title)
               .limit(1);
 
             if (checkVoucherError) {
@@ -275,18 +280,18 @@ Deno.serve(async (req) => {
             }
 
             if (existingVoucherNotif && existingVoucherNotif.length > 0) {
-              console.log(`Voucher notification already exists for user ${profile.id}, skipping`);
               continue;
             }
 
-            // Create voucher notification
             const { error: insertError } = await supabase
               .from('notifications')
               .insert({
                 user_id: profile.id,
                 role: 'user',
-                title: 'Voucher de 10€ Disponível',
-                body: 'O teu voucher de boas-vindas de 10€ está disponível para reivindicar nos primeiros 60 dias! Vai às Recompensas para o reclamar. 🎉',
+                title,
+                body: isReminder
+                  ? `Faltam ${voucherStatus.days_left} dias para reivindicares o teu voucher de boas-vindas de 10€. Vai às Recompensas e reivindica-o antes que acabe!`
+                  : 'O teu voucher de boas-vindas de 10€ está disponível para reivindicar nos primeiros 60 dias! Vai às Recompensas para o reivindicares.',
                 read: false,
               });
 
