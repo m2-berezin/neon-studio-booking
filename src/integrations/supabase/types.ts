@@ -1635,6 +1635,14 @@ export type Database = {
     Functions: {
       abandon_offer: { Args: { p_reservation_id: string }; Returns: boolean }
       admin_approve_payment: { Args: { p_payment_id: string }; Returns: string }
+      admin_award_points: {
+        Args: {
+          p_amount: number
+          p_transaction_type: string
+          p_user_id: string
+        }
+        Returns: string
+      }
       admin_create_mixmaster_project: {
         Args: { p_client_id: string; p_title: string }
         Returns: string

@@ -228,7 +228,7 @@ const AdminPayments = () => {
         
         if (isMixMasterService && request.type !== 'subscription_request') {
           try {
-            const { error: pointsError } = await supabase.rpc('award_points', {
+            const { error: pointsError } = await supabase.rpc('admin_award_points' as any, {
               p_user_id: request.user_id,
               p_amount: 1500,
               p_transaction_type: 'service_reward',
