@@ -89,7 +89,7 @@ Deno.serve(async (req) => {
       .update({ push_sent_at: new Date().toISOString() })
       .eq('id', notificationId)
       .is('push_sent_at', null)
-      .select('id, user_id, title, body')
+      .select('id, user_id, title, body, link')
       .maybeSingle();
 
     if (claimError) throw claimError;
@@ -105,7 +105,12 @@ Deno.serve(async (req) => {
 
     const jwt = await createApnsJwt(keyId, teamId, privateKey);
     const payload = JSON.stringify({
-      aps: { alert: { title: notification.title, body: notification.body }, sound: 'default' },
+      aps: {
+        alert: { title: notification.title, body: notification.body },
+        sound: 'default',
+        // Each conversation is grouped together on the lock screen
+        ...(notification.link?.includes('messages') ? { 'thread-id': notification.link } : {}),
+      },
       notification_id: notification.id,
     });
 
