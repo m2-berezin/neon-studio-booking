@@ -565,6 +565,7 @@ export type Database = {
           body: string
           created_at: string
           id: string
+          image_url: string | null
           link: string | null
           push_sent_at: string | null
           read: boolean
@@ -576,6 +577,7 @@ export type Database = {
           body: string
           created_at?: string
           id?: string
+          image_url?: string | null
           link?: string | null
           push_sent_at?: string | null
           read?: boolean
@@ -587,6 +589,7 @@ export type Database = {
           body?: string
           created_at?: string
           id?: string
+          image_url?: string | null
           link?: string | null
           push_sent_at?: string | null
           read?: boolean
@@ -999,6 +1002,35 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "problem_reports_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profile_name_history: {
+        Row: {
+          changed_at: string
+          id: string
+          old_name: string
+          user_id: string
+        }
+        Insert: {
+          changed_at?: string
+          id?: string
+          old_name: string
+          user_id: string
+        }
+        Update: {
+          changed_at?: string
+          id?: string
+          old_name?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_name_history_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -1723,6 +1755,15 @@ export type Database = {
         }
         Returns: string
       }
+      admin_client_service_ranking: {
+        Args: { p_kind: string }
+        Returns: {
+          avatar_url: string
+          full_name: string
+          total: number
+          user_id: string
+        }[]
+      }
       admin_create_mixmaster_project: {
         Args: { p_client_id: string; p_title: string }
         Returns: string
@@ -1956,6 +1997,13 @@ export type Database = {
       get_active_users_count: { Args: never; Returns: number }
       get_admin_avatar: { Args: { p_admin_id: string }; Returns: string }
       get_admin_calendar_token: { Args: never; Returns: string }
+      get_admin_contact: {
+        Args: { p_admin_id: string }
+        Returns: {
+          avatar_url: string
+          full_name: string
+        }[]
+      }
       get_admin_subscriptions: {
         Args: never
         Returns: {
@@ -2211,6 +2259,10 @@ export type Database = {
       mark_notifications_as_read: {
         Args: { p_thread_id: string }
         Returns: boolean
+      }
+      message_notification_preview: {
+        Args: { p_message: Database["public"]["Tables"]["messages"]["Row"] }
+        Returns: string
       }
       mixmaster_add_step: {
         Args: {
